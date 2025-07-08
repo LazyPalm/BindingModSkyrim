@@ -275,7 +275,7 @@ state LetSubStewState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " seems to be making me wait...")
 
         if td.IsAiReady()
-            td.MakeAiComment(theDom, "{{ player.name }} Is grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered until you are ready to tie them up.")
+            td.MakeAiComment(theDom, "{ player.name } Is grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered until you are ready to tie them up.")
         endif
     
         bind_Utility.WriteToConsole("pressed action in camping quest - LetSubStewState")
@@ -322,7 +322,7 @@ state LookAtFireState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is enjoying the fire. I am not allowed to sleep yet...")
     
         if td.IsAiReady()
-            td.MakeAiComment(theDom, "{{ player.name }} is tied to their bed on the ground and grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered.")
+            td.MakeAiComment(theDom, "{ player.name } is tied to their bed on the ground and grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered.")
         endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - LookAtFireState")
@@ -337,7 +337,7 @@ function PutDomToBed()
     bind_Utility.DoSleep()
 
     if td.IsAiReady()
-        td.MakeAiComment(theDom, "You are ready to sleep. Tell {{ player.name }}, your submissive goodnight, and they are not to disturb you while you sleep.")
+        td.MakeAiComment(theDom, "You are ready to sleep. Tell { player.name }, your submissive goodnight, and they are not to disturb you while you sleep.")
     endif
 
     bind_MovementQuestScript.StartSleep(theDom, theBedroll)
@@ -407,7 +407,7 @@ state DomWakingState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is waking. When we I be freed?")
     
         if td.IsAiReady()
-            td.MakeAiComment(theDom, "Tell {{ player.name }} that you are enjoying the view of them all tied up.")
+            td.MakeAiComment(theDom, "Tell { player.name } that you are enjoying the view of them all tied up.")
         endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - DomWakingState")

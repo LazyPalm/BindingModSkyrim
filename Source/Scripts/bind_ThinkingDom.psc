@@ -449,7 +449,7 @@ event SubKneeledEvent()
         ;int result = SkyrimNetApi.SendCustomPromptToLLM(suggestion, llmTemp, maxTokens, "bind_ThinkingDom", "OnLLMResponse")      
         ;int result = SkyrimNetApi.RegisterDialogueToListener(theDomRef, theSubRef, suggestion)
         ;int result = SkyrimNetApi.RegisterEvent("custom", theSubRef.GetDisplayName() + " has dropped to " + pronounHisHer + " knees and is kneeling submissively. Perhaps you should comment about " + pronounHimHer + " pleasing you.", theDomRef, theSubRef)
-        MakeAiComment(theDomRef, "{{ player.name }} dropped submissively to their knees")
+        MakeAiComment(theDomRef, "{ player.name } dropped submissively to their knees for you.")
         ;bind_Utility.WriteToConsole("SkyrimNet SendCustomPromptToLLM result: " + result)  
     endif
 
@@ -482,6 +482,8 @@ endevent
 function MakeAiComment(Actor a, string commentPrompt)
 
     if main.EnableModSkyrimNet == 1
+
+        commentPrompt + "\n- Always use unique comments and write this in " + theDomRef.GetName() + "'s voice."
 
         SkyrimNetApi.DirectNarration(commentPrompt, a)
         bind_Utility.WriteToConsole("MakeAiComment - actor: " + a + " prompt: " + commentPrompt)
