@@ -1,0 +1,118 @@
+{
+    "ankle_list_default" : "ZAP_Rope_Ankles_1",
+	"ankle_list" :
+	{
+		"ZAP_Rope_Ankles_1" : { "item_inv":"0x02004004", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleRope01", "slots":[53] },
+		"ZAP_Rope_Ankles_2" : { "item_inv":"0x02004003", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleRope02", "slots":[53] },
+		"ZAP_Metal_Anklecuffs_Black" : { "item_inv":"0x02004007", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleSimpleBlack", "slots":[53] },
+		"ZAP_Metal_Anklecuffs_Copper" : { "item_inv":"0x0202431F", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleSimpleCopper", "slots":[53] },
+		"ZAP_Metal_Anklecuffs_Gold" : { "item_inv":"0x0200400D", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleSimpleGold", "slots":[53] },
+		"ZAP_Metal_Anklecuffs_Shiny" : { "item_inv":"0x0200400C", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleSimpleShiny", "slots":[53] }
+	},
+	"belt_list_default": "ZAP_Padded_Belt",
+	"belt_list" :
+	{
+		"ZAP_Iron_Belt" : { "item_inv":"0x0200700B", "fname":"ZazAnimationPack.esm", "iname":"zbfBeltChastity03", "slots":[49] },
+		"ZAP_Padded_Belt" : { "item_inv":"0x0200700C", "fname":"ZazAnimationPack.esm", "iname":"zbfBeltChastity04", "slots":[49] },
+		"ZAP_Padded_Open_Belt" : { "item_inv":"0x0200700D", "fname":"ZazAnimationPack.esm", "iname":"zbfBeltChastity05", "slots":[49] }
+	},
+	"blindfold_list_default" : "ZAP_Leather_Blindfold",
+	"blindfold_list" :
+	{
+		"ZAP_Leather_Blindfold" : { "item_inv":"0x0200700A", "fname":"ZazAnimationPack.esm", "iname":"zbfBlindEyeMask05", "slots":[55] }
+	},
+	"body_list_default" : "ZAP_Rope_Body_Shibari",
+	"body_list" :
+	{
+		"ZAP_Rope_Breast_Extreme_1" : { "item_inv":"0x020795DC", "fname":"ZazAnimationPack.esm", "iname":"zbfBreastRopeExtreme01", "slots":[32] },
+		"ZAP_Rope_Breast_Extreme_2" : { "item_inv":"0x020795DD", "fname":"ZazAnimationPack.esm", "iname":"zbfBreastRopeExtreme02", "slots":[32] },
+		"ZAP_Rope_Breast_Waist_Extreme_1" : { "item_inv":"0x0207A0A2", "fname":"ZazAnimationPack.esm", "iname":"zbfBreastRopeWithWaistRopeExtreme01", "slots":[32] },
+		"ZAP_Rope_Breast_Waist_Extreme_2" : { "item_inv":"0x0207A0A3", "fname":"ZazAnimationPack.esm", "iname":"zbfBreastRopeWithWaistRopeExtreme02", "slots":[32] },
+		"ZAP_Rope_Body_Shibari" : { "item_inv":"0x02035338", "fname":"ZazAnimationPack.esm", "iname":"zbfBodyBondageShibari", "slots":[32] },
+		"ZAP_Rope_Breast_Waist_1" : { "item_inv":"0x02073F7A", "fname":"ZazAnimationPack.esm", "iname":"zbfWaistAndBreastRope01", "slots":[32] },
+		"ZAP_Rope_Breast_Waist_2" : { "item_inv":"0x02073F7A", "fname":"ZazAnimationPack.esm", "iname":"zbfWaistAndBreastRope02", "slots":[32] },
+		"ZAP_Rope_Waist_1" : { "item_inv":"0x0202ECB9", "fname":"ZazAnimationPack.esm", "iname":"zbfWaistRope01", "slots":[32] },
+        "ZAP_Rope_Waist_2" : { "item_inv":"0x02031D38", "fname":"ZazAnimationPack.esm", "iname":"zbfWaistRope02", "slots":[32] }
+	},
+	"boot_list_default" : "",
+	"boot_list" :
+	{
+
+	},
+	"clamp_list_default" : "ZAP_Nipple_Screw",
+	"clamp_list" :
+	{
+		"ZAP_Nipple_Screw" : { "item_inv":"0x020817BC", "fname":"ZazAnimationPack.esm", "iname":"zbfNippleScrews01", "slots":[51] }
+	},
+	"collar_list_default" : "ZAP_Rope_Collar_1",
+	"collar_list" :
+	{
+		"ZAP_Rope_Collar_1" : { "item_inv":"0x02005003", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarRope01", "slots":[45] },
+		"ZAP_Rope_Collar_2" : { "item_inv":"0x02005012", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarRope02", "slots":[45] },
+		"ZAP_Metal_Collar_Black" : { "item_inv":"0x02003004", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarSimpleBlack", "slots":[45] },
+		"ZAP_Metal_Collar_Copper" : { "item_inv":"0x02024323", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarSimpleCopper", "slots":[45] },
+		"ZAP_Metal_Collar_Gold" : { "item_inv":"0x02022765", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarSimpleGold", "slots":[45] },
+		"ZAP_Metal_Collar_Shiny" : { "item_inv":"0x02023853", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarSimpleShiny", "slots":[45] },
+		"ZAP_Leather_Collar_Rings" : { "item_inv":"0x02007010", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarLeather01", "slots":[45] },
+		"ZAP_Leather_Collar_Belt" : { "item_inv":"0x0200500B", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarLeatherBinds", "slots":[45] },
+		"ZAP_Padded_Collar" : { "item_inv":"0x02007011", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarPadded01", "slots":[45] },
+		"ZAP_Leather_Collar_Posture" : { "item_inv":"0x02007012", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarPosture01", "slots":[45] },
+		"ZAP_Padded_Collar_Posture" : { "item_inv":"0x02007013", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarPosture02", "slots":[45] },
+		"ZAP_Iron_Collar_Black" : { "item_inv":"0x0200500C", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarIronBlack", "slots":[45] },
+		"ZAP_Collar_Harness" : { "item_inv":"0x0200700F", "fname":"ZazAnimationPack.esm", "iname":"zbfCollarHarness01", "slots":[45] }
+	},
+	"corset_list_default" : "",
+	"corset_list" :
+	{
+
+	},
+	"elbow_list_default" : "ZAP_Rope_Elbow_&_Wrist_1",
+	"elbow_list" :
+	{
+		"ZAP_Rope_Elbow_1" : { "item_inv":"0x0202C6FB", "fname":"ZazAnimationPack.esm", "iname":"zbfEllbowRope01", "slots":[46] },
+        "ZAP_Rope_Elbow_2" : { "item_inv":"0x0202DC89", "fname":"ZazAnimationPack.esm", "iname":"zbfEllbowRope02", "slots":[46] },
+		"ZAP_Rope_Elbow_&_Wrist_1" : { "item_inv":"0x0202DC8A", "fname":"ZazAnimationPack.esm", "iname":"zbfEllbowAndWristRope01", "slots":[46,59] },
+		"ZAP_Rope_Elbow_&_Wrist_2" : { "item_inv":"0x0202DC8B", "fname":"ZazAnimationPack.esm", "iname":"zbfEllbowAndWristRope02", "slots":[46,59] }
+	},
+	"gag_list_default" : "ZAP_Gag_Bit",
+	"gag_list" :
+	{
+		"ZAP_Gag_Ball_1" : { "item_inv":"0x02002007", "fname":"ZazAnimationPack.esm", "iname":"zbfGagBall01", "slots":[44] },
+		"ZAP_Gag_Ball_2" : { "item_inv":"0x02007007", "fname":"ZazAnimationPack.esm", "iname":"zbfGagBall02", "slots":[44] },
+		"ZAP_Gag_Harness_Ball" : { "item_inv":"0x02007003", "fname":"ZazAnimationPack.esm", "iname":"zbfGagHarnessBall01", "slots":[44] },
+		"ZAP_Gag_Harness_Panel" : { "item_inv":"0x02007004", "fname":"ZazAnimationPack.esm", "iname":"zbfGagHarnessPanel01", "slots":[44] },
+		"ZAP_Gag_Harness_Panel_Open" : { "item_inv":"0x02007005", "fname":"ZazAnimationPack.esm", "iname":"zbfGagHarnessPanel02", "slots":[44] },
+		"ZAP_Gag_Harness_Ring" : { "item_inv":"0x02007006", "fname":"ZazAnimationPack.esm", "iname":"zbfGagHarnessRing01", "slots":[44] },
+		"ZAP_Gag_Panel" : { "item_inv":"0x02002005", "fname":"ZazAnimationPack.esm", "iname":"zbfGagLeatherPanel", "slots":[44] },
+		"ZAP_Gag_Muzzle" : { "item_inv":"0x02002013", "fname":"ZazAnimationPack.esm", "iname":"zbfGagMuzzle02", "slots":[44] },
+		"ZAP_Gag_Ring" : { "item_inv":"0x02007008", "fname":"ZazAnimationPack.esm", "iname":"zbfGagRing02", "slots":[44] },
+		"ZAP_Gag_Bit" : { "item_inv":"0x02002002", "fname":"ZazAnimationPack.esm", "iname":"zbfGagWoodBit", "slots":[44] }
+	},
+	"hood_list_default" : "ZAP_Hood_Light",
+	"hood_list" :
+	{
+		"ZAP_Hood_Dark" : { "item_inv":"0x02005006", "fname":"ZazAnimationPack.esm", "iname":"zbfHoodDark", "slots":[30,31] },
+		"ZAP_Hood_Light" : { "item_inv":"0x02005007", "fname":"ZazAnimationPack.esm", "iname":"zbfHoodLight", "slots":[30,31] },
+		"ZAP_Hood_Blindfold" : { "item_inv":"0x02005002", "fname":"ZazAnimationPack.esm", "iname":"zbfBlindHood", "slots":[30,31] }
+	},
+	"piercing_list_default" : "ZAP_Nipple_Screw",
+	"piercing_list" :
+	{
+		"ZAP_Nipple_Screw" : { "item_inv":"0x020817BC", "fname":"ZazAnimationPack.esm", "iname":"zbfNippleScrews01", "slots":[51] }
+	},
+	"shackles_list_default" : "ZAP_Iron_Shackles",
+	"shackles_list" :
+	{
+		"ZAP_Iron_Shackles" : { "item_inv":"0x02004009", "fname":"ZazAnimationPack.esm", "iname":"zbfAnkleIronHDT", "slots":[53] }
+	},
+	"wrist_list_default" : "ZAP_Rope_Wrist_1",
+	"wrist_list" :
+	{
+		"ZAP_Metal_Handcuffs Black" : { "item_inv":"0x02081D25", "fname":"ZazAnimationPack.esm", "iname":"zbfHandCuffsBlackBackside", "slots":[59] },
+		"ZAP_Metal_Handcuffs_Copper" : { "item_inv":"0x02081D31", "fname":"ZazAnimationPack.esm", "iname":"zbfHandCuffsCopperBackside", "slots":[59] },
+		"ZAP_Metal_Handcuffs_Gold" : { "item_inv":"0x02081D32", "fname":"ZazAnimationPack.esm", "iname":"zbfHandCuffsGoldBackside", "slots":[59] },
+		"ZAP_Metal_Handcuffs_Shiny" : { "item_inv":"0x02081D30", "fname":"ZazAnimationPack.esm", "iname":"zbfHandCuffsShinyBackside", "slots":[59] },
+		"ZAP_Rope_Wrist_1" : { "item_inv":"0x02001005", "fname":"ZazAnimationPack.esm", "iname":"zbfWristRope01", "slots":[59] },
+		"ZAP_Rope_Wrist_2_Parallel" : { "item_inv":"0x0202BC32", "fname":"ZazAnimationPack.esm", "iname":"zbfWristRope02parallel", "slots":[59] }
+	}
+}

@@ -1,0 +1,9 @@
+{
+    "camping_event" : 
+    {
+        "campfire_burning" : ["0x00035F49", "skyrim.esm"],
+        "zap_furniture_names" : ["ZAP Table Outdoor", "ZAP Hogtied Place", "ZAP Barrel", "ZAP Pole On Knees", "ZAP Spread Eagle Poles", "ZAP Bitch Lesson"],
+        "ddc_furniture_names" : ["Bondage Pole"],
+        "dse_furniture_names" : ["DM3 Pony Rope","DM3 Frame"]
+    }
+}

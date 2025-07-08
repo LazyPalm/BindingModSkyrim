@@ -1,0 +1,182 @@
+{
+	"ankle_list_default" : "Ebonite_Leg_Cuffs",
+	"ankle_list" :
+	{
+		"Ebonite_Leg_Cuffs" : { "item_inv":"0x0600D4E3", "item_rend":"0x0600D4E2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_cuffs_EboniteLegsInventory", "slots":[53] },
+		"Ebonite_Leg_Cuffs_R" : { "item_inv":"0x06011108", "item_rend":"0x06011107", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDECuffsELegsInventory", "slots":[53] },
+		"Ebonite_Leg_Cuffs_W" : { "item_inv":"0x0600F02C", "item_rend":"0x0600F02B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTECuffsELegsInventory", "slots":[53] },
+		"Rope_Leg_Cuffs" : { "item_inv":"0x0904E8A3", "item_rend":"0x0904E8A4", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_cuffs_legs_Inventory", "slots":[53] }
+	},
+	"belt_list_default": "Padded_Belt",
+	"belt_list" :
+	{
+		"Padded_Belt" : { "item_inv":"0x0605845E", "item_rend":"0x0605845F", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_Padded_Black_Inventory", "slots":[49] },
+		"Padded_Belt_Open" : { "item_inv":"0x060584FC", "item_rend":"0x060584FD", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_PaddedOpen_Black_Inventory", "slots":[49] },
+		"Padded_Belt_LS" : { "item_inv":"0x06058630", "item_rend":"0x0605862F", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_Padded_LS_Black_Inventory", "slots":[49] },
+		"Padded_Belt_LS_R" : { "item_inv":"0x0605862E", "item_rend":"0x0605862D", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_Padded_LS_Red_Inventory", "slots":[49] },
+		"Padded_Belt_LS_W" : { "item_inv":"0x0605862C", "item_rend":"0x0605862B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_Padded_LS_White_Inventory", "slots":[49] },
+		"Padded_Belt_LS_Open" : { "item_inv":"0x06058CBF", "item_rend":"0x06058CBE", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_PaddedOpen_LS_Black_Inventory", "slots":[49] },
+		"Padded_Belt_LS_Open_R" : { "item_inv":"0x060012C6", "item_rend":"0x060012C7", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_PaddedOpen_LS_Red_Inventory", "slots":[49] },
+		"Padded_Belt_LS_Open_W" : { "item_inv":"0x060012C8", "item_rend":"0x060012C9", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_chastitybelt_PaddedOpen_LS_White_Inventory", "slots":[49] },
+		"Rope_Crotch" : { "item_inv":"0x0604E89F", "item_rend":"0x0604E8A0", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_crotch_Inventory", "slots":[49] }
+	},
+	"blindfold_list_default" : "Ebonite_Blindfold",
+	"blindfold_list" :
+	{
+		"Rope_Blindfold" : { "item_inv":"0x0604816C", "item_rend":"0x0604816B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_blindfold_Rope_Inventory", "slots":[55] },
+		"Leather_Blindfold" : { "item_inv":"0x06004E25", "item_rend":"0x06004E24", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_blindfoldBlockingInventory", "slots":[42,55] },
+		"Ebonite_Blindfold" : { "item_inv":"0x0600D4E6", "item_rend":"0x0600D4E5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteBlindfoldInventory", "slots":[55] }
+	},
+	"body_list_default" : "Ebonite_Harness_Reg_NC",
+	"body_list" :
+	{
+		"Rope_Harness_Full" : { "item_inv":"0x060486E0", "item_rend":"0x060486E1", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Harness_Rope_Full_Inventory", "slots":[32] },
+		"Rope_Harness_Extreme" : { "item_inv":"0x0604EE33", "item_rend":"0x0604EE34", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Extreme_Inventory", "slots":[58] },
+		"Rope_Harness_Full_Top" : { "item_inv":"0x0604EE35", "item_rend":"0x0604EE36", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_FullTop_Inventory", "slots":[58] },
+		"Rope_Harness_Hishi" : { "item_inv":"0x0604EE37", "item_rend":"0x0604EE38", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Hishi_Inventory", "slots":[58] },
+		"Rope_Harness_Penta_Crotch" : { "item_inv":"0x0604EE39", "item_rend":"0x0604EE3A", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Penta_Crotch_Inventory", "slots":[58] },
+		"Rope_Harness_Penta" : { "item_inv":"0x0604EE3B", "item_rend":"0x0604EE3C", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Penta_Inventory", "slots":[58] },
+		"Rope_Harness_Simple_Crotch" : { "item_inv":"0x0604EE3D", "item_rend":"0x0604EE3E", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Simple_Crotch_Inventory", "slots":[58] },
+		"Rope_Harness_Simple" : { "item_inv":"0x0604EE3F", "item_rend":"0x0604EE40", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Simple_Inventory", "slots":[58] },
+		"Rope_Harness_Top_Crotch" : { "item_inv":"0x0604EE41", "item_rend":"0x0604EE42", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Top_Crotch_Inventory", "slots":[58] },
+		"Rope_Harness_Top" : { "item_inv":"0x0604EE44", "item_rend":"0x0604EE43", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_Top_Inventory", "slots":[58] },
+		"Rope_Harness" : { "item_inv":"0x060592AC", "item_rend":"0x060592AB", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Harness_Rope_Inventory", "slots":[58] },
+		"Ebonite_Harness" :  { "item_inv":"0x0600D4CF", "item_rend":"0x0600D4CE", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteHarnessInventory", "slots":[45,49,58] },
+		"Ebonite_Harness_R" : { "item_inv":"0x060110E8", "item_rend":"0x060110E7", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEboniteHarnessInventory", "slots":[45,49,58] },
+		"Ebonite_Harness_W" : { "item_inv":"0x0600F006", "item_rend":"0x0600F005", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEboniteHarnessInventory", "slots":[45,49,58] },
+		"Ebonite_Harness_No_Collar" : { "item_inv":"0x06001E3D", "item_rend":"0x06057368", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteHarnessNCInventory", "slots":[49,58] },
+		"Ebonite_Harness_NC_R" : { "item_inv":"0x06000E10", "item_rend":"0x06000E11", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEboniteHarnessNCInventory", "slots":[49,58] },
+		"Ebonite_Harness_NC_W" : { "item_inv":"0x0605735C", "item_rend":"0x0605735B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEboniteHarnessNCInventory", "slots":[49,58] },
+		"Ebonite_Harness_Reg" : { "item_inv":"0x06016A07", "item_rend":"0x06016A06", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteHarnessRegInventory", "slots":[45,58] },
+		"Ebonite_Harness_Reg_R" : { "item_inv":"0x06016A0A", "item_rend":"0x06016A09", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEboniteHarnessRegInventory", "slots":[45,58] },
+		"Ebonite_Harness_Reg_W" : { "item_inv":"0x06016A0E", "item_rend":"0x06016A0D", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEharnessRegInventory", "slots":[45,58] },
+		"Ebonite_Harness_Reg_NC" : { "item_inv":"0x06001E3B", "item_rend":"0x06057369", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteHarnessRegNCInventory", "slots":[58] },
+		"Ebonite_Harness_Reg_NC_R" : { "item_inv":"0x0605735A", "item_rend":"0x06057359", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEboniteHarnessRegNCInventory", "slots":[58] },
+		"Ebonite_Harness_Reg_NC_W" : { "item_inv":"0x06057358", "item_rend":"0x06057357", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEboniteHarnessRegNCInventory", "slots":[58] },
+		"Iron_Chain_Harness" : { "item_inv":"0x0601C0B7", "item_rend":"0x0601C0B6", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_ChainHarnessBodyInventory", "slots":[45,58] },
+		"Iron_Chain_Harness_Full" : { "item_inv":"0x0601C0C6", "item_rend":"0x0601C0C5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_ChainHarnessFullInventory", "slots":[33,37,45,51,53,56,58,59] }
+	},
+	"boot_list_default" : "Iron_Boots_Ring",
+	"boot_list" :
+	{
+		"Iron_Boots_Ring" : { "item_inv":"0x060048B8", "item_rend":"0x060048B9", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_bootsLockingInventory", "slots":[37] },
+		"Iron_Boots_Ballet" : { "item_inv":"0x0601F6CE", "item_rend":"0x0601F6CD", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronBalletBootsInventory", "slots":[37] },
+		"Iron_Boots_Ballet Heel" : { "item_inv":"0x0601FC31", "item_rend":"0x0601FC32", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronBalletBootsHeelInventory", "slots":[37] },
+		"Ebonite_Boots" : { "item_inv":"0x060159AE", "item_rend":"0x060159AD", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EbRestrictiveBootsInventory", "slots":[37] },
+		"Ebonite_Boots_R" : { "item_inv":"0x060159D3", "item_rend":"0x060159D2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDErestrictiveBootsInventory", "slots":[37] },
+		"Ebonite_Boots_W" : { "item_inv":"0x060159BF", "item_rend":"0x060159BE", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTErestrictiveBootsInventory", "slots":[37] },
+		"Ebonite_Heels" : { "item_inv":"0x0605859C", "item_rend":"0x0605859B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ebonite_heels_black_Inventory", "slots":[37] },
+		"Ebonite_Heels_R" : { "item_inv":"0x06058596", "item_rend":"0x06058595", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ebonite_heels_red_Inventory", "slots":[37] },
+		"Ebonite_Heels_W" : { "item_inv":"0x06058594", "item_rend":"0x06058593", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ebonite_heels_white_Inventory", "slots":[37] }
+	},
+	"clamp_list_default" : "Nipple_Clamps",
+	"clamp_list" :
+	{
+		"Nipple_Clamps" : { "item_inv":"0x0601C62A", "item_rend":"0x0601C629", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_NippleClampsInventory", "slots":[51] }
+	},
+	"collar_list_default" : "Ebonite_Collar",
+	"collar_list" :
+	{
+		"Ebonite_Collar" : { "item_inv":"0x0600D4DF", "item_rend":"0x0600D4DE", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_cuffs_EboniteCollarInventory", "slots":[45] },
+		"Ebonite_Collar_R" : { "item_inv":"0x06011100", "item_rend":"0x060111FF", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDECuffsECollarInventory", "slots":[45] },
+		"Ebonite_Collar_W" : { "item_inv":"0x0600F020", "item_rend":"0x0600F01F", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTECuffsECollarInventory", "slots":[45] },
+		"Ebonite_Collar_Harness" : { "item_inv":"0x0600D4D3", "item_rend":"0x0600D4D2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteHarnessCollarInventory", "slots":[45] },
+		"Ebonite_Collar_Harness_R" : { "item_inv":"0x060110EC", "item_rend":"0x060110EB", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEHarnessCollarInventory", "slots":[45] },
+		"Ebonite_Collar_Harness_W" : { "item_inv":"0x0600F010", "item_rend":"0x0600F00F", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEHarnessCollarInventory", "slots":[45] },
+		"Leather_Collar_Bell" : { "item_inv":"0x0604F910", "item_rend":"0x0604F911", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Collar_Bell_Inventory", "slots":[45] },
+		"Leather_Collar_Pet" : { "item_inv":"0x0604F914", "item_rend":"0x0604F915", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Collar_Pet_Inventory", "slots":[45] },
+		"Leather_Collar_Kitten" : { "item_inv":"0x0604F912", "item_rend":"0x0604F913", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Collar_Kitten_Inventory", "slots":[45] },
+		"Rope_Collar 1" : { "item_inv":"0x060486D7", "item_rend":"0x060486D6", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Collar_Rope_1_Inventory", "slots":[45] },
+		"Rope_Collar 2" : { "item_inv":"0x060486DA", "item_rend":"0x060486D9", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Collar_Rope_2_Inventory", "slots":[45] },
+		"Iron_Collar" : { "item_inv":"0x0601E687", "item_rend":"0x0601E686", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronCollarInventory", "slots":[45] },
+		"Iron_Collar_Chain" : { "item_inv":"0x0602E4DC", "item_rend":"0x0602E4D4", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronCollarChain01Inventory", "slots":[45] }
+	},
+	"corset_list_default" : "Ebonite_Corset",
+	"corset_list" :
+	{
+		"Rope_Corset" : { "item_inv":"0x0604E8C0", "item_rend":"0x0604E8BF", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corset_Inventory", "slots":[58] },
+		"Rope_Corset_Penta" : { "item_inv":"0x0604E8B9", "item_rend":"0x0604E8BA", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corset_Penta_Inventory", "slots":[58] },
+		"Rope_Corset_Simple" : { "item_inv":"0x0604E8BB", "item_rend":"0x0604E8BC", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corset_Simple_Inventory", "slots":[58] },
+		"Rope_Corset_Top" : { "item_inv":"0x0604E8BD", "item_rend":"0x0604E8BE", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corset_Top_Inventory", "slots":[58] },
+		"Rope_Corset_Exp" : { "item_inv":"0x0604EE31", "item_rend":"0x0604EE32", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corsetExp_Inventory", "slots":[58] },
+		"Rope_Corset_Penta_Exp" : { "item_inv":"0x0604EE2B", "item_rend":"0x0604EE2C", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corsetExp_Penta_Inventory", "slots":[58] },
+		"Rope_Corset_Simple_Exp" : { "item_inv":"0x0604EE2D", "item_rend":"0x0604EE2E", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corsetExp_Simple_Inventory", "slots":[58] },
+		"Rope_Corset_Top_Exp" : { "item_inv":"0x0604EE2F", "item_rend":"0x0604EE30", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_harness_corsetExp_Top_Inventory", "slots":[58] },
+		"Ebonite_Corset" : { "item_inv":"0x060159A8", "item_rend":"0x060159A5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EbRestrictiveCorsetInventory", "slots":[58] },
+		"Ebonite_Corset_R" : { "item_inv":"0x060159CD", "item_rend":"0x060159CA", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDErestrictiveCorsetInventory", "slots":[58] },
+		"Ebonite_Corset_W" : { "item_inv":"0x060159B8", "item_rend":"0x060159B5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTErestrictiveCorsetInventory", "slots":[58] }
+	},
+	"elbow_list_default" : "Ebonite_Elbowbinder",
+	"elbow_list" :
+	{
+		"Rope_Armbinder" : { "item_inv":"0x060486E3", "item_rend":"0x060486E4", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Armbinder_Rope_Inventory", "slots":[46] },
+		"Rope_Armbinder_Strict" : { "item_inv":"0x060486DD", "item_rend":"0x060486DC", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_Armbinder_Rope_Strict_Inventory", "slots":[46] },
+		"Ebonite_Armbinder" : { "item_inv":"0x0600D4D6", "item_rend":"0x0600D4D5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_EboniteArmbinderInventory", "slots":[46] },
+		"Ebonite_Armbinder_R" : { "item_inv":"0x060110F2", "item_rend":"0x060110F1", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEarmbinderInventory", "slots":[46] },
+		"Ebonite_Armbinder_W" : { "item_inv":"0x0600F016", "item_rend":"0x0600F015", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEarmbinderInventory", "slots":[46] },
+		"Ebonite_Elbowbinder" : { "item_inv":"0x060415A3", "item_rend":"0x060415A4", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ElbowbinderEboniteInventory", "slots":[46] },
+		"Ebonite_Elbowbinder_R" : { "item_inv":"0x060415A5", "item_rend":"0x060415A6", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ElbowbinderEboniteRedInventory", "slots":[46] },
+		"Ebonite_Elbowbinder_W" : { "item_inv":"0x060415A7", "item_rend":"0x060415A8", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ElbowbinderEboniteWhiteInventory", "slots":[46] },
+		"Leather_Elbowbinder" : { "item_inv":"0x06031019", "item_rend":"0x06031018", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ElbowbinderInventory", "slots":[46] },
+		"Steel_Manacles" : { "item_inv":"0x0603D2E6", "item_rend":"0x0603D2E5", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_shackles_steel_Inventory", "slots":[46] },
+		"Iron_Elbow_Shackles" : { "item_inv":"0x06053629", "item_rend":"0x0605362A", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_elbowshackles_Inventory", "slots":[46] },
+		"Iron_Elbow_Shackles_Collar" : { "item_inv":"0x060530C1", "item_rend":"0x060530C2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_elbowshacklesCollar_Inventory", "slots":[45,46] },
+		"Iron_Elbow_Shackles_Hook" : { "item_inv":"0x06053625", "item_rend":"0x06053626", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_elbowshacklesHook_Inventory", "slots":[46] },
+		"Rope_Arm_Cuffs_Decorative" : { "item_inv":"0x0604E8A1", "item_rend":"0x0604E8A2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_cuffs_Arms_Inventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs_Decorative" : { "item_inv":"0x0600D4E1", "item_rend":"0x0600D4E0", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_cuffs_EboniteArmsInventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs_R_Decorative" : { "item_inv":"0x06011104", "item_rend":"0x06011103", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDECuffsEArmsInventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs_W_Decorative" : { "item_inv":"0x0600F026", "item_rend":"0x0600F025", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTECuffsEArmsInventory", "slots":[59] }
+	},
+	"gag_list_default" : "Ebonite_Panel_Gag",
+	"gag_list" :
+	{
+		"Rope_Bit Gag" : { "item_inv":"0x060486D3", "item_rend":"0x060486D4", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_gag_rope_bit_Inventory", "slots":[44] },
+		"Rope_Ball Gag" : { "item_inv":"0x060486D0", "item_rend":"0x060486D1", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_gag_rope_ball_Inventory", "slots":[44] },
+		"Ebonite_Panel_Gag" : { "item_inv":"0x0600D4F3", "item_rend":"0x0600D4F2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_GagEbonitePanelInventory", "slots":[44] },
+		"Ebonite_Panel_Gag_R" : { "item_inv":"0x06011130", "item_rend":"0x0601112E", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEGagEbHarnPanelInventory", "slots":[44] },
+		"Ebonite_Panel_Gag_W" : { "item_inv":"0x0600F054", "item_rend":"0x0600F052", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEGagEbHarnPanelInventory", "slots":[44] },
+		"Ebonite_Strap_Ball_Gag" : { "item_inv":"0x06047C05", "item_rend":"0x06047C04", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_GagEboniteStrapBallBig_Inventory", "slots":[44] },
+		"Ebonite_Strap_Ball_Gag_R" : { "item_inv":"0x06001D98", "item_rend":"0x06001D99", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEGagEboniteStrapBallBig_Inventory", "slots":[44] },
+		"Ebonite_Strap_Ball_Gag_W" : { "item_inv":"0x06001DAE", "item_rend":"0x06001DAF", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEGagEboniteStrapBallBig_Inventory", "slots":[44] },
+		"Ebonite_Strap_Ring_Gag" : { "item_inv":"0x0600D4F8", "item_rend":"0x0600D4F7", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_GagEboniteStrapRingInventory", "slots":[44] },
+		"Ebonite_Strap_Ring_Gag_R" : { "item_inv":"0x0601114A", "item_rend":"0x06011149", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDEGagEbStrapRingInventory", "slots":[44] },
+		"Ebonite_Strap_Ring_Gag_W" : { "item_inv":"0x0600F062", "item_rend":"0x0600F061", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTEGagEbStrapRingInventory", "slots":[44] },
+		"Iron_Wooden_Bit_Gag" : { "item_inv":"0x0601F6CB", "item_rend":"0x0601F6CC", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronBitGagWoodInventory", "slots":[44] },
+		"Iron_Bit_Gag" : { "item_inv":"0x0601F6C9", "item_rend":"0x0601F6CA", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronBitGagInventory", "slots":[44] },
+		"Iron_Ring_Gag" : { "item_inv":"0x0601F6C7", "item_rend":"0x0601F6C8", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_IronRingGagInventory", "slots":[44] },
+		"Iron_Pear_Gag" : { "item_inv":"0x0601C62C", "item_rend":"0x0601C62B", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_PearGagInventory", "slots":[44] },
+		"Iron_Bridle_Base" : { "item_inv":"0x0601AB0E", "item_rend":"0x06017FF7", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_BridleHalfInventory", "slots":[42,44] },
+		"Iron_Bridle_Full" : { "item_inv":"0x0601B074", "item_rend":"0x0601B073", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_BridleFullInventory", "slots":[42,44] },
+		"Iron_Bridle_Half" : { "item_inv":"0x0601B072", "item_rend":"0x0601B071", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_BridleHalfInventory", "slots":[42,44] }
+	},
+	"hood_list_default" : "Ebonite_Hood",
+	"hood_list" :
+	{
+		"Ebonite_Hood" : { "item_inv":"0x0603D2D7", "item_rend":"0x0603D2D8", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_hood_rubber_black_Inventory", "slots":[30,31,42] },
+		"Ebonite_Hood_R" : { "item_inv":"0x060012CE", "item_rend":"0x060012CF", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_hood_ebonite_red_Inventory", "slots":[30,31,42] },
+		"Ebonite_Hood_W" : { "item_inv":"0x060012D0", "item_rend":"0x060012D1", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_hood_ebonite_white_Inventory", "slots":[30,31,42] },
+		"Leather_Hood" : { "item_inv":"0x0603D850", "item_rend":"0x0603D851", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_hood_leather_black_Inventory", "slots":[30,31,42] }
+	},
+	"piercing_list_default" : "Nipple_Soulgem_Purple",
+	"piercing_list" :
+	{
+		"Nipple_Soulgem_Purple" : { "item_inv":"0x06014925", "item_rend":"0x06014924", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_piercingNCommonSoulInventory", "slots":[51] },
+		"Nipple_Soulgem_Purple_Shock" : { "item_inv":"0x06014929", "item_rend":"0x06014928", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_piercingNShockSoulInventory", "slots":[51] },
+		"Nipple_Rings" : { "item_inv":"0x0601CB91", "item_rend":"0x0601CB90", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_HR_NipplePiercingsInventory", "slots":[51] }
+	},
+	"shackles_list_default" : "Iron_Shackles",
+	"shackles_list" :
+	{
+		"Iron_Shackles" : { "item_inv":"0x0602F517", "item_rend":"0x0602F516", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_ZaZ_IronChainShacklesInventory", "slots":[53] },
+		"Metal_Shackles_Black" : { "item_inv":"0x0603D2E8", "item_rend":"0x0603D2E9", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_AnkleShackles_Black_Inventory", "slots":[53] },
+		"Metal_Shackles_Silver" : { "item_inv":"0x0603D2EB", "item_rend":"0x0603D2EC", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_AnkleShackles_Silver_Inventory", "slots":[53] }
+	},
+	"wrist_list_default" : "Ebonite_Arm_Cuffs",
+	"wrist_list" :
+	{
+		"Rope_Arm_Cuffs" : { "item_inv":"0x0604E8A1", "item_rend":"0x0604E8A2", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_rope_cuffs_Arms_Inventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs" : { "item_inv":"0x0600D4E1", "item_rend":"0x0600D4E0", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_cuffs_EboniteArmsInventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs_R" : { "item_inv":"0x06011104", "item_rend":"0x06011103", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_RDECuffsEArmsInventory", "slots":[59] },
+		"Ebonite_Arm_Cuffs_W" : { "item_inv":"0x0600F026", "item_rend":"0x0600F025", "fname":"Devious Devices - Expansion.esm", "iname":"zadx_WTECuffsEArmsInventory", "slots":[59] }
+	}
+}
