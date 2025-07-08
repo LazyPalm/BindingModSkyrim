@@ -166,10 +166,10 @@ function MakeComment(Actor source, Actor target, int commentType) global
         bind_ThinkingDom td = Quest.GetQuest("bind_MainQuest") as bind_ThinkingDom
         string prompt = ""
         if commentType == GetCommentTypePackUpCamp()
-            prompt = "Order " + target.GetDisplayName() + ", your submissive, to clean up the area used for camping."
+            prompt = "Order { player.name }, your submissive, to clean up the area used for camping."
 
         elseif commentType == GetCommentTypeUntyingSub()
-            prompt = "Since you like to see them tied up, tell " + target.GetDisplayName() + ", your submissive, how dispointed you are that it is time to untie them."
+            prompt = "Since you like to see them tied up, tell { player.name }, your submissive, how dispointed you are that it is time to untie them."
 
         endif
 
