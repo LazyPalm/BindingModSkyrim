@@ -337,7 +337,7 @@ function PutDomToBed()
     bind_Utility.DoSleep()
 
     if td.IsAiReady()
-        td.MakeAiComment(theDom, "You are ready to sleep. Tell { player.name }, your submissive goodnight, and they are not to disturb you while you sleep.")
+        td.MakeAiComment(theDom, "You are ready to sleep. Tell { player.name } goodnight, and they are not to disturb you while you sleep.")
     endif
 
     bind_MovementQuestScript.StartSleep(theDom, theBedroll)

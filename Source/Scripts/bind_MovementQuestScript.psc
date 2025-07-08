@@ -161,15 +161,15 @@ function MakeComment(Actor source, Actor target, int commentType) global
     bind_Utility.WriteToConsole("MakeComment source: " + source.GetDisplayName() + " target: " + target.GetDisplayName() + " commentType " + commentType)
 
     bind_MainQuestScript mq = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
-    if (mq.EnableModChim == 1 && mq.SoftCheckChim) == 1 || (mq.EnableModSkyrimNet == 1 && mq.SoftCheckSkyrimNet == 1)
+    bind_ThinkingDom td = Quest.GetQuest("bind_MainQuest") as bind_ThinkingDom
+    if td.IsAiReady()
 
-        bind_ThinkingDom td = Quest.GetQuest("bind_MainQuest") as bind_ThinkingDom
         string prompt = ""
         if commentType == GetCommentTypePackUpCamp()
-            prompt = "Order { player.name }, your submissive, to clean up the area used for camping."
+            prompt = "Order { player.name }, to clean up the area used for camping."
 
         elseif commentType == GetCommentTypeUntyingSub()
-            prompt = "Since you like to see them tied up, tell { player.name }, your submissive, how dispointed you are that it is time to untie them."
+            prompt = "Since you like to see them tied up, tell { player.name } how dispointed you are that it is time to untie them."
 
         endif
 

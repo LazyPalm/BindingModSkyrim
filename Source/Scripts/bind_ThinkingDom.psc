@@ -93,8 +93,6 @@ Function LoadGame(bool rebuildStorage = false)
         pronounHisHers = "hers"
     endif
 
-	;RegisterForModEvent("CHIM_CommandReceived", "ChimCommand")
-
     RegisterForModEvent("bind_EnteringSafeAreaEvent", "EnteringSafeAreaEvent")
     RegisterForModEvent("bind_LeavingSafeAreaEvent", "LeavingSafeAreaEvent")
     RegisterForModEvent("bind_ConversationPoseEvent", "ConversationPoseEvent")
@@ -445,12 +443,7 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        ;string suggestion = "Comment about being on their knees."
-        ;int result = SkyrimNetApi.SendCustomPromptToLLM(suggestion, llmTemp, maxTokens, "bind_ThinkingDom", "OnLLMResponse")      
-        ;int result = SkyrimNetApi.RegisterDialogueToListener(theDomRef, theSubRef, suggestion)
-        ;int result = SkyrimNetApi.RegisterEvent("custom", theSubRef.GetDisplayName() + " has dropped to " + pronounHisHer + " knees and is kneeling submissively. Perhaps you should comment about " + pronounHimHer + " pleasing you.", theDomRef, theSubRef)
         MakeAiComment(theDomRef, "{ player.name } dropped submissively to their knees for you.")
-        ;bind_Utility.WriteToConsole("SkyrimNet SendCustomPromptToLLM result: " + result)  
     endif
 
 endevent
@@ -483,7 +476,7 @@ function MakeAiComment(Actor a, string commentPrompt)
 
     if main.EnableModSkyrimNet == 1
 
-        commentPrompt + "\n- Always use unique comments and write this in " + theDomRef.GetName() + "'s voice."
+        ;commentPrompt += " Be sure to make this a unique comment and try not to repeat."
 
         SkyrimNetApi.DirectNarration(commentPrompt, a)
         bind_Utility.WriteToConsole("MakeAiComment - actor: " + a + " prompt: " + commentPrompt)
