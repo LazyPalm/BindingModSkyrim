@@ -50,6 +50,7 @@ function ShowDebugMenu()
     
     listMenu.AddEntryItem("<-- Return To Menu")
     listMenu.AddEntryItem("Test Dom Rule Change")
+    listMenu.AddEntryItem("Direct Narration Test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -59,6 +60,10 @@ function ShowDebugMenu()
         ShowActionMenu()
     elseif listReturn == 1
         rules_manager.DomManagedRuleChange(functions_script.GetSubRef(), true)
+    elseif listReturn == 2
+        if think.IsAiReady()
+            think.UseDirectNarration(functions_script.GetDomRef(), "You have defeated {{ player.name }} in battle, who is now tied kneeling at your feet. Talk to them about their fate. When the conversation is over you will untie and free them or fuck them based on their answers and your mood.")
+        endif
     endif
 
 endfunction
@@ -166,7 +171,19 @@ function ShowPoseMenu()
         SendKneelingEvent()
     elseif listReturn == 2
         pose_manager.DoSpreadKneel()
-        functions_script.PoseForSex()
+        if think.IsAiReady()
+            string prompt = "{{ player.name }} is kneeling with legs spead wide with a desire for sex."
+            if functions_script.GetRuleInfractions() > 0
+                prompt += " They have been bad and you will explain they must work off punishments first. You will not give them what they want."
+            else
+                prompt += " They have been good and probably deserve to be tied and given what they want."
+            endif
+            ;BETTER? OR BOTH?
+            ;add punishments due decorator at the prompt and display the lines above
+            think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+        else
+            functions_script.PoseForSex()            
+        endif
     elseif listReturn == 3     
         pose_manager.DoAttention()
     elseif listReturn == 4     
@@ -174,7 +191,19 @@ function ShowPoseMenu()
         functions_script.PoseForBondage()
     elseif listReturn == 5     
         pose_manager.DoGetWhippedPose()
-        functions_script.PoseForWhipping()
+        if think.IsAiReady()
+            string prompt = "{{ player.name }} has entered a bent foward at the waist pose indicating a desire to be whipped."
+            if functions_script.GetRuleInfractions() > 0
+                prompt += " They have been very bad lately."
+            else
+                prompt += " The have been good lately and must just desire the sting of a whip."
+            endif
+            ;BETTER? OR BOTH?
+            ;add punishments due decorator at the prompt and display the lines above
+            think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+        else
+            functions_script.PoseForWhipping()
+        endif
     elseif listReturn == 6     
         pose_manager.DoShowAss()
     elseif listReturn == 7     
@@ -416,6 +445,7 @@ bind_BondageManager property bondage_manager auto
 bind_GearManager property gear_manager auto
 bind_RulesManager property rules_manager auto
 bind_Functions property functions_script auto
+bind_ThinkingDom property think auto
 
 Quest property bind_BoundMasturbationQuest auto
 

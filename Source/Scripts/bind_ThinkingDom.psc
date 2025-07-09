@@ -79,7 +79,10 @@ Function LoadGame(bool rebuildStorage = false)
     theSubRef = fs.GetSubRef()
     theDomRef = fs.GetDomRef()
 
-    domName = theDomRef.GetActorBase().GetName()
+    domName = ""
+    if theDomRef
+        domName = theDomRef.GetDisplayName()
+    endif
 
     pronounHimHer = "him"
     pronounHeShe = "he"
@@ -101,12 +104,40 @@ Function LoadGame(bool rebuildStorage = false)
     RegisterForModEvent("bind_SubLookedAtFurnitureEvent", "SubLookedAtFurnitureEvent")
 
     if main.SoftCheckSkyrimNet == 1 ;&& main.EnableModSkyrimNet == 1
-        RegisterSkyrimNetFunctions()
+        RegisterDecorators()
+        RegisterFunctions()
     endif
 
 EndFunction
 
-function RegisterSkyrimNetFunctions()
+function RegisterDecorators()
+
+    bind_Utility.WriteToConsole("Registering SkyrimNet decorators")
+
+    ;is dom
+    ;is sub - this is always player for now - but might expand
+    ;is potential dom - for defeated quest
+
+    ;add furniture description decorator
+        ;use this for knowing what kind of furniture sub will be locked into
+        ;and use it to describe the furniture the sub is locked into (for dom teasing/comments - crowd comments)
+        ;maybe have an optional long furinture description in a JSON file that could be created and then loaded in??
+
+    ;punishments due decorator
+
+    ;not noticed decorator - so the dom can make comments about how they think the sub is up to something
+
+    ;rules decorators
+
+    ;bondage decorators
+
+    SkyrimNetApi.RegisterDecorator("binding_is_dom", "bind_ThinkingDom", "DecoratorIsDom")
+
+    SkyrimNetApi.RegisterDecorator("binding_info", "bind_ThinkingDom", "DecoratorInfo")
+
+endfunction
+
+function RegisterFunctions()
 
     if skyrimNetRegistered != 1 ;NOTE - this is an integer vs. bool so it can be incremented up to force a new registration of actions/decoractors
 
@@ -118,7 +149,7 @@ function RegisterSkyrimNetFunctions()
 
     bind_Utility.WriteToConsole("Registering SkyrimNet actions")
 
-    SkyrimNetApi.RegisterDecorator("get_hour", "bind_ThinkingDom", "Decorator_Function")
+    ;SkyrimNetApi.RegisterDecorator("get_hour", "bind_ThinkingDom", "Decorator_Function")
 
     ; SkyrimNetApi.RegisterAction("ExtCmdBindingTieWrists", "Bind {{ player.name }}'s wrists.", \
     ;                                 "bind_ThinkingDom", "BindingTieWrists_IsEligible", \
@@ -132,25 +163,25 @@ function RegisterSkyrimNetFunctions()
     ;                                 "", "PAPYRUS", \
     ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingWhip", "Give " + theSubRef.GetDisplayName() + " a good beating for punishment or fun.", \
+    SkyrimNetApi.RegisterAction("ExtCmdBindingWhip", "Give {{ player.name }} a good beating for punishment or fun.", \
                                     "bind_ThinkingDom", "BindingWhip_IsEligible", \
                                     "bind_ThinkingDom", "BindingWhip_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")
                                     
-    SkyrimNetApi.RegisterAction("ExtCmdBindingSex", "Have sex with " + theSubRef.GetDisplayName() + ".", \
+    SkyrimNetApi.RegisterAction("ExtCmdBindingSex", "Have sex with {{ player.name }} while using bondage equipment.", \
                                     "bind_ThinkingDom", "BindingSex_IsEligible", \
                                     "bind_ThinkingDom", "BindingSex_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")    
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingFurniture", "Lock " + theSubRef.GetDisplayName() + " into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
+    SkyrimNetApi.RegisterAction("ExtCmdBindingFurniture", "Lock {{ player.name }} into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
                                     "bind_ThinkingDom", "BindingFurniture_IsEligible", \
                                     "bind_ThinkingDom", "BindingFurniture_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")    
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingHarshBondage", "Tie " + theSubRef.GetDisplayName() + " into inescapably tight bondage for punishment or fun .", \
+    SkyrimNetApi.RegisterAction("ExtCmdBindingHarshBondage", "Tie {{ player.name }} into inescapably tight bondage for punishment or fun .", \
                                     "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
                                     "bind_ThinkingDom", "BindingHarshBondage_Execute", \
                                     "", "PAPYRUS", \
@@ -158,29 +189,93 @@ function RegisterSkyrimNetFunctions()
 
     ;"Setup a camp for the night. This can ONLY be used after the 18th hour or before the 6th hour of the day. The current hour is {{ get_hour(npc.UUID) }}."                                    
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingCamping", "Setup a camp for the night. This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
+    ;TODO - this decorator is the wrong way to do this. the hours of the day just needs to be in the BindingCamping_IsEligible check
+    SkyrimNetApi.RegisterAction("ExtCmdBindingCamping", "Setup a kinky camp for the night.", \  
                                     "bind_ThinkingDom", "BindingCamping_IsEligible", \
                                     "bind_ThinkingDom", "BindingCamping_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")   
+                                    ;removed this - " This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
+
 
 endfunction
 
-string function Decorator_Function(Actor akActor) global
-    float Time = Utility.GetCurrentGameTime()
-	Time -= Math.Floor(Time) ; Remove "previous in-game days passed" bit
-	Time *= 24 ; Convert from fraction of a day to number of hours
-    string result
-    result = "" + Time
-    bind_Utility.WriteToConsole("DecoratorFunction actor: " + akActor + " result: " + result)
-	Return result
+; string function Decorator_Function(Actor akActor) global
+;     float Time = Utility.GetCurrentGameTime()
+; 	Time -= Math.Floor(Time) ; Remove "previous in-game days passed" bit
+; 	Time *= 24 ; Convert from fraction of a day to number of hours
+;     string result
+;     result = "" + Time
+;     bind_Utility.WriteToConsole("DecoratorFunction actor: " + akActor + " result: " + result)
+; 	Return result
+; endfunction
+
+string function DecoratorInfo(Actor akActor) global
+
+    bind_Functions fun = bind_Functions.GetBindingFunctions()
+
+    Form dev = StorageUtil.GetFormValue(fun.GetSubRef(), "binding_locked_in_furniture", none)
+    int inFurniture = 0
+    string furnitureName = ""
+    if dev
+        inFurniture = 1
+        furnitureName = dev.GetName()
+    endif 
+
+    int isKneeling = 0
+    ;fix this
+
+    int isDom = 0
+    if fun.GetDomRef() == akActor
+        isDom = 1
+    endif
+    int isBound = fun.SubInBondage()
+    int isGagged = fun.SubIsGagged()
+
+    string output = "{"
+
+    output += "\"player_is_sub\":" + fun.PlayerIsSub() + ","
+    output += "\"is_dom\":" + isDom + ","
+    output += "\"sub_in_furniture\":" + inFurniture + ","
+    output += "\"furniture_name\":\"" + furnitureName + "\","
+    output += "\"sub_bound\":" + isBound + ","
+    output += "\"is_gagged\":" + isGagged + ","
+    output += "\"is_kneeling\":" + isKneeling
+
+    output += "}"
+
+    bind_Utility.WriteToConsole(output)
+
+    ;bind_Utility.WriteToConsole("DecoratorInfo - player_is_sub: " + fun.PlayerIsSub() + " is_dom: " + isDom + " sub_in_furniture: " + inFurniture + " sub_bound: " + isBound + " is_gagged: " + isGagged + " is_kneeling: " + isKneeling)
+
+    return output
+
 endfunction
 
-function OnLLMResponse(string response) global
-
-    bind_Utility.WriteToConsole("SkyrimNet OnLLMResponse: " + response)
-
+string function DecoratorIsDom(Actor akActor) global
+    bind_Functions fun = bind_Functions.GetBindingFunctions()
+    if fun.GetDomRef() == akActor
+        bind_Utility.JsonIntValueReturn("is_dom", 1)
+    else
+        bind_Utility.JsonIntValueReturn("is_dom", 0)  
+    endif
 endfunction
+
+; string function DecoratorSubFurnitureStatus(Actor akActor) global
+
+;     bind_Functions fun = bind_Functions.GetBindingFunctions()
+
+;     Form dev = StorageUtil.GetFormValue(fun.GetSubRef(), "binding_locked_in_furniture", none)
+;     int inFurniture = 0
+;     string furnitureName = ""
+;     if dev
+;         inFurniture = 1
+;         furnitureName = dev.GetName()
+;     endif 
+
+;     return bind_Utility.JsonIntValueReturn("is_dom", 1)
+
+; endfunction
 
 bool function BindingTieWrists_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
 
@@ -308,6 +403,8 @@ endfunction
 
 bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
 
+    ;TODO - add the global is adult check
+
     bind_Utility.WriteToConsole("SkyrimNet called: BindingCamping_IsEligible actor: " + akOriginator)
 
     bool result
@@ -318,38 +415,42 @@ bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, 
         return false
     endif
 
+    ;TODO - other checks:
+    ;* outside safe area
+    ;* time of day check
+
     result = true
 
     return result
 
 endfunction
 
-function BindingTieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+; function BindingTieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
-    bind_Utility.WriteToConsole("SkyrimNet called: BindingTieWrists_Execute actor: " + akOriginator)
+;     bind_Utility.WriteToConsole("SkyrimNet called: BindingTieWrists_Execute actor: " + akOriginator)
 
-    bind_BondageManager bm = bind_BondageManager.GetBindingBondageManager()
-    bind_Functions f = bind_Functions.GetBindingFunctions()
+;     bind_BondageManager bm = bind_BondageManager.GetBindingBondageManager()
+;     bind_Functions f = bind_Functions.GetBindingFunctions()
 
-    Form dev = bm.GetDdRandomItem(bm.BONDAGE_TYPE_HEAVYBONDAGE())
-    StorageUtil.SetFormValue(f.GetSubRef(), "bind_thinkingdom_wrists", dev)
-    bm.AddSpecificItem(f.GetSubRef(), dev)
+;     Form dev = bm.GetDdRandomItem(bm.BONDAGE_TYPE_HEAVYBONDAGE())
+;     StorageUtil.SetFormValue(f.GetSubRef(), "bind_thinkingdom_wrists", dev)
+;     bm.AddSpecificItem(f.GetSubRef(), dev)
 
-endfunction
+; endfunction
 
-function BindingUntieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+; function BindingUntieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
-    bind_Utility.WriteToConsole("SkyrimNet called: BindingUntieWrists_Execute actor: " + akOriginator)
+;     bind_Utility.WriteToConsole("SkyrimNet called: BindingUntieWrists_Execute actor: " + akOriginator)
 
-    bind_BondageManager bm = bind_BondageManager.GetBindingBondageManager()
-    bind_Functions f = bind_Functions.GetBindingFunctions()
+;     bind_BondageManager bm = bind_BondageManager.GetBindingBondageManager()
+;     bind_Functions f = bind_Functions.GetBindingFunctions()
 
-    Form dev = StorageUtil.GetFormValue(f.GetSubRef(), "bind_thinkingdom_wrists")
-    if dev
-        bm.RemoveSpecificItem(f.GetSubRef(), dev)
-    endif
+;     Form dev = StorageUtil.GetFormValue(f.GetSubRef(), "bind_thinkingdom_wrists")
+;     if dev
+;         bm.RemoveSpecificItem(f.GetSubRef(), dev)
+;     endif
 
-endfunction
+; endfunction
 
 function BindingWhip_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
@@ -443,7 +544,7 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        MakeAiComment(theDomRef, "{ player.name } dropped submissively to their knees for you.")
+        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for you.")
     endif
 
 endevent
@@ -472,14 +573,14 @@ event LeavingSafeAreaEvent()
 
 endevent
 
-function MakeAiComment(Actor a, string commentPrompt)
+function UseDirectNarration(Actor a, string commentPrompt)
 
     if main.EnableModSkyrimNet == 1
 
         ;commentPrompt += " Be sure to make this a unique comment and try not to repeat."
 
         SkyrimNetApi.DirectNarration(commentPrompt, a)
-        bind_Utility.WriteToConsole("MakeAiComment - actor: " + a + " prompt: " + commentPrompt)
+        bind_Utility.WriteToConsole("UsedDirectNarration - actor: " + a + " prompt: " + commentPrompt)
 
     endif
 

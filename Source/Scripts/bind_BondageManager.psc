@@ -771,6 +771,14 @@ bool function IsInBondage(Actor a)
     endif
 endfunction
 
+bool function IsGagged(Actor a)
+    if a.WornHasKeyWord(zlib.zad_DeviousGag)
+        return true
+    else
+        return false
+    endif
+endfunction
+
 bool Function GagHasPlug(Actor a)
     if a.WornHasKeyWord(zlib.zad_DeviousGagPanel)
         return true

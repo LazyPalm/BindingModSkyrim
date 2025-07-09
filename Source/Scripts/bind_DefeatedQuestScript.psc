@@ -208,6 +208,11 @@ function SaveThePlayer(bool addGag)
         futureDom.AddToFaction(bind_ForceGreetFaction)
     endif
 
+    ;TODO:
+    ;
+    ;See if this works with direct naration
+    ;"You have defeated {{ player.name }} in battle, who is now tied kneeling at your feet. Talk to them about their fate. When the conversation is over you will untie and free them or enslave them based on their answers and your mood."
+
 endfunction
 
 FormList property bind_SafeLocationsList auto

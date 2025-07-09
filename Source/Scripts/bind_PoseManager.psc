@@ -497,6 +497,8 @@ Function DoHighKneel()
 		bind_GlobalKneelingOK.SetValue(1.0)
 	endif
 
+
+
 EndFunction
 
 bool Function InHighKneel()

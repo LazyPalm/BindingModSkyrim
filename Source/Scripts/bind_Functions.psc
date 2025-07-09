@@ -2202,6 +2202,26 @@ bind_Functions function GetBindingFunctions() global
 	return Quest.GetQuest("bind_MainQuest") as bind_Functions
 endfunction
 
+int function PlayerIsSub()
+	return main.IsSub
+endfunction
+
+int function SubInBondage()
+	int result = 0
+	if bms.IsInBondage(theSubRef)
+		result = 1
+	endif
+	return result
+endfunction
+
+int function SubIsGagged()
+	int result = 0
+	if bms.IsGagged(theSubRef)
+		result = 1
+	endif
+	return result
+endfunction
+
 bool function UseSkyrimNetCheck(Actor akActor)
 	return (main.EnableModSkyrimNet == 1 && main.IsSub == 1 && theDomRef == akActor && ModInRunningState())
 endfunction

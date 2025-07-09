@@ -166,17 +166,17 @@ function MakeComment(Actor source, Actor target, int commentType) global
 
         string prompt = ""
         if commentType == GetCommentTypePackUpCamp()
-            prompt = "Order { player.name }, to clean up the area used for camping."
+            prompt = "Order {{ player.name }}, to clean up the area used for camping."
 
         elseif commentType == GetCommentTypeUntyingSub()
-            prompt = "Since you like to see them tied up, tell { player.name } how dispointed you are that it is time to untie them."
+            prompt = "Since you like to see them tied up, tell {{ player.name }} how dispointed you are that it is time to untie them."
 
         endif
 
         bind_Utility.WriteToConsole("In AI comment - prompt: " + prompt)
 
         if prompt != ""
-            td.MakeAiComment(source, prompt)
+            td.UseDirectNarration(source, prompt)
         endif
 
     else

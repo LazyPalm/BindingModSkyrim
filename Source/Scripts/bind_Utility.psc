@@ -265,3 +265,7 @@ string[] function GetLetters() global
     return letters
 
 endfunction
+
+string function JsonIntValueReturn(string name, int value) global
+    return "{\"" + name + "\":\"" + value + "\"}"    
+endfunction

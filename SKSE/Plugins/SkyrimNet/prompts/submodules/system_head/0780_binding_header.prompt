@@ -1,0 +1,20 @@
+{% set binding_info = binding_info(npc.UUID) %}
+
+{# Player is sub and mod is active #}
+{% if binding_info.player_is_sub == 1 %}
+    {# NPC is the dominant #}
+    {% if binding_info.is_dom == 1 %}
+        {# sub is wearing a gag #}
+        {% if binding_info.is_gagged == 1 %}
+        - {{ player.name }} has a gag in their mouth. You need to pretend anything they say is ONLY mumbling gag speech. This is VERY important for realism. It is OK to talk about this mumbling. THIS REPLACES OTHER SPEECH INSTRUCTIONS!!!.
+        {% endif %}
+    {% endif %}
+    {# normal NPC #}
+    {% if binding_info.is_dom == 0 %}
+        {# sub is wearing a gag #}
+        {% if binding_info.is_gagged == 1 %}
+        - {{ player.name }} has a gag in their mouth. You need to pretend anything they say is ONLY mumbling gag speech. This is VERY important for realism. It is OK to talk about this mumbling. THIS REPLACES OTHER SPEECH INSTRUCTIONS!!!.
+        - Since {{ player.name }} is a slave, you don't offer any help removing the gag.
+        {% endif %}
+    {% endif %}
+{% endif %}

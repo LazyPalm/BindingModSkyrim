@@ -114,6 +114,7 @@ int toggleFreeDismissedDisabled
 int toggleRequireKneeling
 int toggleInfractionForNotKneeling
 int toggleGaggedForNotKneeling
+int toggleKneelingOnlyRequiedInSafeAreas
 
 int toggleCleanSub
 int toggleUnplugGagsOnly
@@ -1298,12 +1299,14 @@ Function DisplayPreferences()
     int kneelingRequired = StorageUtil.GetIntValue(theSub, "kneeling_required", 1)
     int gaggedForNotKneeling = StorageUtil.GetIntValue(theSub, "gagged_for_not_kneeling", 1)
     int ruleInfractionForNotKneeling = StorageUtil.GetIntValue(theSub, "rule_infraction_for_not_kneeling", 1)
+    int kneelingOnlyRequiedInSafeAreas = StorageUtil.GetIntValue(theSub, "kneeling_safe_areas_only", 1)
 
     AddHeaderOption("Kneeling Preferences")
     AddHeaderOption("")
     toggleRequireKneeling = AddToggleOption("Kneeling Required To Speak", kneelingRequired)
     toggleGaggedForNotKneeling = AddToggleOption("Kneeling Required - Gagged For Not", gaggedForNotKneeling)
     toggleInfractionForNotKneeling = AddToggleOption("Kneeling Required - Infraction For Not", ruleInfractionForNotKneeling)
+    ;toggleKneelingOnlyRequiedInSafeAreas = AddToggleOption("Kneeling Required - Only In Safe Area", ruleInfractionForNotKneeling)
     AddTextOption("", "")
 
 
@@ -2326,6 +2329,12 @@ Event OnOptionSelect(int option)
         StorageUtil.SetIntValue(theSub, "kneeling_required", kneelingRequired)
         bind_GlobalPreferenceRequireKneeling.SetValue(kneelingRequired)
         SetToggleOptionValue(toggleRequireKneeling, kneelingRequired)
+    endif
+
+    if option == toggleKneelingOnlyRequiedInSafeAreas
+        int kneelingOnlyRequiedInSafeAreas = ToggleValue(StorageUtil.GetIntValue(theSub, "kneeling_safe_areas_only", 1))
+        StorageUtil.SetIntValue(theSub, "kneeling_safe_areas_only", kneelingOnlyRequiedInSafeAreas)
+        SetToggleOptionValue(toggleKneelingOnlyRequiedInSafeAreas, kneelingOnlyRequiedInSafeAreas)
     endif
 
     if option == toggleGaggedForNotKneeling

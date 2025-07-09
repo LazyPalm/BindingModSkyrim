@@ -399,7 +399,7 @@ EndFunction
 bool Function LockInFurniture(Actor a, ObjectReference furn, bool player = true)
 
     StorageUtil.SetFormValue(a, "binding_locked_in_furniture", furn)
-
+  
     if !ddcEventRegistered
         ddcEventRegistered = true
         RegisterForModEvent("DDC_DeviceEvent", "DdcDeviceEvent")
