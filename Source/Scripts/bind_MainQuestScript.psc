@@ -59,10 +59,12 @@ int property SuspendRulesOutsideOfCitiesAndTowns auto conditional
 int property SuspendRulesNearEnemies auto conditional
 int property SuspendRulesAutomatic auto conditional
 
+int property AdventuringManual auto conditional
 int property AdventuringFreeHands auto conditional
 int property AdventuringAllowClothing auto conditional
 int property AdventuringSuspendRules auto conditional
 int property AdventuringAutomatic auto conditional
+int property AdventuringSafeBondageApplied auto conditional
 float property AdventuringCheckAfterSeconds auto conditional
 
 int property DomPreferenceUntieForCombat auto conditional
@@ -156,6 +158,11 @@ int property LikesCityRiften auto conditional
 int property LikesCityWinterhold auto conditional
 int property LikesCityRavenRock auto conditional
 int property LikesCityDawnstar auto conditional
+
+;*********************************************************
+;skyrimnet variables
+int property SkryimNetSlaveryType auto conditional
+
 
 event OnInit()
 

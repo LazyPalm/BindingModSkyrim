@@ -6,7 +6,7 @@ Actor theDom
 bool pressedButton
 string[] bondageTypes
 string[] materialTypes
-string[] queststList
+string[] usageList
 
 string loadedSetName = ""
 
@@ -58,10 +58,33 @@ event OnInit()
         materialTypes[12] = "Iron/Steel"
         materialTypes[13] = "Chain"
 
-        queststList = new string[3]
-        queststList[0] = "Harsh Bondage"
-        queststList[1] = "Location - Castle"
-        queststList[2] = "Location - Player Home"
+        usageList = new string[18]
+        usageList[0] = "Location - All Areas"
+        usageList[1] = "Location - All Safe Areas"
+        usageList[2] = "Location - All Dangerous Areas"
+        usageList[3] = "Location - Any City"
+        usageList[4] = "Location - Dawnstar"
+        usageList[5] = "Location - Falkreath"
+        usageList[6] = "Location - Windhelm"
+        usageList[7] = "Location - Markarth"
+        usageList[8] = "Location - Morthal"
+        usageList[9] = "Location - Riften"
+        usageList[10] = "Location - Solitude"
+        usageList[11] = "Location - High Hrothgar"
+        usageList[12] = "Location - Whiterun"
+        usageList[13] = "Location - Winterhold"
+        usageList[14] = "Location - Raven Rock"       
+        usageList[15] = "Location - Towns"
+        usageList[16] = "Location - Player Home"
+        usageList[17] = "Event - Harsh Bondage"
+        ; usageList[17] = "Day - Sundas"
+        ; usageList[18] = "Day - Morndas"
+        ; usageList[19] = "Day - Tirdas"
+        ; usageList[20] = "Day - Middas"
+        ; usageList[21] = "Day - Turdas"
+        ; usageList[22] = "Day - Fredas"
+        ; usageList[23] = "Day - Loredas"
+
 
         SetObjectiveDisplayed(10, true)
 
@@ -161,18 +184,18 @@ function SetUsesMenu()
     listMenu.AddEntryItem("<-- Return To Menu")
 
     int i = 0
-    while i < queststList.Length
+    while i < usageList.Length
 
-        bind_Utility.WriteToConsole("used_for_" + queststList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + queststList[i]))
+        bind_Utility.WriteToConsole("used_for_" + usageList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + usageList[i]))
 
-        bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], loadedSetName)
+        bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + usageList[i], loadedSetName)
 
         string inUseText = ""
         if hasSet
             inUseText = " - Yes"
         endif
 
-        listMenu.AddEntryItem("Use In - " + queststList[i] + inUseText)
+        listMenu.AddEntryItem("Use For - " + usageList[i] + inUseText)
         i += 1
     endwhile
     listMenu.OpenMenu()
@@ -182,13 +205,13 @@ function SetUsesMenu()
         ParentMenu()
     elseif listReturn >= 1
 
-        bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[listReturn - 1], loadedSetName)
+        bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + usageList[listReturn - 1], loadedSetName)
         if hasSet
-            bind_Utility.WriteToConsole("removing from uses: used_for_" + queststList[listReturn - 1] + " set: " + loadedSetName)
-            StorageUtil.StringListRemove(TheWardrobe, "used_for_" + queststList[listReturn - 1], loadedSetName)
+            bind_Utility.WriteToConsole("removing from uses: used_for_" + usageList[listReturn - 1] + " set: " + loadedSetName)
+            StorageUtil.StringListRemove(TheWardrobe, "used_for_" + usageList[listReturn - 1], loadedSetName)
         else
-            int idx = StorageUtil.StringListAdd(TheWardrobe, "used_for_" + queststList[listReturn - 1], loadedSetName)
-            bind_Utility.WriteToConsole("adding to uses: used_for_" + queststList[listReturn - 1] + " set: " + loadedSetName + " idx: " + idx)
+            int idx = StorageUtil.StringListAdd(TheWardrobe, "used_for_" + usageList[listReturn - 1], loadedSetName)
+            bind_Utility.WriteToConsole("adding to uses: used_for_" + usageList[listReturn - 1] + " set: " + loadedSetName + " idx: " + idx)
         endif
 
         SetUsesMenu()
@@ -209,12 +232,12 @@ function DeleteSetMenu()
 
         ;remove favorites
         int i = 0
-        while i < queststList.Length
-            bind_Utility.WriteToConsole("used_for_" + queststList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + queststList[i]))
-            bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], loadedSetName)
+        while i < usageList.Length
+            bind_Utility.WriteToConsole("used_for_" + usageList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + usageList[i]))
+            bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + usageList[i], loadedSetName)
             if hasSet
-                StorageUtil.StringListRemove(TheWardrobe, "used_for_" + queststList[i], loadedSetName, true)
-                bind_Utility.WriteToConsole("removed from: used_for_" + queststList[i])
+                StorageUtil.StringListRemove(TheWardrobe, "used_for_" + usageList[i], loadedSetName, true)
+                bind_Utility.WriteToConsole("removed from: used_for_" + usageList[i])
             endif
             i += 1
         endwhile

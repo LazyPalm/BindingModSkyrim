@@ -75,8 +75,8 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("<-- Return To Menu")
     listMenu.AddEntryItem("Change Dominant Title (" + functions_script.SettingsGetDomTitle() + ")")
     listMenu.AddEntryItem("Run Latency Check")
-    listMenu.AddEntryItem("Browse Bondage Items")
-    listMenu.AddEntryItem("Manage Favorites - For Bondage Rules")
+    ; listMenu.AddEntryItem("Browse Bondage Items")
+    ; listMenu.AddEntryItem("Manage Favorites - For Bondage Rules")
     listMenu.AddEntryItem("Manage Rules")
     listMenu.AddEntryItem("Learn Worn DD Items as Set")    
     listMenu.AddEntryItem("Debug Tests")
@@ -101,17 +101,17 @@ function ShowSettingsMenu()
             ModEvent.PushFloat(handle, bind_Utility.GetTime())
             ModEvent.Send(handle)
         endif
+    ; elseif listReturn == 3
+    ;     bondage_manager.BrowseDdItemsList(functions_script.GetSubRef(), none, 1)
+    ; elseif listReturn == 4
+    ;     bondage_manager.ManageFavorites(functions_script.GetSubRef())
     elseif listReturn == 3
-        bondage_manager.BrowseDdItemsList(functions_script.GetSubRef(), none, 1)
-    elseif listReturn == 4
-        bondage_manager.ManageFavorites(functions_script.GetSubRef())
-    elseif listReturn == 5
         rules_manager.ManageRules(functions_script.GetSubRef())
-    elseif listReturn == 6
+    elseif listReturn == 4
         bondage_manager.SaveWornDdItemsAsSet(functions_script.GetSubRef())
-    elseif listReturn == 7
+    elseif listReturn == 5
         ShowDebugMenu()
-    elseif listReturn == 8
+    elseif listReturn == 6
         StorageUtil.FormListClear(functions_script.GetSubRef(), "bind_future_doms")
         debug.MessageBox("Future doms list has been cleared")
         ;     bind_MovementQuestScript.WalkTo(mqs.GetDomRef(), mqs.GetSubRef(), 128.0, 60)
@@ -235,6 +235,8 @@ endstate
 
 function ShowActionMenuNested()
 
+    bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
+
     UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
     
     actionMenu.SetPropertyIndexString("optionText", 0, "Close")
@@ -262,15 +264,20 @@ function ShowActionMenuNested()
     Actor a = functions_script.GetSubRef()
     Actor dom = functions_script.GetDomRef()
 
-    if !a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
-        actionMenu.SetPropertyIndexString("optionText", 3, "Bind Wrists")
-        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Bind Wrists")
-        actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
+    if safeZone ;!a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
+        actionMenu.SetPropertyIndexString("optionText", 3, "Safe Zone Bondage")
+        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Safe Zone Bondage")
+        actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)        
+        ;actionMenu.SetPropertyIndexString("optionText", 3, "Bind Wrists")
+        ;actionMenu.SetPropertyIndexString("optionLabelText", 3, "Bind Wrists")
+        ;actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
     else
-
-        actionMenu.SetPropertyIndexString("optionText", 3, "Free Wrists")
-        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Free Wrists")
+        actionMenu.SetPropertyIndexString("optionText", 3, "Dangerous Area Bondage")
+        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Dangerous Area Bondage")
         actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
+        ;actionMenu.SetPropertyIndexString("optionText", 3, "Free Wrists")
+        ;actionMenu.SetPropertyIndexString("optionLabelText", 3, "Free Wrists")
+        ;actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
     endif
 
     if !gear_manager.IsNude(a)
@@ -297,8 +304,6 @@ function ShowActionMenuNested()
 
     int actionResult = actionMenu.OpenMenu()
 
-    bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
-
     bool isBoundFlag = a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
     bool isNudeFlag = gear_manager.IsNude(a)
     ;bool boundRule = rules_manager.IsHeavyBondageRequired(a, safeZone) ;(rules_manager.GetBondageRuleByName("Bound Rule") == 1)
@@ -313,6 +318,7 @@ function ShowActionMenuNested()
         if pose_manager.IsInPose()
             pose_manager.ResumeStanding()
             bind_Utility.EnablePlayer()
+            SendLeftKneelEvent()
             ;mqs.GetSubRef().SetDontMove(false)
         else
             ShowPoseMenu()
@@ -325,7 +331,13 @@ function ShowActionMenuNested()
         if a.IsOnMount()
             bind_Utility.WriteInternalMonologue("I need to get off this horse first...")
         else
-            functions_script.PoseForBondage()
+            if safeZone
+                ;bondage_manager.ActiveBondageSet = "" ;clear active set - this lets player pick a new set
+                functions_script.ApplySafeAreaBondage()
+            else
+                functions_script.ApplyDangerousAreaBondage()
+            endif
+            ;functions_script.PoseForBondage()
             ; bind_Utility.DisablePlayer()
             ; if !isBoundFlag
             ;     PlayDomTyingAnimation(dom, a, true)
@@ -366,8 +378,14 @@ function ShowActionMenuNested()
             else
                 bind_MovementQuestScript.PlayDressUndress(a)
                 if !gear_manager.IsNude(a)
+                    if think.IsAiReady()
+                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
+                    endif
                     gear_manager.RemoveWornGear(a)
                 else
+                    if think.IsAiReady()
+                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
+                    endif
                     gear_manager.RestoreWornGear(a)
                 endif
             endif
@@ -392,6 +410,13 @@ endstate
 
 function SendKneelingEvent()
    int handle = ModEvent.Create("bind_SubKneeledEvent")
+    if handle
+        ModEvent.Send(handle)
+    endif
+endfunction
+
+function SendLeftKneelEvent()
+   int handle = ModEvent.Create("bind_SubLeftKneelEvent")
     if handle
         ModEvent.Send(handle)
     endif

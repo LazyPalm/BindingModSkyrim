@@ -412,6 +412,7 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 			;debug.MessageBox("entering a safe area")
 			bind_Utility.WriteToConsole("Entering a safe area")
 			bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
+			bms.SetActiveBondageSet(true, newLocation)
 		endif
 		lastLocationSafetyFlag = 1
 	else
@@ -421,6 +422,7 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 			;debug.MessageBox("entering a dangerous area")
 			bind_Utility.WriteToConsole("Enter a dangerous area")
 			bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
+			bms.SetActiveBondageSet(false, newLocation)
 		endif
 		lastLocationSafetyFlag = 2
 	endif
@@ -2202,6 +2204,47 @@ bind_Functions function GetBindingFunctions() global
 	return Quest.GetQuest("bind_MainQuest") as bind_Functions
 endfunction
 
+bool function GetSafeAreaBondageApplied()
+	debug.MessageBox(main.AdventuringSafeBondageApplied)
+	return (main.AdventuringSafeBondageApplied > 0)
+endfunction
+
+function ApplySafeAreaBondage()
+
+	main.AdventuringSafeBondageApplied = 1
+
+	if  rman.IsNudityRequired(theSubRef, true) 
+		gmanage.RemoveWornGear(theSubRef)
+	endif
+
+	bms.UpdateBondage(theSubRef, true)
+
+	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
+
+endfunction
+
+function ApplyDangerousAreaBondage()
+
+	main.AdventuringSafeBondageApplied = 0 ;leave this on until the player removes safe area rules gear
+
+	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
+
+	bms.UpdateBondage(theSubRef, true)
+
+	if !rman.IsNudityRequired(theSubRef, false) 
+		gmanage.RestoreWornGear(theSubRef)
+	endif
+
+endfunction
+
+int function InSafeArea()
+	if bind_GlobalSafeZone.GetValue() == 2
+		return 1
+	else
+		return 0
+	endif
+endfunction
+
 int function PlayerIsSub()
 	return main.IsSub
 endfunction
@@ -2220,6 +2263,19 @@ int function SubIsGagged()
 		result = 1
 	endif
 	return result
+endfunction
+
+int function SubIsCollared()
+	if theSubRef.HasKeywordString("zad_DeviousCollar")
+		return 1
+	else 
+		return 0
+	endif
+endfunction
+
+int function GetIsKneeling()
+	int kneeling = StorageUtil.GetIntValue(theSubRef, "pose_high_kneel", 0)
+	return kneeling
 endfunction
 
 bool function UseSkyrimNetCheck(Actor akActor)

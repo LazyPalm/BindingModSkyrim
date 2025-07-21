@@ -101,6 +101,7 @@ Function LoadGame(bool rebuildStorage = false)
     RegisterForModEvent("bind_ConversationPoseEvent", "ConversationPoseEvent")
 
     RegisterForModEvent("bind_SubKneeledEvent", "SubKneeledEvent") ;kneeling event
+    RegisterForModEvent("bind_SubLeftKneelEvent", "SubLeftKneelEvent")
     RegisterForModEvent("bind_SubLookedAtFurnitureEvent", "SubLookedAtFurnitureEvent")
 
     if main.SoftCheckSkyrimNet == 1 ;&& main.EnableModSkyrimNet == 1
@@ -222,7 +223,7 @@ string function DecoratorInfo(Actor akActor) global
         furnitureName = dev.GetName()
     endif 
 
-    int isKneeling = 0
+    ;int isKneeling = 0
     ;fix this
 
     int isDom = 0
@@ -231,16 +232,27 @@ string function DecoratorInfo(Actor akActor) global
     endif
     int isBound = fun.SubInBondage()
     int isGagged = fun.SubIsGagged()
+    int isCollared = fun.SubIsCollared()
+    int isKneeling = fun.GetIsKneeling()
+
+    int nudity = arcs_API.CheckNudity(fun.GetSubRef()) ;might move this code over?
 
     string output = "{"
 
     output += "\"player_is_sub\":" + fun.PlayerIsSub() + ","
     output += "\"is_dom\":" + isDom + ","
+    output += "\"safe_area\":" + fun.InSafeArea() + ","
+    output += "\"sub_type\":4,"
+    output += "\"has_indentured\":1,"
+    output += "\"has_slavery\":3,"
+    output += "\"infractions\":" + fun.GetRuleInfractions() + ","
     output += "\"sub_in_furniture\":" + inFurniture + ","
     output += "\"furniture_name\":\"" + furnitureName + "\","
     output += "\"sub_bound\":" + isBound + ","
     output += "\"is_gagged\":" + isGagged + ","
-    output += "\"is_kneeling\":" + isKneeling
+    output += "\"is_kneeling\":" + isKneeling + ","
+    output += "\"is_collared\":" + isCollared + ","
+    output += "\"is_nude\":" + nudity
 
     output += "}"
 
@@ -544,7 +556,15 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for you.")
+        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
+    endif
+
+endevent
+
+event SubLeftKneelEvent()
+
+    if main.EnableModSkyrimNet == 1
+        UseDirectNarration(theDomRef, "{{ player.name }} has stood up and left their kneeling position " + domName)
     endif
 
 endevent
@@ -582,9 +602,24 @@ function UseDirectNarration(Actor a, string commentPrompt)
         SkyrimNetApi.DirectNarration(commentPrompt, a)
         bind_Utility.WriteToConsole("UsedDirectNarration - actor: " + a + " prompt: " + commentPrompt)
 
+        RegisterForSingleUpdate(10.0)
+
     endif
 
 endfunction
+
+state DirectNarrationCooldownState
+
+    function UseDirectNarration(Actor a, string commentPrompt)
+        bind_Utility.WriteToConsole("direct narration is in cool down state")
+    endfunction
+
+    event OnUpdate()
+        debug.Notification("Direct Narration has cooled down")
+        GoToState("")
+    endevent
+
+endstate
 
 bool function IsAiReady()
     return (main.SoftCheckChim == 1 && main.EnableModChim == 1) || (main.SoftCheckSkyrimNet == 1 && main.EnableModSkyrimNet == 1)

@@ -275,7 +275,7 @@ state LetSubStewState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " seems to be making me wait...")
 
         if td.IsAiReady()
-            td.UseDirectNarration(theDom, "{{ player.name }} Is grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered until you are ready to tie them up.")
+            td.UseDirectNarration(theDom, "{{ player.name }} Is grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does want be bothered.  " + thedom.GetDisplayName() + " will tie them up for the night shortly.")
         endif
     
         bind_Utility.WriteToConsole("pressed action in camping quest - LetSubStewState")
@@ -322,7 +322,7 @@ state LookAtFireState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is enjoying the fire. I am not allowed to sleep yet...")
     
         if td.IsAiReady()
-            td.UseDirectNarration(theDom, "{{ player.name }} is tied to their bed on the ground and grunting through their gag to get your attention. You are relaxing by the fire, and don't want be bothered.")
+            td.UseDirectNarration(theDom, "{{ player.name }} is tied to their bed on the ground and grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does not want be bothered.")
         endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - LookAtFireState")
@@ -337,7 +337,7 @@ function PutDomToBed()
     bind_Utility.DoSleep()
 
     if td.IsAiReady()
-        td.UseDirectNarration(theDom, "You are ready to sleep. Tell {{ player.name }} goodnight, and they are not to disturb you while you sleep.")
+        td.UseDirectNarration(theDom, thedom.GetDisplayName() + "is ready to sleep. Tell {{ player.name }} goodnight, and they are not to disturb " + thedom.GetDisplayName() + " while sleep.")
     endif
 
     bind_MovementQuestScript.StartSleep(theDom, theBedroll)
@@ -407,7 +407,7 @@ state DomWakingState
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is waking. When we I be freed?")
     
         if td.IsAiReady()
-            td.UseDirectNarration(theDom, "You {{ player.name }} are enjoying the view of them all tied up.")
+            td.UseDirectNarration(theDom, thedom.GetDisplayName() + " is enjoying the view of {{ player.name }} all tied up.")
         endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - DomWakingState")
@@ -431,7 +431,12 @@ function FreeSub()
 
     fms.UnlockFromFurniture(theSub, theFurniture)
 
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePackUpCamp())
+    if td.IsAiReady()
+        td.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to get the camp site packed and cleaned.")
+    else
+        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePackUpCamp())
+    endif
+
 
     theClearedSpot.Delete()
     bind_Utility.DoSleep()

@@ -313,6 +313,10 @@ endfunction
 ; 	return result
 ; EndFunction
 
+bool function ResetStripList(Actor act) global
+	StorageUtil.FormListClear(act, "bind_strip_list")
+endfunction
+
 bool function RemoveWornGear(Actor act)
 
 	;TODO - change this to unequip items (vs. removing to hidden container) and store an array with StorageUtil of the items for re-equipping

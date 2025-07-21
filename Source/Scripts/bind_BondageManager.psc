@@ -10,9 +10,11 @@ int property HarshBondageUseHood auto conditional
 
 int property BedtimeUseHood auto conditional
 
-int property CurrentFavoriteSet auto conditional
-int property UseFavoriteSet auto conditional
-float property CurrentFavoriteSetEndTime auto conditional
+string property ActiveBondageSet auto conditional
+
+; int property CurrentFavoriteSet auto conditional
+; int property UseFavoriteSet auto conditional
+; float property CurrentFavoriteSetEndTime auto conditional
 
 string[] bondageTypes
 
@@ -46,6 +48,186 @@ EndFunction
 
 string function DDVersionString()
     return zlib.GetVersionString()
+endfunction
+
+Int Function GetDayOfWeek() Global
+	return (Math.Floor(Utility.GetCurrentGameTime()) as int) % 7
+EndFunction
+
+function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
+
+    ActiveBondageSet = ""
+
+    ;test current set to see if it is still active vs clearing??
+    ;bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], ActiveBondageSet)
+
+    int dayOfWeek = GetDayOfWeek()
+
+    ; queststList[0] = "Location - All Areas"
+    ; queststList[1] = "Location - All Safe Areas"
+    ; queststList[2] = "Location - All Dangerous Areas"
+    ; queststList[3] = "Location - Any City"
+    ; queststList[4] = "Location - Dawnstar"
+    ; queststList[5] = "Location - Falkreath"
+    ; queststList[6] = "Location - Windhelm"
+    ; queststList[7] = "Location - Markarth"
+    ; queststList[8] = "Location - Morthal"
+    ; queststList[9] = "Location - Riften"
+    ; queststList[10] = "Location - Solitude"
+    ; queststList[11] = "Location - High Hrothgar"
+    ; queststList[12] = "Location - Whiterun"
+    ; queststList[13] = "Location - Winterhold"
+    ; queststList[14] = "Location - Raven Rock"       
+    ; queststList[15] = "Location - Towns"
+    ; queststList[16] = "Location - Player Home"
+    ; queststList[17] = "Day - Sundas"
+    ; queststList[18] = "Day - Morndas"
+    ; queststList[19] = "Day - Tirdas"
+    ; queststList[20] = "Day - Middas"
+    ; queststList[21] = "Day - Turdas"
+    ; queststList[22] = "Day - Fredas"
+    ; queststList[23] = "Day - Loredas"
+
+    bool found = false
+
+    string[] setsList
+
+    if currentLocation.HasKeywordString("LocTypePlayerHouse")
+        setsList = GetSetsByUsage("Location - Player Home")
+        if setsList.Length > 0
+            found = true
+        endif
+
+    elseif currentLocation.HasKeywordString("LocTypeTown")
+        setsList = GetSetsByUsage("Location - Towns")
+        if setsList.Length > 0
+            found = true
+        endif
+
+    elseif currentLocation.HasKeywordString("LocTypeCity")
+
+        ;debug.MessageBox(currentLocation.GetName())
+
+        if currentLocation.GetName() == "Dawnstar"
+            setsList = GetSetsByUsage("Location - Dawnstar")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Falkreath"
+            setsList = GetSetsByUsage("Location - Falkreath")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Windhelm"
+            setsList = GetSetsByUsage("Location - Windhelm")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Markarth"
+            setsList = GetSetsByUsage("Location - Markarth")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Morthal"
+            setsList = GetSetsByUsage("Location - Morthal")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Riften"
+            setsList = GetSetsByUsage("Location - Riften")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Solitude"
+            setsList = GetSetsByUsage("Location - Solitude")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "High Hrothgar"
+            setsList = GetSetsByUsage("Location - High Hrothgar")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Whiterun"
+            setsList = GetSetsByUsage("Location - Whiterun")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Winterhold"
+            setsList = GetSetsByUsage("Location - Winterhold")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        elseif currentLocation.GetName() == "Raven Rock"
+            setsList = GetSetsByUsage("Location - Raven Rock")
+            if setsList.Length > 0
+                found = true
+            endif
+
+        endif
+
+    endif
+
+    if !found
+        if currentLocation.HasKeywordString("LocTypeCity")
+            ;check any city
+            setsList = GetSetsByUsage("Location - Any City")
+            if setsList.Length > 0
+                found = true
+            endif
+        endif
+    endif
+
+    if !found
+        if safeLocation
+            setsList = GetSetsByUsage("Location - All Safe Areas")
+            if setsList.Length > 0
+                found = true
+            endif
+        else
+            setsList = GetSetsByUsage("Location - All Dangerous Areas")
+            if setsList.Length > 0
+                found = true
+            endif
+        endif
+    endif
+
+    if !found
+        ;check all areas
+        setsList = GetSetsByUsage("Location - All Areas")
+        if setsList.Length > 0
+            found = true
+        endif
+    endif
+       
+    if setsList.Length > 0
+        ActiveBondageSet = setsList[Utility.RandomInt(0, setsList.Length - 1)]
+    endif
+
+    if ActiveBondageSet != ""
+        bind_Utility.WriteNotification("Switched to bondage set " + ActiveBondageSet)
+    else
+        bind_Utility.WriteNotification("No bondage set found, using random items")
+    endif
+
+    ;debug.MessageBox("day of week: " + dayOfWeek + " active set: " + ActiveBondageSet)
+
+    bind_Utility.WriteToConsole("Selected bondage set: " + ActiveBondageSet)
+
+endfunction
+
+string[] function GetSetsByUsage(string usage)
+    return StorageUtil.StringListToArray(TheWardrobe, "used_for_" + usage)
 endfunction
 
 bool function AddSpecificItem(Actor act, Form dev)
@@ -90,12 +272,16 @@ endfunction
 
 bool function AddItem(Actor act, int typeNumber, string setName = "")
 
-    if CurrentFavoriteSetEndTime < bind_Utility.GetTime() && UseFavoriteSet == 0
-        ;set new set
-        CurrentFavoriteSet = Utility.RandomInt(1, 3)
-        bind_Utility.WriteToConsole("New favorite bondage set: " + CurrentFavoriteSet)
-        CurrentFavoriteSetEndTime = bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(4, 24), 0)
-    endif
+    ; if CurrentFavoriteSetEndTime < bind_Utility.GetTime() && UseFavoriteSet == 0
+    ;     ;set new set
+    ;     string randomSet = GetRandomSet("all") ;need to change this
+    ;     debug.MessageBox(randomSet)
+    ;     if randomSet != ""
+    ;         CurrentFavoriteSet = Utility.RandomInt(1, 3)
+    ;         bind_Utility.WriteToConsole("New favorite bondage set: " + CurrentFavoriteSet)
+    ;         CurrentFavoriteSetEndTime = bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(4, 24), 0)
+    ;     endif
+    ; endif
 
     ;debug.MessageBox("in here???")
 
@@ -122,20 +308,54 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
 
     string skeyf = "bind_favorite_dd_"
 
-    int trySet = 0
-    If UseFavoriteSet == 0
-        trySet = CurrentFavoriteSet
+    ; int trySet = 0
+    ; If UseFavoriteSet == 0
+    ;     trySet = CurrentFavoriteSet
+    ; else
+    ;     trySet = UseFavoriteSet
+    ; endif
+
+    if ActiveBondageSet != ""
+
+        Form[] setItems = StorageUtil.FormListToArray(TheWardrobe, "set_" + ActiveBondageSet)
+        Keyword kw = GetDDKeyword(typenumber)
+
+        ;debug.MessageBox("set set: " + ActiveBondageSet + " items: " + setItems + " keyword: " + kw)
+
+        int i = 0
+        while i < setItems.Length
+            Form item = setItems[i]
+            Form renderedItem = zlib.GetRenderedDevice(item as Armor)
+            if renderedItem
+                if renderedItem.HasKeyWord(kw)
+                    dev = item
+                    i = 500 ;found item
+                endif
+            endif
+            i += 1
+        endwhile
+
+        if !dev
+            ;;debug.Notification("No items for typenumber: " + typenumber)
+        else
+            ;debug.MessageBox(dev)
+        endif
+
     else
-        trySet = UseFavoriteSet
+
+        ;debug.MessageBox("random")
+
+        dev = GetDdRandomItem(typenumber)
+
     endif
 
-    Form[] favorites = StorageUtil.FormListToArray(act, skeyf + typeNumber + "_" + trySet)
-    if favorites.Length > 0
-        dev = favorites[Utility.RandomInt(0, favorites.length - 1)]
-        bind_Utility.WriteToConsole("Found favorite: " + dev.GetName())
-    else
-        dev = GetDdRandomItem(typenumber)
-        bind_Utility.WriteToConsole("No favorite / using random: " + dev.GetName())
+    ; Form[] favorites = StorageUtil.FormListToArray(act, skeyf + typeNumber + "_" + trySet)
+    ; if favorites.Length > 0
+    ;     dev = favorites[Utility.RandomInt(0, favorites.length - 1)]
+    ;     bind_Utility.WriteToConsole("Found favorite: " + dev.GetName())
+    ; else
+        ;dev = GetDdRandomItem(typenumber)
+        ;bind_Utility.WriteToConsole("No favorite / using random: " + dev.GetName())
         ; LeveledItem list
         ; if typeNumber == BONDAGE_TYPE_HEAVYBONDAGE()
         ;     list = ddLists.zad_dev_armbinders
@@ -145,7 +365,7 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
         ; endif
         ; ;get random
         ; dev = ddLists.GetRandomDevice(list)
-    endif
+    ;endif
 
     ;debug.MessageBox(dev)
 
@@ -839,13 +1059,13 @@ function AddHogtieBindings(Actor act, bool useBlindfold = false, bool useHood = 
     endwhile
 endfunction
 
-string function GetRandomSet(string questName)
+string function GetRandomSet(string purpose)
 
     string result = ""
 
     ;"Harsh Bondage","Location - Castle","Location - Player Home"
 
-    string[] setsList = StorageUtil.StringListToArray(TheWardrobe, "used_for_" + questName)
+    string[] setsList = StorageUtil.StringListToArray(TheWardrobe, "used_for_" + purpose)
     if setsList.Length > 0
         result = setsList[Utility.RandomInt(0, setsList.Length - 1)]
     endif
@@ -1044,98 +1264,98 @@ int function GetTotalDDKeywords()
     return bind_DDKeywords.GetSize()
 endfunction
 
-function ManageFavorites(Actor a)
+; function ManageFavorites(Actor a)
 
-    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 
-    int i = 1
-    while i < 4
-        if CurrentFavoriteSet == i && UseFavoriteSet == 0
-            listMenu.AddEntryItem("Favorite Set " + i + " - Current Random Set")
-        else
-            listMenu.AddEntryItem("Favorite Set " + i)
-        endif
-        i += 1
-    endwhile
+;     int i = 1
+;     while i < 4
+;         if CurrentFavoriteSet == i && UseFavoriteSet == 0
+;             listMenu.AddEntryItem("Favorite Set " + i + " - Current Random Set")
+;         else
+;             listMenu.AddEntryItem("Favorite Set " + i)
+;         endif
+;         i += 1
+;     endwhile
 
-    listMenu.AddEntryItem("Browse Bondage Items - DD List")
-    listMenu.AddEntryItem("Browse Bondage Items - Binding List")
+;     listMenu.AddEntryItem("Browse Bondage Items - DD List")
+;     listMenu.AddEntryItem("Browse Bondage Items - Binding List")
 
-    if UseFavoriteSet == 0
-        listMenu.AddEntryItem("Use Random Favorite Set - YES")
-    elseif UseFavoriteSet == 1
-        listMenu.AddEntryItem("Use Favorite Set - 1")
-    elseif UseFavoriteSet == 2
-        listMenu.AddEntryItem("Use Favorite Set - 2")
-    elseif UseFavoriteSet == 3
-        listMenu.AddEntryItem("Use Favorite Set - 3")
-    endif
+;     if UseFavoriteSet == 0
+;         listMenu.AddEntryItem("Use Random Favorite Set - YES")
+;     elseif UseFavoriteSet == 1
+;         listMenu.AddEntryItem("Use Favorite Set - 1")
+;     elseif UseFavoriteSet == 2
+;         listMenu.AddEntryItem("Use Favorite Set - 2")
+;     elseif UseFavoriteSet == 3
+;         listMenu.AddEntryItem("Use Favorite Set - 3")
+;     endif
 
-    listMenu.OpenMenu()
-    int listReturn = listMenu.GetResultInt()
+;     listMenu.OpenMenu()
+;     int listReturn = listMenu.GetResultInt()
 
-    if listReturn >= 0 && listReturn < 3
-        ViewFavoritesList(a, listReturn + 1)
-    elseif listReturn == 3
-        BrowseDdItemsList(a, none, 1)
-    elseif listReturn == 4
-        BindingBondageTypesMenu(a, 1)
-    elseif listReturn == 5
-        UseFavoriteSet += 1
-        if UseFavoriteSet > 3
-            UseFavoriteSet = 0
-        endif
-        ManageFavorites(a)
-    else
-        ;???
-    endif
+;     if listReturn >= 0 && listReturn < 3
+;         ViewFavoritesList(a, listReturn + 1)
+;     elseif listReturn == 3
+;         BrowseDdItemsList(a, none, 1)
+;     elseif listReturn == 4
+;         BindingBondageTypesMenu(a, 1)
+;     elseif listReturn == 5
+;         UseFavoriteSet += 1
+;         if UseFavoriteSet > 3
+;             UseFavoriteSet = 0
+;         endif
+;         ManageFavorites(a)
+;     else
+;         ;???
+;     endif
 
-endfunction
+; endfunction
 
-function ViewFavoritesList(Actor a, int setNumber)
+; function ViewFavoritesList(Actor a, int setNumber)
 
-    string skeyf = "bind_favorite_dd_"
+;     string skeyf = "bind_favorite_dd_"
 
-    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-    listMenu.AddEntryItem("<-- Back")
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+;     listMenu.AddEntryItem("<-- Back")
 
-    string[] setKeys = new string[128]
-    Form[] setItems = new Form[128]
-    int[] setBranches = new int[128]
-    int si = 1 ;start at one since 0 is the back button
+;     string[] setKeys = new string[128]
+;     Form[] setItems = new Form[128]
+;     int[] setBranches = new int[128]
+;     int si = 1 ;start at one since 0 is the back button
 
-    int i = 0
-    int i2 = 0
-    while i < bind_BondageFactions.GetSize()
-        Form[] items = StorageUtil.FormListToArray(a, skeyf + i + "_" + setNumber)
-        if items.Length > 0
-            i2 = 0
-            while i2 < items.Length
-                listMenu.AddEntryItem(items[i2].GetName())
-                setKeys[si] = skeyf + i + "_" + setNumber
-                setItems[si] = items[i2]
-                setBranches[si] = i
-                si += 1
-                i2 += 1
-            endwhile
-        endif
-        i += 1
-    endwhile
+;     int i = 0
+;     int i2 = 0
+;     while i < bind_BondageFactions.GetSize()
+;         Form[] items = StorageUtil.FormListToArray(a, skeyf + i + "_" + setNumber)
+;         if items.Length > 0
+;             i2 = 0
+;             while i2 < items.Length
+;                 listMenu.AddEntryItem(items[i2].GetName())
+;                 setKeys[si] = skeyf + i + "_" + setNumber
+;                 setItems[si] = items[i2]
+;                 setBranches[si] = i
+;                 si += 1
+;                 i2 += 1
+;             endwhile
+;         endif
+;         i += 1
+;     endwhile
 
-    listMenu.OpenMenu()
-    int listReturn = listMenu.GetResultInt()
+;     listMenu.OpenMenu()
+;     int listReturn = listMenu.GetResultInt()
 
-    if listReturn == 0
-        ManageFavorites(a)
-    elseif listReturn > 0
-        BrowseDdItemsListSubMenu(a, none, 3, setBranches[listReturn], setItems[listReturn], setNumber)
-    endif
+;     if listReturn == 0
+;         ManageFavorites(a)
+;     elseif listReturn > 0
+;         BrowseDdItemsListSubMenu(a, none, 3, setBranches[listReturn], setItems[listReturn], setNumber)
+;     endif
 
-endfunction
+; endfunction
 
-bool madeFavoritesChanges
+; bool madeFavoritesChanges
 
-string favoritesFileName = "bind_dd_favorites.json"
+; string favoritesFileName = "bind_dd_favorites.json"
 
 function BrowseDdItemsListSubMenu(Actor a, LeveledItem list, int mode, int branch, Form item, int setNumber = 0)
 
@@ -1148,19 +1368,21 @@ function BrowseDdItemsListSubMenu(Actor a, LeveledItem list, int mode, int branc
     string itemName = item.GetName()
 
     listMenu.AddEntryItem("<-- Back")
-    int i = 1
-    while i < 4
-        counts[i] = StorageUtil.FormListCountValue(a, skeyf + branch + "_" + i, item)
-        if counts[i] == 1
-            listMenu.AddEntryItem(itemName + " - F" + i + " - YES")
-        else
-            listMenu.AddEntryItem(itemName + " - F" + i)
-        endif
-        i += 1
-    endwhile
-    if mode == 2
-        listMenu.AddEntryItem("Equip this item")
-    endif
+    listMenu.AddEntryItem("Equip this item")
+
+    ; int i = 1
+    ; while i < 4
+    ;     counts[i] = StorageUtil.FormListCountValue(a, skeyf + branch + "_" + i, item)
+    ;     if counts[i] == 1
+    ;         listMenu.AddEntryItem(itemName + " - F" + i + " - YES")
+    ;     else
+    ;         listMenu.AddEntryItem(itemName + " - F" + i)
+    ;     endif
+    ;     i += 1
+    ; endwhile
+    ; if mode == 2
+    ;     listMenu.AddEntryItem("Equip this item")
+    ; endif
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
@@ -1169,30 +1391,30 @@ function BrowseDdItemsListSubMenu(Actor a, LeveledItem list, int mode, int branc
         if mode == 1 || mode == 2
             BrowseDdItemsList(a, list, mode)
         elseif mode == 3
-            ViewFavoritesList(a, setNumber)
+            ;ViewFavoritesList(a, setNumber)
         endif
 
-    elseif listReturn > 0 && listReturn < 4
-        if counts[listReturn] == 0
-            PO3_SKSEFunctions.AddKeywordToForm(item, bind_BondageTypeKeywords.GetAt(branch) as Keyword)
-            StorageUtil.FormListAdd(a, skeyf + branch + "_" + listReturn, item)
-            JsonUtil.FormListAdd(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
-            JsonUtil.Save(favoritesFileName)
-        else
-            StorageUtil.FormListRemove(a, skeyf + branch + "_" + listReturn, item, true)
-            JsonUtil.FormListRemove(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
-            JsonUtil.Save(favoritesFileName)
-        endif
-        madeFavoritesChanges = true
+    ;elseif listReturn > 0 && listReturn < 4
+        ; if counts[listReturn] == 0
+        ;     PO3_SKSEFunctions.AddKeywordToForm(item, bind_BondageTypeKeywords.GetAt(branch) as Keyword)
+        ;     StorageUtil.FormListAdd(a, skeyf + branch + "_" + listReturn, item)
+        ;     JsonUtil.FormListAdd(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
+        ;     JsonUtil.Save(favoritesFileName)
+        ; else
+        ;     StorageUtil.FormListRemove(a, skeyf + branch + "_" + listReturn, item, true)
+        ;     JsonUtil.FormListRemove(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
+        ;     JsonUtil.Save(favoritesFileName)
+        ; endif
+        ; madeFavoritesChanges = true
 
-        BrowseDdItemsListSubMenu(a, list, mode, branch, item, setNumber) ;show this menu again
-    elseif listReturn == 4
+        ;BrowseDdItemsListSubMenu(a, list, mode, branch, item, setNumber) ;show this menu again
+    elseif listReturn == 1
         AddSpecificItem(a, item as Armor)
     else
-        if madeFavoritesChanges
-            UpdateBondage(a, true)
-            madeFavoritesChanges = false
-        endif
+        ; if madeFavoritesChanges
+        ;     UpdateBondage(a, true)
+        ;     madeFavoritesChanges = false
+        ; endif
     endif
 
 endfunction
@@ -1348,10 +1570,10 @@ function BrowseDdItemsList(Actor a, LeveledItem list, int mode)
         endif
 
     else
-        if madeFavoritesChanges
-            UpdateBondage(a, true)
-            madeFavoritesChanges = false
-        endif
+        ; if madeFavoritesChanges
+        ;     UpdateBondage(a, true)
+        ;     madeFavoritesChanges = false
+        ; endif
 
     endif
 
@@ -1372,14 +1594,14 @@ function BindingBondageTypesMenu(Actor a, int mode)
 
     int listReturn = listMenu.GetResultInt()
     if listReturn == 0
-        ManageFavorites(a)
+        ;ManageFavorites(a)
     elseif listReturn >= 1 && listReturn <= bondageTypes.Length
         BindingAddBondageTypeItemsMenu(a, listReturn - 1, mode)
     else
-        if madeFavoritesChanges
-            UpdateBondage(a, true)
-            madeFavoritesChanges = false
-        endif
+        ; if madeFavoritesChanges
+        ;     UpdateBondage(a, true)
+        ;     madeFavoritesChanges = false
+        ; endif
     endif
 
 endfunction
@@ -1407,10 +1629,10 @@ function BindingAddBondageTypeItemsMenu(Actor a, int type, int mode)
         Form dev = items.GetAt(listReturn - 1)
         BindingBondageItemSubMenu(a, mode, type, dev)
     else
-        if madeFavoritesChanges
-            UpdateBondage(a, true)
-            madeFavoritesChanges = false
-        endif
+        ; if madeFavoritesChanges
+        ;     UpdateBondage(a, true)
+        ;     madeFavoritesChanges = false
+        ; endif
     endif
 
 endfunction
@@ -1451,26 +1673,26 @@ function BindingBondageItemSubMenu(Actor a, int mode, int branch, Form item)
         endif
 
     elseif listReturn > 0 && listReturn < 4
-        if counts[listReturn] == 0
-            PO3_SKSEFunctions.AddKeywordToForm(item, bind_BondageTypeKeywords.GetAt(branch) as Keyword)
-            StorageUtil.FormListAdd(a, skeyf + branch + "_" + listReturn, item)
-            JsonUtil.FormListAdd(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
-            JsonUtil.Save(favoritesFileName)
-        else
-            StorageUtil.FormListRemove(a, skeyf + branch + "_" + listReturn, item, true)
-            JsonUtil.FormListRemove(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
-            JsonUtil.Save(favoritesFileName)
-        endif
-        madeFavoritesChanges = true
+        ; if counts[listReturn] == 0
+        ;     PO3_SKSEFunctions.AddKeywordToForm(item, bind_BondageTypeKeywords.GetAt(branch) as Keyword)
+        ;     StorageUtil.FormListAdd(a, skeyf + branch + "_" + listReturn, item)
+        ;     JsonUtil.FormListAdd(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
+        ;     JsonUtil.Save(favoritesFileName)
+        ; else
+        ;     StorageUtil.FormListRemove(a, skeyf + branch + "_" + listReturn, item, true)
+        ;     JsonUtil.FormListRemove(favoritesFileName, "set" + listReturn + ".branch" + branch, item)
+        ;     JsonUtil.Save(favoritesFileName)
+        ; endif
+        ; madeFavoritesChanges = true
 
         BindingBondageItemSubMenu(a, mode, branch, item) ;show this menu again
     elseif listReturn == 4
         AddSpecificItem(a, item as Armor)
     else
-        if madeFavoritesChanges
-            UpdateBondage(a, true)
-            madeFavoritesChanges = false
-        endif
+        ; if madeFavoritesChanges
+        ;     UpdateBondage(a, true)
+        ;     madeFavoritesChanges = false
+        ; endif
     endif
 
 endfunction

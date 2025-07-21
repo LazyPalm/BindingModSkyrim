@@ -83,6 +83,7 @@ int sliderPunishmentMaxGold
 int sliderPunishmentGoldPercentage
 
 ;preferences
+int toggleManualAdventureMode
 int toggleAdventuringFreeHands
 int toggleAdventuringAllowClothing
 int toggleAdventuringSuspendRules
@@ -197,6 +198,10 @@ int keyCodeRightAlt = 184
 int keyCodeLeftShift = 42
 int keyCodeRightShift = 54
 
+;skyrimnet
+int menuSlaveryType
+string[] slaveryTypes
+
 Actor theSub
 
 string slTagsFile = "bind_sl_tags.json"
@@ -205,7 +210,7 @@ Event OnConfigOpen()
 
     theSub = fs.GetSubRef()
 
-    Pages = new string[18]
+    Pages = new string[19]
 
     Pages[0] = "Status Info"
     Pages[1] = "Bondage Status"
@@ -226,6 +231,7 @@ Event OnConfigOpen()
     Pages[15] = "Dependencies"
     Pages[16] = "Factions"
     Pages[17] = "Control Panel"
+    Pages[18] = "SkyrimNet"
 
     if toggleBehaviorHard.Length != 50 ;lets rebuild...
         toggleBehaviorHard = new int[50]
@@ -414,6 +420,10 @@ Event OnPageReset(string page)
         elseif page == "Control Panel"
 
             DisplayControlPanel()
+    
+        elseif page == "SkyrimNet"
+
+            DisplaySkyrimNet()
 
         EndIf
 
@@ -465,7 +475,34 @@ event OnOptionHighlight(int option)
 
 endevent
 
+function DisplaySkyrimNet()
 
+    if main.SoftCheckSkyrimNet == 1 && main.EnableModSkyrimNet == 1
+
+        slaveryTypes = new string[6]
+        slaveryTypes[0] = "Consensual BDSM"
+        slaveryTypes[1] = "Non-consensual BDSM"
+        slaveryTypes[2] = "Indentured Servant"
+        slaveryTypes[3] = "Pleasure Slave"
+        slaveryTypes[4] = "Fighting Slave"
+        slaveryTypes[5] = "Custom"
+
+        AddHeaderOption("Prompt Options")
+        AddHeaderOption("")
+
+        menuSlaveryType = AddMenuOption("Slavery Type", slaveryTypes[main.SkryimNetSlaveryType])
+
+    else
+
+        if main.SoftCheckSkyrimNet == 0
+            AddTextOption("SkyrimNet", "Not Found")
+        else
+            AddTextOption("SkyrimNet", "Not Enabled")
+        endif
+
+    endif
+
+endfunction
 
 function DisplayFactions(Actor a)
 
@@ -1277,12 +1314,14 @@ Function DisplayPreferences()
     AddHeaderOption("Adventuring (outside of Cities and Towns)")
     AddHeaderOption("")
 
-    toggleAdventuringFreeHands = AddToggleOption("Free Hands from Bondage", main.AdventuringFreeHands)
-    toggleAdventuringAllowClothing = AddToggleOption("Allow Clothing", main.AdventuringAllowClothing)
+    ;toggleManualAdventureMode = AddToggleOption("Switch to Manual (Action Menu)", main.AdventuringManual)
+    ;toggleAdventuringFreeHands = AddToggleOption("Free Hands from Bondage", main.AdventuringFreeHands)
+    ;toggleAdventuringAllowClothing = AddToggleOption("Allow Clothing", main.AdventuringAllowClothing)
     toggleAdventuringAutomatic = AddToggleOption("Auto When Entering/Leaving", main.AdventuringAutomatic)
     sliderAdventuringSeconds = AddSliderOption("Run Check After Seconds", main.AdventuringCheckAfterSeconds, "{0}")
-    toggleAdventuringSuspendRules = AddToggleOption("Suspend Rules & Auto *", main.AdventuringSuspendRules)
-    AddTextOption("", "")
+    ;toggleAdventuringSuspendRules = AddToggleOption("Suspend Rules & Auto *", main.AdventuringSuspendRules)
+    
+    ;AddTextOption("", "")
 
 
     AddHeaderOption("Dominant Preferences")
@@ -2002,6 +2041,11 @@ Event OnOptionSelect(int option)
     EndIf
 
     ;preferences
+    if option == toggleManualAdventureMode
+        main.AdventuringManual = ToggleValue(main.AdventuringManual)
+        SetToggleOptionValue(toggleManualAdventureMode, main.AdventuringManual)
+    endif
+
     If option == toggleAdventuringFreeHands
         main.AdventuringFreeHands = ToggleValue(main.AdventuringFreeHands)
         SetToggleOptionValue(toggleAdventuringFreeHands, main.AdventuringFreeHands)
@@ -2678,6 +2722,11 @@ string[] function ConvertFormListToStringArray(FormList fml)
 endfunction
 
 Event OnOptionMenuOpen(int option)
+
+    if option == menuSlaveryType
+        SetMenuDialogOptions(slaveryTypes)
+        SetMenuDialogStartIndex(main.SkryimNetSlaveryType)
+    endif
 
     if option == menuChangeLetter
         SetMenuDialogOptions(letters)

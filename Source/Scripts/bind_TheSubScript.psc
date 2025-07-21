@@ -22,6 +22,10 @@ event OnInit()
 
 endevent
 
+event OnPlayerTeleport()
+	debug.MessageBox("teleported??")
+endevent
+
 Event OnPlayerLoadGame()
 
 	;debug.MessageBox("loaded game")

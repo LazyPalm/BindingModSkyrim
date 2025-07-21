@@ -85,6 +85,15 @@ state RunCheckState
             theDom = fs.GetDomRef()
         endif
 
+        if mqs.AdventuringAutomatic == 0
+            ;TODO - this needs to check if player has active bondage rules            
+            if !fs.GetSafeAreaBondageApplied()
+                fs.MarkSubBrokeRule("I did not ask to have my safe area bondage rules added")
+            endif
+            ;debug.MessageBox("entering....")
+            return
+        endif
+
         ; if !fs.ModInRunningState()
         ;     bind_Utility.WriteToConsole("EnteringSafeArea exiting mod not in running state")
         ;     ;return
@@ -119,6 +128,11 @@ state RunCheckState
     endfunction
 
     function LeavingSafeArea()
+
+        if mqs.AdventuringAutomatic == 0
+            ;debug.MessageBox("leaving....")
+            return
+        endif
 
         ; if !fs.ModInRunningState()
         ;     bind_Utility.WriteToConsole("LeavingSafeArea exiting mod not in running state")
