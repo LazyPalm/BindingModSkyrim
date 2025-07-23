@@ -242,7 +242,7 @@ string function DecoratorInfo(Actor akActor) global
     output += "\"player_is_sub\":" + fun.PlayerIsSub() + ","
     output += "\"is_dom\":" + isDom + ","
     output += "\"safe_area\":" + fun.InSafeArea() + ","
-    output += "\"sub_type\":4,"
+    output += "\"sub_type\":" + fun.SkyrimNetSlaveryType() + ","
     output += "\"has_indentured\":1,"
     output += "\"has_slavery\":3,"
     output += "\"infractions\":" + fun.GetRuleInfractions() + ","
@@ -347,6 +347,10 @@ bool function BindingWhip_IsEligible(Actor akOriginator, string contextJson, str
         return false
     endif
 
+    if f.InSafeArea() == 0
+        return false ;needs to be safe area
+    endif
+
     result = true
 
     return result
@@ -363,6 +367,10 @@ bool function BindingSex_IsEligible(Actor akOriginator, string contextJson, stri
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
+    endif
+
+    if f.InSafeArea() == 0
+        return false ;needs to be safe area
     endif
 
     ;do arousal check
@@ -383,6 +391,10 @@ bool function BindingFurniture_IsEligible(Actor akOriginator, string contextJson
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
+    endif
+
+    if f.InSafeArea() == 0
+        return false ;needs to be safe area
     endif
 
     if f.LocationHasFurniture()
@@ -407,6 +419,10 @@ bool function BindingHarshBondage_IsEligible(Actor akOriginator, string contextJ
         return false
     endif
 
+    if f.InSafeArea() == 0
+        return false ;needs to be safe area
+    endif
+
     result = true
 
     return result
@@ -424,6 +440,14 @@ bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, 
     bind_Functions f = bind_Functions.GetBindingFunctions()
 
     if !f.UseSkyrimNetCheck(akOriginator)
+        return false
+    endif
+
+    if f.InSafeArea() == 1
+        return false ;can't camp in cities or towns
+    endif
+
+    if f.AreaIsIndoors() == 1
         return false
     endif
 

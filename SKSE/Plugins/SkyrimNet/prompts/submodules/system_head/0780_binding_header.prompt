@@ -78,7 +78,7 @@
     {% if binfo.is_dom == 1 %}
   
         {# player as con submissive #}
-        {% if binfo.sub_type == 1 %}
+        {% if binfo.sub_type == 0 %}
         - {{ actor_name }} is in a consensual BDSM relationship with {{ player.name }}.
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} has agreed to follow {{ actor_name }}'s commands or be disciplined.
@@ -86,20 +86,20 @@
         {% endif %}
 
         {# player as non-con submissive #}
-        {% if binfo.sub_type == 2 %}
+        {% if binfo.sub_type == 1 %}
         - {{ actor_name }} is in a non-consensual BDSM relationship with {{ player.name }}.
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} is forced to follow {{ actor_name }}'s commands or be disciplined.
         {% endif %}
 
         {# player as indentured servant #}
-        {% if binfo.sub_type == 3 %}
+        {% if binfo.sub_type == 2 %}
         - {{ player.name }} has a debt of service to {{ actor_name }} by law and must render whatever services they require.
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined. This debt of service can be enforced by the Jarl of the hold that issued it.
         {% endif %}
 
         {# player as pleasure slave #}
-        {% if binfo.sub_type == 4 %}
+        {% if binfo.sub_type == 3 %}
         - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
@@ -113,7 +113,7 @@
         {% endif %}
 
         {# player as fighting slave #}
-        {% if binfo.sub_type == 5 %}
+        {% if binfo.sub_type == 4 %}
         - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
@@ -127,7 +127,7 @@
         {% endif %}
 
         {# player as custom #}
-        {% if binfo.sub_type == 6 %}
+        {% if binfo.sub_type == 5 %}
         {# ENTER CUSTOM HERE #}
         {% endif %}
 

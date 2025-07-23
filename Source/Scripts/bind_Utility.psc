@@ -269,3 +269,41 @@ endfunction
 string function JsonIntValueReturn(string name, int value) global
     return "{\"" + name + "\":\"" + value + "\"}"    
 endfunction
+
+bool function IsReady(Actor akSub, Actor akDom) global
+
+    bool result = true
+
+	If (!Utility.IsInMenuMode()) \
+	&& (!UI.IsMenuOpen("Dialogue Menu")) \
+	&& (!UI.IsMenuOpen("Console")) \
+	&& (!UI.IsMenuOpen("Crafting Menu")) \
+	&& (!UI.IsMenuOpen("MessageBoxMenu")) \
+	&& (!UI.IsMenuOpen("ContainerMenu")) \
+	&& (!UI.IsTextInputEnabled())
+		;IsInMenuMode to block when game is paused with menus open
+		;Dialogue Menu check to block when dialog is open
+		;Console check to block when console is open - console does not trigger IsInMenuMode and thus needs its own check
+		;Crafting Menu check to block when crafting menus are open - game is not paused so IsInMenuMode does not work
+		;MessageBoxMenu check to block when message boxes are open - while they pause the game, they do not trigger IsInMenuMode
+		;ContainerMenu check to block when containers are accessed - while they pause the game, they do not trigger IsInMenuMode
+		;IsTextInputEnabled check to block when editable text fields are open
+	Else
+		result = False
+	EndIf
+
+    ;in combat check - dragons might be attaching city or towns
+    if akSub.IsInCombat() || akDom.IsInCombat() || akSub.IsWeaponDrawn()
+        result = false
+    endif
+
+    ;zap whipping plays in a scene - so do a scene check
+    ;this is probably helpful for any mod that is running scenes outside of dhlp protected events including the base game
+    if akSub.GetCurrentScene() || akDom.GetCurrentScene()
+        result = false
+    endif
+
+    return result
+
+endfunction
+

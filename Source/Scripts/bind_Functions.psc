@@ -425,10 +425,13 @@ state ProcessLocationArrivedState
     function EnteringSafeArea()
 
         if main.AdventuringAutomatic == 0
+			if rman.GetBondageRulesCount() == 0 && !rman.IsNudityRequired(theSubRef, true) 
+				return ;does not need to do anything
+			endif
             ;TODO - this needs to check if player has active bondage rules            
             if !GetSafeAreaBondageApplied()
 				CalculateDistanceAtAction()
-                MarkSubBrokeRule("I did not ask to have my safe area bondage rules added", true)
+                MarkSubBrokeRule("I did not ask to have my safe area rules added", true)
             endif
             return
         endif
@@ -568,11 +571,11 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	lastLocation = oldLocation
 	currentLocation = newLocation
 
-	if !theSubRef.GetParentCell().IsInterior()
-		bind_GlobalTimeEnteredOutdoorLocation.SetValue(bind_Utility.GetTime())
-		currentOutdoorLocation = newLocation
-		TheSubCurrentOutdoorLocation.ForceLocationTo(newLocation)
-	endif
+	; if !theSubRef.GetParentCell().IsInterior()
+	; 	bind_GlobalTimeEnteredOutdoorLocation.SetValue(bind_Utility.GetTime())
+	; 	currentOutdoorLocation = newLocation
+	; 	TheSubCurrentOutdoorLocation.ForceLocationTo(newLocation)
+	; endif
 
 	TheSubCurrentLocation.ForceLocationTo(newLocation)
 
@@ -2407,6 +2410,14 @@ int function InSafeArea()
 	endif
 endfunction
 
+int function AreaIsIndoors()
+	if theSubRef.GetParentCell().IsInterior()
+		return 1
+	else
+		return 0
+	endif
+endfunction
+
 int function PlayerIsSub()
 	return main.IsSub
 endfunction
@@ -2440,8 +2451,50 @@ int function GetIsKneeling()
 	return kneeling
 endfunction
 
-bool function UseSkyrimNetCheck(Actor akActor)
-	return (main.EnableModSkyrimNet == 1 && main.IsSub == 1 && theDomRef == akActor && ModInRunningState())
+int function SkyrimNetSlaveryType()
+	return main.SkryimNetSlaveryType
+endfunction
+
+bool function UseSkyrimNetCheck(Actor akDom)
+
+	Actor akSub = GetSubRef()
+
+    bool result = true
+
+	If (!Utility.IsInMenuMode()) \
+	&& (!UI.IsMenuOpen("Dialogue Menu")) \
+	&& (!UI.IsMenuOpen("Console")) \
+	&& (!UI.IsMenuOpen("Crafting Menu")) \
+	&& (!UI.IsMenuOpen("MessageBoxMenu")) \
+	&& (!UI.IsMenuOpen("ContainerMenu")) \
+	&& (!UI.IsTextInputEnabled())
+		;IsInMenuMode to block when game is paused with menus open
+		;Dialogue Menu check to block when dialog is open
+		;Console check to block when console is open - console does not trigger IsInMenuMode and thus needs its own check
+		;Crafting Menu check to block when crafting menus are open - game is not paused so IsInMenuMode does not work
+		;MessageBoxMenu check to block when message boxes are open - while they pause the game, they do not trigger IsInMenuMode
+		;ContainerMenu check to block when containers are accessed - while they pause the game, they do not trigger IsInMenuMode
+		;IsTextInputEnabled check to block when editable text fields are open
+	Else
+		result = False
+	EndIf
+
+    ;in combat check - dragons might be attaching city or towns
+    if akSub.IsInCombat() || akDom.IsInCombat() || akSub.IsWeaponDrawn()
+        result = false
+    endif
+
+    ;zap whipping plays in a scene - so do a scene check
+    ;this is probably helpful for any mod that is running scenes outside of dhlp protected events including the base game
+    if akSub.GetCurrentScene() || akDom.GetCurrentScene()
+        result = false
+    endif
+
+	if result
+		result = (main.EnableModSkyrimNet == 1 && main.IsSub == 1 && theDomRef == akDom && ModInRunningState())
+	endif
+
+	return result
 endfunction
 
 bool function LocationHasFurniture()
