@@ -1247,54 +1247,95 @@ function ViewBondageRule(Actor a, int rule)
     endif
 
     if listReturn > 1
-        int optionSelect = (listReturn - 1)
-        if optionSelect == optionsFlag
-            optionSelect = 0 ;toggled turn off
+        if controlMode == RULES_SUB_MANAGED() || controlMode == RULES_HYBRID_MANAGED()
+            int optionSelect = -1
+            if listReturn == 2
+                optionSelect = 2
+            elseif listReturn == 3
+                optionSelect = 5
+            endif
+            bind_Utility.WriteNotification("optionSelect: " + optionSelect + " optionsFlag: " + optionsFlag)
+            if optionSelect == optionsFlag
+                optionSelect = 0 ;toggled turn off
+            endif
+            SetBondageRuleOption(a, rule, optionSelect)
+            bind_GlobalRulesUpdatedFlag.SetValue(1)
+            StorageUtil.SetIntValue(a, "bind_safe_area_interaction_check", 3) ;set to to-do
+            ViewBondageRule(a, rule)
+        else
+            int optionSelect = (listReturn - 1)
+            if optionSelect == optionsFlag
+                optionSelect = 0 ;toggled turn off
+            endif
+            SetBondageRuleOption(a, rule, optionSelect)
+            bind_GlobalRulesUpdatedFlag.SetValue(1)
+            StorageUtil.SetIntValue(a, "bind_safe_area_interaction_check", 3) ;set to to-do
+            ViewBondageRule(a, rule)
         endif
-        SetBondageRuleOption(a, rule, optionSelect)
-        bind_GlobalRulesUpdatedFlag.SetValue(1)
-        StorageUtil.SetIntValue(a, "bind_safe_area_interaction_check", 3) ;set to to-do
-        ViewBondageRule(a, rule)
     endif
 
 endfunction
 
 function DisplayRuleOptions(UIListMenu listMenu, int optionsFlag)
 
-    if optionsFlag == RULE_OPTION_HARD_LIMIT()
-        listMenu.AddEntryItem("Option - Hard Limit [ON]")
-    else
-        listMenu.AddEntryItem("Option - Hard Limit")
+    int controlMode = bind_GlobalRulesControlledBy.GetValue() as int
+
+    bind_Utility.WriteNotification("controlMode: " + controlMode)
+
+    if controlMode == RULES_SUB_MANAGED() || controlMode == RULES_HYBRID_MANAGED()
+
+        if optionsFlag == RULE_OPTION_SAFE_AREAS()
+            listMenu.AddEntryItem("Option - Safe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Safe Areas")
+        endif
+
+        if optionsFlag == RULE_OPTION_UNSAFE_AREAS()
+            listMenu.AddEntryItem("Option - Unsafe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Unsafe Areas")
+        endif
+
     endif
 
-    if optionsFlag == RULE_OPTION_SAFE_AREAS()
-        listMenu.AddEntryItem("Option - Safe Areas [ON]")
-    else
-        listMenu.AddEntryItem("Option - Safe Areas")
-    endif
+    if controlMode == RULES_DOM_MANAGED()
 
-    if optionsFlag == RULE_OPTION_PERMANENT()
-        listMenu.AddEntryItem("Option - Permanent [ON]")
-    else
-        listMenu.AddEntryItem("Option - Permanent")
-    endif
-    
-    if optionsFlag == RULE_OPTION_PERMANENT_SAFE_AREAS()
-        listMenu.AddEntryItem("Option - Permanent Safe Areas [ON]")
-    else
-        listMenu.AddEntryItem("Option - Permanent Safe Areas")
-    endif
-    
-    if optionsFlag == RULE_OPTION_UNSAFE_AREAS()
-        listMenu.AddEntryItem("Option - Unsafe Areas [ON]")
-    else
-        listMenu.AddEntryItem("Option - Unsafe Areas")
-    endif
+        if optionsFlag == RULE_OPTION_HARD_LIMIT()
+            listMenu.AddEntryItem("Option - Hard Limit [ON]")
+        else
+            listMenu.AddEntryItem("Option - Hard Limit")
+        endif
 
-    if optionsFlag == RULE_OPTION_PERMANENT_UNSAFE_AREAS()
-        listMenu.AddEntryItem("Option - Permanent Unsafe Areas [ON]")
-    else
-        listMenu.AddEntryItem("Option - Permanent Unsafe Areas")
+        if optionsFlag == RULE_OPTION_SAFE_AREAS()
+            listMenu.AddEntryItem("Option - Safe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Safe Areas")
+        endif
+
+        if optionsFlag == RULE_OPTION_PERMANENT()
+            listMenu.AddEntryItem("Option - Permanent [ON]")
+        else
+            listMenu.AddEntryItem("Option - Permanent")
+        endif
+        
+        if optionsFlag == RULE_OPTION_PERMANENT_SAFE_AREAS()
+            listMenu.AddEntryItem("Option - Permanent Safe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Permanent Safe Areas")
+        endif
+        
+        if optionsFlag == RULE_OPTION_UNSAFE_AREAS()
+            listMenu.AddEntryItem("Option - Unsafe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Unsafe Areas")
+        endif
+
+        if optionsFlag == RULE_OPTION_PERMANENT_UNSAFE_AREAS()
+            listMenu.AddEntryItem("Option - Permanent Unsafe Areas [ON]")
+        else
+            listMenu.AddEntryItem("Option - Permanent Unsafe Areas")
+        endif
+
     endif
     
 endfunction
