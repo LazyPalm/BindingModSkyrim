@@ -546,6 +546,12 @@ function DisplayControlPanel()
 
     AddTextOption("Binding Run State", runState)
 
+    AddHeaderOption("Diagnostic Information")
+    AddHeaderOption("")
+
+    AddTextOption("Safe Area", fs.InSafeArea())
+    AddTextOption("Bondage Set", bmanage.ActiveBondageSet)
+
     ; AddHeaderOption("Quests - Core")
     ; AddHeaderOption("")
 

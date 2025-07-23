@@ -276,7 +276,7 @@ Function ClearDom()
 
 	rman.ResetRules()
 
-	bms.RemoveAllBondageItems(theSubRef)
+	bms.RemoveAllBondageItems(theSubRef, false)
 
 	bind_Utility.DoSleep(2.0)
 
@@ -398,34 +398,171 @@ Function SoftChecks()
 EndFunction
 
 int lastLocationSafetyFlag = 0
+bool safeAreaOldState
+
+function EnteringSafeArea()
+endfunction
+
+function LeavingSafeArea()
+endfunction
+
+state ProcessLocationArrivedState
+
+	event OnUpdate()
+
+		bind_Utility.WriteNotification("Running arrived checks...")
+
+		if bind_GlobalSafeZone.GetValue() == 2
+			EnteringSafeArea()
+		else
+			LeavingSafeArea()
+		endif
+
+		GoToState("")
+
+	endevent
+
+    function EnteringSafeArea()
+
+        if main.AdventuringAutomatic == 0
+            ;TODO - this needs to check if player has active bondage rules            
+            if !GetSafeAreaBondageApplied()
+				CalculateDistanceAtAction()
+                MarkSubBrokeRule("I did not ask to have my safe area bondage rules added", true)
+            endif
+            return
+        endif
+
+        StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 1) ;set to starting
+
+        if theDomRef.GetDistance(theSubRef) < 1500.0
+            bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
+            if nudityRuleFlag && !gmanage.IsNude(theSubRef)
+                gmanage.RemoveWornGear(theSubRef)
+            endif
+            bms.UpdateBondage(theSubRef, false)
+            StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
+        else
+            ;NOTE - need the dom to do an LOS check and run the rule enforcement code when they see the sub
+            bind_Utility.WriteInternalMonologue(GetDomTitle() + " is not nearby to enforce my rules...")
+            StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 3) ;set to to-do
+        endif
+
+    endfunction
+
+    function LeavingSafeArea()
+
+        if main.AdventuringAutomatic == 0
+            return
+        endif
+
+        StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
+        bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
+        bms.UpdateBondage(theSubRef, false)
+        if !nudityRuleFlag && gmanage.IsNude(theSubRef)
+            gmanage.RestoreWornGear(theSubRef)
+        endif
+
+    endfunction
+
+endstate
+
+state ProcessLocationChangeState
+
+	event OnUpdate()
+
+		bool safeAreaNewState = false
+		bool outdoors = true
+		if theSubRef.GetParentCell().IsInterior()
+
+			if newLoc.HasKeyword(LocTypePlayerHouse)
+				debug.Notification("moving into a player home...")
+				safeAreaNewState = true
+			elseif newLoc.HasKeyWord(LocTypeInn)
+				debug.Notification("moving into a free standing inn...")
+				safeAreaNewState = true
+			elseif lastOutdoorLoc.HasKeyword(LocTypeCity) || lastOutdoorLoc.HasKeyword(LocTypeTown)
+				debug.Notification("moving into safe (indoor) area...")
+				safeAreaNewState = true
+			else
+				debug.Notification("moving into dangerous (indoor) area...")
+			endif
+
+		else
+			;store this as the last outdoor location
+			lastOutdoorLoc = newLoc
+
+			;see if this is a dangerous area
+			if newLoc.HasKeyword(LocTypeCity) 
+				debug.Notification("moving into safe area (city)...")
+				safeAreaNewState = true
+			elseif newLoc.HasKeyword(LocTypeTown)
+				debug.Notification("moving into safe area (town)...")
+				safeAreaNewState = true
+			else
+				debug.Notification("moving into dangerous area...")
+			endif
+
+		endif
+
+		if safeAreaOldState != safeAreaNewState
+			if safeAreaNewState
+				bind_GlobalSafeZone.SetValue(2)
+				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
+				;bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
+				bind_Utility.WriteNotification("I am entering a safe area...", bind_Utility.TextColorRed())
+			else
+				bind_GlobalSafeZone.SetValue(1)
+				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
+				;bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
+				bind_Utility.WriteNotification("I am leaving a safe area...", bind_Utility.TextColorRed())
+			endif
+			bms.SetActiveBondageSet(true, newLoc) ;make this better
+		endif
+		safeAreaOldState = safeAreaNewState
+
+		GotoState("ProcessLocationArrivedState")
+		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+
+	endevent
+
+endstate
+
+Location lastOutdoorLoc
+Location newLoc
 
 function ProcessLocationChange(Location oldLocation, Location newLocation)
 
+	UnregisterForUpdate()
+	GoToState("ProcessLocationChangeState")
+	newLoc = newLocation
+	RegisterForSingleUpdate(3.0)
+
 	;KEEP THIS - 3/8/25
 
-	bool safeLocation = SafeLocationTest(newLocation)
-	bind_Utility.WriteToConsole(newLocation.GetName() + " is safe: " + safeLocation)
-	if safeLocation
-		bind_GlobalSafeZone.SetValue(2)
-		StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
-		if lastLocationSafetyFlag == 2 || lastLocationSafetyFlag == 0
-			;debug.MessageBox("entering a safe area")
-			bind_Utility.WriteToConsole("Entering a safe area")
-			bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
-			bms.SetActiveBondageSet(true, newLocation)
-		endif
-		lastLocationSafetyFlag = 1
-	else
-		bind_GlobalSafeZone.SetValue(1)
-		StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
-		if lastLocationSafetyFlag == 1 || lastLocationSafetyFlag == 0
-			;debug.MessageBox("entering a dangerous area")
-			bind_Utility.WriteToConsole("Enter a dangerous area")
-			bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
-			bms.SetActiveBondageSet(false, newLocation)
-		endif
-		lastLocationSafetyFlag = 2
-	endif
+	; bool safeLocation = SafeLocationTest(newLocation)
+	; bind_Utility.WriteToConsole(newLocation.GetName() + " is safe: " + safeLocation)
+	; if safeLocation
+	; 	bind_GlobalSafeZone.SetValue(2)
+	; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
+	; 	if lastLocationSafetyFlag == 2 || lastLocationSafetyFlag == 0
+	; 		;debug.MessageBox("entering a safe area")
+	; 		bind_Utility.WriteToConsole("Entering a safe area")
+	; 		bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
+	; 		;bms.SetActiveBondageSet(true, newLocation)
+	; 	endif
+	; 	lastLocationSafetyFlag = 1
+	; else
+	; 	bind_GlobalSafeZone.SetValue(1)
+	; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
+	; 	if lastLocationSafetyFlag == 1 || lastLocationSafetyFlag == 0
+	; 		;debug.MessageBox("entering a dangerous area")
+	; 		bind_Utility.WriteToConsole("Enter a dangerous area")
+	; 		bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
+	; 		;bms.SetActiveBondageSet(false, newLocation)
+	; 	endif
+	; 	lastLocationSafetyFlag = 2
+	; endif
 
 	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
 	lastLocation = oldLocation
@@ -1403,10 +1540,11 @@ Function SafeWord()
 	If removeAllGeneric
 		;debug.MessageBox("bm: " + bms + " sub: " + theSubRef)
 		bind_Utility.WriteToConsole("safeword - removing all generic bondage")
-		bms.RemoveAllDetectedBondageItems(theSubRef)
+		;bms.RemoveAllDetectedBondageItems(theSubRef)
+		bms.RemoveAllBondageItems(theSubRef, true)
 	Else
 		bind_Utility.WriteToConsole("safeword - removing stored bondage")
-		bms.RemoveAllBondageItems(theSubRef)
+		bms.RemoveAllBondageItems(theSubRef, false)
 	EndIf
 
 	WindowOutput("Safeword: repairing bondage factions...")
@@ -2205,16 +2343,28 @@ bind_Functions function GetBindingFunctions() global
 endfunction
 
 bool function GetSafeAreaBondageApplied()
-	debug.MessageBox(main.AdventuringSafeBondageApplied)
+	;debug.MessageBox(main.AdventuringSafeBondageApplied)
 	return (main.AdventuringSafeBondageApplied > 0)
 endfunction
 
 function ApplySafeAreaBondage()
 
+	if theDomRef.GetAV("WaitingForPlayer") > 0
+		debug.MessageBox(GetDomTitle() + " is waiting for you...")
+		return
+	else
+		if theDomRef.GetDistance(theSubRef) > 1000.0
+			theDomRef.MoveTo(theSubRef)
+		endif
+		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
+		bind_MovementQuestScript.PlayDoWork(theDomRef)
+	endif
+
 	main.AdventuringSafeBondageApplied = 1
 
-	if  rman.IsNudityRequired(theSubRef, true) 
-		gmanage.RemoveWornGear(theSubRef)
+	if rman.IsNudityRequired(theSubRef, true) && !gmanage.IsNude(theSubRef)
+		gmanage.RemoveWornGear(theSubRef) ;should only store this if wearning something
 	endif
 
 	bms.UpdateBondage(theSubRef, true)
@@ -2225,14 +2375,26 @@ endfunction
 
 function ApplyDangerousAreaBondage()
 
+	if theDomRef.GetAV("WaitingForPlayer") > 0
+		debug.MessageBox(GetDomTitle() + " is waiting for you...")
+		return
+	else
+		if theDomRef.GetDistance(theSubRef) > 1000.0
+			theDomRef.MoveTo(theSubRef)
+		endif
+		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
+		bind_MovementQuestScript.PlayDoWork(theDomRef)
+	endif
+
 	main.AdventuringSafeBondageApplied = 0 ;leave this on until the player removes safe area rules gear
 
 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
 
 	bms.UpdateBondage(theSubRef, true)
 
-	if !rman.IsNudityRequired(theSubRef, false) 
-		gmanage.RestoreWornGear(theSubRef)
+	if !rman.IsNudityRequired(theSubRef, false) && gmanage.IsNude(theSubRef)
+		gmanage.RestoreWornGear(theSubRef) ;should only run this if nude
 	endif
 
 endfunction

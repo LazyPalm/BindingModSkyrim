@@ -53,21 +53,23 @@ endevent
 
 event LocationChangeEvent(Form oldLocation, Form newLocation)
 
-    if fs.ModInRunningState()
+    bind_Utility.WriteToConsole("bound for location quest - not running")
 
-        currentLocation = newLocation as Location
-        ;Location parentLocation = PO3_SKSEFunctions.GetParentLocation(currentLocation)
+    ; if fs.ModInRunningState()
 
-        bind_Utility.WriteToConsole("bound for location - location: " + currentLocation.GetName() + " inside: " + theSub.IsInInterior())
-        if !theSub.IsInInterior()
-            LocationExit()
-        else
-            LocationEntry()
-        endif
+    ;     currentLocation = newLocation as Location
+    ;     ;Location parentLocation = PO3_SKSEFunctions.GetParentLocation(currentLocation)
 
-    else       
-        bind_Utility.WriteToConsole("bound for location - mod not in running state")
-    endif
+    ;     bind_Utility.WriteToConsole("bound for location - location: " + currentLocation.GetName() + " inside: " + theSub.IsInInterior())
+    ;     if !theSub.IsInInterior()
+    ;         LocationExit()
+    ;     else
+    ;         LocationEntry()
+    ;     endif
+
+    ; else       
+    ;     bind_Utility.WriteToConsole("bound for location - mod not in running state")
+    ; endif
 
 endevent
 

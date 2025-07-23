@@ -18,7 +18,7 @@ string property ActiveBondageSet auto conditional
 
 string[] bondageTypes
 
-float sleepTime = 0.1
+float sleepTime = 0.5
 
 Function LoadGame(bool rebuildStorage = false)
     
@@ -99,6 +99,7 @@ function SetActiveBondageSet(bool safeLocation, Location currentLocation)
         endif
 
     elseif currentLocation.HasKeywordString("LocTypeTown")
+        ;debug.MessageBox("in a town??")
         setsList = GetSetsByUsage("Location - Towns")
         if setsList.Length > 0
             found = true
@@ -374,7 +375,7 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
     ;Do slot checks??
 
     if dev
-        StorageUtil.SetIntValue(dev, "binding_bondage_item", 1)
+        ;StorageUtil.SetIntValue(dev, "binding_bondage_item", 1)
         SetBindingBondageItem(dev)
         result = zlib.LockDevice(act, dev as Armor, true)
     endif
@@ -382,7 +383,9 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
     bind_Utility.WriteToConsole("additem - dev: " + dev + " result: " + result)
 
     if result
+        StorageUtil.FormListAdd(act, "binding_worn_bondage_items", dev, false)
         StoreEquippedItem(act, typeNumber, dev)
+
         ; bind_Utility.DoSleep()
         ; Armor rdev = zlib.GetWornRenderedDeviceByKeyword(act, bind_DDKeywords.GetAt(typeNumber) as Keyword)
         ; if rdev
@@ -453,6 +456,7 @@ bool function RemoveItem(Actor act, int typeNumber)
     endif
 
     if result
+        StorageUtil.FormListRemove(act, "binding_worn_bondage_items", dev, true)
         ;maybe do a dd keyword check on the wornform to make sure it is gone??
 
         ClearStoredItem(act, typeNumber)        
@@ -584,6 +588,25 @@ endfunction
 
 Function RemoveAllDetectedBondageItems(Actor act)
 
+    int i = 0
+
+    if act.WornHasKeyWord(zlib.zad_Lockable)
+        while i < bind_DDKeywords.GetSize()
+            Keyword kw = bind_DDKeywords.GetAt(i) as Keyword
+            if act.WornHasKeyword(kw)
+                if zlib.UnlockDeviceByKeyword(act, kw, false)
+                    bind_Utility.WriteToConsole("removing by keyword: " + kw)
+                endif
+                bind_Utility.DoSleep(sleepTime)
+            endif
+            i += 1
+        endwhile
+    endif
+
+    StorageUtil.FormListClear(act, "binding_worn_bondage_items") ;clear the stored items list
+
+    return
+
     ;debug.MessageBox("in here???")
 
     ; Keyword[] zadKeywords = new Keyword[35]
@@ -631,7 +654,7 @@ Function RemoveAllDetectedBondageItems(Actor act)
 
 
 	Form[] inventory = act.GetContainerForms()
-	int i = 0
+	;int i = 0
     int kwi = 0
 
     ;debug.MessageBox("inv len: " + inventory.Length)
@@ -666,22 +689,71 @@ Function RemoveAllDetectedBondageItems(Actor act)
 
 EndFunction
 
-bool Function RemoveAllBondageItems(Actor act)
+bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
+
+    Form[] wornItems = StorageUtil.FormListToArray(act, "binding_worn_bondage_items")
+
+    int i
+
+    if wornItems
+        i = 0
+        while i < wornItems.Length
+            Armor dev = wornItems[i] as Armor
+            if zlib.UnlockDevice(act, dev, none, none, true)
+                bind_Utility.WriteToConsole("removing stored item: " + dev)                
+            endif
+            bind_Utility.DoSleep(sleepTime)
+            i += 1
+        endwhile
+    endif
+
+    ;phase 2 ???
+    ;walk items by dd keyword get item
+    ;check if it has a binding stored decorator on the form
+    
+    StorageUtil.FormListClear(act, "binding_worn_bondage_items")
+
+    if nonBindingItems
+        if act.WornHasKeyWord(zlib.zad_Lockable)
+            i = 0
+            while i < bind_DDKeywords.GetSize()
+                Keyword kw = bind_DDKeywords.GetAt(i) as Keyword
+                if act.WornHasKeyword(kw)
+                    if zlib.UnlockDeviceByKeyword(act, kw, false)
+                        bind_Utility.WriteToConsole("removing by keyword: " + kw)
+                    endif
+                    bind_Utility.DoSleep(sleepTime)
+                endif
+                i += 1
+            endwhile
+        endif
+    endif
+
+    return true
+
+
 
     bool result
 
-    int i = 0
+    i = 0
     while i < bind_BondageList.GetSize()
 
         Form dev = GetStoredItem(act, i)
+
+        bind_Utility.WriteToConsole("RemoveAllBondageItems i: " + i + " found: " + dev)
+
         if dev
             
             int flag = GetBindingBondageItem(dev)
+
+            bind_Utility.WriteToConsole("flag: " + flag)
 
             result = false
 
             if flag == 1
                 result = zlib.UnlockDevice(act, dev as Armor, none, bind_DDKeywords.GetAt(i) as Keyword, true)
+
+                bind_Utility.WriteToConsole("remove result: " + result)
             endif
 
             if result
@@ -727,7 +799,7 @@ function UpdateBondage(Actor a, bool removeExisting = false)
             bind_Utility.WriteToConsole("UpdateBondage disable rules faction found")
 
             ;remove all binding items
-            RemoveAllBondageItems(a)
+            RemoveAllBondageItems(a, false)
 
 
         else
@@ -735,8 +807,9 @@ function UpdateBondage(Actor a, bool removeExisting = false)
             bool removedAllItems = false
 
             if removeExisting
-                RemoveAllBondageItems(a)
+                RemoveAllBondageItems(a, false)
                 removedAllItems = true
+                bind_Utility.DoSleep(1.0) ;give dd enough time to clear so that keyword checks below are accurate
             endif
 
             ;apply rules bondage
@@ -766,7 +839,7 @@ function UpdateBondage(Actor a, bool removeExisting = false)
 
                 if i == BONDAGE_TYPE_SUIT() && ruleSetting == 1 && !safeArea ;see if heavy bondage should be removed in unsafe areas
                     ;debug.MessageBox("in the condition")
-                    ;heavy bondage check on suits - suits are lower in the list, so this should only happen that slot
+                    ;heavy bondage check on suits - suits are lower in the list, so this should only happen for that slot
                     if a.WornHasKeyWord(bind_DDKeywords.GetAt(BONDAGE_TYPE_HEAVYBONDAGE()) as Keyword)
                         ;debug.MessageBox("found heavy bondage keyword")
                         int heavyBondageOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + BONDAGE_TYPE_HEAVYBONDAGE(), 0)
@@ -825,7 +898,7 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                         if AddItem(a, i)
                             ddResult = 1
                             ;bind_Utility.WriteToConsole("adding: " + i)
-                            bind_Utility.DoSleep(0.25)
+                            bind_Utility.DoSleep(sleepTime)
                         else
                             ddResult = 2
                         endif
@@ -839,7 +912,7 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                         if RemoveItem(a, i)
                             ddResult = 1
                             ;bind_Utility.WriteToConsole("removing: " + i)
-                            bind_Utility.DoSleep(0.25)
+                            bind_Utility.DoSleep(sleepTime)
                         else 
                             ddResult = 2
                         endif
