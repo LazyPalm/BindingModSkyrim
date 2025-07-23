@@ -15,7 +15,7 @@
     - {{ player.name }} is a pleasure slave
     {% endif %}
     {% if binfo.sub_type == 5 %}
-    - {{ player.name }} is a fighing slave
+    - {{ player.name }} is a fighting slave
     {% endif %}
     {% if binfo.sub_type == 6 %}
     {# ENTER CUSTOM HERE #}
@@ -46,13 +46,13 @@
 
     {# slavery in skyrim #}
     {% if binfo.has_slavery == 1 %}
-    - Slavery exists in Skyrim and is tolerated as long as it is low-key, especially if the slave isn't a nord.
+    - Slavery exists in Skyrim and is tolerated as long as it is low-key, especially if the slave isn't a Nord.
     - Collars typically indicate slavery.
     - People will treat slaves poorly.
     {% endif %}
 
     {% if binfo.has_slavery == 2 %}
-    - Slavery is common place and legal in Skyrim. Some many question the morality of it, but no guards or people of rank will interfere with it.
+    - Slavery is common place and legal in Skyrim. Some may question the morality of it, but no guards or people of rank will interfere with it.
     - Collars typically indicate slavery 
     - People will treat slaves poorly.
     {% if binfo.is_collared == 1 %}
