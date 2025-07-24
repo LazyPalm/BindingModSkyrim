@@ -45,6 +45,12 @@
     {% endif %}
 
     {# slavery in skyrim #}
+    {% if binfo.has_slavery == 0 %}
+    - Slavery does not legally exist in Skyrim.
+    - Collars typically indicate slavery.
+    - People will treat slaves poorly.
+    {% endif %}
+
     {% if binfo.has_slavery == 1 %}
     - Slavery exists in Skyrim and is tolerated as long as it is low-key, especially if the slave isn't a Nord.
     - Collars typically indicate slavery.

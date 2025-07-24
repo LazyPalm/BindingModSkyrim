@@ -223,6 +223,11 @@ auto state StandingState
 
     function ShowActionMenu()
 
+        if bind_Utility.UiIsOpen()
+            bind_Utility.WriteToConsole("Can't show action menu - UI is open")
+            return
+        endif
+
         GoToState("MenuOpenState")
 
         ShowActionMenuNested()

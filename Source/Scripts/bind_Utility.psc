@@ -270,6 +270,20 @@ string function JsonIntValueReturn(string name, int value) global
     return "{\"" + name + "\":\"" + value + "\"}"    
 endfunction
 
+bool function UiIsOpen() global
+    If (!Utility.IsInMenuMode()) \
+	&& (!UI.IsMenuOpen("Dialogue Menu")) \
+	&& (!UI.IsMenuOpen("Console")) \
+	&& (!UI.IsMenuOpen("Crafting Menu")) \
+	&& (!UI.IsMenuOpen("MessageBoxMenu")) \
+	&& (!UI.IsMenuOpen("ContainerMenu")) \
+	&& (!UI.IsTextInputEnabled())
+        return false
+	Else
+		return true
+	EndIf
+endfunction
+
 bool function IsReady(Actor akSub, Actor akDom) global
 
     bool result = true
