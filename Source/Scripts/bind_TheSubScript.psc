@@ -473,10 +473,17 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		if theSub.IsInFaction(bind_NudityFaction)
 			theSub.RemoveFromFaction(bind_NudityFaction)
 		endif
+		MQS.bind_GlobalPlayerNudity.SetValue(3) ;dressed
 	endif
 	if BondageManager.IsBondageItem(akBaseObject)
 		BondageManager.DetectAddedItem(theSub, akBaseObject, 0)
 	endif
+
+	; if akBaseObject.HasKeyWord(bms.zlib.zad_DeviousGag)
+	; 	if !theSub.IsInFaction(bind_WearingGagFaction)
+	; 		theSub.AddToFaction(bind_WearingGagFaction)
+	; 	endif
+	; endif
 
 	bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
 
@@ -561,10 +568,17 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 		if !theSub.IsInFaction(bind_NudityFaction)
 			theSub.AddToFaction(bind_NudityFaction)
 		endif
+		MQS.bind_GlobalPlayerNudity.SetValue(1) ;nude
 	endif
 	if BondageManager.IsBondageItem(akBaseObject)
 		BondageManager.DetectRemovedItem(theSub, akBaseObject, 0)
 	endif
+
+	; if akBaseObject.HasKeyWord(bms.zlib.zad_DeviousGag)
+	; 	if theSub.IsInFaction(bind_WearingGagFaction)
+	; 		theSub.RemoveFromFaction(bind_WearingGagFaction)
+	; 	endif
+	; endif
 
 
 	if bind_GlobalModState.GetValue() == 1.0

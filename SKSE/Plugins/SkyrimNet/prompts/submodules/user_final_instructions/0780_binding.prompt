@@ -1,20 +1,21 @@
-{% set binfo = binding_info(npc.UUID) %}
 {% set actor_name = decnpc(npc.UUID).name %}
+{% set wearing_collar = is_in_faction(player.UUID, "bind_WearingCollarFaction") %}
+{% set wearing_gag = is_in_faction(player.UUID, "bind_WearingGagFaction") %}
 
 {# Player is sub and mod is active #}
-{% if binfo.player_is_sub == 1 %}
+{% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
      {# NPC is the dominant #}
-    {% if binfo.is_dom == 1 %}
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") %}
         {# sub is wearing a gag #}
-        {% if binfo.is_gagged == 1 and binfo.is_kneeling == 0 %}
+        {% if wearing_gag and is_in_faction(player.UUID, "bind_KneelingFaction") == false %}
         - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that {{ actor_name }} can't understand them. This is VERY important for immersion. 
         - {{ actor_name }} will tell {{ player.name }} to be quiet if gagged in public.
         {% endif %}
     {% endif %}
     {# normal NPC #}
-    {% if binfo.is_dom == 0 %}
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false %}
         {# sub is wearing a gag #}
-        {% if binfo.is_gagged == 1 %}
+        {% if wearing_gag %}
         - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that can't understand {{ player.name }}. This is VERY important for immersion.
         - Since {{ player.name }}'s gag is locked on, {{ actor_name }} can't offer help. Sometimes they may suggest {{ play.name }} talk to their owner.
         {% endif %}

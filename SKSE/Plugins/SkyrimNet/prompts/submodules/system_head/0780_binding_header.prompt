@@ -1,77 +1,79 @@
 
-{% set binfo = binding_info(npc.UUID) %}
 {% set actor_name = decnpc(npc.UUID).name %}
+{% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
+{% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
+{% set has_indentured = get_global_value("bind_GlobalSettingsIndenturedInSkyrim") %}
+{% set wearing_collar = is_in_faction(player.UUID, "bind_WearingCollarFaction") %}
+{% set safe_area = get_global_value("bind_GlobalSafeZone") %}
+{% set player_nudity = get_global_value("bind_GlobalPlayerNudity") %}
 
 {# Player is sub and mod is active #}
-{% if binfo.player_is_sub == 1 %}
+{% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
 
     {# slavery type #}
-    {% if binfo.sub_type == 1 or binfo.sub_type == 2 %}
+    {% if sub_type == 1 or sub_type == 2 %}
     {% endif %}
-    {% if binfo.sub_type == 3 %}
+    {% if sub_type == 3 %}
     - {{ player.name }} is an indentured servant.
     {% endif %}
-    {% if binfo.sub_type == 4 %}
+    {% if sub_type == 4 %}
     - {{ player.name }} is a pleasure slave
     {% endif %}
-    {% if binfo.sub_type == 5 %}
+    {% if sub_type == 5 %}
     - {{ player.name }} is a fighting slave
     {% endif %}
-    {% if binfo.sub_type == 6 %}
+    {% if sub_type == 6 %}
     {# ENTER CUSTOM HERE #}
     {% endif %}
 
-    {% if binfo.safe_area == 0 %}
+    {% if safe_area != 2 %}
     - {{ player.name }} is an unsafe area.
     {% endif %}
-    {% if binfo.safe_area == 1 %}
+    {% if safe_area == 2 %}
     - {{ player.name }} is an safe area.
     {% endif %}
 
-    {% if binfo.is_collared == 1 %}
+    {% if wearing_collar %}
     - {{ player.name }} is collared.
     {% endif %}
-    {% if binfo.is_collared == 0 %}
+    {% if wearing_collar == false %}
     - {{ player.name }} is not wearing a collar.
     {% endif %}
-    {% if binfo.is_nude == 0 %}
+    {% if player_nudity == 1 %}
     - {{ player.name }} is nude.
     {% endif %}
-    {% if binfo.is_nude == 1 %}
+    {% if player_nudity == 2 %}
     - {{ player.name }} is wearing bikini armor or skimpy clothing.
     {% endif %}
-    {% if binfo.is_nude == 2 %}
+    {% if player_nudity == 3 %}
     - {{ player.name }} is wearing clothing.
     {% endif %}
 
     {# slavery in skyrim #}
-    {% if binfo.has_slavery == 0 %}
+    {% if has_slavery == 0 %}
     - Slavery does not legally exist in Skyrim.
     {% endif %}
 
-    {% if binfo.has_slavery == 1 %}
+    {% if has_slavery == 1 %}
     - Slavery exists in Skyrim and is tolerated as long as it is low-key, especially if the slave isn't a Nord.
     - Collars typically indicate slavery.
     - People will treat slaves poorly.
     {% endif %}
 
-    {% if binfo.has_slavery == 2 %}
+    {% if has_slavery == 2 %}
     - Slavery is common place and legal in Skyrim. Some may question the morality of it, but no guards or people of rank will interfere with it.
     - Collars typically indicate slavery 
     - People will treat slaves poorly.
-    {% if binfo.is_collared == 1 %}
-    - {{ player.name }} is collared.
-    {% endif %}
     {% endif %}
 
-    {% if binfo.has_slavery == 3 %}
+    {% if has_slavery == 3 %}
     - Slavery is government sanctioned and none dare question its use, for fear of imprisonment.
     - Collars and nudity are required of any pleasure slave in a safe area. Slaveholders are legally responsible for ensuring this.
     - Fighting slaves must be nude or wearing bikini armor. Slaveholders are legally responsible for ensuring this.
     - Slaves are valued property and while people might speak to them poorly, they never touch them.
     {% endif %}
 
-    {% if binfo.has_indentured == 1 %}
+    {% if has_indentured == 1 %}
     - Indentured service is commonplace and can, depending on the contractual details be pretty much indistinguishable from slavery.
     - Indentured service commonly revolves about labor, but can also extend to sexual services or even forced prostitution.
     - Most people will acknowledge indentured individuals as technically only being under a binding contract, so treating them like a regular, if perhaps impoverished individual. That is, if they even know that an individual is indentured, as there is often no way to tell at a glance.
@@ -79,10 +81,10 @@
     {% endif %}
 
     {# NPC is the dominant #}
-    {% if binfo.is_dom == 1 %}
-  
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") %}
+
         {# player as con submissive #}
-        {% if binfo.sub_type == 0 %}
+        {% if sub_type == 0 %}
         - {{ actor_name }} is in a consensual BDSM relationship with {{ player.name }}.
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} has agreed to follow {{ actor_name }}'s commands or be disciplined.
@@ -90,66 +92,66 @@
         {% endif %}
 
         {# player as non-con submissive #}
-        {% if binfo.sub_type == 1 %}
+        {% if sub_type == 1 %}
         - {{ actor_name }} is in a non-consensual BDSM relationship with {{ player.name }}.
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} is forced to follow {{ actor_name }}'s commands or be disciplined.
         {% endif %}
 
         {# player as indentured servant #}
-        {% if binfo.sub_type == 2 %}
+        {% if sub_type == 2 %}
         - {{ player.name }} has a debt of service to {{ actor_name }} by law and must render whatever services they require.
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined. This debt of service can be enforced by the Jarl of the hold that issued it.
         {% endif %}
 
         {# player as pleasure slave #}
-        {% if binfo.sub_type == 3 %}
+        {% if sub_type == 3 %}
         - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a pleasure slave and must offer their body to {{ actor_name }} whenever desired.
-        {% if binfo.is_collared == 0 and binfo.safe_area == 1 and binfo.has_slavery == 3 %}
+        {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
-        {% if binfo.is_nude != 0 and binfo.safe_area == 1 and binfo.has_slavery == 3 %}
+        {% if player_nudity != 1 and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not nude, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
         {% endif %}
 
         {# player as fighting slave #}
-        {% if binfo.sub_type == 4 %}
+        {% if sub_type == 4 %}
         - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a fighting slave. {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
-        {% if binfo.is_collared == 0 and binfo.safe_area == 1 and binfo.has_slavery == 3 %}
+        {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
-        {% if binfo.is_nude == 2 and binfo.safe_area == 1 and binfo.has_slavery == 3 %}
+        {% if player_nudity == 3 and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not nude or in bikini armor, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
         {% endif %}
 
         {# player as custom #}
-        {% if binfo.sub_type == 5 %}
+        {% if sub_type == 5 %}
         {# ENTER CUSTOM HERE #}
         {% endif %}
 
         {# posing #}
-        {% if binfo.is_kneeling > 0 %}
+        {% if is_in_faction(player.UUID, "bind_KneelingFaction") %} 
         - {{ player.name }} is kneeling submissively.
         {% endif %}
 
         {# disciplined #}
-        {% if binfo.infractions > 0 %}
-        - {{ player.name }} has {{ binfo.infractions }}, {{ actor_name }} should be disciplined.
+        {% if get_global_value("bind_GlobalInfractions") > 0 %}
+        - {{ player.name }} has {{ get_global_value("bind_GlobalInfractions") }}, {{ actor_name }} should be disciplined.
         {% endif %}
 
     {% endif %}
     {# normal NPC #}
-    {% if binfo.is_dom == 0 %}
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false %}
         {# player is nude #}
-        {% if binfo.is_nude < 2 %}
+        {% if player_nudity < 3 %}
   
         {% endif %}
     {% endif %}

@@ -163,6 +163,11 @@ int property LikesCityDawnstar auto conditional
 ;skyrimnet variables
 int property SkryimNetSlaveryType auto conditional
 
+GlobalVariable property bind_GlobalSettingsSubType auto
+GlobalVariable property bind_GlobalSettingsSlaveryInSkyrim auto
+GlobalVariable property bind_GlobalSettingsIndenturedInSkyrim auto
+
+GlobalVariable property bind_GlobalPlayerNudity auto
 
 event OnInit()
 
