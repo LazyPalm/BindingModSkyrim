@@ -202,6 +202,12 @@ int keyCodeRightShift = 54
 int menuSlaveryType
 string[] slaveryTypes
 
+int menuSlaveryInSkyrim
+string[] slaveryInSkyrimTypes
+
+int menuIndenturedServants
+string[] indenturedServantsInSkyrimTypes
+
 Actor theSub
 
 string slTagsFile = "bind_sl_tags.json"
@@ -487,10 +493,28 @@ function DisplaySkyrimNet()
         slaveryTypes[4] = "Fighting Slave"
         slaveryTypes[5] = "Custom"
 
+        slaveryInSkyrimTypes = new string[5]
+        slaveryInSkyrimTypes[0] = "Slavery Rare / Frowned Upon"
+        slaveryInSkyrimTypes[1] = "Slavery Uncommon / Tolerated"
+        slaveryInSkyrimTypes[2] = "Slavery Commmon / Legal"
+        slaveryInSkyrimTypes[3] = "Slavery Government Sanctioned"
+        slaveryInSkyrimTypes[4] = "Custom"
+
+        indenturedServantsInSkyrimTypes = new string[2]
+        indenturedServantsInSkyrimTypes[0] = "Indentured Rare / Frowned Upon"
+        indenturedServantsInSkyrimTypes[1] = "Indentured Common / Legal"
+
         AddHeaderOption("Prompt Options")
         AddHeaderOption("")
 
+        AddTextOption("Slavery In Skyrim", "")
+        AddTextOption("Indentured Servants In Skyrim", "")
+
+        menuSlaveryInSkyrim = AddMenuOption("", slaveryInSkyrimTypes[main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() as int])
+        menuIndenturedServants = AddMenuOption("", indenturedServantsInSkyrimTypes[main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() as int])
+
         menuSlaveryType = AddMenuOption("Slavery Type", slaveryTypes[main.SkryimNetSlaveryType])
+
 
     else
 
@@ -2734,6 +2758,16 @@ Event OnOptionMenuOpen(int option)
         SetMenuDialogStartIndex(main.SkryimNetSlaveryType)
     endif
 
+    if option == menuSlaveryInSkyrim
+        SetMenuDialogOptions(slaveryInSkyrimTypes)
+        SetMenuDialogStartIndex(main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() as int)
+    endif
+
+    if option == menuIndenturedServants
+        SetMenuDialogOptions(indenturedServantsInSkyrimTypes)
+        SetMenuDialogStartIndex(main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() as int)
+    endif
+
     if option == menuChangeLetter
         SetMenuDialogOptions(letters)
         SetMenuDialogStartIndex(letters.Find(selectedLetter))
@@ -2832,6 +2866,31 @@ Event OnOptionMenuOpen(int option)
 EndEvent
 
 Event OnOptionMenuAccept(int option, int index)
+
+    if option == menuSlaveryType
+        if main.SkryimNetSlaveryType != index
+            main.SkryimNetSlaveryType = index
+            main.bind_GlobalSettingsSubType.SetValue(index)
+            SetMenuOptionValue(menuSlaveryType, SlaveryTypes[main.SkryimNetSlaveryType])
+            ForcePageReset()
+        endif
+    endif
+
+    if option == menuSlaveryInSkyrim
+        if main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() != index
+            main.bind_GlobalSettingsSlaveryInSkyrim.SetValue(index)
+            SetMenuOptionValue(menuSlaveryInSkyrim, slaveryInSkyrimTypes[main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() as int])
+            ForcePageReset()
+        endif
+    endif
+
+    if option == menuIndenturedServants
+        if main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() != index
+            main.bind_GlobalSettingsIndenturedInSkyrim.SetValue(index)
+            SetMenuOptionValue(menuIndenturedServants, indenturedServantsInSkyrimTypes[main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() as int])
+            ForcePageReset()
+        endif
+    endif
 
     if option == menuChangeLetter
         if selectedLetter != letters[index]

@@ -1,4 +1,5 @@
 
+{% if render_mode == "full" and not isTimePaused %}
 {% set actor_name = decnpc(npc.UUID).name %}
 {% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
 {% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
@@ -52,6 +53,7 @@
     {# slavery in skyrim #}
     {% if has_slavery == 0 %}
     - Slavery does not legally exist in Skyrim.
+    - People make negative comments about slave owners.
     {% endif %}
 
     {% if has_slavery == 1 %}
@@ -155,4 +157,5 @@
   
         {% endif %}
     {% endif %}
+{% endif %}
 {% endif %}
