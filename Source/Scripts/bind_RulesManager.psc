@@ -78,6 +78,10 @@ int property BehaviorRulePrayer auto conditional
 ; int property HardLimitHood auto conditional
 ; int property HardLimitAnalPlug auto conditional
 
+bind_RulesManager function GetRulesManager() global
+    return Quest.GetQuest("bind_MainQuest") as bind_RulesManager
+endfunction
+
 Function LoadGame()
 
     ; ;bondageRulesKeys = "Bound Rule,Collared Rule,Chastity Rule,Boots Rule,Corset Rule,Gagged Rule,Shackles Rule,Piercing Rule,Blindfold Rule,Hood Rule"
@@ -414,15 +418,16 @@ endfunction
 
 
 int function GetActiveBondageRulesCount(Actor a)
-    int idx = 0
-    int count = 0
-    While idx < GetBondageRulesCount()
-        If GetBondageRule(a, idx) > 0
-            count += 1
-        EndIf
-        idx += 1 
-    EndWhile
-    return count
+    return StorageUtil.GetIntValue(a, "bind_active_bondage_rules", 0)
+    ; int idx = 0
+    ; int count = 0
+    ; While idx < GetBondageRulesCount()
+    ;     If GetBondageRule(a, idx) > 0
+    ;         count += 1
+    ;     EndIf
+    ;     idx += 1 
+    ; EndWhile
+    ; return count
 endfunction
 
 int function GetActiveBehaviorRulesCount(Actor a)
@@ -637,6 +642,13 @@ function SetBondageRule(Actor a, int rule, bool on)
     else
         StorageUtil.SetIntValue(a, "bind_rule_setting_" + rule, 0)
     endif
+    int active = 0
+    int idx = 0
+    While idx < 18
+        active += StorageUtil.GetIntValue(a, "bind_rule_setting_" + idx, 0)
+        idx += 1 
+    EndWhile
+    StorageUtil.SetIntValue(a, "bind_active_bondage_rules", active)
 endfunction
 
 int function GetBondageRule(Actor a, int rule)
@@ -659,7 +671,35 @@ float function GetBondageRuleEnd(Actor a, int rule)
     return StorageUtil.GetFloatValue(a, "bind_rule_end_" + rule, 0.0)
 endfunction
 
+string function FindOpenBondageRulesByName(Actor a)
+    string list = ""
+    int idx = 0
+    While idx < 18
+        string ruleName = dRuleName[idx]
+        int bondageRule = GetBondageRule(a, idx)
+        int bondageRuleOption = GetBondageRuleOption(a, idx)
+        if bondageRuleOption != RULE_OPTION_HARD_LIMIT() && bondageRule == 0
+            if list != ""
+                list += "|"
+            endif
+            list += ruleName
+        endif
+        idx += 1 
+    EndWhile
+    return list
+endfunction
 
+int function GetBondageRuleIdByName(string ruleName)
+    int result = -1
+    int idx = 0
+    While idx < dRuleName.Length
+        If dRuleName[idx] == ruleName
+            result = idx
+        EndIf
+        idx += 1 
+    EndWhile
+    return result
+endfunction
 
 
 

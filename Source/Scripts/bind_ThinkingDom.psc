@@ -69,6 +69,10 @@ float llmTemp = 0.699999988
 int maxTokens = 1024
 int skyrimNetRegistered = 0
 
+bind_ThinkingDom function GetThinkingDom() global
+    return Quest.GetQuest("bind_MainQuest") as bind_ThinkingDom
+endfunction
+
 Function LoadGame(bool rebuildStorage = false)
     
     _SetupStorage(rebuildStorage)
@@ -132,9 +136,9 @@ function RegisterDecorators()
 
     ;bondage decorators
 
-    SkyrimNetApi.RegisterDecorator("binding_is_dom", "bind_ThinkingDom", "DecoratorIsDom")
+    ; SkyrimNetApi.RegisterDecorator("binding_is_dom", "bind_ThinkingDom", "DecoratorIsDom")
 
-    SkyrimNetApi.RegisterDecorator("binding_info", "bind_ThinkingDom", "DecoratorInfo")
+    ; SkyrimNetApi.RegisterDecorator("binding_info", "bind_ThinkingDom", "DecoratorInfo")
 
 endfunction
 
@@ -198,6 +202,23 @@ function RegisterFunctions()
                                     1, "")   
                                     ;removed this - " This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
 
+
+    RegisterBondageRule()
+
+
+endfunction
+
+function RegisterBondageRule()
+
+    string rules = rman.FindOpenBondageRulesByName(theSubRef)
+
+    bind_Utility.WriteToConsole("RegisterBondageRule - rules: " + rules)
+
+    SkyrimNetApi.RegisterAction("AddBondageRule", "Add a bondage rule for {{ player.name }} to follow.", \
+                                    "bind_ThinkingDom", "AddBondageRule_IsEligible", \
+                                    "bind_ThinkingDom", "AddBondageRule_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "{\"rule\":\"" + rules + "\"}")  
 
 endfunction
 
@@ -288,6 +309,45 @@ endfunction
 ;     return bind_Utility.JsonIntValueReturn("is_dom", 1)
 
 ; endfunction
+
+bool function AddBondageRule_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+
+    return true
+
+    bool result
+    result = true
+
+    bind_BondageManager bm = bind_BondageManager.GetBindingBondageManager()
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+    bind_RulesManager r = bind_RulesManager.GetRulesManager()
+
+    string reason = ""
+
+    if !f.UseSkyrimNetCheck(akOriginator)
+        result = false
+        reason = "Failed UseSkyrimNetCheck"
+        ;debug.MessageBox("skycheck: " + result)
+    endif
+
+    if f.InSafeArea() == 0
+        result = false ;needs to be safe area
+        reason = "Failed Safe Area"
+        ;debug.MessageBox("safearea: " + result)
+    endif
+
+    if m.bind_GlobalRulesBondageMax.GetValue() <= r.GetActiveBondageRulesCount(f.GetSubRef())
+        result = false
+        reason = "At max rules"
+    endif
+
+    ;debug.MessageBox(result)
+
+    bind_Utility.WriteToConsole("SkyrimNet called: AddBondageRule_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+
+    return result
+
+endfunction
 
 bool function BindingTieWrists_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
 
@@ -487,6 +547,46 @@ endfunction
 ;     endif
 
 ; endfunction
+
+function AddBondageRule_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: ddBondageRule_Execute actor: " + akOriginator)
+
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_RulesManager r = bind_RulesManager.GetRulesManager()
+    bind_ThinkingDom t = bind_ThinkingDom.GetThinkingDom()
+    bind_BondageManager b = bind_BondageManager.GetBondageManager()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
+    string rule = SkyrimNetApi.GetJsonString(paramsJson, "rule", "") 
+
+    if rule == "Random Rule"
+        string rules = r.FindOpenBondageRulesByName(f.GetSubRef())
+        string[] arr = StringUtil.Split(rules, "|")
+        if arr.Length > 0
+            rule = arr[Utility.RandomInt(0, arr.Length - 1)]
+        endif
+    endif
+
+    debug.MessageBox(rule)
+
+    int ruleIdx = r.GetBondageRuleIdByName(rule)
+    if ruleIdx > -1
+        r.SetBondageRule(f.GetSubRef(), ruleIdx, 1)
+        r.SetBondageRuleEnd(f.GetSubRef(), ruleIdx, bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(24, 96), 0))
+        float currentTime = bind_Utility.GetTime()
+        m.bind_GlobalRulesLastRule.SetValue(currentTime)
+        m.bind_GlobalRulesNextRule.SetValue(bind_Utility.AddTimeToTime(currentTime, m.bind_GlobalRulesHoursBetween.GetValue() as int, 0))
+        bind_MovementQuestScript.FaceTarget(f.GetDomRef(), f.GetSubRef())
+        bind_MovementQuestScript.PlayDoWork(f.GetDomRef())
+        if b.AddItem(f.GetSubRef(), ruleIdx)
+        endif
+        SkyrimNetApi.DirectNarration(f.GetDomRef().GetDisplayName() + " has added a new required bondage rule the " + rule + " that {{ player.name }} must follow, and locked " + b.LastAddedItemName + " on {{ player.name }}'s body", f.GetSubRef())
+        t.RegisterBondageRule() ;refresh this action registration with an updated rules list
+    endif
+
+
+endfunction
 
 function BindingWhip_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 

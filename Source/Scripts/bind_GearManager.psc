@@ -821,17 +821,31 @@ bool Function IsNude(Actor a)
 	; ElseIf UndressedFlag == 2
 	; 	return true
 	; Else
-		Form bodyItem = a.GetWornForm(kSlotMaskBody)
-		If bodyItem == none			
-			return true
-		Else
-			If bodyItem.HasKeyWord(ArmorCuirass) || bodyItem.hasKeyword(ClothingBody)
-				return false
-			Else
-				return true
-			EndIf
-		EndIf
+		bool isNude = true
+
+		If a.WornHasKeyWord(ArmorCuirass) || a.WornHasKeyWord(ClothingBody)
+			isNude = false
+		else
+			; Form bodyItem = a.GetWornForm(kSlotMaskBody)
+			; if bodyItem != none
+			; 	isNude = false
+			; endif
+		endif
+
+		; Form bodyItem = a.GetWornForm(kSlotMaskBody)
+		; If bodyItem == none			
+		; 	return true
+		; Else
+		; 	If a.WornHasKeyWord(ArmorCuirass) || a.WornHasKeyWord(ClothingBody)
+		; 		return false
+		; 	Else
+		; 		return true
+		; 	EndIf
+		; EndIf
 	; EndIf
+
+	return isNude
+
 EndFunction
 
 ; Function ResetUndressedFlag()

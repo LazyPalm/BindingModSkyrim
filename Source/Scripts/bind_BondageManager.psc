@@ -12,6 +12,8 @@ int property BedtimeUseHood auto conditional
 
 string property ActiveBondageSet auto conditional
 
+string property LastAddedItemName auto conditional
+
 ; int property CurrentFavoriteSet auto conditional
 ; int property UseFavoriteSet auto conditional
 ; float property CurrentFavoriteSetEndTime auto conditional
@@ -19,6 +21,10 @@ string property ActiveBondageSet auto conditional
 string[] bondageTypes
 
 float sleepTime = 0.5
+
+bind_BondageManager function GetBondageManager() global 
+    return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
+endfunction
 
 Function LoadGame(bool rebuildStorage = false)
     
@@ -377,6 +383,7 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
     if dev
         ;StorageUtil.SetIntValue(dev, "binding_bondage_item", 1)
         SetBindingBondageItem(dev)
+        LastAddedItemName = dev.GetName()
         result = zlib.LockDevice(act, dev as Armor, true)
     endif
 
@@ -782,6 +789,8 @@ EndFunction
 
 function UpdateBondage(Actor a, bool removeExisting = false)
 
+    ;debug.MessageBox("UpdateBondage called")
+
     int i
     int operation
     int rank
@@ -813,16 +822,59 @@ function UpdateBondage(Actor a, bool removeExisting = false)
             endif
 
             ;apply rules bondage
-            i = 0
+            ;i = 0
 
             string[] ruleNames = rms.GetBondageRuleNameArray()
 
             bind_Utility.WriteToConsole("UpdateBondage rulescheck:")
 
+        ; dRuleName[0] = "Ankle Shackles Rule"
+        ; dRuleName[1] = "Arm Cuffs Rule"
+        ; dRuleName[2] = "Blindfold Rule"
+        ; dRuleName[3] = "Boots Rule"
+        ; dRuleName[4] = "Belt Rule"
+        ; dRuleName[5] = "Collar Rule"
+        ; dRuleName[6] = "Corset Rule"
+        ; dRuleName[7] = "Gag Rule"
+        ; dRuleName[8] = "Gloves Rule"
+        ; dRuleName[9] = "Harness Rule"
+        ; dRuleName[10] = "Heavy Bondage Rule"
+        ; dRuleName[11] = "Hood Rule"
+        ; dRuleName[12] = "Leg Cuffs Rule"
+        ; dRuleName[13] = "Nipple Piercing Rule"
+        ; dRuleName[14] = "Vaginal Piercing Rule"
+        ; dRuleName[15] = "Anal Plug Rule"
+        ; dRuleName[16] = "Vaginal Plug Rule"
+        ; dRuleName[17] = "Suit Rule"
+
+            int[] equipOrder = new int[18]
+            equipOrder[0] = 15 ;anal plug
+            equipOrder[1] = 16 ;v plug
+            equipOrder[2] = 14 ;v piercing
+            equipOrder[3] = 13 ;n piercing
+            equipOrder[4] = 17 ;suits
+            equipOrder[5] = 9 ;harness
+            equipOrder[6] = 6 ;corset
+            equipOrder[7] = 4 ;belt
+            equipOrder[8] = 5 ;collar
+            equipOrder[9] = 8 ;gloves
+            equipOrder[10] = 3 ;boots
+            equipOrder[11] = 1 ;arm cuffs
+            equipOrder[12] = 12 ;leg cuffs
+            equipOrder[13] = 10 ;heavy bondage
+            equipOrder[14] = 0 ;ankle shackles
+            equipOrder[15] = 2 ;blindfold
+            equipOrder[16] = 11 ;hood
+            equipOrder[17] = 7 ;gag
+
+
+            int idx = 0
             ;TODO - run this in reverse??? so plugs get set first - suit can block everyting else?
-            while i < bind_DDKeywords.GetSize() ;bind_BondageRulesFactionList.GetSize()
+            while idx < bind_DDKeywords.GetSize() ;bind_BondageRulesFactionList.GetSize()
 
                 operation = 0
+
+                i = equipOrder[idx]
 
                 int ruleSetting = StorageUtil.GetIntValue(a, "bind_rule_setting_" + i, 0)
                 int ruleOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + i, 0)
@@ -928,7 +980,7 @@ function UpdateBondage(Actor a, bool removeExisting = false)
 
                 bind_Utility.WriteToConsole("rule setting: " + ruleSetting + " rule option: " + ruleOption + " operation: " + operation + " keyword check: " + kwc + " dd result: " + ddresult + " - " + ruleNames[i])                
 
-                i += 1
+                idx += 1
 
             endwhile
 

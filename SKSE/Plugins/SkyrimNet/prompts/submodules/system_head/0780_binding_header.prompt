@@ -4,9 +4,10 @@
 {% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
 {% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
 {% set has_indentured = get_global_value("bind_GlobalSettingsIndenturedInSkyrim") %}
-{% set wearing_collar = is_in_faction(player.UUID, "bind_WearingCollarFaction") %}
+{% set wearing_collar = worn_has_keyword(player.UUID, "zad_DeviousCollar") %}
 {% set safe_area = get_global_value("bind_GlobalSafeZone") %}
 {% set player_nudity = get_global_value("bind_GlobalPlayerNudity") %}
+{% set player_infractions = get_global_value("bind_GlobalInfractions") %}
 
 {# Player is sub and mod is active #}
 {% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
@@ -68,6 +69,10 @@
     - People will treat slaves poorly.
     {% endif %}
 
+    {% if has_slavery == 4 %}
+    {# ENTER CUSTOM HERE #}
+    {% endif %}
+
     {% if has_slavery == 3 %}
     - Slavery is government sanctioned and none dare question its use, for fear of imprisonment.
     - Collars and nudity are required of any pleasure slave in a safe area. Slaveholders are legally responsible for ensuring this.
@@ -80,6 +85,10 @@
     - Indentured service commonly revolves about labor, but can also extend to sexual services or even forced prostitution.
     - Most people will acknowledge indentured individuals as technically only being under a binding contract, so treating them like a regular, if perhaps impoverished individual. That is, if they even know that an individual is indentured, as there is often no way to tell at a glance.
     - Contract holders of indentured individuals might be inclined to discuss the advantages, disadvantages and economic benefits they receive from it with each other.
+    {% endif %}
+
+    {% if has_indentured == 2 %}
+    {# ENTER CUSTOM HERE #}
     {% endif %}
 
     {# NPC is the dominant #}
@@ -112,6 +121,7 @@
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a pleasure slave and must offer their body to {{ actor_name }} whenever desired.
+        - Pleasure slaves can fight when adventuring.
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
@@ -126,6 +136,7 @@
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a fighting slave. {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
+        - Fighting slaves can be used for sexual purposes also.
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
@@ -145,8 +156,9 @@
         {% endif %}
 
         {# disciplined #}
-        {% if get_global_value("bind_GlobalInfractions") > 0 %}
-        - {{ player.name }} has {{ get_global_value("bind_GlobalInfractions") }}, {{ actor_name }} should be disciplined.
+        {% if player_infractions > 0 %}
+        - {{ player.name }} has {{ player_infractions }} rule infractions.
+        - {{ player.name }} should be disciplined by {{ actor_name }}.
         {% endif %}
 
     {% endif %}

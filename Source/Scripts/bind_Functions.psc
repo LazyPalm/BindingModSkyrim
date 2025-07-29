@@ -134,7 +134,7 @@ function LoadGame()
 	endif
 
 	if !bind_GoAdventuringQuest.IsRunning()
-		bind_GoAdventuringQuest.Start()
+		bind_GoAdventuringQuest.Stop() ;changed from start
 	endif
 
 	if StorageUtil.GetIntValue(theSubRef, "kneeling_required", 1) == 0 ;if does not exist - required is the default state
@@ -425,7 +425,7 @@ state ProcessLocationArrivedState
     function EnteringSafeArea()
 
         if main.AdventuringAutomatic == 0
-			if rman.GetBondageRulesCount() == 0 && !rman.IsNudityRequired(theSubRef, true) 
+			if rman.GetActiveBondageRulesCount(theSubRef) == 0 && !rman.IsNudityRequired(theSubRef, true) 
 				return ;does not need to do anything
 			endif
             ;TODO - this needs to check if player has active bondage rules            
@@ -442,6 +442,7 @@ state ProcessLocationArrivedState
             bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
             if nudityRuleFlag && !gmanage.IsNude(theSubRef)
                 gmanage.RemoveWornGear(theSubRef)
+				bind_Utility.DoSleep(2.0)
             endif
             bms.UpdateBondage(theSubRef, false)
             StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
@@ -456,12 +457,14 @@ state ProcessLocationArrivedState
     function LeavingSafeArea()
 
         if main.AdventuringAutomatic == 0
+			;debug.MessageBox("leaving??")
             return
         endif
 
         StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
         bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
         bms.UpdateBondage(theSubRef, false)
+		bind_Utility.DoSleep(2.0)
         if !nudityRuleFlag && gmanage.IsNude(theSubRef)
             gmanage.RestoreWornGear(theSubRef)
         endif

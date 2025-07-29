@@ -51,6 +51,7 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("<-- Return To Menu")
     listMenu.AddEntryItem("Test Dom Rule Change")
     listMenu.AddEntryItem("Direct Narration Test")
+    listMenu.AddEntryItem("Skyrim Bondage Rule Test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -63,6 +64,10 @@ function ShowDebugMenu()
     elseif listReturn == 2
         if think.IsAiReady()
             think.UseDirectNarration(functions_script.GetDomRef(), "You have defeated {{ player.name }} in battle, who is now tied kneeling at your feet. Talk to them about their fate. When the conversation is over you will untie and free them or fuck them based on their answers and your mood.")
+        endif
+    elseif listReturn == 3
+        if think.IsAiReady()
+            bind_ThinkingDom.AddBondageRule_Execute(functions_script.GetDomRef(), "", "{\"rule\":\"Random Rule\"}")
         endif
     endif
 

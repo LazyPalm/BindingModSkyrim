@@ -500,9 +500,10 @@ function DisplaySkyrimNet()
         slaveryInSkyrimTypes[3] = "Slavery Government Sanctioned"
         slaveryInSkyrimTypes[4] = "Custom"
 
-        indenturedServantsInSkyrimTypes = new string[2]
+        indenturedServantsInSkyrimTypes = new string[3]
         indenturedServantsInSkyrimTypes[0] = "Indentured Rare / Frowned Upon"
         indenturedServantsInSkyrimTypes[1] = "Indentured Common / Legal"
+        indenturedServantsInSkyrimTypes[2] = "Custom"
 
         AddHeaderOption("Prompt Options")
         AddHeaderOption("")

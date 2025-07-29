@@ -111,6 +111,7 @@ state RunCheckState
                 gms.RemoveWornGear(theSub)
             endif
 
+            debug.MessageBox("Go quest - EnteringSafeArea")
             bms.UpdateBondage(theSub, false)
 
             StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 2) ;set to completed
@@ -147,6 +148,7 @@ state RunCheckState
 
         ;debug.MessageBox(nudityRuleFlag)
 
+        debug.MessageBox("Go quest - LeavingSafeArea")
         bms.UpdateBondage(theSub, false)
 
         if !nudityRuleFlag

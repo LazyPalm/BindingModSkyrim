@@ -169,6 +169,18 @@ GlobalVariable property bind_GlobalSettingsIndenturedInSkyrim auto
 
 GlobalVariable property bind_GlobalPlayerNudity auto
 
+GlobalVariable property bind_GlobalRulesBondageMax auto
+GlobalVariable property bind_GlobalRulesBondageMin auto
+GlobalVariable property bind_GlobalRulesBehaviorMax auto
+GlobalVariable property bind_GlobalRulesBehaviorMin auto
+GlobalVariable property bind_GlobalRulesLastRule auto
+GlobalVariable property bind_GlobalRulesNextRule auto
+GlobalVariable property bind_GlobalRulesHoursBetween auto
+
 event OnInit()
 
 endevent
+
+bind_MainQuestScript function GetMainQuestScript() global
+    return Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+endfunction

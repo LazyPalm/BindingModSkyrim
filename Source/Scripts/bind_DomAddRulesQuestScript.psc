@@ -7,6 +7,9 @@ int add = 0
 int choice = 0
 int rule = 0
 
+bind_ThinkingDom think
+string selectedRuleName
+
 event OnInit()
 
     if self.IsRunning()
@@ -17,6 +20,8 @@ event OnInit()
 
         theSub = fs.GetSubRef()
         theDom = fs.GetDomRef()
+
+        think = bind_ThinkingDom.GetThinkingDom()
 
         add = 0
         choice = 0
@@ -50,6 +55,12 @@ event PressedAction(bool longPress)
 endevent
 
 event DomRuleSceneEnded()
+    DomRuleSceneEndedFunction()
+endevent
+
+function DomRuleSceneEndedFunction()
+
+    string playerResponse = "{{ player.name }} was silent about the rules change."
 
     string ruleName = "";
     if bind_GlobalEventVar2.GetValue() == 1
@@ -79,14 +90,16 @@ event DomRuleSceneEnded()
     
     if listReturn == 0
         bind_GlobalEventVar4.SetValue(1)
-    
+        
     ;other options - spend points
     elseif listReturn == 1
         bind_GlobalEventVar4.SetValue(2) ;gave thanks
+        playerResponse = "{{ player.name }} was thankful about the rules change."
 
     elseif listReturn == 2
         bind_GlobalEventVar4.SetValue(3) ;begged to keep
         add = 3 ;change to protect
+        playerResponse = "{{ player.name }} begged to keep the rule. " + theDom.GetDisplayName() + " agreed to keep it in place."
 
     else
         bind_GlobalEventVar4.SetValue(1)
@@ -142,11 +155,23 @@ event DomRuleSceneEnded()
 
     UpdateTimers()
 
-    bind_DoAdRuQuSceneGiveThanks.Start()
+    if think.IsAiReady()
+        SkyrimNetApi.DirectNarration(playerResponse, theDom)
+        bind_Utility.DoSleep(10.0)
+        DomRuleSceneGiveThanksEndedFunction()
+    else
+        bind_DoAdRuQuSceneGiveThanks.Start()
+    endif
 
-endevent
+    ;bind_DoAdRuQuSceneGiveThanks.Start()
+
+endfunction
 
 event DomRuleSceneGiveThanksEnded()
+    DomRuleSceneGiveThanksEndedFunction()
+endevent
+
+function DomRuleSceneGiveThanksEndedFunction()
 
     ;debug.MessageBox("this happened??")
 
@@ -204,7 +229,7 @@ event DomRuleSceneGiveThanksEnded()
 
     EventEnd()
 
-endevent
+endfunction
 
 string pickMenu = ""
 
@@ -451,7 +476,13 @@ function EventStart()
     SetObjectiveDisplayed(10, true)
 
     if add == 1
-        bind_DomAddRulQueSceneAdd.Start()
+        if think.IsAiReady()
+            SkyrimNetApi.DirectNarration(theDom.GetDisplayName() + " is changing {{ player.name }}'s rules to " + selectedRuleName, theDom)
+            bind_Utility.DoSleep(10.0)
+            DomRuleSceneEndedFunction()
+        else
+            bind_DomAddRulQueSceneAdd.Start()
+        endif
     elseif add == 2
         bind_DomAddRulQueSceneRemove.Start()
     else
@@ -642,18 +673,22 @@ function DomManagedRuleChange()
             if actionType == "1" ;remove bondage rule
                 add = 2
                 choice = 2
+                selectedRuleName = "Removing " + brm.GetFriendlyBondageRuleName(rule) + " bondage rule"
 
             elseif actionType == "2" ;remove behavior rule
                 add = 2
                 choice = 1
+                selectedRuleName = "Removing " + brm.GetFriendlyBehaviorRuleName(rule) + " behavior rule"
 
             elseif actionType == "3" ;add bondage rule
                 add = 1
                 choice = 2
+                selectedRuleName = "Adding " + brm.GetFriendlyBondageRuleName(rule) + " bondage rule"
 
             elseif actionType == "4" ;add behavior rule
                 add = 1
                 choice = 1
+                selectedRuleName = "Addomg " + brm.GetFriendlyBehaviorRuleName(rule) + " behavior rule"
 
             endif
 
