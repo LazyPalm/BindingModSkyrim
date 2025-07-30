@@ -177,6 +177,8 @@ GlobalVariable property bind_GlobalRulesLastRule auto
 GlobalVariable property bind_GlobalRulesNextRule auto
 GlobalVariable property bind_GlobalRulesHoursBetween auto
 
+GlobalVariable property bind_GlobalLocationHasBed auto
+
 event OnInit()
 
 endevent

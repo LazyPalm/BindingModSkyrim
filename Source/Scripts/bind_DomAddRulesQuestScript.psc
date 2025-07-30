@@ -8,7 +8,7 @@ int choice = 0
 int rule = 0
 
 bind_ThinkingDom think
-string selectedRuleName
+string selectedRuleAiSummary
 
 event OnInit()
 
@@ -156,7 +156,8 @@ function DomRuleSceneEndedFunction()
     UpdateTimers()
 
     if think.IsAiReady()
-        SkyrimNetApi.DirectNarration(playerResponse, theDom)
+        ;SkyrimNetApi.DirectNarration(playerResponse, theDom)
+        think.UseDirectNarration(theDom, playerResponse)
         bind_Utility.DoSleep(10.0)
         DomRuleSceneGiveThanksEndedFunction()
     else
@@ -319,6 +320,9 @@ function HybridManagedPick()
     int listReturn = listMenu.GetResultInt()
     if listReturn < rules.Length
         rule = indexList[listReturn]
+        if think.IsAiReady()
+            CreateSelectedRuleAiSummary(choice, add, rule)
+        endif
     else
         HybridManagedPick()
     endif
@@ -418,6 +422,9 @@ function SubManagedPickRule()
         return
     elseif listReturn > 0 && listReturn < rules.Length
         rule = indexList[listReturn - 1]
+        if think.IsAiReady()
+            CreateSelectedRuleAiSummary(choice, add, rule)
+        endif
     else
         SubManagedPickRule()
     endif
@@ -475,23 +482,45 @@ function EventStart()
 
     SetObjectiveDisplayed(10, true)
 
-    if add == 1
-        if think.IsAiReady()
-            SkyrimNetApi.DirectNarration(theDom.GetDisplayName() + " is changing {{ player.name }}'s rules to " + selectedRuleName, theDom)
-            bind_Utility.DoSleep(10.0)
+    if think.IsAiReady()
+        if selectedRuleAiSummary != ""
+            think.UseDirectNarration(theDom, theDom.GetDisplayName() + " is changing {{ player.name }}'s rules to " + selectedRuleAiSummary)
             DomRuleSceneEndedFunction()
         else
-            bind_DomAddRulQueSceneAdd.Start()
+            EventEnd()
         endif
-    elseif add == 2
-        bind_DomAddRulQueSceneRemove.Start()
     else
-        ;this should never happen
-        bind_Utility.WriteToConsole("dom rules manage failure - add: " + add)
-        EventEnd()
+
+        if add == 1
+            bind_DomAddRulQueSceneAdd.Start()
+        elseif add == 2
+            bind_DomAddRulQueSceneRemove.Start()
+        else
+            ;this should never happen
+            bind_Utility.WriteToConsole("dom rules manage failure - add: " + add)
+            EventEnd()
+        endif
+
     endif
 
 
+endfunction
+
+function CreateSelectedRuleAiSummary(int behaviorOrBondage, int addOrRemove, int ruleIdx)
+    selectedRuleAiSummary = ""
+    if behaviorOrBondage == 1
+        if addOrRemove == 1
+            selectedRuleAiSummary = "Adding " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule"
+        elseif addOrRemove == 2
+            selectedRuleAiSummary = "Removing " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule"
+        endif
+    elseif behaviorOrBondage == 2
+        if addOrRemove == 1
+            selectedRuleAiSummary = "Adding " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule"
+        elseif addOrRemove == 2
+            selectedRuleAiSummary = "Removing " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule"
+        endif
+    endif
 endfunction
 
 function SilentEventEnd()
@@ -673,28 +702,24 @@ function DomManagedRuleChange()
             if actionType == "1" ;remove bondage rule
                 add = 2
                 choice = 2
-                selectedRuleName = "Removing " + brm.GetFriendlyBondageRuleName(rule) + " bondage rule"
-
             elseif actionType == "2" ;remove behavior rule
                 add = 2
                 choice = 1
-                selectedRuleName = "Removing " + brm.GetFriendlyBehaviorRuleName(rule) + " behavior rule"
-
             elseif actionType == "3" ;add bondage rule
                 add = 1
                 choice = 2
-                selectedRuleName = "Adding " + brm.GetFriendlyBondageRuleName(rule) + " bondage rule"
-
             elseif actionType == "4" ;add behavior rule
                 add = 1
                 choice = 1
-                selectedRuleName = "Addomg " + brm.GetFriendlyBehaviorRuleName(rule) + " behavior rule"
-
             endif
 
             ;debug.MessageBox("Action: " + actionType + " Rule: " + rule)
 
         endif
+    endif
+
+    if think.IsAiReady()
+        CreateSelectedRuleAiSummary(choice, add, rule)
     endif
 
     bind_GlobalEventVar1.SetValue(add)

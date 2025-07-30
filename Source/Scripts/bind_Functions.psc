@@ -714,6 +714,7 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	;clear stuff
 
 	bind_GlobalLocationHasFurniture.SetValue(0)
+	main.bind_GlobalLocationHasBed.SetValue(0)
 
 endfunction
 
@@ -2033,6 +2034,14 @@ function ClearNearbyBed()
 	NearbyBed.Clear()
 endfunction
 
+bool function HasNearbyBed()
+	if NearbyBed.GetReference() != none
+		return true
+	else
+		return false
+	endif
+endfunction
+
 function EventSetWordWall(ObjectReference ww)
 	TheWordWall.ForceRefTo(ww)
 endfunction
@@ -2480,21 +2489,27 @@ bool function UseSkyrimNetCheck(Actor akDom)
 		;IsTextInputEnabled check to block when editable text fields are open
 	Else
 		result = False
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - menus check failed")
 	EndIf
 
     ;in combat check - dragons might be attaching city or towns
     if akSub.IsInCombat() || akDom.IsInCombat() || akSub.IsWeaponDrawn()
         result = false
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - combat check failed")
     endif
 
     ;zap whipping plays in a scene - so do a scene check
     ;this is probably helpful for any mod that is running scenes outside of dhlp protected events including the base game
     if akSub.GetCurrentScene() || akDom.GetCurrentScene()
         result = false
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - in scene check failed")
     endif
 
 	if result
 		result = (main.EnableModSkyrimNet == 1 && main.IsSub == 1 && theDomRef == akDom && ModInRunningState())
+		if !result
+			bind_Utility.WriteToConsole("UseSkyrimNetCheck - run state check failed")
+		endif
 	endif
 
 	return result

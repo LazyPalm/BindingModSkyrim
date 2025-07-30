@@ -330,9 +330,10 @@ Event OnCrosshairRefChange(ObjectReference ref)
 							bind_Utility.SendSimpleModEvent("bind_SubLookedAtFurnitureEvent")
 						endif
 
-					;elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
-						; bind_Utility.WriteInternalMonologue("This bed looks very comfortable...")
-						; MQS.NearbyBed.ForceRefTo(ref)
+					elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
+						bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
+						fs.SetNearbyBed(ref)
+						MQS.bind_GlobalLocationHasBed.SetValue(1)
 
 					; ElseIf displayName == "Door"
 					; 	;float dist = ref.GetDistance(MQS.GetSubRef())

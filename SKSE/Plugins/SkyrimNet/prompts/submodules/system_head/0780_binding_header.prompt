@@ -29,27 +29,17 @@
     {% endif %}
 
     {% if safe_area != 2 %}
-    - {{ player.name }} is an unsafe area.
+    - {{ actor_name }} is an unsafe area.
+    - Camping is OK in unsafe areas.
+    - Trying on bondage looks and gear is NOT OK in unsafe areas.
     {% endif %}
     {% if safe_area == 2 %}
-    - {{ player.name }} is an safe area.
+    - {{ actor_name }} is an safe area.
+    - Camping is NOT OK a safe area. In safe areas, {{ actor_name }} must spend the night in an inn or a home.
+    - Trying on bondage looks and gear is OK in safe areas, but only if {{ player.name }} asks.
     {% endif %}
 
-    {% if wearing_collar %}
-    - {{ player.name }} is collared.
-    {% endif %}
-    {% if wearing_collar == false %}
-    - {{ player.name }} is not wearing a collar.
-    {% endif %}
-    {% if player_nudity == 1 %}
-    - {{ player.name }} is nude.
-    {% endif %}
-    {% if player_nudity == 2 %}
-    - {{ player.name }} is wearing bikini armor or skimpy clothing.
-    {% endif %}
-    {% if player_nudity == 3 %}
-    - {{ player.name }} is wearing clothing.
-    {% endif %}
+ 
 
     {# slavery in skyrim #}
     {% if has_slavery == 0 %}
@@ -117,7 +107,6 @@
 
         {# player as pleasure slave #}
         {% if sub_type == 3 %}
-        - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a pleasure slave and must offer their body to {{ actor_name }} whenever desired.
@@ -132,7 +121,6 @@
 
         {# player as fighting slave #}
         {% if sub_type == 4 %}
-        - {{ actor_name }} is owned by {{ player.name }}.
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is tasked as a fighting slave. {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
@@ -150,10 +138,7 @@
         {# ENTER CUSTOM HERE #}
         {% endif %}
 
-        {# posing #}
-        {% if is_in_faction(player.UUID, "bind_KneelingFaction") %} 
-        - {{ player.name }} is kneeling submissively.
-        {% endif %}
+
 
         {# disciplined #}
         {% if player_infractions > 0 %}

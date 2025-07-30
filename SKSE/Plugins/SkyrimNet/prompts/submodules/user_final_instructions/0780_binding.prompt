@@ -17,7 +17,7 @@
         {# sub is wearing a gag #}
         {% if wearing_gag %}
         - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that can't understand {{ player.name }}. This is VERY important for immersion.
-        - Since {{ player.name }}'s gag is locked on, {{ actor_name }} can't offer help. Sometimes they may suggest {{ play.name }} talk to their owner.
+        - Since {{ player.name }}'s gag is locked on, {{ actor_name }} can't offer help. Sometimes they may suggest {{ player.name }} talk to their owner about having the gag removed.
         {% endif %}
     {% endif %}
 {% endif %}

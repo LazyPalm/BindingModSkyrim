@@ -69,9 +69,9 @@ function EventStart()
 
     CheckBehaviorRules(safeArea)
 
-    debug.MessageBox("in here??")
+    ;debug.MessageBox("in here??")
 
-    bms.UpdateBondage(theSub, false)
+    bms.UpdateBondage(theSub, true)
 
     bms.SnapshotCurrentBondage(theSub)
 

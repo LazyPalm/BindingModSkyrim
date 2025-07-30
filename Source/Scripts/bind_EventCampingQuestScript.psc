@@ -274,9 +274,9 @@ state LetSubStewState
 
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " seems to be making me wait...")
 
-        if td.IsAiReady()
-            td.UseDirectNarration(theDom, "{{ player.name }} Is grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does want be bothered.  " + thedom.GetDisplayName() + " will tie them up for the night shortly.")
-        endif
+        ; if td.IsAiReady()
+        ;     td.UseDirectNarration(theDom, "{{ player.name }} Is grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does want be bothered.  " + thedom.GetDisplayName() + " will tie them up for the night shortly.")
+        ; endif
     
         bind_Utility.WriteToConsole("pressed action in camping quest - LetSubStewState")
     
@@ -321,9 +321,9 @@ state LookAtFireState
 
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is enjoying the fire. I am not allowed to sleep yet...")
     
-        if td.IsAiReady()
-            td.UseDirectNarration(theDom, "{{ player.name }} is tied to their bed on the ground and grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does not want be bothered.")
-        endif
+        ; if td.IsAiReady()
+        ;     td.UseDirectNarration(theDom, "{{ player.name }} is tied to their bed on the ground and grunting through their gag to get  " + thedom.GetDisplayName() + "'s attention.  " + thedom.GetDisplayName() + " is relaxing by the fire, and does not want be bothered.")
+        ; endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - LookAtFireState")
     
@@ -406,9 +406,9 @@ state DomWakingState
 
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is waking. When we I be freed?")
     
-        if td.IsAiReady()
-            td.UseDirectNarration(theDom, thedom.GetDisplayName() + " is enjoying the view of {{ player.name }} all tied up.")
-        endif
+        ; if td.IsAiReady()
+        ;     td.UseDirectNarration(theDom, thedom.GetDisplayName() + " is enjoying the view of {{ player.name }} all tied up.")
+        ; endif
 
         bind_Utility.WriteToConsole("pressed action in camping quest - DomWakingState")
     
@@ -424,7 +424,7 @@ function FreeSub()
 
     bind_MovementQuestScript.WalkTo(theDom, theFurniture)
 
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeUntyingSub())
+    ;bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeUntyingSub())
 
     bind_MovementQuestScript.PlayDoWork(theDom)
     bind_Utility.DoSleep(2.0)

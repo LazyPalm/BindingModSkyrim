@@ -22,6 +22,8 @@ event OnInit()
         theSub = fs.GetSubRef()
         theDom = fs.GetDomRef()
 
+        StorageUtil.FormListClear(theSub, "binding_bondage_specific_list")
+
         bondageTypes = new string[18]
         bondageTypes[0] = "Ankle Shackles"
         bondageTypes[1] = "Arm Cuffs"
@@ -271,10 +273,14 @@ function ClearItemsMenu()
         if listReturn == 0
 
         else
+            StorageUtil.FormListClear(theSub, "binding_bondage_specific_list")
             loadedSetName = ""
         endif
 
     else
+
+        StorageUtil.FormListClear(theSub, "binding_bondage_specific_list")
+        debug.MessageBox("Items cleared")
 
     endif
 

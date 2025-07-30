@@ -1,0 +1,33 @@
+{% if not isTimePaused %}
+{% set actor_name = decnpc(actorUUID).name %}
+{% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") %}
+
+{# nudity checks #}
+{% if worn_has_keyword(actorUUID, "ArmorCuirass") or worn_has_keyword(actorUUID, "ClothingBody") %}
+- {{ actor_name }} is wearing clothing
+{% set actor_nudity = "actor_dressed" %}
+{% else %}
+{% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspendex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") %}
+- {{ actor_name }} is wearing bikini armor or skimpy clothing.
+{% set actor_nudity = "actor_dressed_skimpy" %}
+{% else %}
+- {{ actor_name }} is nude.
+{% set actor_nudity = "actor_nude" %}
+{% endif %}
+{% endif %}
+
+{# gear #}
+{% if wearing_collar %}
+- {{ actor_name }} is collared.
+{% endif %}
+{% if wearing_collar == false %}
+- {{ actor_name }} is not wearing a collar.
+{% endif %}
+
+{# posing #}
+{% if is_in_faction(actorUUID, "bind_KneelingFaction") %} 
+- {{ actor_name }} is kneeling submissively.
+{% endif %}
+
+
+{% endif %}

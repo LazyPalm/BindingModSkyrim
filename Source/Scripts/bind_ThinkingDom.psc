@@ -168,25 +168,43 @@ function RegisterFunctions()
     ;                                 "", "PAPYRUS", \
     ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingWhip", "Give {{ player.name }} a good beating for punishment or fun.", \
+    SkyrimNetApi.RegisterAction("BindingCheckRules", "Makes sure {{ player.name }} is following their bondage rules.", \
+                                    "bind_ThinkingDom", "BindingCheckRules_IsEligible", \
+                                    "bind_ThinkingDom", "BindingCheckRules_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "")
+
+    SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try on new bondage gear. Only use this if {{ player.name }} asks.", \
+                                    "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
+                                    "bind_ThinkingDom", "BindingDressingRoom_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "")
+
+    SkyrimNetApi.RegisterAction("BindingBed", "Put {{ player.name }} to bed for the night to sleep hogtied or bound to furniture.", \
+                                    "bind_ThinkingDom", "BindingSleep_IsEligible", \
+                                    "bind_ThinkingDom", "BindingSleep_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "")
+
+    SkyrimNetApi.RegisterAction("BindingWhip", "Give {{ player.name }} a good beating for punishment or fun.", \
                                     "bind_ThinkingDom", "BindingWhip_IsEligible", \
                                     "bind_ThinkingDom", "BindingWhip_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")
                                     
-    SkyrimNetApi.RegisterAction("ExtCmdBindingSex", "Have sex with {{ player.name }} while using bondage equipment.", \
+    SkyrimNetApi.RegisterAction("BindingSex", "Have sex with {{ player.name }} using bondage gear.", \
                                     "bind_ThinkingDom", "BindingSex_IsEligible", \
                                     "bind_ThinkingDom", "BindingSex_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")    
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingFurniture", "Lock {{ player.name }} into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
+    SkyrimNetApi.RegisterAction("BindingFurniture", "Lock {{ player.name }} into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
                                     "bind_ThinkingDom", "BindingFurniture_IsEligible", \
                                     "bind_ThinkingDom", "BindingFurniture_Execute", \
                                     "", "PAPYRUS", \
                                     1, "")    
 
-    SkyrimNetApi.RegisterAction("ExtCmdBindingHarshBondage", "Tie {{ player.name }} into inescapably tight bondage for punishment or fun .", \
+    SkyrimNetApi.RegisterAction("BindingHarshBondage", "Tie {{ player.name }} into inescapably tight bondage for punishment or fun .", \
                                     "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
                                     "bind_ThinkingDom", "BindingHarshBondage_Execute", \
                                     "", "PAPYRUS", \
@@ -195,7 +213,7 @@ function RegisterFunctions()
     ;"Setup a camp for the night. This can ONLY be used after the 18th hour or before the 6th hour of the day. The current hour is {{ get_hour(npc.UUID) }}."                                    
 
     ;TODO - this decorator is the wrong way to do this. the hours of the day just needs to be in the BindingCamping_IsEligible check
-    SkyrimNetApi.RegisterAction("ExtCmdBindingCamping", "Setup a kinky camp for the night.", \  
+    SkyrimNetApi.RegisterAction("BindingCamping", "Setup a kinky camp for the night.", \  
                                     "bind_ThinkingDom", "BindingCamping_IsEligible", \
                                     "bind_ThinkingDom", "BindingCamping_Execute", \
                                     "", "PAPYRUS", \
@@ -214,7 +232,7 @@ function RegisterBondageRule()
 
     bind_Utility.WriteToConsole("RegisterBondageRule - rules: " + rules)
 
-    SkyrimNetApi.RegisterAction("AddBondageRule", "Add a bondage rule for {{ player.name }} to follow.", \
+    SkyrimNetApi.RegisterAction("BindingAddBondageRule", "Add a bondage rule for {{ player.name }} to follow.", \
                                     "bind_ThinkingDom", "AddBondageRule_IsEligible", \
                                     "bind_ThinkingDom", "AddBondageRule_Execute", \
                                     "", "PAPYRUS", \
@@ -347,6 +365,58 @@ bool function AddBondageRule_IsEligible(Actor akOriginator, string contextJson, 
 
     return result
 
+endfunction
+
+bool function BindingCheckRules_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+    bool result = true
+    string reason = ""
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if !f.UseSkyrimNetCheck(akOriginator)
+        result = false
+        reason = "Failed UseSkyrimNetCheck"
+    endif
+    if f.InSafeArea() == 0
+        result = false ;needs to be safe area
+        reason = "Failed Safe Area"
+    endif
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingCheckRules_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+    return result
+endfunction
+
+bool function BindingDressingRoom_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+    bool result = true
+    string reason = ""
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if !f.UseSkyrimNetCheck(akOriginator)
+        result = false
+        reason = "Failed UseSkyrimNetCheck"
+    endif
+    if f.InSafeArea() == 0
+        result = false ;needs to be safe area
+        reason = "Failed Safe Area"
+    endif
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingDressingRoom_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+    return result
+endfunction
+
+bool function BindingSleep_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+    bool result = true
+    string reason = ""
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if !f.UseSkyrimNetCheck(akOriginator)
+        result = false
+        reason = "Failed UseSkyrimNetCheck"
+    endif
+    if f.InSafeArea() == 0
+        result = false ;needs to be safe area
+        reason = "Failed Safe Area"
+    endif
+    if !f.HasNearbyBed()
+        result = false
+        reason = "No near a bed"
+    endif
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingSleep_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+    return result
 endfunction
 
 bool function BindingTieWrists_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
@@ -588,6 +658,42 @@ function AddBondageRule_Execute(Actor akOriginator, string contextJson, string p
 
 endfunction
 
+function BindingCheckRules_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingCheckRules_Execute actor: " + akOriginator)
+    Quest q = Quest.GetQuest("bind_RulesCheckQuest")
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if f.ModInRunningState()
+        debug.MessageBox("start bind_RulesCheckQuest quest")
+        if !q.IsRunning()
+            q.Start()
+        endif
+    endif
+endfunction
+
+function BindingDressingRoom_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingDressingRoom_Execute actor: " + akOriginator)
+    Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if f.ModInRunningState()
+        debug.MessageBox("start bind_TheDressingRoomQuest quest")
+        if !q.IsRunning()
+            q.Start()
+        endif
+    endif
+endfunction
+
+function BindingSleep_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingSleep_Execute actor: " + akOriginator)
+    Quest q = Quest.GetQuest("bind_EventBoundSleepQuest")
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    if f.ModInRunningState()
+        debug.MessageBox("start bind_EventBoundSleepQuest quest")
+        if !q.IsRunning()
+            q.Start()
+        endif
+    endif
+endfunction
+
 function BindingWhip_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
     bind_Utility.WriteToConsole("SkyrimNet called: BindingWhip_Execute actor: " + akOriginator)
@@ -680,7 +786,7 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
+        ;UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
     endif
 
 endevent
@@ -688,7 +794,7 @@ endevent
 event SubLeftKneelEvent()
 
     if main.EnableModSkyrimNet == 1
-        UseDirectNarration(theDomRef, "{{ player.name }} has stood up and left their kneeling position " + domName)
+        ;UseDirectNarration(theDomRef, "{{ player.name }} has stood up and left their kneeling position " + domName)
     endif
 
 endevent
@@ -717,7 +823,9 @@ event LeavingSafeAreaEvent()
 
 endevent
 
-function UseDirectNarration(Actor a, string commentPrompt)
+bool function UseDirectNarration(Actor a, string commentPrompt)
+
+    bool result = false
 
     if main.EnableModSkyrimNet == 1
 
@@ -726,16 +834,25 @@ function UseDirectNarration(Actor a, string commentPrompt)
         SkyrimNetApi.DirectNarration(commentPrompt, a)
         bind_Utility.WriteToConsole("UsedDirectNarration - actor: " + a + " prompt: " + commentPrompt)
 
-        RegisterForSingleUpdate(10.0)
+        Utility.Wait(5.0)
+
+        ; GotoState("DirectNarrationCooldownState")
+        ; UnregisterForUpdate()
+        ; RegisterForSingleUpdate(10.0)
+
+        result = true
 
     endif
+
+    return result
 
 endfunction
 
 state DirectNarrationCooldownState
 
-    function UseDirectNarration(Actor a, string commentPrompt)
+    bool function UseDirectNarration(Actor a, string commentPrompt)
         bind_Utility.WriteToConsole("direct narration is in cool down state")
+        return false
     endfunction
 
     event OnUpdate()
