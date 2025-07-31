@@ -6,6 +6,7 @@ int property LogOutputToScreen auto conditional
 int property ActionKeyMappedKeyCode auto conditional
 int property ActionKeyModifier auto conditional
 int property ShowFurnitureMenu auto conditional
+int property CleanUpNonBindingItemsFromBags auto conditional
 
 int property SoftCheckHasBondageFramework auto conditional
 int property SoftCheckHasSexFramework auto conditional

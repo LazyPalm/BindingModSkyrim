@@ -62,6 +62,8 @@ EndFunction
 
 function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
 
+    bind_Utility.WriteToConsole("SetActiveBondageSet - safeLocation: " + safeLocation + " currentLocation: " + currentLocation)
+
     ActiveBondageSet = ""
 
     ;test current set to see if it is still active vs clearing??
@@ -98,7 +100,14 @@ function SetActiveBondageSet(bool safeLocation, Location currentLocation)
 
     string[] setsList
 
-    if currentLocation.HasKeywordString("LocTypePlayerHouse")
+    if !safeLocation
+        ;debug.MessageBox("looking for dangerous areas sets")
+        setsList = GetSetsByUsage("Location - All Dangerous Areas")
+        if setsList.Length > 0
+            found = true
+        endif
+
+    elseif currentLocation.HasKeywordString("LocTypePlayerHouse")
         setsList = GetSetsByUsage("Location - Player Home")
         if setsList.Length > 0
             found = true
@@ -201,11 +210,11 @@ function SetActiveBondageSet(bool safeLocation, Location currentLocation)
             if setsList.Length > 0
                 found = true
             endif
-        else
-            setsList = GetSetsByUsage("Location - All Dangerous Areas")
-            if setsList.Length > 0
-                found = true
-            endif
+        ; else
+        ;     setsList = GetSetsByUsage("Location - All Dangerous Areas")
+        ;     if setsList.Length > 0
+        ;         found = true
+        ;     endif
         endif
     endif
 
@@ -390,6 +399,7 @@ bool function AddItem(Actor act, int typeNumber, string setName = "")
     bind_Utility.WriteToConsole("additem - dev: " + dev + " result: " + result)
 
     if result
+        ;debug.MessageBox("adding: " + dev.GetName())
         StorageUtil.FormListAdd(act, "binding_worn_bondage_items", dev, false)
         StoreEquippedItem(act, typeNumber, dev)
 
@@ -699,6 +709,7 @@ EndFunction
 bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
 
     Form[] wornItems = StorageUtil.FormListToArray(act, "binding_worn_bondage_items")
+    ;debug.MessageBox(wornItems)
 
     int i
 
@@ -734,7 +745,40 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
                 i += 1
             endwhile
         endif
+        if act.WornHasKeyWord(zlib.zad_Lockable)
+            debug.MessageBox("fail safe removal")
+        	Form[] inventory = act.GetContainerForms()
+            i = 0
+            while i < inventory.Length
+                Form dev = inventory[i]
+                if dev.HasKeyWord(zlib.zad_Lockable) && act.IsEquipped(dev)
+                    zlib.UnlockDevice(act, dev as Armor, none, none, true)
+                    bind_Utility.WriteToConsole("removing non-binding rendered item: " + dev.GetName())
+                endif
+                i += 1
+            endwhile
+        endif
     endif
+
+	Form[] inventory = act.GetContainerForms()
+    i = 0
+    bind_Utility.WriteToConsole("clean up bags: " + inventory.Length)
+
+	while i < inventory.Length
+        Form dev = inventory[i]
+        if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev)
+            int flag = GetBindingBondageItem(dev)
+            if flag == 1 || main.CleanUpNonBindingItemsFromBags == 1
+                bind_Utility.WriteToConsole("removing binding item: " + dev.GetName())
+                act.RemoveItem(dev, 100, true, none)
+            else
+                bind_Utility.WriteToConsole("leaving non-binding item: " + dev.GetName())
+            endif
+        endif
+        i += 1
+    endwhile
+
+
 
     return true
 
@@ -889,18 +933,18 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                 ;     ruleText += " - Always On In Safe Areas"
                 ; endif
 
-                if i == BONDAGE_TYPE_SUIT() && ruleSetting == 1 && !safeArea ;see if heavy bondage should be removed in unsafe areas
-                    ;debug.MessageBox("in the condition")
-                    ;heavy bondage check on suits - suits are lower in the list, so this should only happen for that slot
-                    if a.WornHasKeyWord(bind_DDKeywords.GetAt(BONDAGE_TYPE_HEAVYBONDAGE()) as Keyword)
-                        ;debug.MessageBox("found heavy bondage keyword")
-                        int heavyBondageOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + BONDAGE_TYPE_HEAVYBONDAGE(), 0)
-                        if heavyBondageOption == 2 || heavyBondageOption == 4
-                            ruleOption = heavyBondageOption
-                            bind_Utility.WriteToConsole("suits has heavy bondage - using heavy bondage safe areas option")
-                        endif
-                    endif
-                endif
+                ; if i == BONDAGE_TYPE_SUIT() && ruleSetting == 1 && !safeArea ;see if heavy bondage should be removed in unsafe areas
+                ;     ;debug.MessageBox("in the condition")
+                ;     ;heavy bondage check on suits - suits are lower in the list, so this should only happen for that slot
+                ;     if a.WornHasKeyWord(bind_DDKeywords.GetAt(BONDAGE_TYPE_HEAVYBONDAGE()) as Keyword)
+                ;         ;debug.MessageBox("found heavy bondage keyword")
+                ;         int heavyBondageOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + BONDAGE_TYPE_HEAVYBONDAGE(), 0)
+                ;         if heavyBondageOption == 2 || heavyBondageOption == 4
+                ;             ruleOption = heavyBondageOption
+                ;             bind_Utility.WriteToConsole("suits has heavy bondage - using heavy bondage safe areas option")
+                ;         endif
+                ;     endif
+                ; endif
 
                 if ruleSetting == 1 ;a.IsInFaction(bind_BondageRulesFactionList.GetAt(i) as Faction)
                     ;TODO - check faction rank??
@@ -944,8 +988,8 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                 int ddResult = 0
 
                 if operation == 1
-                    if !a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
-                        kwc = 2
+                    ;if !a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
+                    ;    kwc = 2
                         ;bind_Utility.WriteToConsole("keyword not found: " + i)
                         if AddItem(a, i)
                             ddResult = 1
@@ -954,12 +998,12 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                         else
                             ddResult = 2
                         endif
-                    else
-                        kwc = 1
-                    endif
+                    ;else
+                    ;    kwc = 1
+                    ;endif
                 elseif operation == 2
-                    if a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
-                        kwc = 1
+                    ;if a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
+                    ;    kwc = 1
                         ;bind_Utility.WriteToConsole("keyword found: " + i)
                         if RemoveItem(a, i)
                             ddResult = 1
@@ -968,9 +1012,9 @@ function UpdateBondage(Actor a, bool removeExisting = false)
                         else 
                             ddResult = 2
                         endif
-                    else
-                        kwc = 2
-                    endif
+                    ;else
+                    ;    kwc = 2
+                    ;endif
                 elseif operation == 3
                     ;leave the things alone
                     if removedAllItems

@@ -444,7 +444,7 @@ state ProcessLocationArrivedState
                 gmanage.RemoveWornGear(theSubRef)
 				bind_Utility.DoSleep(2.0)
             endif
-            bms.UpdateBondage(theSubRef, false)
+            bms.UpdateBondage(theSubRef, true)
             StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
         else
             ;NOTE - need the dom to do an LOS check and run the rule enforcement code when they see the sub
@@ -463,7 +463,7 @@ state ProcessLocationArrivedState
 
         StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
         bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
-        bms.UpdateBondage(theSubRef, false)
+        bms.UpdateBondage(theSubRef, true)
 		bind_Utility.DoSleep(2.0)
         if !nudityRuleFlag && gmanage.IsNude(theSubRef)
             gmanage.RestoreWornGear(theSubRef)
@@ -511,6 +511,8 @@ state ProcessLocationChangeState
 
 		endif
 
+		;debug.MessageBox("safeAreaNewState: " + safeAreaNewState + " safeAreaOldState: " + safeAreaOldState)
+
 		if safeAreaOldState != safeAreaNewState
 			if safeAreaNewState
 				bind_GlobalSafeZone.SetValue(2)
@@ -523,8 +525,11 @@ state ProcessLocationChangeState
 				;bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
 				bind_Utility.WriteNotification("I am leaving a safe area...", bind_Utility.TextColorRed())
 			endif
-			bms.SetActiveBondageSet(true, newLoc) ;make this better
+			;bms.SetActiveBondageSet(true, newLoc) ;make this better
 		endif
+
+		bms.SetActiveBondageSet((bind_GlobalSafeZone.GetValue() == 2), newLoc) ;make this better
+
 		safeAreaOldState = safeAreaNewState
 
 		GotoState("ProcessLocationArrivedState")
@@ -1574,7 +1579,7 @@ Function SafeWord()
 
 	if restoreBondage
 		WindowOutput("Safeword: re-applying bondage...")
-		bms.UpdateBondage(theSubRef, false)
+		bms.UpdateBondage(theSubRef, true)
 	endif
 
 	FutureDom.Clear()

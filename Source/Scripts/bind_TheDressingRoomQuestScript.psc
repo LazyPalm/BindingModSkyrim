@@ -270,10 +270,11 @@ function ClearItemsMenu()
         listMenu.OpenMenu()
 
         int listReturn = listMenu.GetResultInt()
-        if listReturn == 0
 
+        StorageUtil.FormListClear(theSub, "binding_bondage_specific_list")
+
+        if listReturn == 0
         else
-            StorageUtil.FormListClear(theSub, "binding_bondage_specific_list")
             loadedSetName = ""
         endif
 
@@ -482,7 +483,7 @@ function SaveSet()
     int kwi = 0
 	while i < inventory.Length
         Form dev = inventory[i]
-        if dev.HasKeyWord(zlib.zad_inventoryDevice)
+        if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
             bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
             if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
                 bind_Utility.WriteToConsole("quest or blocking device")

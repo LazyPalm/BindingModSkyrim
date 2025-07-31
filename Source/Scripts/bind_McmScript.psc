@@ -129,6 +129,8 @@ int toggleFakeSleep
 
 int toggleGameplayAnyNpcCanDom
 
+int toggleCleanUpNonBindingItemsFromBags
+
 ;debug
 int toggleRunSafeword
 int toggleClearPunishments
@@ -447,7 +449,9 @@ event OnOptionHighlight(int option)
         SetInfoText("This will store/restore all bondage/clothing automatically when leaving/entering cities and towns. This overrides other adventuring strip options.")
     elseif option == toggleGameplayAnyNpcCanDom
         SetInfoText("This is an experimental feature. When it enabled it will allow you to add any NPC as your dominant. They will stay at a fixed location and you will be required to report in regularly. You can will gain access to their residence.")
-        
+    elseif option == toggleCleanUpNonBindingItemsFromBags
+        SetInfoText("Enabling this will destroy all unused/unequiped Devious Devices items from player inventory. If Disabled, mod will only remove Binding unequipped Devious Devices items (from failed or layered equips).")
+
     ;events help
     elseif option == toggleEventWordWall
         SetInfoText("Require player to kneel near a Word Wall and perform a ritual with your dominant before learning the word of power.")
@@ -1387,6 +1391,7 @@ Function DisplayPreferences()
     toggleNoFreedom = AddToggleOption("Hide Free Me Dialog Option", main.DomWillNotOfferFreedom)
     toggleStartupQuests = AddToggleOption("Enable Pre-enslavement Events", main.DomStartupQuestsEnabled)
     toggleGameplayAnyNpcCanDom = AddToggleOption("Any NPC can be your Dominant", main.GameplayAnyNpcCanDom)
+    toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Non-Binding Items From Bags", main.CleanUpNonBindingItemsFromBags)
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
     ;AddTextOption("", "")
 
@@ -2264,6 +2269,11 @@ Event OnOptionSelect(int option)
     if option == toggleGameplayAnyNpcCanDom
         main.GameplayAnyNpcCanDom = ToggleValue(main.GameplayAnyNpcCanDom)
         SetToggleOptionValue(toggleGameplayAnyNpcCanDom, main.GameplayAnyNpcCanDom)
+    endif
+
+    if option == toggleCleanUpNonBindingItemsFromBags
+        main.CleanUpNonBindingItemsFromBags = ToggleValue(main.CleanUpNonBindingItemsFromBags)
+        SetToggleOptionValue(toggleCleanUpNonBindingItemsFromBags, main.CleanUpNonBindingItemsFromBags)
     endif
 
 
