@@ -261,7 +261,7 @@ function FindStall()
         bind_MovementQuestScript.FaceTwoActors(theSub, theDom)
         bind_MovementQuestScript.PlayDoWork(theDom)
 
-        fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
+        fs.EventGetSubReady(theSub, theDom, "event_dairy") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
 
         ; bind_Utility.DoSleep()
         ; if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_N_PIERCING())

@@ -3,11 +3,15 @@ Scriptname bind_EventGagForPunQuestScript extends Quest
 Actor theSub
 Actor theDom
 
+bind_ThinkingDom think
+
 event OnInit()
 
     if self.IsRunning()
         
         GoToState("")
+
+        think = bind_ThinkingDom.GetThinkingDom()
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
@@ -56,12 +60,19 @@ function EventStart()
 
     bind_MovementQuestScript.StartWorking(theDom)
 
-    bm.AddItem(theSub, bm.BONDAGE_TYPE_GAG())
-    bind_Utility.DoSleep(3.0)
+    fs.EventGetSubReady(theSub, theDom, "event_gagged_for_punishment")
+
+    ;bm.AddItem(theSub, bm.BONDAGE_TYPE_GAG())
+    ;bind_Utility.DoSleep(3.0)
 
     bind_MovementQuestScript.StopWorking(theDom)
 
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeStartGagSub())
+    if think.IsAiReady()
+        string narrationString = theDom.GetDisplayName() + " is gagging {{ player.name }} for not kneeling before speaking."
+        think.UseDirectNarration(theDom, narrationString)
+    else
+        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeStartGagSub())
+    endif
 
     bind_Utility.EnablePlayer()
 
@@ -82,12 +93,19 @@ function EventEnd()
 
     bind_MovementQuestScript.StartWorking(theDom)
 
-    bm.RemoveItem(theSub, bm.BONDAGE_TYPE_GAG())
-    bind_Utility.DoSleep(3.0)
+    ; bm.RemoveItem(theSub, bm.BONDAGE_TYPE_GAG())
+    ; bind_Utility.DoSleep(3.0)
+
+    fs.EventCleanUpSub(theSub, theDom, true)
 
     bind_MovementQuestScript.StopWorking(theDom)
 
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeEndGagSub())
+    if think.IsAiReady()
+        string narrationString = theDom.GetDisplayName() + " removes the gag and hopes that {{ player.name }} learned not to speak without kneeling."
+        think.UseDirectNarration(theDom, narrationString)
+    else
+        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeEndGagSub())
+    endif
 
     bind_Utility.EnablePlayer()
 

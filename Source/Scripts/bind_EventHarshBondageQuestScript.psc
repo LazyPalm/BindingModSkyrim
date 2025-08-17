@@ -73,63 +73,63 @@ function TieUpSub()
 
     bind_Utility.DisablePlayer()
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
+    fs.EventGetSubReady(theSub, theDom, "event_harsh_bondage") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
 
-    string foundSet = bman.GetRandomSet("Event - Harsh Bondage")
-    usingSet = false
+    ; string foundSet = bman.GetRandomSet("Event - Harsh Bondage")
+    ; usingSet = false
 
-    If foundSet != ""
+    ; If foundSet != ""
 
-        bind_Utility.WriteToConsole("harsh bondage - found set: " + foundSet)
+    ;     bind_Utility.WriteToConsole("harsh bondage - found set: " + foundSet)
 
-        usingSet = true
+    ;     usingSet = true
 
-        bman.EquipSet(theSub, foundSet)
+    ;     bman.EquipSet(theSub, foundSet)
 
-    Else
+    ; Else
 
-        bool zresult
+    ;     bool zresult
 
-        zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(0) as armor) ;bman.BONDAGE_TYPE_HARNESS())
-        bind_Utility.DoSleep()
-        zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(1) as armor) ; bman.BONDAGE_TYPE_HEAVYBONDAGE())
-        bind_Utility.DoSleep()
+    ;     zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(0) as armor) ;bman.BONDAGE_TYPE_HARNESS())
+    ;     bind_Utility.DoSleep()
+    ;     zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(1) as armor) ; bman.BONDAGE_TYPE_HEAVYBONDAGE())
+    ;     bind_Utility.DoSleep()
 
-        If bman.HarshBondageUseNipple == 1
-            zresult = bman.AddSpecificItem(theSub,  bind_HarshBondageItemsList.GetAt(2) as armor) ;"clamps_list", bman.GetFavoriteNippleClamps(),true)
-            bind_Utility.DoSleep()
-        EndIf
-        If bman.HarshBondageUseAnkles == 1
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(3) as armor) ; bman.BONDAGE_TYPE_LEG_CUFFS())
-            bind_Utility.DoSleep()
-        EndIf
-        If bman.HarshBondageUseCollar == 1
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(4) as armor) ; bman.BONDAGE_TYPE_COLLAR())
-            bind_Utility.DoSleep()
-        EndIf
-        If bman.HarshBondageUseBoots == 1
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(5) as armor) ; bman.BONDAGE_TYPE_BOOTS())
-            bind_Utility.DoSleep()
-        EndIf
-        If bman.HarshBondageUseChastity == 1
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(6) as armor) ; bman.BONDAGE_TYPE_BELT())
-            bind_Utility.DoSleep()
-        Endif
-        If bman.HarshBondageUseHood == 1
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(7) as armor) ; bman.BONDAGE_TYPE_HOOD()) ;this will block a gag and blindfold
-            bind_Utility.DoSleep()
-        Else
-            If bman.HarshBondageUseBlindfold == 1
-                zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(8) as armor) ; bman.BONDAGE_TYPE_BLINDFOLD()) ;only try to equip if no hood
-                bind_Utility.DoSleep()
-            EndIf
-            zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(9) as armor) ; bman.BONDAGE_TYPE_GAG()) ;always try to equip if no hood
-            bind_Utility.DoSleep()
-        EndIf
+    ;     If bman.HarshBondageUseNipple == 1
+    ;         zresult = bman.AddSpecificItem(theSub,  bind_HarshBondageItemsList.GetAt(2) as armor) ;"clamps_list", bman.GetFavoriteNippleClamps(),true)
+    ;         bind_Utility.DoSleep()
+    ;     EndIf
+    ;     If bman.HarshBondageUseAnkles == 1
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(3) as armor) ; bman.BONDAGE_TYPE_LEG_CUFFS())
+    ;         bind_Utility.DoSleep()
+    ;     EndIf
+    ;     If bman.HarshBondageUseCollar == 1
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(4) as armor) ; bman.BONDAGE_TYPE_COLLAR())
+    ;         bind_Utility.DoSleep()
+    ;     EndIf
+    ;     If bman.HarshBondageUseBoots == 1
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(5) as armor) ; bman.BONDAGE_TYPE_BOOTS())
+    ;         bind_Utility.DoSleep()
+    ;     EndIf
+    ;     If bman.HarshBondageUseChastity == 1
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(6) as armor) ; bman.BONDAGE_TYPE_BELT())
+    ;         bind_Utility.DoSleep()
+    ;     Endif
+    ;     If bman.HarshBondageUseHood == 1
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(7) as armor) ; bman.BONDAGE_TYPE_HOOD()) ;this will block a gag and blindfold
+    ;         bind_Utility.DoSleep()
+    ;     Else
+    ;         If bman.HarshBondageUseBlindfold == 1
+    ;             zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(8) as armor) ; bman.BONDAGE_TYPE_BLINDFOLD()) ;only try to equip if no hood
+    ;             bind_Utility.DoSleep()
+    ;         EndIf
+    ;         zresult = bman.AddSpecificItem(theSub, bind_HarshBondageItemsList.GetAt(9) as armor) ; bman.BONDAGE_TYPE_GAG()) ;always try to equip if no hood
+    ;         bind_Utility.DoSleep()
+    ;     EndIf
 
-    EndIf
+    ; EndIf
 
-    bind_MovementQuestScript.StopWorking(theDom)
+    ; bind_MovementQuestScript.StopWorking(theDom)
 
     bind_Utility.WriteInternalMonologue("It looks like " + fs.GetDomTitle() + " will keep me like this for a bit...")
 

@@ -568,8 +568,9 @@ function EventEnd()
     if orderedToStrip && gms.IsNude(theSub)
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeGetDressedCommand())
         bind_MovementQuestScript.PlayDressUndress(theSub)
-        gms.RestoreWornGear(theSub)
-        bind_Utility.DoSleep()
+        ;gms.RestoreWornGear(theSub)
+        fs.GetSubDressed()
+        bind_Utility.DoSleep(1.0)
     endif
 
     if removedHeavyBondage || removedShackles
@@ -652,9 +653,9 @@ function ShowActionMenu()
             bind_MovementQuestScript.PlayDressUndress(theSub)
         endif
         if !gms.IsNude(theSub)
-            gms.RemoveWornGear(theSub)
+            gms.WearOutfit(theSub, "nude")
         else
-            gms.RestoreWornGear(theSub)
+            fs.GetSubDressed()
         endif
     elseif actionResult == 1
     	theSub.PlayIdle(ResetIdle)

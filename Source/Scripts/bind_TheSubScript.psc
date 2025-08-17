@@ -152,15 +152,15 @@ bool lookedAtFurniture
 
 Event OnCrosshairRefChange(ObjectReference ref)
 
+	if ref != currentConversationTarget
+		fs.ClearConversationTargetNpc()
+	endif
+
 	;TODO - not sure about this only working while running state
 	;this is to keep it from ditching targets while an event is running, but targeting in the event might be needed?? 3/8/25
 	if bind_GlobalModState.GetValue() == 1.0
 
 		;Maybe only run checks if the activation key has been pressed?
-
-		if ref != currentConversationTarget
-			fs.ClearConversationTargetNpc()
-		endif
 
 		If MQS.IsSub == 1
 			If ref ;Used to determine if it's none or not.
@@ -440,6 +440,10 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 
 	;debug.MessageBox("changed locations: " + MQS.IsSub)
 
+	if MQS.IsSub == 1
+		fs.ProcessLocationChangeAnyState(akOldLoc, akNewLoc)
+	endif
+
 	if bind_GlobalModState.GetValue() == 1.0
 		if MQS.IsSub == 1
 			;debug.MessageBox("in here...")
@@ -488,7 +492,40 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 	bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
 
+	; if akBaseObject as Armor
+	; 	GearManager.AddItemToOutfit(theSub, akBaseObject as Armor)
+	; endif
+
+	;TODO - this needs to use whatever the equipped set is - events are not working
+	if MQS.IsSub == 1
+
+		;NOTE - any state operations (events and normal state)
+
+		if !BondageManager.EquippingBondageOutfit
+
+			int wearingSetId = StorageUtil.GetIntValue(theSub, "bind_wearing_outfit_id")
+			if wearingSetId > 0
+				Armor dev = akBaseObject as Armor
+				if dev != none
+					int slotMask = dev.GetSlotMask()
+					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
+					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
+					if hasBlock
+						;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
+						bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
+						theSub.UnequipItem(dev, false, true)
+					endif
+					bind_Utility.WriteToConsole("f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
+				endif
+			endif
+
+		endif
+
+	endif
+
 	if bind_GlobalModState.GetValue() == 1.0
+
+		;NOTE - normal state operations only (not during events)
 
 		;Debug.MessageBox("here???")
 
@@ -498,7 +535,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 		;MQS.ResetStripBuffers(0) ;do we need to do this still?
 
-		If MQS.IsSub == 1 && fs.GetModState() == 1 ;TODO - && mod running state check from global
+		If MQS.IsSub == 1 ;&& fs.GetModState() == 1 ;TODO - && mod running state check from global
 
 			;Debug.MessageBox(akBaseObject)
 
@@ -509,36 +546,36 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 				EndIf
 			EndIf
 
-			If isBodyItem
-				; bool isInventoryMenuOpen = UI.IsMenuOpen("InventoryMenu")
-				; If isInventoryMenuOpen
-				; 	;Debug.MessageBox("resetting this...")
-				; 	GearManager.ResetUndressedFlag()
-				; EndIf
-				If RulesManager.IsNudityRequired(theSub, safeZone) ;GetBehaviorRule(theSub, RulesManager.BEHAVIOR_RULE_NUDITY())  == 1 ; ;RulesManager.IsNudityRequired() ;RulesManager.GetBehaviorRuleByName("Body Rule:Nudity") == 1 ;&& MQS.ModDHLPSuspended == 0  ;MQS.RuleAlwaysNude == 1 && MQS.ModDHLPSuspended == 0
-					bool failedCheck = true
-					If BondageManager.IsBondageItem(akBaseObject)
-						;make sure this is not a bondage item
-						failedCheck = false
-					EndIf
-					; If RulesManager.SuspendedNudity() ;!MQS.InCityOrTownCheck() && (MQS.AdventuringAllowClothing == 1 || MQS.AdventuringSuspendRules == 1)
-					; 	failedCheck = false ;NOTE - first priority check
-					; ; ElseIf (MQS.DomInCombat == 1 && MQS.DomPreferenceDressForCombat == 1) ;NOTE - test this a lot
-					; ; 	failedCheck = false ;NOTE - second priority check
-					; EndIf
-					If failedCheck ;&& ((MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0) || (MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 1 && (MQS.InLocation == 100 || MQS.InLocation == 101)))
-						fs.CalculateDistanceAtAction()
-						;MQS.DialogThreadVariantLevel2 = 200 ;nudity required
-						fs.MarkSubBrokeRule("Oh no, I broke the nudity rule", true)
-						;Debug.Notification("You are violating the nudity rule...")
-						;MQS.RuleInfractions = MQS.RuleInfractions + 1
-					EndIf
-				EndIf
+			; If isBodyItem
+			; 	; bool isInventoryMenuOpen = UI.IsMenuOpen("InventoryMenu")
+			; 	; If isInventoryMenuOpen
+			; 	; 	;Debug.MessageBox("resetting this...")
+			; 	; 	GearManager.ResetUndressedFlag()
+			; 	; EndIf
+			; 	If RulesManager.IsNudityRequired(theSub, safeZone) ;GetBehaviorRule(theSub, RulesManager.BEHAVIOR_RULE_NUDITY())  == 1 ; ;RulesManager.IsNudityRequired() ;RulesManager.GetBehaviorRuleByName("Body Rule:Nudity") == 1 ;&& MQS.ModDHLPSuspended == 0  ;MQS.RuleAlwaysNude == 1 && MQS.ModDHLPSuspended == 0
+			; 		bool failedCheck = true
+			; 		If BondageManager.IsBondageItem(akBaseObject)
+			; 			;make sure this is not a bondage item
+			; 			failedCheck = false
+			; 		EndIf
+			; 		; If RulesManager.SuspendedNudity() ;!MQS.InCityOrTownCheck() && (MQS.AdventuringAllowClothing == 1 || MQS.AdventuringSuspendRules == 1)
+			; 		; 	failedCheck = false ;NOTE - first priority check
+			; 		; ; ElseIf (MQS.DomInCombat == 1 && MQS.DomPreferenceDressForCombat == 1) ;NOTE - test this a lot
+			; 		; ; 	failedCheck = false ;NOTE - second priority check
+			; 		; EndIf
+			; 		If failedCheck ;&& ((MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0) || (MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 1 && (MQS.InLocation == 100 || MQS.InLocation == 101)))
+			; 			fs.CalculateDistanceAtAction()
+			; 			;MQS.DialogThreadVariantLevel2 = 200 ;nudity required
+			; 			fs.MarkSubBrokeRule("Oh no, I broke the nudity rule", true)
+			; 			;Debug.Notification("You are violating the nudity rule...")
+			; 			;MQS.RuleInfractions = MQS.RuleInfractions + 1
+			; 		EndIf
+			; 	EndIf
 
 
 
-				;MQS.SubStripped = 0 ;TODO - this is going have issues with the sexlab strip editor
-			EndIf
+			; 	;MQS.SubStripped = 0 ;TODO - this is going have issues with the sexlab strip editor
+			; EndIf
 
 		EndIf
 
@@ -581,6 +618,10 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 	; 	endif
 	; endif
 
+	; if akBaseObject as Armor
+	; 	GearManager.RemoveItemFromOutfit(theSub, akBaseObject as Armor)
+	; endif
+
 
 	if bind_GlobalModState.GetValue() == 1.0
 
@@ -590,15 +631,15 @@ Event OnObjectUnequipped(Form akBaseObject, ObjectReference akReference)
 
 		If MQS.IsSub == 1
 
-			If isBodyItem
-				; If RulesManager.GetBehaviorRuleByName("Body Rule:Nudity") == 1 && !RulesManager.SuspendedNudity() ;&& MQS.InLocation != 200 && MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0 ;MQS.RuleAlwaysNude == 1 && MQS.InLocation != 200 && MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0
-				; 	;bind_Utility.WriteInternalMonologue("I am following the nudity rule...") ;only display this if the rule is on and nudity is not suspended
-				; EndIf
+			; If isBodyItem
+			; 	; If RulesManager.GetBehaviorRuleByName("Body Rule:Nudity") == 1 && !RulesManager.SuspendedNudity() ;&& MQS.InLocation != 200 && MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0 ;MQS.RuleAlwaysNude == 1 && MQS.InLocation != 200 && MQS.DomPreferenceDressOutsideOfCitiesAndTowns == 0
+			; 	; 	;bind_Utility.WriteInternalMonologue("I am following the nudity rule...") ;only display this if the rule is on and nudity is not suspended
+			; 	; EndIf
 
 
 
-				;MQS.SubStripped = 1 ;TODO - this is going have issues with the sexlab strip editor
-			EndIf
+			; 	;MQS.SubStripped = 1 ;TODO - this is going have issues with the sexlab strip editor
+			; EndIf
 
 
 

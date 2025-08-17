@@ -59,7 +59,7 @@ function StartEvent()
 
     bind_MovementQuestScript.FaceTarget(theDom, theSub)
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = false)
+    fs.EventGetSubReady(theSub, theDom, "event_bound_sex") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = false)
 
     ;remove chastity chance
     if theSub.IsInFaction(bms.WearingBeltFaction())

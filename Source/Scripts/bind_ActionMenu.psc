@@ -73,6 +73,98 @@ function ShowDebugMenu()
 
 endfunction
 
+function ShowOutfitsMenu()
+
+    Actor a = functions_script.GetSubRef()
+    int kSlotMaskBody = 0x00000004  ;32
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("<-- Return To Settings Menu")
+    listMenu.AddEntryItem("Learn nude outfit")
+    listMenu.AddEntryItem("Learn bikini outfit")
+    listMenu.AddEntryItem("Learn erotic armor outfit")
+    listMenu.AddEntryItem("Learn safe area outfit")
+    listMenu.AddEntryItem("Learn unsafe area outfit")
+    listMenu.AddEntryItem("Try on nude outfit")
+    listMenu.AddEntryItem("Try on bikini outfit")
+    listMenu.AddEntryItem("Try on erotic armor outfit")
+    listMenu.AddEntryItem("Try on safe area outfit")
+    listMenu.AddEntryItem("Try on unsafe area outfit")
+    listMenu.AddEntryItem("Add Bikini Keyword on Slot 32")
+    listMenu.AddEntryItem("Add Erotic Armor Keyword on Slot 32")
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+    if listReturn == 0
+        ShowSettingsMenu()
+    elseif listReturn == 1
+        gear_manager.LearnOutfit(a, "nude")
+        debug.MessageBox("Nude outfit learned")
+    elseif listReturn == 2
+        gear_manager.LearnOutfit(a, "bikini")
+        debug.MessageBox("Bikini outfit learned")
+    elseif listReturn == 3
+        gear_manager.LearnOutfit(a, "erotic")
+        debug.MessageBox("Erotic Armor outfit learned")
+    elseif listReturn == 4
+        gear_manager.LearnOutfit(a, "safe")
+        debug.MessageBox("Safe area outfit learned")
+    elseif listReturn == 5
+        gear_manager.LearnOutfit(a, "unsafe")
+        debug.MessageBox("Unsafe area outfit learned")
+    elseif listReturn == 6
+        gear_manager.WearOutfit(a, "nude")
+        debug.MessageBox("Nude outfit equipped")
+    elseif listReturn == 7
+        gear_manager.WearOutfit(a, "bikini")
+        debug.MessageBox("Bikini outfit equipped")
+    elseif listReturn == 8
+        gear_manager.WearOutfit(a, "erotic")
+        debug.MessageBox("Erotic Armor outfit equipped")
+    elseif listReturn == 9
+        gear_manager.WearOutfit(a, "safe")
+        debug.MessageBox("Safe area outfit equipped")
+    elseif listReturn == 10
+        gear_manager.WearOutfit(a, "unsafe")
+        debug.MessageBox("Unsafe area outfit equipped")
+    elseif listReturn == 11
+        Keyword kw = Keyword.GetKeyword("bind_ArmorBikini")
+        Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+        if bodyItem != none
+            if !bodyItem.HasKeyWord(kw)
+                PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
+                if Keyword.GetKeyword("sla_armorhalfnakedbikini")
+                    PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("sla_armorhalfnakedbikini"))
+                endif
+                debug.MessageBox("Bikini keyword added")
+            else
+                debug.MessageBox("Already has bikini keyword")
+            endif
+        else
+            debug.MessageBox("No slot 32 item found")
+        endif
+    elseif listReturn == 12
+        Keyword kw = Keyword.GetKeyword("bind_ArmorErotic")
+        Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+        if bodyItem != none
+            if !bodyItem.HasKeyWord(kw)
+                PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
+                if Keyword.GetKeyword("Eroticarmor") != none
+                    PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("Eroticarmor"))
+                endif
+                debug.MessageBox("Erotic armor keyword added")
+            else
+                debug.MessageBox("Already has erotic armor keyword")
+            endif
+        else
+            debug.MessageBox("No slot 32 item found")
+        endif
+    endif
+
+endfunction
+
 function ShowSettingsMenu()
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -87,6 +179,7 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Debug Tests")
     listMenu.AddEntryItem("Clear Future Doms List")
     listMenu.AddEntryItem("Run Dressing Room Quest")
+    listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
     ; listMenu.AddEntryItem("Dom Follow 30s")
     ; listMenu.AddEntryItem("Make Dom Say Follow Me")
@@ -129,6 +222,8 @@ function ShowSettingsMenu()
                 q.Start()
             endif
         endif
+    elseif listReturn == 8
+        ShowOutfitsMenu()
         ;     bind_MovementQuestScript.WalkTo(mqs.GetDomRef(), mqs.GetSubRef(), 128.0, 60)
     ; elseif listReturn == 3
     ;     bind_MovementQuestScript.StartWorking(mqs.GetDomRef())
@@ -300,15 +395,19 @@ function ShowActionMenuNested()
         ;actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
     endif
 
-    if !gear_manager.IsNude(a)
-        actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
-        actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
-        actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
-    else
-        actionMenu.SetPropertyIndexString("optionText", 4, "Dress")
-        actionMenu.SetPropertyIndexString("optionLabelText", 4, "Dress")
-        actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
-    endif
+    actionMenu.SetPropertyIndexString("optionText", 4, "Choose Outfit")
+    actionMenu.SetPropertyIndexString("optionLabelText", 4, "Choose Outfit")
+    actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+
+    ; if !gear_manager.IsNude(a)
+    ;     actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
+    ;     actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
+    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+    ; else
+    ;     actionMenu.SetPropertyIndexString("optionText", 4, "Dress")
+    ;     actionMenu.SetPropertyIndexString("optionLabelText", 4, "Dress")
+    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+    ; endif
 
     actionMenu.SetPropertyIndexString("optionText", 5, "Furniture")
     actionMenu.SetPropertyIndexString("optionLabelText", 5, "Furniture")
@@ -382,32 +481,44 @@ function ShowActionMenuNested()
             bind_Utility.WriteInternalMonologue("I need to get off this horse first...")
         else
             if isBoundFlag
-                bind_Utility.DisablePlayer()      
-                if !gear_manager.IsNude(a)
-                    functions_script.EventDomTyingAnimation(a, dom, false)
-                    gear_manager.RemoveWornGear(a)
-                else
-                    if !nudeRule ;|| rules_manager.SuspendedNudity()
-                        functions_script.EventDomTyingAnimation(a, dom, false)
-                        gear_manager.RestoreWornGear(a)
-                    else
-                        bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " will not undress me...")
-                    endif
-                endif
-                bind_Utility.EnablePlayer()
+                bind_Utility.WriteInternalMonologue("I can't change outfits while bound...")
+                ; bind_Utility.DisablePlayer()
+                ; ChooseOutfitMenu()
+                ; functions_script.EventDomTyingAnimation(a, dom, false)
+                ; bind_Utility.EnablePlayer()
+
+                ; if !gear_manager.IsNude(a)
+                ;     functions_script.EventDomTyingAnimation(a, dom, false)
+                ;     gear_manager.RemoveWornGear(a)
+                ; else
+                ;     if !nudeRule ;|| rules_manager.SuspendedNudity()
+                ;         functions_script.EventDomTyingAnimation(a, dom, false)
+                ;         ;gear_manager.RestoreWornGear(a)
+                ;         ChoseOutfitMenu()
+                ;     else
+                ;         bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " will not undress me...")
+                ;     endif
+                ; endif
+                ; bind_Utility.EnablePlayer()
             else
+                bind_Utility.DisablePlayer()
+                ChooseOutfitMenu()
                 bind_MovementQuestScript.PlayDressUndress(a)
-                if !gear_manager.IsNude(a)
-                    if think.IsAiReady()
-                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
-                    endif
-                    gear_manager.RemoveWornGear(a)
-                else
-                    if think.IsAiReady()
-                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
-                    endif
-                    gear_manager.RestoreWornGear(a)
-                endif
+                bind_Utility.EnablePlayer()
+
+                ; bind_MovementQuestScript.PlayDressUndress(a)
+                ; if !gear_manager.IsNude(a)
+                ;     if think.IsAiReady()
+                ;         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
+                ;     endif
+                ;     gear_manager.RemoveWornGear(a)
+                ; else
+                ;     if think.IsAiReady()
+                ;         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
+                ;     endif
+                ;     ;gear_manager.RestoreWornGear(a)
+                ;     ChoseOutfitMenu()
+                ; endif
             endif
         endif
     elseif actionResult == 5
@@ -416,6 +527,35 @@ function ShowActionMenuNested()
         ShowMoreMenu()
     elseif actionResult == 7
         ShowSettingsMenu()
+    endif
+
+endfunction
+
+function ChooseOutfitMenu()
+
+    Actor a = functions_script.GetSubRef()
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("Safe Area Armor/Clothing")
+    listMenu.AddEntryItem("Unsafe Area Armor/Clothing")
+    listMenu.AddEntryItem("Erotic Armor")
+    listMenu.AddEntryItem("Bikini Armor")
+    listMenu.AddEntryItem("Nude with Jewelry")
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+    if listReturn == 0
+        gear_manager.WearOutfit(a, "safe")
+    elseif listReturn == 1
+        gear_manager.WearOutfit(a, "unsafe")
+    elseif listReturn == 2
+        gear_manager.WearOutfit(a, "erotic")
+    elseif listReturn == 3
+        gear_manager.WearOutfit(a, "bikini")
+    elseif listReturn == 4
+        gear_manager.WearOutfit(a, "nude")
     endif
 
 endfunction

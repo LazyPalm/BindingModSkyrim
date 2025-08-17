@@ -1,0 +1,50 @@
+{
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x32744|Devious Devices - Integration.esm",
+			"0x32743|Devious Devices - Integration.esm",
+			"0x58474|Devious Devices - Expansion.esm",
+			"0x1b072|Devious Devices - Expansion.esm"
+		]
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			8,
+			4,
+			16,
+			128,
+			65536,
+			67108864,
+			524288,
+			4194304,
+			8388608,
+			16777216,
+			134217728,
+			536870912,
+			268435456
+		]
+	},
+	"stringList" : 
+	{
+		"blocks" : 
+		[
+			"Hands - Slot 33",
+			"Body - Slot 32",
+			"Forearms - Slot 34",
+			"Feet  - Slot 37",
+			"Chest Primary - Slot 46",
+			"Chest Secondary - Slot 56",
+			"Pelvis Primary - Slot 49",
+			"Pelvis Secondary - Slot 54",
+			"Leg Primary - Slot 53",
+			"Leg Secondary - Slot 54",
+			"Shoulder - Slot 57",
+			"Arm Primary - Slot 59",
+			"Arm Secondary - Slot 58"
+		]
+	}
+}

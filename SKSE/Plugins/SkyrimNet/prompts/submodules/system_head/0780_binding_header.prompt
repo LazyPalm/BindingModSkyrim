@@ -6,40 +6,36 @@
 {% set has_indentured = get_global_value("bind_GlobalSettingsIndenturedInSkyrim") %}
 {% set wearing_collar = worn_has_keyword(player.UUID, "zad_DeviousCollar") %}
 {% set safe_area = get_global_value("bind_GlobalSafeZone") %}
-{% set player_nudity = get_global_value("bind_GlobalPlayerNudity") %}
 {% set player_infractions = get_global_value("bind_GlobalInfractions") %}
+
+{% if worn_has_keyword(player.UUID, "Eroticarmor") or worn_has_keyword(player.UUID, "sla_armorspendex") or worn_has_keyword(player.UUID, "sla_armorhalfnakedbikini") or worn_has_keyword(player.UUID, "sla_armorhalfnaked") or worn_has_keyword(player.UUID, "bind_ArmorBikini") or worn_has_keyword(player.UUID, "bind_ArmorErotic") %}
+{% set pnudity = 1 %}
+{% else %}
+{% if worn_has_keyword(player.UUID, "ArmorCuirass") or worn_has_keyword(player.UUID, "ClothingBody") %}
+{% set pnudity = 2 %}
+{% else %}
+{% set pnudity = 0 %}
+{% endif %}
+{% endif %}
 
 {# Player is sub and mod is active #}
 {% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
 
     {# slavery type #}
-    {% if sub_type == 1 or sub_type == 2 %}
+    {% if sub_type == 0 or sub_type == 1 %}
     {% endif %}
-    {% if sub_type == 3 %}
+    {% if sub_type == 2 %}
     - {{ player.name }} is an indentured servant.
     {% endif %}
-    {% if sub_type == 4 %}
+    {% if sub_type == 3 %}
     - {{ player.name }} is a pleasure slave
     {% endif %}
-    {% if sub_type == 5 %}
+    {% if sub_type == 4 %}
     - {{ player.name }} is a fighting slave
     {% endif %}
-    {% if sub_type == 6 %}
+    {% if sub_type == 5 %}
     {# ENTER CUSTOM HERE #}
     {% endif %}
-
-    {% if safe_area != 2 %}
-    - {{ actor_name }} is an unsafe area.
-    - Camping is OK in unsafe areas.
-    - Trying on bondage looks and gear is NOT OK in unsafe areas.
-    {% endif %}
-    {% if safe_area == 2 %}
-    - {{ actor_name }} is an safe area.
-    - Camping is NOT OK a safe area. In safe areas, {{ actor_name }} must spend the night in an inn or a home.
-    - Trying on bondage looks and gear is OK in safe areas, but only if {{ player.name }} asks.
-    {% endif %}
-
- 
 
     {# slavery in skyrim #}
     {% if has_slavery == 0 %}
@@ -64,8 +60,9 @@
     {% endif %}
 
     {% if has_slavery == 3 %}
-    - Slavery is government sanctioned and none dare question its use, for fear of imprisonment.
-    - Collars and nudity are required of any pleasure slave in a safe area. Slaveholders are legally responsible for ensuring this.
+    - Slavery is government sanctioned and none dare question its use, for fear of arrest.
+    - Collars are required for any slave.
+    - Pleasure slaves must be kept nude in a safe area. Slaveholders are legally responsible for ensuring this.
     - Fighting slaves must be nude or wearing bikini armor. Slaveholders are legally responsible for ensuring this.
     - Slaves are valued property and while people might speak to them poorly, they never touch them.
     {% endif %}
@@ -79,6 +76,45 @@
 
     {% if has_indentured == 2 %}
     {# ENTER CUSTOM HERE #}
+    {% endif %}
+
+    {# NPC is guard - enforce nudity and collars #}
+    {% if is_in_faction(npc.UUID, "GuardDialogueFaction") and has_slavery == 3 %}
+
+        {# player as pleasure slave #}
+        {% if sub_type == 3 %}
+        {% if wearing_collar == false and safe_area == 2  %}
+        - {{ player.name }} is not wearing a collar, {{ actor_name }} needs to enforce this.
+        {% endif %}
+        {% if wearing_collar == true and safe_area == 2  %}
+        - {{ player.name }} is wearing a collar, {{ actor_name }} will approve of this.
+        {% endif %}
+        {% if pnudity != 0 and safe_area == 2 %}
+        - {{ player.name }} is not nude, {{ actor_name }} needs to enforce this.
+        {% endif %}
+        {% if pnudity == 0 and safe_area == 2 %}
+        - {{ player.name }} is nude, {{ actor_name }} will approve of this.
+        {% endif %}
+        {% endif %}
+
+        {# player as fighting slave #}
+        {% if sub_type == 4 %}
+        {% if wearing_collar == false and safe_area == 2 %}
+        - {{ player.name }} is not wearing a collar, {{ actor_name }} needs to enforce this.
+        {% endif %}
+        {% if wearing_collar == true and safe_area == 2  %}
+        - {{ player.name }} is wearing a collar, {{ actor_name }} will approve of this.
+        {% endif %}
+        {% if pnudity == 2 and safe_area == 2 %}
+        - {{ player.name }} is not nude or in bikini armor, {{ actor_name }} needs to enforce this.
+        {% endif %}
+        {% if pnudity == 1 and safe_area == 2 %}
+        - {{ player.name }} is in bikini armor, {{ actor_name }} will approve of this.
+        {% endif %}
+        {% if pnudity == 0 and safe_area == 2 %}
+        - {{ player.name }} is nude, which is OK for fighting slaves, but {{ actor_name }} will recommend bikini armor for fighting slaves.
+        {% endif %}
+        {% endif %}
     {% endif %}
 
     {# NPC is the dominant #}
@@ -109,12 +145,12 @@
         {% if sub_type == 3 %}
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ player.name }} is tasked as a pleasure slave and must offer their body to {{ actor_name }} whenever desired.
+        - {{ player.name }} must offer their body to {{ actor_name }} whenever desired.
         - Pleasure slaves can fight when adventuring.
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
-        {% if player_nudity != 1 and safe_area == 2 and has_slavery == 3 %}
+        {% if pnudity != 0 and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not nude, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
         {% endif %}
@@ -123,12 +159,12 @@
         {% if sub_type == 4 %}
         - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ player.name }} is tasked as a fighting slave. {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
-        - Fighting slaves can be used for sexual purposes also.
+        - {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
+        - Fighting slaves can be used for sexual purposes.
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
-        {% if player_nudity == 3 and safe_area == 2 and has_slavery == 3 %}
+        {% if pnudity == 2 and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not nude or in bikini armor, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
         {% endif %}
@@ -138,7 +174,17 @@
         {# ENTER CUSTOM HERE #}
         {% endif %}
 
-
+        {# binding event awareness #}
+        {% if safe_area != 2 %}
+        - {{ actor_name }} is an unsafe area.
+        - Camping is OK in unsafe areas.
+        - Trying on bondage looks and gear is NOT OK in unsafe areas.
+        {% endif %}
+        {% if safe_area == 2 %}
+        - {{ actor_name }} is an safe area.
+        - Camping is NOT OK a safe area. In safe areas, {{ actor_name }} must spend the night in an inn or a home.
+        - Trying on bondage looks and gear is OK in safe areas, but only if {{ player.name }} asks.
+        {% endif %}
 
         {# disciplined #}
         {% if player_infractions > 0 %}
@@ -147,12 +193,14 @@
         {% endif %}
 
     {% endif %}
+
     {# normal NPC #}
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false %}
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false and is_in_faction(npc.UUID, "GuardDialogueFaction") == false %}
         {# player is nude #}
-        {% if player_nudity < 3 %}
+        {% if pnudity < 2 %}
   
         {% endif %}
     {% endif %}
+
 {% endif %}
 {% endif %}

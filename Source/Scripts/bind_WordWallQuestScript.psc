@@ -95,7 +95,7 @@ function Accepted()
 
     bind_MovementQuestScript.FaceTarget(theDom, theSub)
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = true, removeAll = true)
+    fs.EventGetSubReady(theSub, theDom, "event_word_wall") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = true, removeAll = true)
 
 	bind_Utility.DoSleep()
 

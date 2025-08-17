@@ -257,6 +257,9 @@ function HybridManagedRuleChange()
         choice = 1
     endif
 
+    ;choice only supported
+    choice = 1
+
     if choice == 1
         ;behavior
         if behaviorRulesActive <= bind_GlobalRulesBehaviorMin.GetValue()
@@ -358,8 +361,8 @@ function SubManagedPickChoice()
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 
     listMenu.AddEntryItem("<-- Go Back")
-    listMenu.AddEntryItem("Behavior rule (default)")
-    listMenu.AddEntryItem("Bondage rule")
+    listMenu.AddEntryItem("Behavior rule"); (default)")
+    ;listMenu.AddEntryItem("Bondage rule")
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
@@ -369,8 +372,8 @@ function SubManagedPickChoice()
         return
     elseif listReturn == 1
         choice = 1
-    elseif listReturn == 2
-        choice = 2
+    ; elseif listReturn == 2
+    ;     choice = 2
     else
         choice = 1
     endif

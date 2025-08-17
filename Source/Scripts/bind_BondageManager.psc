@@ -14,6 +14,8 @@ string property ActiveBondageSet auto conditional
 
 string property LastAddedItemName auto conditional
 
+bool property EquippingBondageOutfit auto conditional
+
 ; int property CurrentFavoriteSet auto conditional
 ; int property UseFavoriteSet auto conditional
 ; float property CurrentFavoriteSetEndTime auto conditional
@@ -21,6 +23,8 @@ string property LastAddedItemName auto conditional
 string[] bondageTypes
 
 float sleepTime = 0.5
+
+string bondageOutfitsFile = "bind_bondage_outfits.json"
 
 bind_BondageManager function GetBondageManager() global 
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
@@ -59,6 +63,232 @@ endfunction
 Int Function GetDayOfWeek() Global
 	return (Math.Floor(Utility.GetCurrentGameTime()) as int) % 7
 EndFunction
+
+; Form function RandomEquip(Actor a, FormList fl) 
+;     Form dev = fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1))
+;     if dev
+;         ; AddSpecificItem(a, dev as Armor)
+;         ; bind_Utility.DoSleep(0.5)
+;         return dev
+;     else
+;         return none
+;     endif
+; endfunction
+
+function EquipBondageOutfit(Actor a, int setId)
+
+    EquippingBondageOutfit = true
+
+    string f = "bind_bondage_outfit_" + setId + ".json"
+
+    bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
+
+    RemoveAllBondageItems(a, true)
+
+    ;unequip blocks
+    int[] blocks = JsonUtil.IntListToArray(f, "block_slots")
+    int i = 0
+    while i < blocks.Length
+        Armor dev = a.GetWornForm(blocks[i]) as Armor
+        if dev != none
+            a.UnequipItem(dev, false, true)
+            bind_Utility.DoSleep(0.5)
+        endif
+        i += 1
+    endwhile
+
+    int useRandom = JsonUtil.GetIntValue(f, "use_random_bondage", 0)
+
+    Form[] setItems
+
+    bind_Utility.WriteToConsole("EquipBondageOutfit - userandom: " + userandom)
+
+    if useRandom == 1
+
+        JsonUtil.FormListClear(f, "dynamic_bondage_items")
+
+        int material = Utility.RandomInt(1, 3)
+        int color = 0
+        if material == 1 ;rope
+            color = Utility.RandomInt(1, 4)
+        elseif material == 2 ;leather
+            color = Utility.RandomInt(1, 3)
+        elseif material == 3 ;iron
+            color = 1
+        endif
+
+        int[] chances = JsonUtil.IntListToArray(f, "random_bondage_chance")
+        bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
+
+        ;anal plug - 0
+        if Utility.RandomInt(0, 100) < chances[0]
+            bind_Utility.WriteToConsole("using anal plug")
+            FormList fl = bind_dd.GetAt(0) as FormList
+            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
+        endif
+        ;vag plug - 1
+        if Utility.RandomInt(0, 100) < chances[1]
+            bind_Utility.WriteToConsole("using vag plug")
+            FormList fl = bind_dd.GetAt(1) as FormList
+            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
+        endif
+        ;vag piercing - 2
+        if Utility.RandomInt(0, 100) < chances[2]
+            bind_Utility.WriteToConsole("using vag piercing")
+            FormList fl = bind_dd.GetAt(2) as FormList
+            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
+        endif
+        ;nipple piercing - 3
+        if Utility.RandomInt(0, 100) < chances[3]
+            bind_Utility.WriteToConsole("using nip piercing")
+            FormList fl = bind_dd.GetAt(3) as FormList
+            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
+        endif
+        ;arms - 4
+        if Utility.RandomInt(0, 100) < chances[4]
+            bind_Utility.WriteToConsole("using arms")
+            FormList arms = bind_dd.GetAt(4) as FormList
+            FormList fl
+            if material == 3
+                fl = arms.GetAt(0) as FormList
+            elseif material == 2 && color == 1
+                fl = arms.GetAt(1) as FormList
+            elseif material == 2 && color == 2
+                fl = arms.GetAt(2) as FormList
+            elseif material == 2 && color == 3
+                fl = arms.GetAt(3) as FormList
+            elseif material == 1 && color == 1
+                fl = arms.GetAt(4) as FormList
+            elseif material == 1 && color == 2
+                fl = arms.GetAt(5) as FormList
+            elseif material == 1 && color == 3
+                fl = arms.GetAt(6) as FormList
+            elseif material == 1 && color == 4
+                fl = arms.GetAt(7) as FormList
+            endif
+            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
+        endif
+
+        JsonUtil.Save(f)
+
+        setItems = JsonUtil.FormListToArray(f, "dynamic_bondage_items")
+
+    else
+    
+        setItems = JsonUtil.FormListToArray(f, "fixed_bondage_items")
+
+    endif
+
+    bind_Utility.WriteToConsole("EquipBondageOutfit - items: " + setItems)
+
+    if setItems != none
+        i = 0
+        while i < setItems.Length
+            Form dev = setItems[i]
+            if dev
+                AddSpecificItem(a, dev as Armor)
+                bind_Utility.DoSleep(0.5)
+            endif
+            i += 1
+        endwhile
+    endif
+
+    StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+
+    EquippingBondageOutfit = false
+
+endfunction
+
+int function GetBondageSetForLocation(Location currentLocation, int currentBondageSet)
+
+    string outfitKey = ""
+    int[] outfitIds
+
+    if currentLocation.HasKeywordString("LocTypePlayerHouse")
+        outfitKey = "location_player_home"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+
+    if currentLocation.HasKeywordString("LocTypeTown") && outfitIds.Length == 0
+        outfitKey = "location_towns"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+    
+    if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+        outfitKey = ""
+        string locationName = currentLocation.GetName()
+        if locationName == "Dawnstar"
+            outfitKey = "location_dawnstar"
+        elseif locationName == "Falkreath"
+            outfitKey = "location_falkreath"
+        elseif locationName == "Windhelm"
+            outfitKey = "location_windhelm"
+        elseif locationName == "Markarth"
+            outfitKey = "location_markarth"
+        elseif locationName == "Morthal"
+            outfitKey = "location_morthal"
+        elseif locationName == "Riften"
+            outfitKey = "location_riften"
+        elseif locationName == "Solitude"
+            outfitKey = "location_solitude"
+        elseif locationName == "High Hrothgar"
+            outfitKey = "location_high_hrothgar"
+        elseif locationName == "Whiterun"
+            outfitKey = "location_whiterun"
+        elseif locationName == "Winterhold"
+            outfitKey = "location_winterhold"
+        elseif locationName == "Raven Rock"
+            outfitKey = "location_raven Rock"  
+        endif
+        if outfitKey != ""
+            bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+            if hasSet
+                return currentBondageSet
+            endif
+            outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+            bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        endif
+    endif
+
+    if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+        outfitKey = "location_any_city"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+
+    if outfitIds.Length == 0
+        outfitKey = "location_all_areas"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+
+    if outfitIds.Length == 0
+        return -1
+    endif
+
+    return outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
+
+    ;debug.MessageBox(outfitIds)
+
+endfunction
 
 function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
 
@@ -122,69 +352,71 @@ function SetActiveBondageSet(bool safeLocation, Location currentLocation)
 
     elseif currentLocation.HasKeywordString("LocTypeCity")
 
+        string locationName = currentLocation.GetName()
+
         ;debug.MessageBox(currentLocation.GetName())
 
-        if currentLocation.GetName() == "Dawnstar"
+        if locationName == "Dawnstar"
             setsList = GetSetsByUsage("Location - Dawnstar")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Falkreath"
+        elseif locationName == "Falkreath"
             setsList = GetSetsByUsage("Location - Falkreath")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Windhelm"
+        elseif locationName == "Windhelm"
             setsList = GetSetsByUsage("Location - Windhelm")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Markarth"
+        elseif locationName == "Markarth"
             setsList = GetSetsByUsage("Location - Markarth")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Morthal"
+        elseif locationName == "Morthal"
             setsList = GetSetsByUsage("Location - Morthal")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Riften"
+        elseif locationName == "Riften"
             setsList = GetSetsByUsage("Location - Riften")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Solitude"
+        elseif locationName == "Solitude"
             setsList = GetSetsByUsage("Location - Solitude")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "High Hrothgar"
+        elseif locationName == "High Hrothgar"
             setsList = GetSetsByUsage("Location - High Hrothgar")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Whiterun"
+        elseif locationName == "Whiterun"
             setsList = GetSetsByUsage("Location - Whiterun")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Winterhold"
+        elseif locationName == "Winterhold"
             setsList = GetSetsByUsage("Location - Winterhold")
             if setsList.Length > 0
                 found = true
             endif
 
-        elseif currentLocation.GetName() == "Raven Rock"
+        elseif locationName == "Raven Rock"
             setsList = GetSetsByUsage("Location - Raven Rock")
             if setsList.Length > 0
                 found = true
@@ -1866,41 +2098,92 @@ function BindingBondageItemSubMenu(Actor a, int mode, int branch, Form item)
 
 endfunction
 
-function SaveWornDdItemsAsSet(Actor a)
+function SaveWornDdItemsAsSet(Actor theSub)
 
-    ;display dialogue 
+    string bondageOutfitFile
+
     UIExtensions.InitMenu("UITextEntryMenu")
     UIExtensions.OpenMenu("UITextEntryMenu")
-    string setName = UIExtensions.GetMenuResultString("UITextEntryMenu")
-    if setName != ""
-        StorageUtil.StringListAdd(TheWardrobe, "sets_list", setName)
+    string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
+    if result != ""
+        ;loadedSetName = result
+
+        int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
+        JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", result, false)
+        int nextId = lastUid + 1
+        JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", nextId, false)
+        JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", nextId)
+        JsonUtil.Save(bondageOutfitsFile)
+        bondageOutfitFile = "bind_bondage_outfit_" + nextId + ".json"
+        ;loadedSetId = nextId
+
+        ;StorageUtil.StringListAdd(TheWardrobe, "sets_list", result)
     else
         return
     endif
 
-    StorageUtil.FormListClear(TheWardrobe, "set_" + setName)
+    GoToState("WorkingState")
 
-	Form[] inventory = a.GetContainerForms()
+    JsonUtil.FormListClear(bondageOutfitFile, "fixed_bondage_items")
+    ;StorageUtil.FormListClear(TheWardrobe, "set_" + loadedSetName)
+
+	Form[] inventory = theSub.GetContainerForms()
 	int i = 0
     int kwi = 0
 	while i < inventory.Length
         Form dev = inventory[i]
-        if dev.HasKeyWord(zlib.zad_inventoryDevice)
+        if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
             bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
             if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
                 bind_Utility.WriteToConsole("quest or blocking device")
             else
                 bind_Utility.WriteToConsole("dev: " + dev.GetName() + " binding item: " + StorageUtil.GetIntValue(dev, "binding_bondage_item", 0))
 
-                StorageUtil.FormListAdd(TheWardrobe, "set_" + setName, dev, false)
-
+                ;StorageUtil.FormListAdd(TheWardrobe, "set_" + loadedSetName, dev, false)
+                JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
 
             endif
         endif
         i += 1
     endwhile
 
-    debug.MessageBox("Set " + setName + " saved")
+    GoToState("")
+
+    JsonUtil.Save(bondageOutfitFile)
+
+    ; ;display dialogue 
+    ; UIExtensions.InitMenu("UITextEntryMenu")
+    ; UIExtensions.OpenMenu("UITextEntryMenu")
+    ; string setName = UIExtensions.GetMenuResultString("UITextEntryMenu")
+    ; if setName != ""
+    ;     StorageUtil.StringListAdd(TheWardrobe, "sets_list", setName)
+    ; else
+    ;     return
+    ; endif
+
+    ; StorageUtil.FormListClear(TheWardrobe, "set_" + setName)
+
+	; Form[] inventory = a.GetContainerForms()
+	; int i = 0
+    ; int kwi = 0
+	; while i < inventory.Length
+    ;     Form dev = inventory[i]
+    ;     if dev.HasKeyWord(zlib.zad_inventoryDevice) && a.IsEquipped(dev)
+    ;         bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
+    ;         if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
+    ;             bind_Utility.WriteToConsole("quest or blocking device")
+    ;         else
+    ;             bind_Utility.WriteToConsole("dev: " + dev.GetName() + " binding item: " + StorageUtil.GetIntValue(dev, "binding_bondage_item", 0))
+
+    ;             StorageUtil.FormListAdd(TheWardrobe, "set_" + setName, dev, false)
+
+
+    ;         endif
+    ;     endif
+    ;     i += 1
+    ; endwhile
+
+    debug.MessageBox("Set " + result + " saved")
 
 endfunction
 
@@ -1913,6 +2196,8 @@ bind_MainQuestScript property main auto
 bind_RulesManager property rms auto
 
 zadLibs property zlib auto
+
+FormList property bind_dd auto
 
 FormList property bind_BondageList auto
 FormList property bind_BondageFactions auto

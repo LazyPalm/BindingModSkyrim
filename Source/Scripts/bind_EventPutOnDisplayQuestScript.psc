@@ -97,7 +97,7 @@ function EventStart()
 
     bind_MovementQuestScript.PlayKneel(theSub)
 
-    fs.EventGetSubReady(theSub, theDom, true, true, true, false)
+    fs.EventGetSubReady(theSub, theDom, "event_put_on_display");, true, true, true, false)
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 

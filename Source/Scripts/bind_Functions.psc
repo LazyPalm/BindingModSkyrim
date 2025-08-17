@@ -42,6 +42,8 @@ int inConversation = 0
 
 int saveGameUid
 
+string bondageOutfitsFile = "bind_bondage_outfits.json"
+
 Event OnInit()
 
 	if self.IsRunning()
@@ -140,6 +142,8 @@ function LoadGame()
 	if StorageUtil.GetIntValue(theSubRef, "kneeling_required", 1) == 0 ;if does not exist - required is the default state
 		bind_GlobalKneelingOK.SetValue(1.0) ;if not required, always make this OK
 	endif
+
+
 
 endfunction
 
@@ -280,7 +284,9 @@ Function ClearDom()
 
 	bind_Utility.DoSleep(2.0)
 
-	gmanage.RestoreWornGear(theSubRef)
+	;gmanage.RestoreWornGear(theSubRef)
+
+	gmanage.WearOutfit(theSubRef, "unsafe")
 
 	theDomRef = none
 
@@ -400,140 +406,217 @@ EndFunction
 int lastLocationSafetyFlag = 0
 bool safeAreaOldState
 
-function EnteringSafeArea()
-endfunction
+; function EnteringSafeArea()
+; endfunction
 
-function LeavingSafeArea()
-endfunction
+; function LeavingSafeArea()
+; endfunction
 
-state ProcessLocationArrivedState
+; state ProcessLocationArrivedState
+
+; 	event OnUpdate()
+
+; 		bind_Utility.WriteNotification("Running arrived checks...")
+
+; 		if bind_GlobalSafeZone.GetValue() == 2
+; 			EnteringSafeArea()
+; 		else
+; 			LeavingSafeArea()
+; 		endif
+
+; 		GoToState("")
+
+; 	endevent
+
+;     function EnteringSafeArea()
+
+;         if main.AdventuringAutomatic == 0
+; 			if rman.GetActiveBondageRulesCount(theSubRef) == 0 && !rman.IsNudityRequired(theSubRef, true) 
+; 				return ;does not need to do anything
+; 			endif
+;             ;TODO - this needs to check if player has active bondage rules            
+;             if !GetSafeAreaBondageApplied()
+; 				CalculateDistanceAtAction()
+; 				;TODO - check to see if rules are already followed??
+;                 MarkSubBrokeRule("I did not ask to have my safe area rules added", true)
+;             endif
+;             return
+;         endif
+
+;         StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 1) ;set to starting
+
+;         if theDomRef.GetDistance(theSubRef) < 1500.0
+;             bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
+; 			bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, true)
+
+; 			if nudityRuleFlag
+; 				gmanage.WearOutfit(theSubRef, "nude")
+; 				bind_Utility.DoSleep(2.0)
+; 			elseif bikiniRuleFlag
+; 				gmanage.WearOutfit(theSubRef, "bikini")
+; 				bind_Utility.DoSleep(2.0)
+; 			else
+; 				gmanage.WearOutfit(theSubRef, "safe")
+; 				bind_Utility.DoSleep(2.0)
+; 			endif
+
+; 			; bind_NudityChecker ncheck = bind_NudityChecker.GetNudityChecker()
+; 			; int nudityCheck = ncheck.NudityCheck(theSubRef)
+; 			; debug.MessageBox("nudity: " + nudityCheck)
+;             ; ;if nudityRuleFlag && !gmanage.IsNude(theSubRef)
+; 			; if (nudityRuleFlag && nudityCheck > 0) || (bikiniRuleFlag && nudityCheck > 1)
+;             ;     gmanage.RemoveWornGear(theSubRef)
+; 			; 	bind_Utility.DoSleep(2.0)
+;             ; endif
+;             bms.UpdateBondage(theSubRef, true)
+;             StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
+;         else
+;             ;NOTE - need the dom to do an LOS check and run the rule enforcement code when they see the sub
+;             bind_Utility.WriteInternalMonologue(GetDomTitle() + " is not nearby to enforce my rules...")
+;             StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 3) ;set to to-do
+;         endif
+
+;     endfunction
+
+;     function LeavingSafeArea()
+
+;         if main.AdventuringAutomatic == 0
+; 			;debug.MessageBox("leaving??")
+;             return
+;         endif
+
+;         StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
+;         bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
+; 		bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, false)
+
+; 		bms.UpdateBondage(theSubRef, true)
+; 		bind_Utility.DoSleep(2.0)
+
+; 		if nudityRuleFlag
+; 			gmanage.WearOutfit(theSubRef, "nude")
+; 			bind_Utility.DoSleep(2.0)
+; 		elseif bikiniRuleFlag
+; 			gmanage.WearOutfit(theSubRef, "bikini")
+; 			bind_Utility.DoSleep(2.0)
+; 		else
+; 			gmanage.WearOutfit(theSubRef, "unsafe")
+; 			bind_Utility.DoSleep(2.0)
+; 		endif
+
+; 		; bind_NudityChecker ncheck = bind_NudityChecker.GetNudityChecker()
+; 		; int nudityCheck = ncheck.NudityCheck(theSubRef)
+;         ; bms.UpdateBondage(theSubRef, true)
+; 		; bind_Utility.DoSleep(2.0)
+;         ; if !nudityRuleFlag && !bikiniRuleFlag && nudityCheck < 2
+; 		; 	debug.MessageBox("restoring worn gear?")
+;         ;     gmanage.RestoreWornGear(theSubRef)
+;         ; endif
+
+;     endfunction
+
+; endstate
+
+; state ProcessLocationChangeState
+
+; 	event OnUpdate()
+
+; 		bool safeAreaNewState = false
+; 		bool outdoors = true
+; 		if theSubRef.GetParentCell().IsInterior()
+
+; 			if newLoc.HasKeyword(LocTypePlayerHouse)
+; 				debug.Notification("moving into a player home...")
+; 				safeAreaNewState = true
+; 			elseif newLoc.HasKeyWord(LocTypeInn)
+; 				debug.Notification("moving into a free standing inn...")
+; 				safeAreaNewState = true
+; 			elseif lastOutdoorLoc.HasKeyword(LocTypeCity) || lastOutdoorLoc.HasKeyword(LocTypeTown)
+; 				debug.Notification("moving into safe (indoor) area...")
+; 				safeAreaNewState = true
+; 			else
+; 				debug.Notification("moving into dangerous (indoor) area...")
+; 			endif
+
+; 		else
+; 			;store this as the last outdoor location
+; 			lastOutdoorLoc = newLoc
+
+; 			;see if this is a dangerous area
+; 			if newLoc.HasKeyword(LocTypeCity) 
+; 				debug.Notification("moving into safe area (city)...")
+; 				safeAreaNewState = true
+; 			elseif newLoc.HasKeyword(LocTypeTown)
+; 				debug.Notification("moving into safe area (town)...")
+; 				safeAreaNewState = true
+; 			else
+; 				debug.Notification("moving into dangerous area...")
+; 			endif
+
+; 		endif
+
+; 		;debug.MessageBox("safeAreaNewState: " + safeAreaNewState + " safeAreaOldState: " + safeAreaOldState)
+
+; 		if safeAreaOldState != safeAreaNewState
+; 			if safeAreaNewState
+; 				bind_GlobalSafeZone.SetValue(2)
+; 				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
+; 				;bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
+; 				bind_Utility.WriteNotification("I am entering a safe area...", bind_Utility.TextColorRed())
+; 			else
+; 				bind_GlobalSafeZone.SetValue(1)
+; 				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
+; 				;bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
+; 				bind_Utility.WriteNotification("I am leaving a safe area...", bind_Utility.TextColorRed())
+; 			endif
+; 			;bms.SetActiveBondageSet(true, newLoc) ;make this better
+; 		endif
+
+; 		bms.SetActiveBondageSet((bind_GlobalSafeZone.GetValue() == 2), newLoc) ;make this better
+
+; 		safeAreaOldState = safeAreaNewState
+
+; 		GotoState("ProcessLocationArrivedState")
+; 		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+
+; 	endevent
+
+; endstate
+
+state ArrivalCheckState
 
 	event OnUpdate()
 
-		bind_Utility.WriteNotification("Running arrived checks...")
+		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
 
-		if bind_GlobalSafeZone.GetValue() == 2
-			EnteringSafeArea()
-		else
-			LeavingSafeArea()
-		endif
+		if !ModInRunningState()
 
-		GoToState("")
+			bind_Utility.WriteToConsole("ArrivalCheckState - Quest is running... terminate")
 
-	endevent
+		elseif targetSetId == main.ActiveBondageSetId
 
-    function EnteringSafeArea()
-
-        if main.AdventuringAutomatic == 0
-			if rman.GetActiveBondageRulesCount(theSubRef) == 0 && !rman.IsNudityRequired(theSubRef, true) 
-				return ;does not need to do anything
-			endif
-            ;TODO - this needs to check if player has active bondage rules            
-            if !GetSafeAreaBondageApplied()
-				CalculateDistanceAtAction()
-                MarkSubBrokeRule("I did not ask to have my safe area rules added", true)
-            endif
-            return
-        endif
-
-        StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 1) ;set to starting
-
-        if theDomRef.GetDistance(theSubRef) < 1500.0
-            bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
-            if nudityRuleFlag && !gmanage.IsNude(theSubRef)
-                gmanage.RemoveWornGear(theSubRef)
-				bind_Utility.DoSleep(2.0)
-            endif
-            bms.UpdateBondage(theSubRef, true)
-            StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
-        else
-            ;NOTE - need the dom to do an LOS check and run the rule enforcement code when they see the sub
-            bind_Utility.WriteInternalMonologue(GetDomTitle() + " is not nearby to enforce my rules...")
-            StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 3) ;set to to-do
-        endif
-
-    endfunction
-
-    function LeavingSafeArea()
-
-        if main.AdventuringAutomatic == 0
-			;debug.MessageBox("leaving??")
-            return
-        endif
-
-        StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
-        bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
-        bms.UpdateBondage(theSubRef, true)
-		bind_Utility.DoSleep(2.0)
-        if !nudityRuleFlag && gmanage.IsNude(theSubRef)
-            gmanage.RestoreWornGear(theSubRef)
-        endif
-
-    endfunction
-
-endstate
-
-state ProcessLocationChangeState
-
-	event OnUpdate()
-
-		bool safeAreaNewState = false
-		bool outdoors = true
-		if theSubRef.GetParentCell().IsInterior()
-
-			if newLoc.HasKeyword(LocTypePlayerHouse)
-				debug.Notification("moving into a player home...")
-				safeAreaNewState = true
-			elseif newLoc.HasKeyWord(LocTypeInn)
-				debug.Notification("moving into a free standing inn...")
-				safeAreaNewState = true
-			elseif lastOutdoorLoc.HasKeyword(LocTypeCity) || lastOutdoorLoc.HasKeyword(LocTypeTown)
-				debug.Notification("moving into safe (indoor) area...")
-				safeAreaNewState = true
-			else
-				debug.Notification("moving into dangerous (indoor) area...")
-			endif
+			bind_Utility.WriteToConsole("ArrivalCheckState - already in this set... terminating")
 
 		else
-			;store this as the last outdoor location
-			lastOutdoorLoc = newLoc
 
-			;see if this is a dangerous area
-			if newLoc.HasKeyword(LocTypeCity) 
-				debug.Notification("moving into safe area (city)...")
-				safeAreaNewState = true
-			elseif newLoc.HasKeyword(LocTypeTown)
-				debug.Notification("moving into safe area (town)...")
-				safeAreaNewState = true
+			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
+
+			if main.AdventuringAutomatic == 1
+
+				bind_Utility.WriteToConsole("ArrivalCheckState - update bondage")
+				bind_Utility.WriteNotification("updating bondage...", bind_Utility.TextColorRed())
+				bms.EquipBondageOutfit(theSubRef, main.ActiveBondageSetId)
+
 			else
-				debug.Notification("moving into dangerous area...")
+
+				bind_Utility.WriteNotification("start conversation?", bind_Utility.TextColorRed())
+				bind_Utility.WriteToConsole("ArrivalCheckState - start conversation")
+				debug.MessageBox("This is not coded yet... use auto")
+
 			endif
 
 		endif
 
-		;debug.MessageBox("safeAreaNewState: " + safeAreaNewState + " safeAreaOldState: " + safeAreaOldState)
-
-		if safeAreaOldState != safeAreaNewState
-			if safeAreaNewState
-				bind_GlobalSafeZone.SetValue(2)
-				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
-				;bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
-				bind_Utility.WriteNotification("I am entering a safe area...", bind_Utility.TextColorRed())
-			else
-				bind_GlobalSafeZone.SetValue(1)
-				StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
-				;bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
-				bind_Utility.WriteNotification("I am leaving a safe area...", bind_Utility.TextColorRed())
-			endif
-			;bms.SetActiveBondageSet(true, newLoc) ;make this better
-		endif
-
-		bms.SetActiveBondageSet((bind_GlobalSafeZone.GetValue() == 2), newLoc) ;make this better
-
-		safeAreaOldState = safeAreaNewState
-
-		GotoState("ProcessLocationArrivedState")
-		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+		GotoState("")
 
 	endevent
 
@@ -542,12 +625,116 @@ endstate
 Location lastOutdoorLoc
 Location newLoc
 
+function ProcessLocationChangeAnyState(Location oldLocation, Location newLocation)
+
+	;NOTE - this will always be called first
+
+	bind_Utility.WriteToConsole("DEBUG - Process location change")
+
+	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
+	lastLocation = oldLocation
+	currentLocation = newLocation
+
+	TheSubCurrentLocation.ForceLocationTo(newLocation)
+
+	bool isIndoors = theSubRef.IsInInterior()
+
+	if isIndoors
+		main.SubIndoors = 1
+	else
+		main.SubIndoors = 0
+	endif
+
+endfunction
+
 function ProcessLocationChange(Location oldLocation, Location newLocation)
 
-	UnregisterForUpdate()
-	GoToState("ProcessLocationChangeState")
-	newLoc = newLocation
-	RegisterForSingleUpdate(3.0)
+	bind_Utility.WriteToConsole("DEBUG - Process location change")
+
+	; if newlocation.HasKeywordString("LocTypeCity")
+	; 	main.BondageSetLocation = "City"
+	; elseif newLocation.HasKeywordString("LocTypeTown")
+	; 	main.BondageSetLocation = "Town"
+	; endif
+
+	; bind_Utility.WriteNotification("BondageSetLocation: " + main.BondageSetLocation, bind_Utility.TextColorRed())
+
+	int currentBondageSetId = main.ActiveBondageSetId
+	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
+
+	if main.ActiveBondageSetId == 0
+		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorRed())
+	else
+		if main.ActiveBondageSetId != currentBondageSetId
+			;update bondage??
+			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorRed())
+			UnregisterForUpdate()
+			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+			GotoState("ArrivalCheckState")
+		else
+			bind_Utility.WriteToConsole("Keep bondage outfit: " + currentBondageSetId)
+		endif
+	endif
+
+	if newLocation.HasKeyword(LocTypePlayerHouse) || newLocation.HasKeyWord(LocTypeInn) || newLocation.HasKeyword(LocTypeCity) || newLocation.HasKeyword(LocTypeTown) || newlocation.HasKeyWord(LocTypeStore) || newlocation.HasKeyWord(LocTypeDwelling) || newlocation.HasKeyWord(LocTypeCastle) || newlocation.HasKeyWord(LocTypeHouse)
+		;safe area
+		bind_GlobalSafeZone.SetValue(2)
+	else
+		;dangerous areaa
+		bind_GlobalSafeZone.SetValue(1)
+	endif
+
+	int count = newlocation.GetNumKeywords()
+	bind_Utility.WriteToConsole("keywords: " + count)
+	int index
+	while (index < count)
+		Keyword kw = newlocation.GetNthKeyword(index)
+		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
+		index += 1
+	endwhile
+
+	;clear stuff
+
+	rman.ClearLocationPermissions(theSubRef)
+
+	bind_GlobalLocationHasFurniture.SetValue(0)
+	main.bind_GlobalLocationHasBed.SetValue(0)
+
+	;return
+
+; get rid of safe/unsafe areas
+; get rid of bondage rules
+
+; bondage set
+; - must have at least one (maybe 2, one with heavy one with cuffs?)
+; - default one will be defined 
+; - change for location (auto only??) (loctypecity (specifics, whiterun, etc.), loctypetown, loctypecastle, loctypeplayerhome, etc.) - city or town bondage will carry outside of the city or town and will not change until arrival at new location (or adventuring request - active set will be put on after ends, or arrival set)
+; - nude option on bondage set (maybe have strip slots? so shoes could be kept for instance)
+; - block item add/removes when bondage set is equipped?  maybe allow items swaps if the slot allows an active armor item?? (example - slot 32 is not avialable when bondage rules are active)
+; - process location change will update the BondageSetLocation - test to see if set needs to change and leave alone if not
+; - maybe do bikini/erotic armor blocks on set??
+
+; adventuring request
+; - ask the dom to go adventuring. They will specify hours / maybe all daylight
+; - after this you have to check into an inn after dark
+; - lift this requirement if in dungeon??
+; - maybe deny this if after dark or too many punishments due
+; - could still go out nude/bound if denied?
+; - maybe have an array of keep certain bondage items while adventuring flags?
+
+; furniture
+; - only remove heavy bondage / shackles?
+; - maybe don't gag?
+; - don't change bondage set nudity state (camping, tie up with clothing if enabled)
+
+; events
+; - maybe add flags for forced nudity / gagging (opt in vs. current defaulting to it)
+
+
+	; UnregisterForUpdate()
+	; GoToState("ProcessLocationChangeState")
+	; newLoc = newLocation
+	; RegisterForSingleUpdate(3.0)
 
 	;KEEP THIS - 3/8/25
 
@@ -575,9 +762,9 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	; 	lastLocationSafetyFlag = 2
 	; endif
 
-	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
-	lastLocation = oldLocation
-	currentLocation = newLocation
+	; bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
+	; lastLocation = oldLocation
+	; currentLocation = newLocation
 
 	; if !theSubRef.GetParentCell().IsInterior()
 	; 	bind_GlobalTimeEnteredOutdoorLocation.SetValue(bind_Utility.GetTime())
@@ -585,7 +772,7 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	; 	TheSubCurrentOutdoorLocation.ForceLocationTo(newLocation)
 	; endif
 
-	TheSubCurrentLocation.ForceLocationTo(newLocation)
+	;TheSubCurrentLocation.ForceLocationTo(newLocation)
 
 	; bind_Utility.WriteToConsole("city or town: " + InCityOrTownCheck())
 
@@ -604,13 +791,13 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	; 	endif
 	; endif
 
-	bool isIndoors = theSubRef.IsInInterior()
+	; bool isIndoors = theSubRef.IsInInterior()
 
-	if isIndoors
-		main.SubIndoors = 1
-	else
-		main.SubIndoors = 0
-	endif
+	; if isIndoors
+	; 	main.SubIndoors = 1
+	; else
+	; 	main.SubIndoors = 0
+	; endif
 
 	; bool enteringSafeArea = false
 	; bool leavingSafeArea = false
@@ -714,12 +901,12 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	; 	bind_GoAdventuringQuest.Start()
 	; endif
 
-	rman.ClearLocationPermissions(theSubRef)
+	; ;clear stuff
 
-	;clear stuff
+	; rman.ClearLocationPermissions(theSubRef)
 
-	bind_GlobalLocationHasFurniture.SetValue(0)
-	main.bind_GlobalLocationHasBed.SetValue(0)
+	; bind_GlobalLocationHasFurniture.SetValue(0)
+	; main.bind_GlobalLocationHasBed.SetValue(0)
 
 endfunction
 
@@ -1579,7 +1766,16 @@ Function SafeWord()
 
 	if restoreBondage
 		WindowOutput("Safeword: re-applying bondage...")
-		bms.UpdateBondage(theSubRef, true)
+		;bms.UpdateBondage(theSubRef, true)
+
+		main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+		int outfitId = main.ActiveBondageSetId
+		;debug.MessageBox("outfit id: " + outfitId)
+		if outfitId > 0
+			bms.EquipBondageOutfit(theSubRef, outfitId)
+			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
+		endif
+
 	endif
 
 	FutureDom.Clear()
@@ -1901,24 +2097,35 @@ event OnPauseStart()
 	int restoredGear = 0
 	int removedBondage = 0
 	if bms.IsInBondage(theSubRef)
-		bms.SnapshotCurrentBondage(theSubRef)
+		;bms.SnapshotCurrentBondage(theSubRef)
 		bms.RemoveAllDetectedBondageItems(theSubRef)
 		removedBondage = 1
 	endif
-	if gmanage.IsNude(theSubRef)
-		gmanage.RestoreWornGear(theSubRef)
-		restoredGear = 1
-	endif
+	gmanage.WearOutfit(theSubRef, "unsafe")
+	; if gmanage.IsNude(theSubRef)
+		
+	; 	;gmanage.RestoreWornGear(theSubRef)
+	; 	restoredGear = 1
+	; endif
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_restored_gear", restoredGear)
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_removed_bondage", removedBondage)
 endevent
 
 event OnPauseEnd()
 	if StorageUtil.GetIntValue(theSubRef, "binding_pause_restored_gear", 0) == 1
-		gmanage.RemoveWornGear(theSubRef)
+		GetSubDressed()
 	endif
 	if StorageUtil.GetIntValue(theSubRef, "binding_pause_removed_bondage", 0) == 1
-		bms.RestoreFromSnapshot(theSubRef)
+		;bms.UpdateBondage(theSubRef)
+
+		main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+		int outfitId = main.ActiveBondageSetId
+		;debug.MessageBox("outfit id: " + outfitId)
+		if outfitId > 0
+			bms.EquipBondageOutfit(theSubRef, outfitId)
+			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
+		endif
+
 	endif
 endevent
 
@@ -2139,45 +2346,84 @@ endfunction
 
 bool eventRemovedClothing
 
-function EventGetSubReady(Actor sub, Actor dom, bool playAnimations = true, bool stripClothing = true, bool addGag = false, bool freeWrists = false, bool removeAll = false)
+;function EventGetSubReady(Actor sub, Actor dom, bool playAnimations = true, bool stripClothing = true, bool addGag = false, bool freeWrists = false, bool removeAll = false)
+function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	eventRemovedClothing = false
+
+	;snapshot gear
+	Form[] inventory = sub.GetContainerForms()
+	StorageUtil.FormListClear(sub, "bind_event_worn_gear")
+	int i = 0
+	while i < inventory.Length
+		Form item = inventory[i]
+		If item.IsPlayable()
+			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+				StorageUtil.FormListAdd(sub, "bind_event_worn_gear", item)
+			endif
+		EndIf
+		i += 1
+	endwhile
 
     bind_MovementQuestScript.WalkTo(dom, sub)
 
 	bind_MovementQuestScript.FaceTarget(dom, sub)
 	bind_Utility.DoSleep()
 
-	if playAnimations
-    	bind_MovementQuestScript.PlayDoWork(dom)
+	bind_MovementQuestScript.PlayDoWork(dom)
+
+	int[] outfitIds
+
+	if eventName != ""
+		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + eventName)
+		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + outfitIds)
 	endif
 
-    if bms.SnapshotCurrentBondage(sub)
-        bind_Utility.DoSleep()
-    endif
+	bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
+	if outfitIds.Length == 0 || outfitIds == none
+		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_event_any_event")
+		bind_Utility.WriteToConsole("EventGetSubReady - any event: " + outfitIds)
+	endif
 
-	if removeAll
-		if bms.RemoveAllDetectedBondageItems(sub) ; bms.RemoveAllBondageItems(sub)
-			bind_Utility.DoSleep(1.0)
-		endif
-	else
-		if sub.IsInFaction(bms.WearingHeavyBondageFaction()) && freeWrists
-			bms.RemoveItem(sub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
-			bind_Utility.DoSleep()
+	if outfitIds.Length > 0
+		int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
+		bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
+		if outfitId > 0
+			bms.EquipBondageOutfit(theSubRef, outfitId)
 		endif
 	endif
 
-    if !sub.IsInFaction(bms.WearingGagFaction()) && addGag
-        bms.AddItem(sub, bms.BONDAGE_TYPE_GAG())
-        bind_Utility.DoSleep()
-    endif
+	; if playAnimations
+    ; 	bind_MovementQuestScript.PlayDoWork(dom)
+	; endif
 
-	if !gmanage.IsNude(sub) && stripClothing
-		if gmanage.RemoveWornGear(sub)
-			eventRemovedClothing = true
-			bind_Utility.DoSleep(1.0)
-		endif
-	endif
+    ; if bms.SnapshotCurrentBondage(sub)
+    ;     bind_Utility.DoSleep()
+    ; endif
+
+	; if removeAll
+	; 	if bms.RemoveAllDetectedBondageItems(sub) ; bms.RemoveAllBondageItems(sub)
+	; 		bind_Utility.DoSleep(1.0)
+	; 	endif
+	; else
+	; 	if sub.IsInFaction(bms.WearingHeavyBondageFaction()) && freeWrists
+	; 		bms.RemoveItem(sub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
+	; 		bind_Utility.DoSleep()
+	; 	endif
+	; endif
+
+    ; if !sub.IsInFaction(bms.WearingGagFaction()) && addGag
+    ;     bms.AddItem(sub, bms.BONDAGE_TYPE_GAG())
+    ;     bind_Utility.DoSleep()
+    ; endif
+
+	; if stripClothing ;!gmanage.IsNude(sub) && stripClothing
+	; 	;if gmanage.RemoveWornGear(sub)
+	; 	gmanage.WearOutfit(sub, "nude")
+	; 	eventRemovedClothing = true
+	; 	bind_Utility.DoSleep(1.0)
+	; 	;endif
+	; endif
 
 endfunction
 
@@ -2196,15 +2442,41 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
         bind_Utility.DoSleep(1.0)
     endif
 
-	if eventRemovedClothing
-		if gmanage.RestoreWornGear(sub)
-			bind_Utility.DoSleep(1.0)
-		endif
+	;TODO - put back on clothing? not sure if outfit manager is going to be a thing in here. need to store?
+	;TODO - put back on correct bondage outfit
+
+	;restore removed gear
+	Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
+	if wornGear.Length > 0
+		int i = 0
+		while i < wornGear.Length
+			Form item = wornGear[i]
+			if !sub.IsEquipped(item)
+				sub.EquipItem(item, false, true)
+				bind_Utility.DoSleep(0.5)
+			endif
+			i += 1
+		endwhile
 	endif
 
-    if bms.RestoreFromSnapshot(sub)
-        bind_Utility.DoSleep(1.0)
-    endif
+	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
+
+	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+	int outfitId = main.ActiveBondageSetId
+	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
+	if outfitId > 0
+		bms.EquipBondageOutfit(sub, outfitId)
+		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
+	endif
+
+	; if eventRemovedClothing
+	; 	GetSubDressed()
+	; 	bind_Utility.DoSleep(1.0)
+	; endif
+
+    ; if bms.UpdateBondage(sub) ;RestoreFromSnapshot(sub)
+    ;     bind_Utility.DoSleep(1.0)
+    ; endif
 
 endfunction
 
@@ -2383,11 +2655,26 @@ function ApplySafeAreaBondage()
 
 	main.AdventuringSafeBondageApplied = 1
 
-	if rman.IsNudityRequired(theSubRef, true) && !gmanage.IsNude(theSubRef)
-		gmanage.RemoveWornGear(theSubRef) ;should only store this if wearning something
+	; if rman.IsNudityRequired(theSubRef, true) && !gmanage.IsNude(theSubRef)
+	; 	gmanage.RemoveWornGear(theSubRef) ;should only store this if wearning something
+	; endif
+
+	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
+	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, true)
+
+	if nudityRuleFlag
+		gmanage.WearOutfit(theSubRef, "nude")
+		bind_Utility.DoSleep(2.0)
+	elseif bikiniRuleFlag
+		gmanage.WearOutfit(theSubRef, "bikini")
+		bind_Utility.DoSleep(2.0)
+	else
+		gmanage.WearOutfit(theSubRef, "safe")
+		bind_Utility.DoSleep(2.0)
 	endif
 
-	bms.UpdateBondage(theSubRef, true)
+	;TODO - update this for bondage outfits
+	;bms.UpdateBondage(theSubRef, true)
 
 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
 
@@ -2411,11 +2698,28 @@ function ApplyDangerousAreaBondage()
 
 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
 
-	bms.UpdateBondage(theSubRef, true)
+	;bms.UpdateBondage(theSubRef, true)
 
-	if !rman.IsNudityRequired(theSubRef, false) && gmanage.IsNude(theSubRef)
-		gmanage.RestoreWornGear(theSubRef) ;should only run this if nude
+	; if !rman.IsNudityRequired(theSubRef, false) && gmanage.IsNude(theSubRef)
+	; 	gmanage.RestoreWornGear(theSubRef) ;should only run this if nude
+	; endif
+
+	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
+	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, false)
+
+	if nudityRuleFlag
+		gmanage.WearOutfit(theSubRef, "nude")
+		bind_Utility.DoSleep(2.0)
+	elseif bikiniRuleFlag
+		gmanage.WearOutfit(theSubRef, "bikini")
+		bind_Utility.DoSleep(2.0)
+	else
+		gmanage.WearOutfit(theSubRef, "unsafe")
+		bind_Utility.DoSleep(2.0)
 	endif
+
+	;TODO - update this for bondage outfits
+
 
 endfunction
 
@@ -2476,7 +2780,27 @@ bool function UseSkyrimNetCheck(Actor akDom)
 
 	Actor akSub = GetSubRef()
 
-    bool result = true
+    ;bool result = true
+
+	if main.EnableModSkyrimNet != 1
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - not enabled")
+		return false
+	endif
+
+	if main.IsSub != 1
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - player is not sub")
+		return false
+	endif
+
+	if !ModInRunningState()
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - mod not in running state")
+		return false
+	endif
+
+	if akDom != GetDomRef()
+		bind_Utility.WriteToConsole("UseSkyrimNetCheck - actor is not dom")
+		return false
+	endif
 
 	If (!Utility.IsInMenuMode()) \
 	&& (!UI.IsMenuOpen("Dialogue Menu")) \
@@ -2493,31 +2817,25 @@ bool function UseSkyrimNetCheck(Actor akDom)
 		;ContainerMenu check to block when containers are accessed - while they pause the game, they do not trigger IsInMenuMode
 		;IsTextInputEnabled check to block when editable text fields are open
 	Else
-		result = False
 		bind_Utility.WriteToConsole("UseSkyrimNetCheck - menus check failed")
+		return false
 	EndIf
 
     ;in combat check - dragons might be attaching city or towns
     if akSub.IsInCombat() || akDom.IsInCombat() || akSub.IsWeaponDrawn()
-        result = false
 		bind_Utility.WriteToConsole("UseSkyrimNetCheck - combat check failed")
-    endif
+		return false
+	endif
 
     ;zap whipping plays in a scene - so do a scene check
     ;this is probably helpful for any mod that is running scenes outside of dhlp protected events including the base game
     if akSub.GetCurrentScene() || akDom.GetCurrentScene()
-        result = false
 		bind_Utility.WriteToConsole("UseSkyrimNetCheck - in scene check failed")
-    endif
-
-	if result
-		result = (main.EnableModSkyrimNet == 1 && main.IsSub == 1 && theDomRef == akDom && ModInRunningState())
-		if !result
-			bind_Utility.WriteToConsole("UseSkyrimNetCheck - run state check failed")
-		endif
+        return false
 	endif
 
-	return result
+	return true
+
 endfunction
 
 bool function LocationHasFurniture()
@@ -2629,6 +2947,29 @@ function PoseForBondage()
 
 endfunction
 
+function GetSubDressed()
+	bool safeArea = false
+	if InSafeArea() == 1
+		safeArea = true
+	endif
+	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, safeArea) 
+	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, safeArea)
+
+	if nudityRuleFlag
+		gmanage.WearOutfit(theSubRef, "nude")
+		bind_Utility.DoSleep(2.0)
+	elseif bikiniRuleFlag
+		gmanage.WearOutfit(theSubRef, "bikini")
+		bind_Utility.DoSleep(2.0)
+	else
+		if safeArea
+			gmanage.WearOutfit(theSubRef, "safe")
+		else
+			gmanage.WearOutfit(theSubRef, "unsafe")
+		endif
+		bind_Utility.DoSleep(2.0)
+	endif
+endfunction
 
 
 bind_ThinkingDom property brain auto

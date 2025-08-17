@@ -1,0 +1,66 @@
+{
+	"int" : 
+	{
+		"last_set_uid" : 1008
+	},
+	"intList" : 
+	{
+		"bondage_set_ids" : 
+		[
+			1001,
+			1002,
+			1003,
+			1004,
+			1005,
+			1006,
+			1007,
+			1008
+		],
+		"used_for_event_any_event" : 
+		[
+			1004
+		],
+		"used_for_event_bound_sleep" : 
+		[
+			1005
+		],
+		"used_for_event_gagged_for_punishment" : 
+		[
+			1007
+		],
+		"used_for_event_go_adventuring" : 
+		[
+			1006
+		],
+		"used_for_event_harsh_bondage" : 
+		[
+			1003
+		],
+		"used_for_location_all_areas" : 
+		[
+			1002
+		],
+		"used_for_location_player_home" : 
+		[
+			1001
+		],
+		"used_for_location_towns" : 
+		[
+			1001
+		]
+	},
+	"stringList" : 
+	{
+		"bondage_set_names" : 
+		[
+			"At Home Outfit",
+			"All Areas Outfit",
+			"Harsh Bondage Outfit",
+			"All Events Outfit",
+			"Bound Sleep Outfit",
+			"Go Adventuring Outfit",
+			"Gagged For Punishment Outfit",
+			"Red Leather Outfit"
+		]
+	}
+}

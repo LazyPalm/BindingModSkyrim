@@ -2,6 +2,9 @@ Scriptname bind_MainQuestScript extends Quest conditional
 
 string property ActiveQuestName auto conditional
 
+;string property BondageSetLocation auto conditional
+int property ActiveBondageSetId auto conditional
+
 int property LogOutputToScreen auto conditional
 int property ActionKeyMappedKeyCode auto conditional
 int property ActionKeyModifier auto conditional

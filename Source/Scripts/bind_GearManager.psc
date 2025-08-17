@@ -28,6 +28,9 @@ Scriptname bind_GearManager extends Quest conditional
 ; int property ProtectArmSecondaryOnStrip auto conditional ;58 (left arm, undergarnment)
 ; int property ProtectArmPrimaryOnStrip auto conditional ;59 (right arm, outergarment)
 
+string property CurrentOutfit auto conditional
+int property OutfitsLearn auto conditional
+
 int kSlotMaskHead = 0x00000001  ;30
 int kSlotMaskHair = 0x00000002  ;31
 int kSlotMaskBody = 0x00000004  ;32
@@ -109,7 +112,7 @@ string[] slotFriendlyName
 
 ; bool wasUndressed
 
-Function LoadGame(bool rebuildStorage = false)
+Function LoadGame(bool rebuildStorage = false)	
     SetupStorage(rebuildStorage)
 EndFunction
 
@@ -319,6 +322,13 @@ endfunction
 
 bool function RemoveWornGear(Actor act)
 
+	; Form[] outfitItems
+	; if CurrentOutfit != ""
+	; 	outfitItems = StorageUtil.FormListToArray(act, "binding_outfit_set_" + CurrentOutfit)
+	; endif
+
+	; int i
+
 	;TODO - change this to unequip items (vs. removing to hidden container) and store an array with StorageUtil of the items for re-equipping
 
 	Form[] inventory = act.GetContainerForms()
@@ -341,7 +351,7 @@ bool function RemoveWornGear(Actor act)
 
 		If item.IsPlayable()
 
-			if act.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice")
+			if act.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
 
 				int slot = -1
 				if item as Armor
@@ -414,8 +424,12 @@ bool function RestoreWornGear(Actor act)
 		; 	StorageChestDom.RemoveItem(item, 1, true, act)
 		; endif
 
-		act.EquipItem(item, false, true)
-		
+		if act.GetItemCount(item) > 0
+			if !act.IsEquipped(item)
+				act.EquipItem(item, false, true)
+			endif
+		endif
+
 		i += 1
 	
 	endwhile
@@ -423,6 +437,14 @@ bool function RestoreWornGear(Actor act)
 	return true
 
 endfunction
+
+; function TryToUndress(Actor a)
+
+; endfunction
+
+; function TryToDress(Actor a)
+
+; endfunction
 
 ; Function Undress(Actor a, int idx)
 
@@ -859,6 +881,230 @@ bool Function IsWearingNoShoes(Actor a)
 		return false
 	EndIf
 EndFunction
+
+bool wearOutfitRunning
+
+function AddItemToOutfit(Actor a, Armor item)
+
+	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
+
+		debug.Notification("adding item: " + item.GetName() + " to set: " + CurrentOutfit)
+
+		StorageUtil.FormListAdd(a, "binding_outfit_set_" + CurrentOutfit, item, false)
+
+	endif
+
+endfunction
+
+function RemoveItemFromOutfit(Actor a, Armor item)
+
+	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
+
+		debug.Notification("removing item: " + item.GetName() + " to set: " + CurrentOutfit)
+
+		StorageUtil.FormListRemove(a, "binding_outfit_set_" + CurrentOutfit, item, true)
+
+	endif
+
+endfunction
+
+function WearOutfit(Actor a, string setName)
+
+	bind_Utility.WriteToConsole("wear outfit: " + setName)
+	;debug.MessageBox("something called this...")
+
+	wearOutfitRunning = true
+
+	if RemoveWornGear(a)
+
+		Form[] items = StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
+
+		if items.Length > 0
+			int idx = 0
+			while idx < items.Length
+				Form item = items[idx]
+				if item
+					bind_Utility.WriteToConsole("WearOutfit - adding item: " + item)
+					if a.GetItemCount(item) > 0
+						if !a.IsEquipped(item)
+							a.EquipItem(item, false, true)
+						endif
+					else
+						bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
+					endif
+				endif
+				idx += 1
+			endwhile
+		endif
+
+	endif
+	
+	RegisterForSingleUpdate(5.0)
+
+	CurrentOutfit = setName
+
+endfunction
+
+event OnUpdate()
+	bind_Utility.WriteToConsole("wear outfit running flag off")
+	wearOutfitRunning = false
+endevent
+
+; function WearEroticOutfit(Actor a, string setName)
+
+; 	if RemoveWornGear(a)
+
+; 		Form[] items = StorageUtil.FormListToArray(a, "binding_erotic_set_" + setName)
+
+;         if items.Length > 0
+;             int idx = 0
+;             while idx < items.Length
+;                 Form item = items[idx]
+;                 if item
+;                     bind_Utility.WriteToConsole("WearEroticOutfit - adding item: " + item)
+; 					if a.GetItemCount(item) > 0
+; 						if !a.IsEquipped(item)
+; 							a.EquipItem(item, false, true)
+; 						endif
+; 					else
+; 						bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
+; 					endif
+;                 endif
+;                 idx += 1
+;             endwhile
+;         endif
+
+; 	endif
+
+; endfunction
+
+; function LearnOutfit(Actor a, string setName)
+
+;     StorageUtil.FormListClear(a, "binding_outfit_set_" + setName)
+
+; 	Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+
+; 	Form[] inventory = a.GetContainerForms()
+; 	int i = 0
+;     int kwi = 0
+; 	while i < inventory.Length
+;         Form dev = inventory[i]
+;         if !dev.HasKeyWord(bman.zlib.zad_inventoryDevice) && !dev.HasKeyWord(bman.zlib.zad_Lockable) && a.IsEquipped(dev) && dev.IsPlayable() ;no dd devices
+; 			bind_Utility.WriteToConsole("dev: " + dev.GetName())
+; 			StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
+;         endif
+;         i += 1
+;     endwhile
+
+; endfunction
+
+function LearnOutfit(Actor a, string setName) 
+
+	;sets - safe/unsafe/bikini/erotic/nude
+
+    ;     gear_manager.LearnEroticOutfit(a, "nude")
+    ;     debug.MessageBox("Nude outfit learned")
+    ; elseif listReturn == 2
+    ;     gear_manager.LearnEroticOutfit(a, "bikini", "", true, "bikini")
+    ;     debug.MessageBox("Bikini outfit learned")
+    ; elseif listReturn == 3
+    ;     gear_manager.LearnEroticOutfit(a, "erotic", "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini", true)
+    ;     debug.MessageBox("Erotic Armor outfit learned")
+    ; elseif listReturn == 4
+    ;     gear_manager.LearnOutfit(a, "safe")
+    ;     debug.MessageBox("Safe area outfit learned")
+    ; elseif listReturn == 5
+    ;     gear_manager.LearnOutfit(a, "unsafe")
+
+	string allowedKeyword = ""
+	bool allowNonBodyArmor = false
+	bool allowBodyArmor = false
+	string nameKeyword = ""
+
+	if setName == "nude"
+
+	elseif setName == "bikini"
+		allowedKeyword = "sla_armorhalfnakedbikini|bind_ArmorBikini"
+		nameKeyword = "bikini"
+		allowNonBodyArmor = true
+	elseif setName == "erotic"
+		allowedKeyword = "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini|bind_ArmorErotic"
+		allowNonBodyArmor = true
+	elseif setName == "safe"
+		allowNonBodyArmor = true
+		allowBodyArmor = true
+	elseif setName == "unsafe"
+		allowNonBodyArmor = true
+		allowBodyArmor = true
+	endif
+
+    StorageUtil.FormListClear(a, "binding_outfit_set_" + setName)
+
+	Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+	; Armor pelvis2 = a.GetWornForm(kSlotMaskPelvisSecondary) as Armor
+	; debug.MessageBox("p2: " + pelvis2.GetName())
+
+	Form[] inventory = a.GetContainerForms()
+	int i = 0
+    int kwi = 0
+	while i < inventory.Length
+        Form dev = inventory[i]
+		if a.IsEquipped(dev)
+			if !dev.HasKeyWord(bman.zlib.zad_inventoryDevice) && !dev.HasKeyWord(bman.zlib.zad_Lockable) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+
+				bool storeThis = true
+				if bodyItem != none && !allowBodyArmor
+					;debug.MessageBox(bodyItem)
+					if bodyItem == dev
+						storeThis = false
+						if nameKeyword != ""
+							if StringUtil.Find(dev.GetName(), nameKeyword, 0) > -1
+								storeThis = true
+							endif
+						endif
+						if allowedKeyword != ""
+							string[] arr = StringUtil.Split(allowedKeyword, "|")
+							;debug.MessageBox(arr)
+							if arr.Length > 0
+								int idx = 0
+								while idx < arr.Length
+									if dev.HasKeyWordString(arr[idx])
+										;debug.MessageBox("found keyword??")
+										storeThis = true
+									endif
+									idx += 1
+								endwhile
+							endif
+						endif
+					endif
+				endif
+
+				if !allowNonBodyArmor && (bodyItem != dev)
+					debug.MessageBox("make it in here???")
+					if dev.HasKeywordString("ArmorJewelry") 
+						;always allow jewelry
+					elseif dev.HasKeyWordString("ClothingFeet") 
+						;always allow shoes
+					else
+						storethis = false
+					endif
+				endif
+
+				if storeThis
+					bind_Utility.WriteToConsole("dev: " + dev.GetName())
+					StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
+				endif
+
+			else
+
+				;bind_Utility.WriteToConsole("ignoring item - dev: " + dev.GetName() + " idx: " + i)
+
+			endif
+		endif
+        i += 1
+    endwhile
+
+endfunction
 
 ; function SetAmmo(Form a)
 ; 	gearBufferAmmo = a

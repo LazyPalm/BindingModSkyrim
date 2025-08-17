@@ -119,7 +119,7 @@ function StartEvent()
         (obj as zadcFurnitureScript).ScriptedDevice = true
     endif
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = true)
+    fs.EventGetSubReady(theSub, theDom, "event_souls_from_bones") ;, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = true)
 
     ;TODO: add a soulstone plug or two??
 

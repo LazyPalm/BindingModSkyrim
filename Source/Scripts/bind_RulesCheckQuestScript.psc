@@ -53,15 +53,15 @@ function EventStart()
 
     if rms.UseFastRuleCheck == 0
 
-        bind_Utility.DisablePlayer()
+        ; bind_Utility.DisablePlayer()
 
-        bind_MovementQuestScript.WalkTo(theDom, theSub)
+        ; bind_MovementQuestScript.WalkTo(theDom, theSub)
 
-        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentRulesCheck())
+        ; bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentRulesCheck())
 
-        bind_MovementQuestScript.FaceTarget(theDom, theSub)
+        ; bind_MovementQuestScript.FaceTarget(theDom, theSub)
 
-        bind_MovementQuestScript.StartWorking(theDom)
+        ; bind_MovementQuestScript.StartWorking(theDom)
 
     endif
 
@@ -71,9 +71,9 @@ function EventStart()
 
     ;debug.MessageBox("in here??")
 
-    bms.UpdateBondage(theSub, true)
+    ; bms.UpdateBondage(theSub, true)
 
-    bms.SnapshotCurrentBondage(theSub)
+    ; bms.SnapshotCurrentBondage(theSub)
 
     ; if (safeZone >= 2 && mqs.AdventuringSuspendRules == 1) || mqs.AdventuringSuspendRules == 0
 
@@ -83,9 +83,9 @@ function EventStart()
 
     if rms.UseFastRuleCheck == 0
 
-        bind_MovementQuestScript.StopWorking(theDom)
+        ; bind_MovementQuestScript.StopWorking(theDom)
 
-        bind_Utility.EnablePlayer()
+        ; bind_Utility.EnablePlayer()
 
     endif
 
@@ -104,11 +104,13 @@ function CheckBehaviorRules(bool safeArea)
 
     ;int nudityRule = rms.GetBehaviorRuleByName("Body Rule:Nudity")
 
-    if rms.IsNudityRequired(theSub, safeArea)
-        gms.RemoveWornGear(theSub)
-    else
+    ; if rms.IsNudityRequired(theSub, safeArea)
+    ;     gms.RemoveWornGear(theSub)
+    ; else
 
-    endif
+    ; endif
+
+    fs.GetSubDressed()
 
     ;TODO - need a location to make this work right
     ;story manager will probably be OK to keep to towns and cities but dialogue should probably be location aware also

@@ -77,7 +77,7 @@ function EventStart()
 
     bind_Utility.DisablePlayer()
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
+    fs.EventGetSubReady(theSub, theDom, "event_bound_sleep") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
 
     int furnitureRoll = Utility.RandomInt(1, 100)
 
@@ -129,7 +129,7 @@ function HogtiedForSleep()
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 
-    bms.AddHogtieBindings(theSub, useBlindfold = false, useHood = (bms.BedtimeUseHood == 1))
+    ;bms.AddHogtieBindings(theSub, useBlindfold = false, useHood = (bms.BedtimeUseHood == 1))
 
     bind_Utility.DoSleep(1.0)
 

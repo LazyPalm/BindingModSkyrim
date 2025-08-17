@@ -83,32 +83,32 @@ function BindSub()
 
     bind_Utility.DisablePlayer()
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
+    fs.EventGetSubReady(theSub, theDom, "event_public_humilation") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
 
-    string foundSet = bms.GetRandomSet("Public Humiliation")
-    usingSet = false
+    ; string foundSet = bms.GetRandomSet("Public Humiliation")
+    ; usingSet = false
 
-    If foundSet != ""
+    ; If foundSet != ""
 
-        bind_Utility.WriteToConsole("Public Humiliation - found set: " + foundSet)
+    ;     bind_Utility.WriteToConsole("Public Humiliation - found set: " + foundSet)
 
-        usingSet = true
+    ;     usingSet = true
 
-        bms.EquipSet(theSub, foundSet)
+    ;     bms.EquipSet(theSub, foundSet)
 
-    Else
+    ; Else
 
-        bool zresult
+    ;     bool zresult
 
-        int i = 0
-        while i < bind_PublicHumiliationItemsList.GetSize()
-            Form dev = bind_PublicHumiliationItemsList.GetAt(i)
-            zresult = bms.AddSpecificItem(theSub, dev as Armor)
-            bind_Utility.DoSleep()
-            i += 1
-        endwhile
+    ;     int i = 0
+    ;     while i < bind_PublicHumiliationItemsList.GetSize()
+    ;         Form dev = bind_PublicHumiliationItemsList.GetAt(i)
+    ;         zresult = bms.AddSpecificItem(theSub, dev as Armor)
+    ;         bind_Utility.DoSleep()
+    ;         i += 1
+    ;     endwhile
 
-    EndIf
+    ; EndIf
 
     bind_MovementQuestScript.StopWorking(theDom)
 

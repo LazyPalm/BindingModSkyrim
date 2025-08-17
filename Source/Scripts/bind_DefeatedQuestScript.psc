@@ -122,7 +122,8 @@ function UntiePlayer()
     endif
 
     bind_MovementQuestScript.PlayDressUndress(theSub)
-    gms.RestoreWornGear(theSub)
+    ;gms.RestoreWornGear(theSub)
+    fs.GetSubDressed()
     bind_Utility.DoSleep(1.0)
 
     bind_Utility.EnablePlayer()

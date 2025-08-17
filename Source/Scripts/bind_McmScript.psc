@@ -210,6 +210,31 @@ string[] slaveryInSkyrimTypes
 int menuIndenturedServants
 string[] indenturedServantsInSkyrimTypes
 
+;outfits
+int selectedOutfit
+int outfitSafe
+int outfitUnsafe
+int outfitNude
+int outfitErotic
+int outfitBikini
+int toggleOutfitsLearn
+
+;bondage outfits
+string[] materials
+
+string bondageOutfitsFile = "bind_bondage_outfits.json"
+string bondageOutfitFile
+
+int inputBondageSetName
+int clickedNewOutfit
+int menuBondageOutfitsList
+string selectedBondageOutfit
+int selectedBondageOutfitId
+int selectedBondageOutfitIndex
+
+int toggleBondageOutfitUseRandomBondage
+
+
 Actor theSub
 
 string slTagsFile = "bind_sl_tags.json"
@@ -222,24 +247,23 @@ Event OnConfigOpen()
 
     Pages[0] = "Status Info"
     Pages[1] = "Bondage Status"
-    Pages[2] = "Bondage Settings"
+    Pages[2] = "Bondage Outfits"
     Pages[3] = "Event Settings"
     Pages[4] = "Points"
     Pages[5] = "Poses"
     Pages[6] = "Gameplay Preferences"
     Pages[7] = "Punishment"
     Pages[8] = "Rules - Behavior"
-    Pages[9] = "Rules - Bondage"
-    Pages[10] = "Rules Settings"
-    Pages[11] = "Sex & Arousal"
-    Pages[12] = "SexLab Tags"
-    Pages[13] = "Stripping"
-    Pages[14] = "Debug"
-    ;Pages[13] = "Diagnostics"
-    Pages[15] = "Dependencies"
-    Pages[16] = "Factions"
-    Pages[17] = "Control Panel"
-    Pages[18] = "SkyrimNet"
+    Pages[9] = "Rules Settings"
+    Pages[10] = "Sex & Arousal"
+    Pages[11] = "SexLab Tags"
+    Pages[12] = "Stripping"
+    Pages[13] = "Debug"
+    Pages[14] = "Dependencies"
+    Pages[15] = "Factions"
+    Pages[16] = "Control Panel"
+    Pages[17] = "SkyrimNet"
+    Pages[18] = "Outfits"
 
     if toggleBehaviorHard.Length != 50 ;lets rebuild...
         toggleBehaviorHard = new int[50]
@@ -364,9 +388,9 @@ Event OnPageReset(string page)
 
             DisplayBondageStatus()
 
-        ElseIf page == "Bondage Settings"
+        ; ElseIf page == "Bondage Settings"
 
-            DisplayBondageSettings()
+        ;     DisplayBondageSettings()
 
         ElseIf page == "Points"
 
@@ -380,9 +404,9 @@ Event OnPageReset(string page)
 
             DisplayBehaviorRules()
 
-        elseif page == "Rules - Bondage"
+        ; elseif page == "Rules - Bondage"
 
-            DisplayBondageRules()
+        ;     DisplayBondageRules()
 
         ElseIf page == "Rules Settings"
         
@@ -433,6 +457,14 @@ Event OnPageReset(string page)
 
             DisplaySkyrimNet()
 
+        elseif page == "Outfits"
+
+            DisplayOutfits()
+
+        elseif page == "Bondage Outfits"
+
+            DisplayBondageOutfits()
+
         EndIf
 
     ;Endif
@@ -444,7 +476,7 @@ event OnOptionHighlight(int option)
 
     ;preferences help
     if option == toggleAdventuringAutomatic
-        SetInfoText("This will trigger automatic arm bondage removal and/or clothing to be added when leaving cities and towns.")
+        SetInfoText("This will trigger automatic bondage outfit changes when changing locations.")
     elseif option == toggleAdventuringSuspendRules
         SetInfoText("This will store/restore all bondage/clothing automatically when leaving/entering cities and towns. This overrides other adventuring strip options.")
     elseif option == toggleGameplayAnyNpcCanDom
@@ -476,14 +508,96 @@ event OnOptionHighlight(int option)
     elseif option == toggleEnableMME
         SetInfoText("Enabling or Disabling will start the Dairy Quest. The dominant will make the PC a milk slave. While the quest is running the dominant will provide Lactacid and command PC to milk and take any produced bottles.")
 
-    elseif option == toggleEnableChim
-        SetInfoText("This will enable the AI Follower Framework CHIM. You must copy the Binding plugin to HerikaServer\\ext folder in the CHIM server folder to recieve commands.")
+    ; elseif option == toggleEnableChim
+    ;     SetInfoText("This will enable the AI Follower Framework CHIM. You must copy the Binding plugin to HerikaServer\\ext folder in the CHIM server folder to recieve commands.")
     elseif option == toggleEnableSkyrimNet
         SetInfoText("This will enable the AI framework SkyrimNet.")
 
     endif
 
 endevent
+
+function DisplayBondageOutfits()
+
+    ;inputBondageSetName = AddInputOption("Bondage Set Name", "")
+
+    AddHeaderOption("Outfits")
+    AddHeaderOption("")
+
+    clickedNewOutfit = AddTextOption("Create New Outfit", "")
+
+    menuBondageOutfitsList = AddMenuOption("Bondage Outfits", selectedBondageOutfit)
+
+    if selectedBondageOutfit != ""
+
+        AddHeaderOption("Set - " + selectedBondageOutfit)
+        AddHeaderOption("")
+
+        inputBondageSetName = AddInputOption("Bondage Outfit Name", selectedBondageOutfit)
+        AddTextOption("", "") ;delete set goes here
+
+        int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
+
+        toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
+
+        
+
+    endif
+
+endfunction
+
+function DisplayOutfits()
+
+    Form[] items ;= StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
+
+    string safeText = ""
+    string unsafeText = ""
+    string nudeText = ""
+    string eroticText = ""
+    string bikiniText = ""
+
+    string selectedMessage = "Selected"
+    if selectedOutfit == 1
+        safeText = selectedMessage
+        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_safe")
+    elseif selectedOutfit == 2
+        unsafeText = selectedMessage
+        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_unsafe")
+    elseif selectedOutfit == 3
+        nudeText = selectedMessage
+        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_nude")
+    elseif selectedOutfit == 4
+        eroticText = selectedMessage
+        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_erotic")
+    elseif selectedOutfit == 5
+        bikiniText = selectedMessage
+        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_bikini")
+    endif
+
+    AddHeaderOption("Outfits")
+    AddHeaderOption("")
+
+    outfitSafe = AddTextOption("Safe Areas Outfit", safeText)
+    outfitUnsafe = AddTextOption("Unsafe Areas Outfit", unsafeText)
+    outfitNude = AddTextOption("Nude Outfit", nudeText)
+    outfitErotic = AddTextOption("Erotic Armor Outfit", eroticText)
+    outfitBikini = AddTextOption("Bikini Armor Outfit", bikiniText)
+    toggleOutfitsLearn = AddToggleOption("Outfits Learn Changes", gmanage.OutfitsLearn)
+
+    if selectedOutfit > 0
+
+        AddHeaderOption("Outfit Items")
+        AddHeaderOption("")
+
+        int i = 0
+        while i < items.Length
+            AddTextOption(items[i].GetName(), "")
+            i += 1
+        endwhile
+
+    endif
+
+endfunction
 
 function DisplaySkyrimNet()
 
@@ -579,7 +693,8 @@ function DisplayControlPanel()
     AddHeaderOption("")
 
     AddTextOption("Safe Area", fs.InSafeArea())
-    AddTextOption("Bondage Set", bmanage.ActiveBondageSet)
+    AddTextOption("Bondage Set", main.ActiveBondageSetId)
+    ;AddTextOption("Outfit", gmanage.CurrentOutfit)
 
     ; AddHeaderOption("Quests - Core")
     ; AddHeaderOption("")
@@ -869,29 +984,33 @@ Function DisplaySexSettings()
 
     AddHeaderOption("Bound Sex Settings")
     AddHeaderOption("")
+    AddTextOption("* Use outfits to manage DD items for event", "")
+    AddTextOption("", "")
 
     ;bound sex flags
-    toggleBoundSexCuffs = AddToggleOption("Add Cuffs", sms.BoundSexCuffs)
-    toggleBoundSexHeavyBondage = AddToggleOption("Add Heavy Bondage", sms.BoundSexHeavyBondage)
-    toggleBoundSexGag = AddToggleOption("Add Gag", sms.BoundSexGag)
-    toggleBoundSexBlindfold = AddToggleOption("Add Blindfold", sms.BoundSexBlindfold)
-    toggleBoundSexHood = AddToggleOption("Add Hood", sms.BoundSexHood)
-    toggleBoundSexAPlug = AddToggleOption("Add Anal Plug", sms.BoundSexAPlug)
-    toggleBoundSexVPlug = AddToggleOption("Add Vaginal Plug", sms.BoundSexVPlug)
-    AddTextOption("", "")
+    ; toggleBoundSexCuffs = AddToggleOption("Add Cuffs", sms.BoundSexCuffs)
+    ; toggleBoundSexHeavyBondage = AddToggleOption("Add Heavy Bondage", sms.BoundSexHeavyBondage)
+    ; toggleBoundSexGag = AddToggleOption("Add Gag", sms.BoundSexGag)
+    ; toggleBoundSexBlindfold = AddToggleOption("Add Blindfold", sms.BoundSexBlindfold)
+    ; toggleBoundSexHood = AddToggleOption("Add Hood", sms.BoundSexHood)
+    ; toggleBoundSexAPlug = AddToggleOption("Add Anal Plug", sms.BoundSexAPlug)
+    ; toggleBoundSexVPlug = AddToggleOption("Add Vaginal Plug", sms.BoundSexVPlug)
+    ; AddTextOption("", "")
 
     AddHeaderOption("Bound Masturbation Settings")
     AddHeaderOption("")
+    AddTextOption("* Use outfits to manage DD items for event", "")
+    AddTextOption("", "")
 
     ;bound masturbation
-    toggleBoundMasturbationCuffs = AddToggleOption("Add Cuffs", sms.BoundMasturbationCuffs)
-    toggleBoundMasturbationGag = AddToggleOption("Add Gag", sms.BoundMasturbationGag)
-    toggleBoundMasturbationBlindfold = AddToggleOption("Add Blindfold", sms.BoundMasturbationBlindfold)
-    toggleBoundMasturbationHood = AddToggleOption("Add Hood", sms.BoundMasturbationHood)
-    toggleBoundMasturbationAPlug = AddToggleOption("Add Anal Plug", sms.BoundMasturbationAPlug)
-    toggleBoundMasturbationVPlug = AddToggleOption("Add Vaginal Plug", sms.BoundMasturbationVPlug)
-    toggleBoundMasturbationUnties = AddToggleOption("Remove Heavy Bondage", sms.BoundMasturbationUnties)
-    AddTextOption("", "")
+    ; toggleBoundMasturbationCuffs = AddToggleOption("Add Cuffs", sms.BoundMasturbationCuffs)
+    ; toggleBoundMasturbationGag = AddToggleOption("Add Gag", sms.BoundMasturbationGag)
+    ; toggleBoundMasturbationBlindfold = AddToggleOption("Add Blindfold", sms.BoundMasturbationBlindfold)
+    ; toggleBoundMasturbationHood = AddToggleOption("Add Hood", sms.BoundMasturbationHood)
+    ; toggleBoundMasturbationAPlug = AddToggleOption("Add Anal Plug", sms.BoundMasturbationAPlug)
+    ; toggleBoundMasturbationVPlug = AddToggleOption("Add Vaginal Plug", sms.BoundMasturbationVPlug)
+    ; toggleBoundMasturbationUnties = AddToggleOption("Remove Heavy Bondage", sms.BoundMasturbationUnties)
+    ; AddTextOption("", "")
 
     ; AddHeaderOption("SL Animation Tags")
     ; AddHeaderOption("")
@@ -1193,14 +1312,14 @@ Function DisplayBondageStatus()
     AddTextOption("Male Privacy (slot 52)", TestBondageItem(kSlotMaskBalls))
     AddTextOption("", "")
 
-    AddHeaderOption("Stored Bondage")
-    AddHeaderOption("")
-    string[] items = bmanage.GetStoredItemsDisplayList(theSub)
-    int i = 0
-    while i < items.Length
-        AddTextOption("Slot " + i, items[i])
-        i += 1
-    endwhile
+    ; AddHeaderOption("Stored Bondage")
+    ; AddHeaderOption("")
+    ; string[] items = bmanage.GetStoredItemsDisplayList(theSub)
+    ; int i = 0
+    ; while i < items.Length
+    ;     AddTextOption("Slot " + i, items[i])
+    ;     i += 1
+    ; endwhile
 
 EndFunction
 
@@ -1255,27 +1374,27 @@ function InitBondageTypesArray()
     endif
 endfunction
 
-Function DisplayBondageSettings()
+; Function DisplayBondageSettings()
 
-    AddTextOption("Bondage favorites menus have been moved", "")
-    AddTextOption("Action button -> Settings -> Manage Favorites", "")
+;     AddTextOption("Bondage favorites menus have been moved", "")
+;     AddTextOption("Action button -> Settings -> Manage Favorites", "")
 
-    ; if bondageTypesMenu.Length != 18
-    ;     bondageTypesMenu = new int[18]
-    ; endif
+;     ; if bondageTypesMenu.Length != 18
+;     ;     bondageTypesMenu = new int[18]
+;     ; endif
 
-    ; InitBondageTypesArray()
+;     ; InitBondageTypesArray()
 
-    ; AddHeaderOption("Bondage Settings")
-    ; AddHeaderOption("")
+;     ; AddHeaderOption("Bondage Settings")
+;     ; AddHeaderOption("")
 
-    ; int i = 0
-    ; while i < bondageTypes.Length
-    ;     bondageTypesMenu[i] = AddMenuOption(bondageTypes[i], bmanage.GetFavoriteItemName(theSub, i))
-    ;     i += 1
-    ; endwhile
+;     ; int i = 0
+;     ; while i < bondageTypes.Length
+;     ;     bondageTypesMenu[i] = AddMenuOption(bondageTypes[i], bmanage.GetFavoriteItemName(theSub, i))
+;     ;     i += 1
+;     ; endwhile
 
-EndFunction
+; EndFunction
 
 Function DisplayPunishmentSettings()
 
@@ -1302,38 +1421,41 @@ Function DisplayEventSettings()
     AddHeaderOption("Harsh Bondage")
     AddHeaderOption("")
     toggleRandomHarshBondage = AddToggleOption("Harsh Bondage - Random Use", main.HarshBondageRandomUse)
+    AddTextOption("", "")
     sliderHarshBondageHours = AddSliderOption("Harsh Bondage - Hours Between Use", main.HarshBondageHoursBetweenUse, "{0}")
     sliderHarshBondageChance = AddSliderOption("Harsh Bondage - Chance To Use", main.HarshBondageChance, "{0}%")
     sliderHarshBondageMin = AddSliderOption("Harsh Bondage - Min. Minutes", main.HarshBondageMinMinutes, "{0}")
     sliderHarshBonadgeMax = AddSliderOption("Harsh Bondage - Max Minutes", main.HarshBondageMaxMinutes, "{0}")
-    toggleHarshUseBoots = AddToggleOption("Harsh Bondage - Use Boots", bmanage.HarshBondageUseBoots)
-    toggleHarshUseAnkles = AddToggleOption("Harsh Bondage - Use Ankles", bmanage.HarshBondageUseAnkles)
-    toggleHarshUseCollar = AddToggleOption("Harsh Bondage - Use Collar", bmanage.HarshBondageUseCollar)
-    toggleHarshUseNipple = AddToggleOption("Harsh Bondage - Use Clamps", bmanage.HarshBondageUseNipple)
-    toggleHarshUseChastity = AddToggleOption("Harsh Bondage - Use Chastity", bmanage.HarshBondageUseChastity)
-    toggleHarshUseHood = AddToggleOption("Harsh Bondage - Use Hood", bmanage.HarshBondageUseHood)
-    toggleHarshUseBlindfold = AddToggleOption("Harsh Bondage - Use Blindfold", bmanage.HarshBondageUseBlindfold)
+
+    ; toggleHarshUseBoots = AddToggleOption("Harsh Bondage - Use Boots", bmanage.HarshBondageUseBoots)
+    ; toggleHarshUseAnkles = AddToggleOption("Harsh Bondage - Use Ankles", bmanage.HarshBondageUseAnkles)
+    ; toggleHarshUseCollar = AddToggleOption("Harsh Bondage - Use Collar", bmanage.HarshBondageUseCollar)
+    ; toggleHarshUseNipple = AddToggleOption("Harsh Bondage - Use Clamps", bmanage.HarshBondageUseNipple)
+    ; toggleHarshUseChastity = AddToggleOption("Harsh Bondage - Use Chastity", bmanage.HarshBondageUseChastity)
+    ; toggleHarshUseHood = AddToggleOption("Harsh Bondage - Use Hood", bmanage.HarshBondageUseHood)
+    ; toggleHarshUseBlindfold = AddToggleOption("Harsh Bondage - Use Blindfold", bmanage.HarshBondageUseBlindfold)
 
     AddHeaderOption("Bound Bedtime (No Beds Rule Active)")
     AddHeaderOption("")
     sliderFurnitureForSleep = AddSliderOption("Furniture - Chance For Sleep Use", main.BedtimeFurnitureForSleep, "{0}")
-    toggleBedtimeUseHood = AddToggleOption("Bound Bedtime - Use Hood", bmanage.BedtimeUseHood)
+    AddTextOption("", "")
+    ;toggleBedtimeUseHood = AddToggleOption("Bound Bedtime - Use Hood", bmanage.BedtimeUseHood)
 
     AddHeaderOption("Put On Display (Special Furniture)")
     AddHeaderOption("")
     toggleRandomSubInFurniture = AddToggleOption("Furniture - Random Use", main.PutOnDisplayRandomUse)
+    AddTextOption("", "")
     sliderFurnitureHours = AddSliderOption("Furniture - Hours Between Use", main.PutOnDisplayHoursBetweenUse, "{0}")
     sliderFurnitureChance = AddSliderOption("Furniture - Chance To Use", main.PutOnDisplayChance, "{0}%")
     sliderFurnitureMin = AddSliderOption("Furniture - Min. Minutes", main.PutOnDisplayMinMinutes, "{0}")
     sliderFurnitureMax = AddSliderOption("Furniture - Max Minutes", main.PutOnDisplayMaxMinutes, "{0}")
-    AddTextOption("", "")
     
     AddHeaderOption("Inspection")
     AddHeaderOption("")
     toggleInspections = AddToggleOption("Inspection - Random Inspections", main.InspectionsRandomUse)
+    AddTextOption("", "")
     sliderInspectionsHours = AddSliderOption("Inspection - Hours Between", main.InspectionHoursBetween, "{0}")
     sliderInspectionsChance = AddSliderOption("Inspection - Chance Of Inspection", main.InspectionChance, "{0}%")
-    AddTextOption("", "")
 
     AddHeaderOption("Other Events")
     AddHeaderOption("")
@@ -1346,7 +1468,7 @@ EndFunction
 
 Function DisplayPreferences()
 
-    AddHeaderOption("Adventuring (outside of Cities and Towns)")
+    AddHeaderOption("Bondage Outfit Changes")
     AddHeaderOption("")
 
     ;toggleManualAdventureMode = AddToggleOption("Switch to Manual (Action Menu)", main.AdventuringManual)
@@ -1513,51 +1635,51 @@ Function DisplayBehaviorRules()
 
 EndFunction
 
-function DisplayBondageRules()
+; function DisplayBondageRules()
 
-    AddTextOption("Bondage Rules menus have been moved", "")
-    AddTextOption("Action button -> Settings -> Manage Rules", "")
+;     AddTextOption("Bondage Rules menus have been moved", "")
+;     AddTextOption("Action button -> Settings -> Manage Rules", "")
 
-    return
+;     return
 
-    AddHeaderOption("Bondage Rules")
-    AddHeaderOption("")
+;     AddHeaderOption("Bondage Rules")
+;     AddHeaderOption("")
 
-    string[] bondageList = rman.GetBondageRuleNameArray() ; rman.GetBondageRulesList()
-    ;int[] bondageSettings = rman.GetBondageRulesSettingsList()
-    ;int[] bondageHard = rman.GetBondageHardLimitsList()
+;     string[] bondageList = rman.GetBondageRuleNameArray() ; rman.GetBondageRulesList()
+;     ;int[] bondageSettings = rman.GetBondageRulesSettingsList()
+;     ;int[] bondageHard = rman.GetBondageHardLimitsList()
 
-    int i = 0
-    while i < bondageList.Length
+;     int i = 0
+;     while i < bondageList.Length
 
-        int ruleSetting = rman.GetBondageRule(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
-        int ruleOption = rman.GetBondageRuleOption(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
+;         int ruleSetting = rman.GetBondageRule(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
+;         int ruleOption = rman.GetBondageRuleOption(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
 
-        ; string ruleText = "Off"
-        ; if ruleSetting == 1
-        ;     ruleText = "On"
-        ; endif
-        ; if ruleOption == 1
-        ;     ruleText += " - Blocked / Hard Limit"
-        ; elseif ruleOption == 2
-        ;     ruleText += " - Safe Areas"
-        ; elseif ruleOption == 3
-        ;     ruleText += " - Permanent"
-        ; elseif ruleOption == 4
-        ;     ruleText += " - Permanent Safe Areas"
-        ; endif
+;         ; string ruleText = "Off"
+;         ; if ruleSetting == 1
+;         ;     ruleText = "On"
+;         ; endif
+;         ; if ruleOption == 1
+;         ;     ruleText += " - Blocked / Hard Limit"
+;         ; elseif ruleOption == 2
+;         ;     ruleText += " - Safe Areas"
+;         ; elseif ruleOption == 3
+;         ;     ruleText += " - Permanent"
+;         ; elseif ruleOption == 4
+;         ;     ruleText += " - Permanent Safe Areas"
+;         ; endif
 
-        toggleBondageRules[i] = AddTextOption(bondageList[i], FormatRuleText(ruleSetting, ruleOption))
+;         toggleBondageRules[i] = AddTextOption(bondageList[i], FormatRuleText(ruleSetting, ruleOption))
 
-        i += 1
+;         i += 1
 
-    endwhile
+;     endwhile
 
-    If ((bondageList.Length as int) % 2) != 0.0
-        AddTextOption("", "")
-    EndIf
+;     If ((bondageList.Length as int) % 2) != 0.0
+;         AddTextOption("", "")
+;     EndIf
 
-endfunction
+; endfunction
 
 Function DisplayRules()
 
@@ -1598,8 +1720,8 @@ Function DisplayRules()
 
     sliderRulesMinBehavior = AddSliderOption("Behavior Rules - Min Rules", bind_GlobalRulesBehaviorMin.GetValue(), "{0}")
     sliderRulesMaxBehavior = AddSliderOption("Behavior Rules - Max Rules", bind_GlobalRulesBehaviorMax.GetValue(), "{0}")
-    sliderRulesMinBondage = AddSliderOption("Bondage Rules - Min Rules", bind_GlobalRulesBondageMin.GetValue(), "{0}")
-    sliderRulesMaxBondage = AddSliderOption("Bondage Rules - Max Rules", bind_GlobalRulesBondageMax.GetValue(), "{0}")
+    ; sliderRulesMinBondage = AddSliderOption("Bondage Rules - Min Rules", bind_GlobalRulesBondageMin.GetValue(), "{0}")
+    ; sliderRulesMaxBondage = AddSliderOption("Bondage Rules - Max Rules", bind_GlobalRulesBondageMax.GetValue(), "{0}")
 
 
 
@@ -1746,6 +1868,10 @@ event OnOptionInputOpen(int option)
         i += 1
     endwhile
 
+    if option == inputBondageSetName
+        SetInputDialogStartText(selectedBondageOutfit)
+    endif
+
 	; if option == inputSLUseTags
 	; 	SetInputDialogStartText(main.SexUseSLTags)
     ; elseif option == inputSLBlockTags
@@ -1800,6 +1926,16 @@ event OnOptionInputAccept(int option, string value)
             endif
             i += 1
         endwhile
+    endif
+
+    if option == inputBondageSetName
+        SetInputOptionValue(inputBondageSetName, value)
+        JsonUtil.StringListSet(bondageOutfitsFile, "bondage_set_names", selectedBondageOutfitIndex, value)
+        JsonUtil.Save(bondageOutfitsFile)
+        selectedBondageOutfit = ""
+        selectedBondageOutfitId = 0
+        selectedBondageOutfitIndex = -1
+        ForcePageReset()
     endif
 
 	; if option == inputSLUseTags
@@ -2437,6 +2573,63 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleInfractionForNotKneeling, svalue)
     endif
 
+    if option == outfitSafe
+        selectedOutfit = 1
+        ForcePageReset()
+    endif
+
+    if option == outfitUnsafe
+        selectedOutfit = 2
+        ForcePageReset()
+    endif
+
+    if option == outfitNude
+        selectedOutfit = 3
+        ForcePageReset()
+    endif
+
+    if option == outfitErotic
+        selectedOutfit = 4
+        ForcePageReset()
+    endif
+
+    if option == outfitBikini
+        selectedOutfit = 5
+        ForcePageReset()
+    endif
+
+    if option == toggleOutfitsLearn
+        if gmanage.OutfitsLearn == 0
+            gmanage.OutfitsLearn = 1
+        else
+            gmanage.OutfitsLearn = 0
+        endif
+        SetToggleOptionValue(toggleOutfitsLearn, gmanage.OutfitsLearn)
+    endif
+
+    if option == clickedNewOutfit
+        string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
+        string newSetName = "Bondage Set " + (bondageSetNames.Length + 1)
+        int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
+        JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", newSetName, false)
+        JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", lastUid + 1, false)
+        JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", lastUid + 1)
+        JsonUtil.Save(bondageOutfitsFile)
+        ForcePageReset()
+    endif
+
+    if option == toggleBondageOutfitUseRandomBondage
+        int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
+        if useRandomBondage == 0
+            useRandomBondage = 1
+        else
+            useRandomBondage = 0
+        endif
+        JsonUtil.SetIntValue(bondageOutfitFile, "use_random_bondage", useRandomBondage)
+        JsonUtil.Save(bondageOutfitFile)
+        ForcePageReset()
+    endif
+
 EndEvent
 
 Event OnConfigClose()
@@ -2874,6 +3067,12 @@ Event OnOptionMenuOpen(int option)
         SetMenuDialogStartIndex(0)
     EndIf
 
+    if option == menuBondageOutfitsList
+        string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
+        SetMenuDialogOptions(bondageSetNames)
+        SetMenuDialogStartIndex(bondageSetNames.Find(selectedBondageOutfit))
+    endif
+
 EndEvent
 
 Event OnOptionMenuAccept(int option, int index)
@@ -3040,6 +3239,17 @@ Event OnOptionMenuAccept(int option, int index)
         selectedSave = savesList[index]
         SetMenuOptionValue(menuMcmSaves, savesList[index])
     EndIf
+
+    if option == menuBondageOutfitsList
+        string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
+        int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+        selectedBondageOutfit = bondageSetNames[index]
+        selectedBondageOutfitId = bondageSetIds[index]
+        selectedBondageOutfitIndex = index
+        bondageOutfitFile = "bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
+        ;SetMenuOptionValue(menuBondageOutfitsList, bondageSetNames[index])
+        ForcePageReset()
+    endif
 
 EndEvent
 

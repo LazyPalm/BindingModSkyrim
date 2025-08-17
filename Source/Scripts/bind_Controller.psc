@@ -77,6 +77,11 @@ function LoadGame()
         bind_BoundForLocations.Start()
     endif
 
+    if bind_GoAdventuringQuest.IsRunning()
+        bind_GoAdventuringQuestScript adventure = bind_GoAdventuringQuest as bind_GoAdventuringQuestScript
+        adventure.LoadGame()
+    endif
+
     actorDom = TheDom.GetReference() as Actor
 
 endfunction
@@ -394,22 +399,26 @@ bool function ReadyForStoryManager()
     bool result = true
 
     if !SafeProcess() ;UI open checks
+        bind_Utility.WriteToConsole("ReadyForStoryManager - safeprocess failed")
         result = false
     endif
 
     ;in combat check - dragons might be attaching city or towns
     if actorSub.IsInCombat() || actorDom.IsInCombat() || actorSub.IsWeaponDrawn()
+        bind_Utility.WriteToConsole("ReadyForStoryManager - combat checks failed")
         result = false
     endif
 
     ;zap whipping plays in a scene - so do a scene check
     ;this is probably helpful for any mod that is running scenes outside of dhlp protected events including the base game
-    if actorSub.GetCurrentScene() || actorDom.GetCurrentScene()
+    if actorSub.GetCurrentScene() ;|| actorDom.GetCurrentScene()
+        bind_Utility.WriteToConsole("ReadyForStoryManager - scene checks failed")
         result = false
     endif
 
     ;sex lab assigns a faction during sex
     if actorSub.IsInFaction(SexLabAnimatingFaction) || actorDom.IsInFaction(SexLabAnimatingFaction)
+        bind_Utility.WriteToConsole("ReadyForStoryManager - sexlab faction checks failed")
         result = false
     endif
 
@@ -460,5 +469,6 @@ Quest property bind_CrowdsQuest auto
 Quest property bind_LocationChangeDetectionQuest auto
 Quest property bind_EntryExitQuest auto
 Quest property bind_BoundForLocations auto
+Quest property bind_GoAdventuringQuest auto
 
 Faction property SexLabAnimatingFaction auto

@@ -85,7 +85,7 @@ function StartTheQuest()
 
     ;bind_MovementQuestScript.StartWorking(theDom)
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = false)
+    fs.EventGetSubReady(theSub, theDom, "event_whipping") ;, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = false)
 
     ;mqs.EvHelpStripAndRemoveBondage(true, mqs.GetEventHandleBondageFreeWristsAddGag(), false, false) ;TODO - build a better version of this?
 

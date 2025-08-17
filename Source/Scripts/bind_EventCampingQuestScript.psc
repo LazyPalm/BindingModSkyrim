@@ -101,7 +101,7 @@ function PrepareSub()
 
     bind_Utility.DisablePlayer()
 
-    fs.EventGetSubReady(theSub, theDom, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = false)
+    fs.EventGetSubReady(theSub, theDom, "event_camping") ;, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = false)
 
     bind_Utility.DoSleep(2.0)
 

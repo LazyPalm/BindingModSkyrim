@@ -221,7 +221,7 @@ function RegisterFunctions()
                                     ;removed this - " This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
 
 
-    RegisterBondageRule()
+    ;RegisterBondageRule()
 
 
 endfunction
@@ -413,7 +413,7 @@ bool function BindingSleep_IsEligible(Actor akOriginator, string contextJson, st
     endif
     if !f.HasNearbyBed()
         result = false
-        reason = "No near a bed"
+        reason = "Not near a bed"
     endif
     bind_Utility.WriteToConsole("SkyrimNet called: BindingSleep_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
     return result
@@ -619,7 +619,6 @@ endfunction
 ; endfunction
 
 function AddBondageRule_Execute(Actor akOriginator, string contextJson, string paramsJson) global
-
     bind_Utility.WriteToConsole("SkyrimNet called: ddBondageRule_Execute actor: " + akOriginator)
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
@@ -627,6 +626,8 @@ function AddBondageRule_Execute(Actor akOriginator, string contextJson, string p
     bind_ThinkingDom t = bind_ThinkingDom.GetThinkingDom()
     bind_BondageManager b = bind_BondageManager.GetBondageManager()
     bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     string rule = SkyrimNetApi.GetJsonString(paramsJson, "rule", "") 
 
@@ -662,6 +663,7 @@ function BindingCheckRules_Execute(Actor akOriginator, string contextJson, strin
     bind_Utility.WriteToConsole("SkyrimNet called: BindingCheckRules_Execute actor: " + akOriginator)
     Quest q = Quest.GetQuest("bind_RulesCheckQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
     if f.ModInRunningState()
         debug.MessageBox("start bind_RulesCheckQuest quest")
         if !q.IsRunning()
@@ -674,6 +676,7 @@ function BindingDressingRoom_Execute(Actor akOriginator, string contextJson, str
     bind_Utility.WriteToConsole("SkyrimNet called: BindingDressingRoom_Execute actor: " + akOriginator)
     Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
     if f.ModInRunningState()
         debug.MessageBox("start bind_TheDressingRoomQuest quest")
         if !q.IsRunning()
@@ -686,6 +689,7 @@ function BindingSleep_Execute(Actor akOriginator, string contextJson, string par
     bind_Utility.WriteToConsole("SkyrimNet called: BindingSleep_Execute actor: " + akOriginator)
     Quest q = Quest.GetQuest("bind_EventBoundSleepQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
     if f.ModInRunningState()
         debug.MessageBox("start bind_EventBoundSleepQuest quest")
         if !q.IsRunning()
@@ -700,6 +704,7 @@ function BindingWhip_Execute(Actor akOriginator, string contextJson, string para
 
     Quest whip = Quest.GetQuest("bind_WhippingQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     if f.ModInRunningState()
         debug.MessageBox("start whipping quest")
@@ -716,6 +721,7 @@ function BindingSex_Execute(Actor akOriginator, string contextJson, string param
 
     Quest boundSex = Quest.GetQuest("bind_BoundSexQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     if f.ModInRunningState()
         debug.MessageBox("start sex quest")
@@ -733,6 +739,7 @@ function BindingFurniture_Execute(Actor akOriginator, string contextJson, string
 
     Quest pod = Quest.GetQuest("bind_EventPutOnDisplayQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     if f.ModInRunningState()
         debug.MessageBox("start put on display quest")
@@ -749,6 +756,7 @@ function BindingHarshBondage_Execute(Actor akOriginator, string contextJson, str
 
     Quest harsh = Quest.GetQuest("bind_EventHarshBondageQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     if f.ModInRunningState()
         debug.MessageBox("start harsh bondage quest")
@@ -765,6 +773,7 @@ function BindingCamping_Execute(Actor akOriginator, string contextJson, string p
 
     Quest camp = Quest.GetQuest("bind_EventCampingQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
 
     if f.ModInRunningState()
         debug.MessageBox("start camping quest")

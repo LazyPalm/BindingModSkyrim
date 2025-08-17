@@ -3,13 +3,13 @@
 {% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") %}
 
 {# nudity checks #}
-{% if worn_has_keyword(actorUUID, "ArmorCuirass") or worn_has_keyword(actorUUID, "ClothingBody") %}
-- {{ actor_name }} is wearing clothing
-{% set actor_nudity = "actor_dressed" %}
-{% else %}
 {% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspendex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") %}
 - {{ actor_name }} is wearing bikini armor or skimpy clothing.
 {% set actor_nudity = "actor_dressed_skimpy" %}
+{% else %}
+{% if worn_has_keyword(actorUUID, "ArmorCuirass") or worn_has_keyword(actorUUID, "ClothingBody") %}
+- {{ actor_name }} is wearing clothing
+{% set actor_nudity = "actor_dressed" %}
 {% else %}
 - {{ actor_name }} is nude.
 {% set actor_nudity = "actor_nude" %}

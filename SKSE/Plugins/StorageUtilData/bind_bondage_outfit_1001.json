@@ -1,0 +1,34 @@
+{
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x486d3|Devious Devices - Expansion.esm",
+			"0x486e3|Devious Devices - Expansion.esm",
+			"0x4ee2d|Devious Devices - Expansion.esm",
+			"0x1e687|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			8,
+			16
+		]
+	},
+	"stringList" : 
+	{
+		"blocks" : 
+		[
+			"Body - Slot 32",
+			"Hands - Slot 33",
+			"Forearms - Slot 34"
+		]
+	}
+}

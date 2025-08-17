@@ -494,6 +494,24 @@ bool function IsNudityRequired(Actor a, bool safeArea)
 
 endfunction
 
+bool function IsBikiniRequired(Actor a, bool safeArea)
+
+    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_BIKINI())
+    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_BIKINI())
+
+    bool onlySafeAreas = false
+    if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
+        onlySafeAreas = true
+    endif
+        
+    if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
+        return true
+    else
+        return false
+    endif
+
+endfunction
+
 bool function IsHeavyBondageRequired(Actor a, bool safeArea)
 
     int heavyBondage = 10 ;need to pull this from bondage manager - can't get the script linking to work so removing for now
@@ -652,7 +670,8 @@ function SetBondageRule(Actor a, int rule, bool on)
 endfunction
 
 int function GetBondageRule(Actor a, int rule)
-    return StorageUtil.GetIntValue(a, "bind_rule_setting_" + rule, 0)
+    return 0
+    ;return StorageUtil.GetIntValue(a, "bind_rule_setting_" + rule, 0)
 endfunction
 
 function SetBondageRuleOption(Actor a, int rule, int option)
@@ -709,9 +728,9 @@ string[] bRuleName
 int bRuleCount
 
 function _BuildBRulesArray()
-    bRuleCount = 20
+    bRuleCount = 22
     if bRuleName.Length != bRuleCount
-        bRuleName = new String[20]
+        bRuleName = new String[22]
         bRuleName[0] = "Body Rule:Nudity"
         bRuleName[1] = "Indoors Rule:No Beds"
         bRuleName[2] = "Indoors Rule:Dismissed"
@@ -732,6 +751,8 @@ function _BuildBRulesArray()
         bRuleName[17] = "Sex Rule:Give Thanks"
         bRuleName[18] = "Studies:Ask To Read Scroll"
         bRuleName[19] = "Studies:Ask To Train"
+        bRuleName[20] = "Body Rule:Bikini Armor"
+        bRuleName[21] = "Body Rule:Erotic Armor"
     endif
 endfunction
 
@@ -828,6 +849,14 @@ endfunction
 
 int function BEHAVIOR_RULE_ASK_TO_TRAIN()
     return 19
+endfunction
+
+int function BEHAVIOR_RULE_BIKINI()
+    return 20
+endfunction
+
+int function BEHAVIOR_RULE_EROTIC_ARMOR()
+    return 21
 endfunction
 
 int activeBondageRules
@@ -1100,15 +1129,15 @@ function ManageRules(Actor a)
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
     listMenu.AddEntryItem("Behavior Rules")
-    listMenu.AddEntryItem("Bondage Rules")
+    ;listMenu.AddEntryItem("Bondage Rules")
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
 
     if listReturn == 0
         ManageBehaviorRules(a)
-    elseif listReturn == 1
-        ManageBondageRules(a)
+    ; elseif listReturn == 1
+    ;     ManageBondageRules(a)
     endif
 
 endfunction
@@ -1196,12 +1225,38 @@ function ViewBehaviorRule(Actor a, int rule)
     endif
 
     if listReturn > 1
-        int optionSelect = (listReturn - 1)
-        if optionSelect == optionsFlag
-            optionSelect = 0 ;toggled turn off
+        if controlMode == RULES_SUB_MANAGED() || controlMode == RULES_HYBRID_MANAGED()
+            int optionSelect = -1
+            if listReturn == 2
+                optionSelect = 2
+            elseif listReturn == 3
+                optionSelect = 5
+            endif
+            bind_Utility.WriteNotification("optionSelect: " + optionSelect + " optionsFlag: " + optionsFlag)
+            if optionSelect == optionsFlag
+                optionSelect = 0 ;toggled turn off
+            endif
+            SetBehaviorRuleOption(a, rule, optionSelect)
+            ;bind_GlobalRulesUpdatedFlag.SetValue(1)
+            ;StorageUtil.SetIntValue(a, "bind_safe_area_interaction_check", 3) ;set to to-do
+            ViewBehaviorRule(a, rule)
+        else
+            int optionSelect = (listReturn - 1)
+            if optionSelect == optionsFlag
+                optionSelect = 0 ;toggled turn off
+            endif
+            SetBehaviorRuleOption(a, rule, optionSelect)
+            ;bind_GlobalRulesUpdatedFlag.SetValue(1)
+            ;StorageUtil.SetIntValue(a, "bind_safe_area_interaction_check", 3) ;set to to-do
+            ViewBehaviorRule(a, rule)
         endif
-        SetBehaviorRuleOption(a, rule, optionSelect)
-        ViewBehaviorRule(a, rule)
+
+        ; int optionSelect = (listReturn - 1)
+        ; if optionSelect == optionsFlag
+        ;     optionSelect = 0 ;toggled turn off
+        ; endif
+        ; SetBehaviorRuleOption(a, rule, optionSelect)
+        ; ViewBehaviorRule(a, rule)
     endif
 
 endfunction
@@ -1460,6 +1515,9 @@ string function PickAction(string expBondage, string expBehavior, string openBon
 endfunction
 
 string function DomManagedRuleChange(Actor theSub, bool testChanges = false)
+
+    bind_GlobalRulesBondageMax.SetValue(0)
+    bind_GlobalRulesBondageMin.SetValue(0) ;note - disable bondage rules
 
     string expiredBondageRules = FindExpiredBondageRules(theSub)
     string expiredBehaviorRules = FindExpiredBehaviorRules(theSub)

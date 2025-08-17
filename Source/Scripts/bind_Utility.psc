@@ -139,9 +139,11 @@ function WriteNotification(string msg, string color = "white") global
     if color == "red"
         debug.Notification("<font color='#ff0000'>" + msg + "</font>")
     elseif color == "blue"
-        debug.Notification("<font color='#0000ff'>" + msg + "</font>")
+        debug.Notification("<font color='#00BFFF'>" + msg + "</font>")
     elseif color == "violet"
         debug.Notification("<font color='#8000ff'>" + msg + "</font>")
+    elseif color == "green"
+        debug.Notification("<font color='#228B22'>" + msg + "</font>")
     else
         debug.Notification(msg)   
     endif
@@ -188,6 +190,10 @@ endfunction
 
 string function TextColorPurple() global
     return "violet"
+endfunction
+
+string function TextColorGreen() global
+    return "green"
 endfunction
 
 function DoSleep(float f = 0.5) global
@@ -321,3 +327,38 @@ bool function IsReady(Actor akSub, Actor akDom) global
 
 endfunction
 
+bool function ConfirmBox(string msg, string yesText = "", string noText = "") global
+
+    bind_Utility.WriteToConsole("displaying confirmbox: " + msg)
+
+    if yesText == ""
+        yesText = "Yes"
+    else 
+        yesText = "Yes - " + yesText
+    endif
+    if noText == ""
+        noText = "No"
+    else 
+        noText = "No - " + noText
+    endif
+
+    int listReturn = 0
+
+    while listReturn < 1
+
+        UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+        listMenu.AddEntryItem(msg)
+        listMenu.AddEntryItem(yesText)
+        listMenu.AddEntryItem(noText)
+        listMenu.OpenMenu()
+        listReturn = listMenu.GetResultInt()
+
+    endwhile
+
+    if listReturn == 1
+        return true
+    else
+        return false
+    endif
+
+endfunction
