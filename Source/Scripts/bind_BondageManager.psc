@@ -293,7 +293,7 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     endif
 
     if isSafeArea && outfitIds.Length == 0
-        debug.MessageBox("safe area")
+        ;debug.MessageBox("safe area")
         outfitKey = "location_safe_area"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
@@ -303,7 +303,7 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     elseif !isSafeArea && outfitIds.Length == 0
         ;dangerous area
-        debug.MessageBox("unsafe area")
+        ;debug.MessageBox("unsafe area")
         outfitKey = "location_unsafe_area"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
