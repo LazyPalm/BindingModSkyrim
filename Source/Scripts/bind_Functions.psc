@@ -645,11 +645,20 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		main.SubIndoors = 0
 	endif
 
+	if newLocation.HasKeyword(LocTypePlayerHouse) || newLocation.HasKeyWord(LocTypeInn) || newLocation.HasKeyword(LocTypeCity) || newLocation.HasKeyword(LocTypeTown) || newlocation.HasKeyWord(LocTypeStore) || newlocation.HasKeyWord(LocTypeDwelling) || newlocation.HasKeyWord(LocTypeCastle) || newlocation.HasKeyWord(LocTypeHouse)
+		;safe area
+		bind_GlobalSafeZone.SetValue(2)
+	else
+		;dangerous areaa
+		bind_GlobalSafeZone.SetValue(1)
+	endif
+
 endfunction
 
 function ProcessLocationChange(Location oldLocation, Location newLocation)
 
 	bind_Utility.WriteToConsole("DEBUG - Process location change")
+	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
 
 	; if newlocation.HasKeywordString("LocTypeCity")
 	; 	main.BondageSetLocation = "City"
@@ -674,14 +683,6 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 		else
 			bind_Utility.WriteToConsole("Keep bondage outfit: " + currentBondageSetId)
 		endif
-	endif
-
-	if newLocation.HasKeyword(LocTypePlayerHouse) || newLocation.HasKeyWord(LocTypeInn) || newLocation.HasKeyword(LocTypeCity) || newLocation.HasKeyword(LocTypeTown) || newlocation.HasKeyWord(LocTypeStore) || newlocation.HasKeyWord(LocTypeDwelling) || newlocation.HasKeyWord(LocTypeCastle) || newlocation.HasKeyWord(LocTypeHouse)
-		;safe area
-		bind_GlobalSafeZone.SetValue(2)
-	else
-		;dangerous areaa
-		bind_GlobalSafeZone.SetValue(1)
 	endif
 
 	int count = newlocation.GetNumKeywords()

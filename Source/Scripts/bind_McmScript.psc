@@ -1,5 +1,7 @@
 Scriptname bind_McmScript extends SKI_ConfigBase  
 
+string selectedPage
+
 string[] letters
 string selectedLetter
 int menuChangeLetter
@@ -231,9 +233,12 @@ int menuBondageOutfitsList
 string selectedBondageOutfit
 int selectedBondageOutfitId
 int selectedBondageOutfitIndex
-
 int toggleBondageOutfitUseRandomBondage
-
+string[] bondageOutfitUsageKey
+string[] bondageOutfitUsageList
+int[] bondageSetUsedForToggle
+int clickedLearnBondageOutfit
+int clickedLearnWornGear
 
 Actor theSub
 
@@ -264,6 +269,8 @@ Event OnConfigOpen()
     Pages[16] = "Control Panel"
     Pages[17] = "SkyrimNet"
     Pages[18] = "Outfits"
+
+    MakeArrays()
 
     if toggleBehaviorHard.Length != 50 ;lets rebuild...
         toggleBehaviorHard = new int[50]
@@ -351,6 +358,8 @@ Event OnPageReset(string page)
     ;EndIf
 
     ;Else
+
+    selectedPage = page
 
         DisplayMcmMessages()
 
@@ -534,13 +543,56 @@ function DisplayBondageOutfits()
         AddHeaderOption("")
 
         inputBondageSetName = AddInputOption("Bondage Outfit Name", selectedBondageOutfit)
-        AddTextOption("", "") ;delete set goes here
+        AddTextOption("Bondage Outfit ID", selectedBondageOutfitId) 
+        
+        ;delete set goes here
 
         int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
 
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
 
-        
+        AddTextOption("", "")
+
+        AddHeaderOption("Set Used For")
+        AddHeaderOption("")
+        int i = 0
+        while i < bondageSetUsedForToggle.Length
+            bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId))
+            i += 1
+        endwhile
+
+        AddHeaderOption("Fixed Items - Devious Devices")
+        clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
+        Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+        i = 0
+        while i < setItems.Length
+            AddTextOption(setItems[i].GetName(), "")
+            ;bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId))
+            i += 1
+        endwhile
+        if setItems.length > 0
+            if setItems.Length % 2 > 0
+                AddTextOption("", "")
+            endif
+        endif
+
+        AddHeaderOption("Fixed Items - Clothing & Armor")
+        clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
+        Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+        i = 0
+        while i < wornItems.Length
+            AddTextOption(wornItems[i].GetName(), "")
+            i += 1
+        endwhile
+        if wornItems.length > 0
+            if wornItems.Length % 2 > 0
+                AddTextOption("", "")
+            endif
+        endif
+
+        AddHeaderOption("Block Equiping")
+        AddHeaderOption("")
+
 
     endif
 
@@ -1848,6 +1900,10 @@ string lastOpenedText
 
 event OnOptionInputOpen(int option)
 
+    if selectedPage == "Bondage Outfits"
+
+    endif
+
     ; lastOpenedText = ""
     ; string displayValue = ""
     ;string[] usedTags = StringUtil.Split(main.SexUseSLTags, ",")
@@ -1881,6 +1937,10 @@ endEvent
 
 
 event OnOptionInputAccept(int option, string value)
+
+    if selectedPage == "Bondage Outfits"
+
+    endif
 
     bool updateSlUsed = false
 
@@ -1979,6 +2039,66 @@ endfunction
 
 Event OnOptionSelect(int option)
 
+    int i
+
+    if selectedPage == "Bondage Outfits"
+
+        if option == clickedNewOutfit
+            if ShowMessage("Create new outfit?", true, "$Yes", "$No")
+                string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
+                string newSetName = "Bondage Set " + (bondageSetNames.Length + 1)
+                int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
+                JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", newSetName, false)
+                JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", lastUid + 1, false)
+                JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", lastUid + 1)
+                JsonUtil.Save(bondageOutfitsFile)
+                ForcePageReset()
+            endif
+        endif
+
+        if option == toggleBondageOutfitUseRandomBondage
+            int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
+            if useRandomBondage == 0
+                useRandomBondage = 1
+            else
+                useRandomBondage = 0
+            endif
+            JsonUtil.SetIntValue(bondageOutfitFile, "use_random_bondage", useRandomBondage)
+            JsonUtil.Save(bondageOutfitFile)
+            ForcePageReset()
+        endif
+
+        if option == clickedLearnBondageOutfit
+            if ShowMessage("Learn worn DD items?", true, "$Yes", "$No")
+                bmanage.LearnWornDdItemsToSet(theSub, selectedBondageOutfitId)
+                ForcePageReset()
+            endif
+        endif
+
+        if option == clickedLearnWornGear
+            if ShowMessage("Learn worn armor and clothing?", true, "$Yes", "$No")
+                gmanage.LearnWornItemsForBondageOutfit(theSub, selectedBondageOutfitId)
+                ForcePageReset()
+            endif
+        endif
+
+        i = 0
+        while i < bondageSetUsedForToggle.Length
+            if option == bondageSetUsedForToggle[i]
+                if JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId)
+                    JsonUtil.IntListRemove(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId)
+                    SetToggleOptionValue(option, 0)
+                else
+                    JsonUtil.IntListAdd(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId)
+                    SetToggleOptionValue(option, 1)
+                endif
+                JsonUtil.Save(bondageOutfitFile)
+            endif
+            i += 1
+        endwhile
+
+    endif
+
     bool completed = false
 
     if option == actionKeyModifierOption && !completed
@@ -1999,7 +2119,7 @@ Event OnOptionSelect(int option)
         completed = true
     endif
 
-    int i = 0
+    i = 0
     if !completed
         while i < rman.GetBehaviorRulesCount()
             if option == toggleBehaviorRules[i]
@@ -2607,29 +2727,6 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleOutfitsLearn, gmanage.OutfitsLearn)
     endif
 
-    if option == clickedNewOutfit
-        string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
-        string newSetName = "Bondage Set " + (bondageSetNames.Length + 1)
-        int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
-        JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", newSetName, false)
-        JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", lastUid + 1, false)
-        JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", lastUid + 1)
-        JsonUtil.Save(bondageOutfitsFile)
-        ForcePageReset()
-    endif
-
-    if option == toggleBondageOutfitUseRandomBondage
-        int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
-        if useRandomBondage == 0
-            useRandomBondage = 1
-        else
-            useRandomBondage = 0
-        endif
-        JsonUtil.SetIntValue(bondageOutfitFile, "use_random_bondage", useRandomBondage)
-        JsonUtil.Save(bondageOutfitFile)
-        ForcePageReset()
-    endif
-
 EndEvent
 
 Event OnConfigClose()
@@ -2957,6 +3054,10 @@ endfunction
 
 Event OnOptionMenuOpen(int option)
 
+    if selectedPage == "Bondage Outfits"
+
+    endif    
+
     if option == menuSlaveryType
         SetMenuDialogOptions(slaveryTypes)
         SetMenuDialogStartIndex(main.SkryimNetSlaveryType)
@@ -3076,6 +3177,10 @@ Event OnOptionMenuOpen(int option)
 EndEvent
 
 Event OnOptionMenuAccept(int option, int index)
+
+    if selectedPage == "Bondage Outfits"
+
+    endif    
 
     if option == menuSlaveryType
         if main.SkryimNetSlaveryType != index
@@ -3686,4 +3791,83 @@ int function AdvanceModifierValue(int currentModifier)
         newModifier = 0
     endif
     return newModifier
+endfunction
+
+bool madeArrays
+
+function MakeArrays()
+
+    if bondageOutfitUsageKey.Length != 32
+
+        bondageSetUsedForToggle = new int[32]
+
+        bondageOutfitUsageKey = new string[32]
+        bondageOutfitUsageKey[0] = "location_all_areas"
+        bondageOutfitUsageKey[1] = "location_any_city"
+        bondageOutfitUsageKey[2] = "location_dawnstar"
+        bondageOutfitUsageKey[3] = "location_falkreath"
+        bondageOutfitUsageKey[4] = "location_windhelm"
+        bondageOutfitUsageKey[5] = "location_markarth"
+        bondageOutfitUsageKey[6] = "location_morthal"
+        bondageOutfitUsageKey[7] = "location_riften"
+        bondageOutfitUsageKey[8] = "location_solitude"
+        bondageOutfitUsageKey[9] = "location_high_hrothgar"
+        bondageOutfitUsageKey[10] = "location_whiterun"
+        bondageOutfitUsageKey[11] = "location_winterhold"
+        bondageOutfitUsageKey[12] = "location_raven Rock"       
+        bondageOutfitUsageKey[13] = "location_towns"
+        bondageOutfitUsageKey[14] = "location_player_home"
+        bondageOutfitUsageKey[15] = "location_safe_area"
+        bondageOutfitUsageKey[16] = "location_unsafe_area"
+        bondageOutfitUsageKey[17] = "event_any_event"
+        bondageOutfitUsageKey[18] = "event_harsh_bondage"
+        bondageOutfitUsageKey[19] = "event_bound_masturbation"
+        bondageOutfitUsageKey[20] = "event_bound_sex"
+        bondageOutfitUsageKey[21] = "event_dairy"
+        bondageOutfitUsageKey[22] = "event_bound_sleep"
+        bondageOutfitUsageKey[23] = "event_camping"
+        bondageOutfitUsageKey[24] = "event_put_on_display"
+        bondageOutfitUsageKey[25] = "event_public_humilation"
+        bondageOutfitUsageKey[26] = "event_whipping"
+        bondageOutfitUsageKey[27] = "event_souls_from_bones"
+        bondageOutfitUsageKey[28] = "event_word_wall"
+        bondageOutfitUsageKey[29] = "event_gagged_for_punishment"
+        bondageOutfitUsageKey[30] = "event_go_adventuring"
+        bondageOutfitUsageKey[31] = "event_free_for_work"
+
+        bondageOutfitUsageList = new string[32]
+        bondageOutfitUsageList[0] = "Location - All Areas"
+        bondageOutfitUsageList[1] = "Location - Any City"
+        bondageOutfitUsageList[2] = "Location - Dawnstar"
+        bondageOutfitUsageList[3] = "Location - Falkreath"
+        bondageOutfitUsageList[4] = "Location - Windhelm"
+        bondageOutfitUsageList[5] = "Location - Markarth"
+        bondageOutfitUsageList[6] = "Location - Morthal"
+        bondageOutfitUsageList[7] = "Location - Riften"
+        bondageOutfitUsageList[8] = "Location - Solitude"
+        bondageOutfitUsageList[9] = "Location - High Hrothgar"
+        bondageOutfitUsageList[10] = "Location - Whiterun"
+        bondageOutfitUsageList[11] = "Location - Winterhold"
+        bondageOutfitUsageList[12] = "Location - Raven Rock"       
+        bondageOutfitUsageList[13] = "Location - Towns"
+        bondageOutfitUsageList[14] = "Location - Player Home"
+        bondageOutfitUsageList[15] = "Location - Safe Areas"
+        bondageOutfitUsageList[16] = "Location - Unsafe Areas"
+        bondageOutfitUsageList[17] = "Event - Any Event"
+        bondageOutfitUsageList[18] = "Event - Harsh Bondage"
+        bondageOutfitUsageList[19] = "Event - Bound Masturbation"
+        bondageOutfitUsageList[20] = "Event - Bound Sex"
+        bondageOutfitUsageList[21] = "Event - Dairy"
+        bondageOutfitUsageList[22] = "Event - Bound Sleep"
+        bondageOutfitUsageList[23] = "Event - Camping"
+        bondageOutfitUsageList[24] = "Event - Put On Display"
+        bondageOutfitUsageList[25] = "Event - Public Humliation"
+        bondageOutfitUsageList[26] = "Event - Whipping"
+        bondageOutfitUsageList[27] = "Event - Souls From Bones"
+        bondageOutfitUsageList[28] = "Event - Word Wall"
+        bondageOutfitUsageList[29] = "Event - Gagged For Punishment"
+        bondageOutfitUsageList[30] = "Event - Go Adventuring"
+        bondageOutfitUsageList[31] = "Event - Free For Work"
+    endif
+
 endfunction

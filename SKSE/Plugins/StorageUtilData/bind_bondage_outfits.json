@@ -1,7 +1,7 @@
 {
 	"int" : 
 	{
-		"last_set_uid" : 1008
+		"last_set_uid" : 1011
 	},
 	"intList" : 
 	{
@@ -14,7 +14,10 @@
 			1005,
 			1006,
 			1007,
-			1008
+			1008,
+			1009,
+			1010,
+			1011
 		],
 		"used_for_event_any_event" : 
 		[
@@ -36,7 +39,8 @@
 		[
 			1003
 		],
-		"used_for_location_all_areas" : 
+		"used_for_location_all_areas" : [],
+		"used_for_location_any_city" : 
 		[
 			1002
 		],
@@ -44,9 +48,17 @@
 		[
 			1001
 		],
+		"used_for_location_solitude" : 
+		[
+			1008
+		],
 		"used_for_location_towns" : 
 		[
 			1001
+		],
+		"used_for_location_unsafe_area" : 
+		[
+			1008
 		]
 	},
 	"stringList" : 
@@ -60,7 +72,10 @@
 			"Bound Sleep Outfit",
 			"Go Adventuring Outfit",
 			"Gagged For Punishment Outfit",
-			"Red Leather Outfit"
+			"Unsafe Areas Outfit",
+			"Bondage Set 9",
+			"Bondage Set 10",
+			"Bondage Set 11"
 		]
 	}
 }

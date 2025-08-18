@@ -998,6 +998,40 @@ endevent
 
 ; endfunction
 
+function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
+
+	string bondageOutfitFile
+    bondageOutfitFile = "bind_bondage_outfit_" + outfitId + ".json"
+
+    GoToState("WorkingState")
+
+    JsonUtil.FormListClear(bondageOutfitFile, "fixed_worn_items")
+
+	Form[] inventory = a.GetContainerForms()
+	int i = 0
+    int kwi = 0
+	while i < inventory.Length
+        Form dev = inventory[i]
+		if dev.IsPlayable()
+			if a.IsEquipped(dev)
+				if !dev.HasKeyWord(bman.zlib.zad_inventoryDevice) && !dev.HasKeyWord(bman.zlib.zad_Lockable) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+					bind_Utility.WriteToConsole("LearnWornItemsForBondageOutfit - dev: " + dev.GetName())
+					;StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
+					JsonUtil.FormListAdd(bondageOutfitFile, "fixed_worn_items", dev, false)
+				else
+
+				endif
+			endif
+		endif
+        i += 1
+    endwhile
+
+    GoToState("")
+
+    JsonUtil.Save(bondageOutfitFile)
+
+endfunction
+
 function LearnOutfit(Actor a, string setName) 
 
 	;sets - safe/unsafe/bikini/erotic/nude

@@ -92,7 +92,23 @@ function EquipBondageOutfit(Actor a, int setId)
         Armor dev = a.GetWornForm(blocks[i]) as Armor
         if dev != none
             a.UnequipItem(dev, false, true)
-            bind_Utility.DoSleep(0.5)
+            bind_Utility.DoSleep(0.25)
+        endif
+        i += 1
+    endwhile
+
+    ;doest the set have stored armor & clothing?
+    Form[] wornItems = JsonUtil.FormListToArray(f, "fixed_worn_items")
+    i = 0
+    while i < wornItems.Length
+        Form item = wornItems[i]
+        if a.GetItemCount(item) > 0
+            if !a.IsEquipped(item)
+                a.EquipItem(item, false, true)
+                bind_Utility.DoSleep(0.25)
+            endif
+        else
+            bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
         endif
         i += 1
     endwhile
@@ -187,7 +203,7 @@ function EquipBondageOutfit(Actor a, int setId)
             Form dev = setItems[i]
             if dev
                 AddSpecificItem(a, dev as Armor)
-                bind_Utility.DoSleep(0.5)
+                bind_Utility.DoSleep(0.25)
             endif
             i += 1
         endwhile
@@ -204,7 +220,10 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     string outfitKey = ""
     int[] outfitIds
 
+    bool isSafeArea = false
+
     if currentLocation.HasKeywordString("LocTypePlayerHouse")
+        isSafeArea = true
         outfitKey = "location_player_home"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
@@ -215,6 +234,7 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     endif
 
     if currentLocation.HasKeywordString("LocTypeTown") && outfitIds.Length == 0
+        isSafeArea = true
         outfitKey = "location_towns"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
@@ -225,6 +245,7 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     endif
     
     if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+        isSafeArea = true
         outfitKey = ""
         string locationName = currentLocation.GetName()
         if locationName == "Dawnstar"
@@ -261,7 +282,29 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     endif
 
     if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+        isSafeArea = true
         outfitKey = "location_any_city"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+
+    if isSafeArea && outfitIds.Length == 0
+        debug.MessageBox("safe area")
+        outfitKey = "location_safe_area"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    elseif !isSafeArea && outfitIds.Length == 0
+        ;dangerous area
+        debug.MessageBox("unsafe area")
+        outfitKey = "location_unsafe_area"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
             return currentBondageSet
@@ -290,189 +333,189 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
 
 endfunction
 
-function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
+; function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
 
-    bind_Utility.WriteToConsole("SetActiveBondageSet - safeLocation: " + safeLocation + " currentLocation: " + currentLocation)
+;     bind_Utility.WriteToConsole("SetActiveBondageSet - safeLocation: " + safeLocation + " currentLocation: " + currentLocation)
 
-    ActiveBondageSet = ""
+;     ActiveBondageSet = ""
 
-    ;test current set to see if it is still active vs clearing??
-    ;bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], ActiveBondageSet)
+;     ;test current set to see if it is still active vs clearing??
+;     ;bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], ActiveBondageSet)
 
-    int dayOfWeek = GetDayOfWeek()
+;     int dayOfWeek = GetDayOfWeek()
 
-    ; queststList[0] = "Location - All Areas"
-    ; queststList[1] = "Location - All Safe Areas"
-    ; queststList[2] = "Location - All Dangerous Areas"
-    ; queststList[3] = "Location - Any City"
-    ; queststList[4] = "Location - Dawnstar"
-    ; queststList[5] = "Location - Falkreath"
-    ; queststList[6] = "Location - Windhelm"
-    ; queststList[7] = "Location - Markarth"
-    ; queststList[8] = "Location - Morthal"
-    ; queststList[9] = "Location - Riften"
-    ; queststList[10] = "Location - Solitude"
-    ; queststList[11] = "Location - High Hrothgar"
-    ; queststList[12] = "Location - Whiterun"
-    ; queststList[13] = "Location - Winterhold"
-    ; queststList[14] = "Location - Raven Rock"       
-    ; queststList[15] = "Location - Towns"
-    ; queststList[16] = "Location - Player Home"
-    ; queststList[17] = "Day - Sundas"
-    ; queststList[18] = "Day - Morndas"
-    ; queststList[19] = "Day - Tirdas"
-    ; queststList[20] = "Day - Middas"
-    ; queststList[21] = "Day - Turdas"
-    ; queststList[22] = "Day - Fredas"
-    ; queststList[23] = "Day - Loredas"
+;     ; queststList[0] = "Location - All Areas"
+;     ; queststList[1] = "Location - All Safe Areas"
+;     ; queststList[2] = "Location - All Dangerous Areas"
+;     ; queststList[3] = "Location - Any City"
+;     ; queststList[4] = "Location - Dawnstar"
+;     ; queststList[5] = "Location - Falkreath"
+;     ; queststList[6] = "Location - Windhelm"
+;     ; queststList[7] = "Location - Markarth"
+;     ; queststList[8] = "Location - Morthal"
+;     ; queststList[9] = "Location - Riften"
+;     ; queststList[10] = "Location - Solitude"
+;     ; queststList[11] = "Location - High Hrothgar"
+;     ; queststList[12] = "Location - Whiterun"
+;     ; queststList[13] = "Location - Winterhold"
+;     ; queststList[14] = "Location - Raven Rock"       
+;     ; queststList[15] = "Location - Towns"
+;     ; queststList[16] = "Location - Player Home"
+;     ; queststList[17] = "Day - Sundas"
+;     ; queststList[18] = "Day - Morndas"
+;     ; queststList[19] = "Day - Tirdas"
+;     ; queststList[20] = "Day - Middas"
+;     ; queststList[21] = "Day - Turdas"
+;     ; queststList[22] = "Day - Fredas"
+;     ; queststList[23] = "Day - Loredas"
 
-    bool found = false
+;     bool found = false
 
-    string[] setsList
+;     string[] setsList
 
-    if !safeLocation
-        ;debug.MessageBox("looking for dangerous areas sets")
-        setsList = GetSetsByUsage("Location - All Dangerous Areas")
-        if setsList.Length > 0
-            found = true
-        endif
+;     if !safeLocation
+;         ;debug.MessageBox("looking for dangerous areas sets")
+;         setsList = GetSetsByUsage("Location - All Dangerous Areas")
+;         if setsList.Length > 0
+;             found = true
+;         endif
 
-    elseif currentLocation.HasKeywordString("LocTypePlayerHouse")
-        setsList = GetSetsByUsage("Location - Player Home")
-        if setsList.Length > 0
-            found = true
-        endif
+;     elseif currentLocation.HasKeywordString("LocTypePlayerHouse")
+;         setsList = GetSetsByUsage("Location - Player Home")
+;         if setsList.Length > 0
+;             found = true
+;         endif
 
-    elseif currentLocation.HasKeywordString("LocTypeTown")
-        ;debug.MessageBox("in a town??")
-        setsList = GetSetsByUsage("Location - Towns")
-        if setsList.Length > 0
-            found = true
-        endif
+;     elseif currentLocation.HasKeywordString("LocTypeTown")
+;         ;debug.MessageBox("in a town??")
+;         setsList = GetSetsByUsage("Location - Towns")
+;         if setsList.Length > 0
+;             found = true
+;         endif
 
-    elseif currentLocation.HasKeywordString("LocTypeCity")
+;     elseif currentLocation.HasKeywordString("LocTypeCity")
 
-        string locationName = currentLocation.GetName()
+;         string locationName = currentLocation.GetName()
 
-        ;debug.MessageBox(currentLocation.GetName())
+;         ;debug.MessageBox(currentLocation.GetName())
 
-        if locationName == "Dawnstar"
-            setsList = GetSetsByUsage("Location - Dawnstar")
-            if setsList.Length > 0
-                found = true
-            endif
+;         if locationName == "Dawnstar"
+;             setsList = GetSetsByUsage("Location - Dawnstar")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Falkreath"
-            setsList = GetSetsByUsage("Location - Falkreath")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Falkreath"
+;             setsList = GetSetsByUsage("Location - Falkreath")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Windhelm"
-            setsList = GetSetsByUsage("Location - Windhelm")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Windhelm"
+;             setsList = GetSetsByUsage("Location - Windhelm")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Markarth"
-            setsList = GetSetsByUsage("Location - Markarth")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Markarth"
+;             setsList = GetSetsByUsage("Location - Markarth")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Morthal"
-            setsList = GetSetsByUsage("Location - Morthal")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Morthal"
+;             setsList = GetSetsByUsage("Location - Morthal")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Riften"
-            setsList = GetSetsByUsage("Location - Riften")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Riften"
+;             setsList = GetSetsByUsage("Location - Riften")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Solitude"
-            setsList = GetSetsByUsage("Location - Solitude")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Solitude"
+;             setsList = GetSetsByUsage("Location - Solitude")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "High Hrothgar"
-            setsList = GetSetsByUsage("Location - High Hrothgar")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "High Hrothgar"
+;             setsList = GetSetsByUsage("Location - High Hrothgar")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Whiterun"
-            setsList = GetSetsByUsage("Location - Whiterun")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Whiterun"
+;             setsList = GetSetsByUsage("Location - Whiterun")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Winterhold"
-            setsList = GetSetsByUsage("Location - Winterhold")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Winterhold"
+;             setsList = GetSetsByUsage("Location - Winterhold")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        elseif locationName == "Raven Rock"
-            setsList = GetSetsByUsage("Location - Raven Rock")
-            if setsList.Length > 0
-                found = true
-            endif
+;         elseif locationName == "Raven Rock"
+;             setsList = GetSetsByUsage("Location - Raven Rock")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
 
-        endif
+;         endif
 
-    endif
+;     endif
 
-    if !found
-        if currentLocation.HasKeywordString("LocTypeCity")
-            ;check any city
-            setsList = GetSetsByUsage("Location - Any City")
-            if setsList.Length > 0
-                found = true
-            endif
-        endif
-    endif
+;     if !found
+;         if currentLocation.HasKeywordString("LocTypeCity")
+;             ;check any city
+;             setsList = GetSetsByUsage("Location - Any City")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
+;         endif
+;     endif
 
-    if !found
-        if safeLocation
-            setsList = GetSetsByUsage("Location - All Safe Areas")
-            if setsList.Length > 0
-                found = true
-            endif
-        ; else
-        ;     setsList = GetSetsByUsage("Location - All Dangerous Areas")
-        ;     if setsList.Length > 0
-        ;         found = true
-        ;     endif
-        endif
-    endif
+;     if !found
+;         if safeLocation
+;             setsList = GetSetsByUsage("Location - All Safe Areas")
+;             if setsList.Length > 0
+;                 found = true
+;             endif
+;         ; else
+;         ;     setsList = GetSetsByUsage("Location - All Dangerous Areas")
+;         ;     if setsList.Length > 0
+;         ;         found = true
+;         ;     endif
+;         endif
+;     endif
 
-    if !found
-        ;check all areas
-        setsList = GetSetsByUsage("Location - All Areas")
-        if setsList.Length > 0
-            found = true
-        endif
-    endif
+;     if !found
+;         ;check all areas
+;         setsList = GetSetsByUsage("Location - All Areas")
+;         if setsList.Length > 0
+;             found = true
+;         endif
+;     endif
        
-    if setsList.Length > 0
-        ActiveBondageSet = setsList[Utility.RandomInt(0, setsList.Length - 1)]
-    endif
+;     if setsList.Length > 0
+;         ActiveBondageSet = setsList[Utility.RandomInt(0, setsList.Length - 1)]
+;     endif
 
-    if ActiveBondageSet != ""
-        bind_Utility.WriteNotification("Switched to bondage set " + ActiveBondageSet)
-    else
-        bind_Utility.WriteNotification("No bondage set found, using random items")
-    endif
+;     if ActiveBondageSet != ""
+;         bind_Utility.WriteNotification("Switched to bondage set " + ActiveBondageSet)
+;     else
+;         bind_Utility.WriteNotification("No bondage set found, using random items")
+;     endif
 
-    ;debug.MessageBox("day of week: " + dayOfWeek + " active set: " + ActiveBondageSet)
+;     ;debug.MessageBox("day of week: " + dayOfWeek + " active set: " + ActiveBondageSet)
 
-    bind_Utility.WriteToConsole("Selected bondage set: " + ActiveBondageSet)
+;     bind_Utility.WriteToConsole("Selected bondage set: " + ActiveBondageSet)
 
-endfunction
+; endfunction
 
 string[] function GetSetsByUsage(string usage)
     return StorageUtil.StringListToArray(TheWardrobe, "used_for_" + usage)
@@ -2095,6 +2138,42 @@ function BindingBondageItemSubMenu(Actor a, int mode, int branch, Form item)
         ;     madeFavoritesChanges = false
         ; endif
     endif
+
+endfunction
+
+function LearnWornDdItemsToSet(Actor theSub, int outfitId)
+
+    string bondageOutfitFile
+    bondageOutfitFile = "bind_bondage_outfit_" + outfitId + ".json"
+
+    GoToState("WorkingState")
+
+    JsonUtil.FormListClear(bondageOutfitFile, "fixed_bondage_items")
+    ;StorageUtil.FormListClear(TheWardrobe, "set_" + loadedSetName)
+
+	Form[] inventory = theSub.GetContainerForms()
+	int i = 0
+    int kwi = 0
+	while i < inventory.Length
+        Form dev = inventory[i]
+        if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
+            bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
+            if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
+                bind_Utility.WriteToConsole("quest or blocking device")
+            else
+                bind_Utility.WriteToConsole("dev: " + dev.GetName() + " binding item: " + StorageUtil.GetIntValue(dev, "binding_bondage_item", 0))
+
+                ;StorageUtil.FormListAdd(TheWardrobe, "set_" + loadedSetName, dev, false)
+                JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
+
+            endif
+        endif
+        i += 1
+    endwhile
+
+    GoToState("")
+
+    JsonUtil.Save(bondageOutfitFile)
 
 endfunction
 
