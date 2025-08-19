@@ -511,9 +511,11 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
 					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
 					if hasBlock
-						;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
-						bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
-						theSub.UnequipItem(dev, false, true)
+						if !dev.HasKeyWordString("zad_Lockable") && !dev.HasKeyWordString("zad_InventoryDevice") && !dev.HasKeyWordString("sexlabnostrip")
+							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
+							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
+							theSub.UnequipItem(dev, false, true)
+						endif
 					endif
 					bind_Utility.WriteToConsole("f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
 				endif

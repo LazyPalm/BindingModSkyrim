@@ -13,10 +13,14 @@
 			"0x32744|Devious Devices - Integration.esm",
 			"0x32743|Devious Devices - Integration.esm",
 			"0x58474|Devious Devices - Expansion.esm"
+		],
+		"fixed_worn_items" : 
+		[
 		]
 	},
 	"int" : 
 	{
+		"remove_existing_gear" : 1,
 		"use_random_bondage" : 0
 	},
 	"intList" : 
@@ -30,6 +34,10 @@
 			50,
 			100
 		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Safe Areas Outfit"
 	},
 	"stringList" : 
 	{

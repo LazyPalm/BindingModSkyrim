@@ -4,8 +4,14 @@
 		"fixed_bondage_items" : 
 		[
 			"0x415a9|Devious Devices - Expansion.esm",
-			"0x14927|Devious Devices - Expansion.esm",
-			"0x1b5e5|Devious Devices - Expansion.esm"
+			"0x14927|Devious Devices - Expansion.esm"
+		],
+		"fixed_worn_items" : 
+		[
 		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "City Bondage Outfit"
 	}
 }

@@ -5,5 +5,9 @@
 		[
 			"0x1e687|Devious Devices - Expansion.esm"
 		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Go Adventuring Outfit"
 	}
 }

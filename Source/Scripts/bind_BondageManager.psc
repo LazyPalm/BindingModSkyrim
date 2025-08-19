@@ -77,6 +77,8 @@ EndFunction
 
 function EquipBondageOutfit(Actor a, int setId)
 
+    int i
+
     EquippingBondageOutfit = true
 
     string f = "bind_bondage_outfit_" + setId + ".json"
@@ -85,19 +87,37 @@ function EquipBondageOutfit(Actor a, int setId)
 
     RemoveAllBondageItems(a, true)
 
-    ;unequip blocks
-    int[] blocks = JsonUtil.IntListToArray(f, "block_slots")
-    int i = 0
-    while i < blocks.Length
-        Armor dev = a.GetWornForm(blocks[i]) as Armor
-        if dev != none
-            a.UnequipItem(dev, false, true)
-            bind_Utility.DoSleep(0.25)
-        endif
-        i += 1
-    endwhile
+    if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
+        Form[] inventory = a.GetContainerForms()
+        i = 0
+        while i < inventory.Length
+            Form item = inventory[i]
+            If item.IsPlayable()
+                if a.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+                    a.UnequipItem(item, false, true)
+                endif
+            endif
+            i += 1
+        endwhile
+    else
+        ;note - no need to do this if all existing gear is being removed
+        ;unequip blocks
+        int[] blocks = JsonUtil.IntListToArray(f, "block_slots")
+        i = 0
+        while i < blocks.Length
+            Armor item = a.GetWornForm(blocks[i]) as Armor
+            if item != none
+                if !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+                    a.UnequipItem(item, false, true)
+                    bind_Utility.DoSleep(0.25)
+                endif
+            endif
+            i += 1
+        endwhile
 
-    ;doest the set have stored armor & clothing?
+    endif
+
+    ;does the set have stored armor & clothing?
     Form[] wornItems = JsonUtil.FormListToArray(f, "fixed_worn_items")
     i = 0
     while i < wornItems.Length
@@ -210,6 +230,9 @@ function EquipBondageOutfit(Actor a, int setId)
     endif
 
     StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+    StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(f, "bondage_outfit_name", ""))
+
+    bind_Utility.DoSleep(2.0)
 
     EquippingBondageOutfit = false
 
@@ -225,6 +248,17 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     if currentLocation.HasKeywordString("LocTypePlayerHouse")
         isSafeArea = true
         outfitKey = "location_player_home"
+        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
+        if hasSet
+            return currentBondageSet
+        endif
+        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+    endif
+
+    if currentLocation.HasKeywordString("LocTypeInn")
+        isSafeArea = true
+        outfitKey = "location_inn"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
         if hasSet
             return currentBondageSet
@@ -1041,6 +1075,9 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
 
 	while i < inventory.Length
         Form dev = inventory[i]
+        
+        ;TODO - figure out how to deal with failed render devices
+
         if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev)
             int flag = GetBindingBondageItem(dev)
             if flag == 1 || main.CleanUpNonBindingItemsFromBags == 1

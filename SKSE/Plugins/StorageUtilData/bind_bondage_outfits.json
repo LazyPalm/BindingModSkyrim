@@ -42,7 +42,12 @@
 		"used_for_location_all_areas" : [],
 		"used_for_location_any_city" : 
 		[
-			1002
+			1002,
+			1009
+		],
+		"used_for_location_inn" : 
+		[
+			1001
 		],
 		"used_for_location_player_home" : 
 		[
@@ -52,10 +57,7 @@
 		[
 			1008
 		],
-		"used_for_location_towns" : 
-		[
-			1001
-		],
+		"used_for_location_towns" : [],
 		"used_for_location_unsafe_area" : 
 		[
 			1008
@@ -66,14 +68,14 @@
 		"bondage_set_names" : 
 		[
 			"At Home Outfit",
-			"All Areas Outfit",
+			"Safe Areas Outfit",
 			"Harsh Bondage Outfit",
 			"All Events Outfit",
 			"Bound Sleep Outfit",
 			"Go Adventuring Outfit",
 			"Gagged For Punishment Outfit",
 			"Unsafe Areas Outfit",
-			"Bondage Set 9",
+			"City Bondage Outfit",
 			"Bondage Set 10",
 			"Bondage Set 11"
 		]

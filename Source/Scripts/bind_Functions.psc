@@ -590,10 +590,12 @@ state ArrivalCheckState
 
 		if !ModInRunningState()
 
+			bind_Utility.WriteNotification("ArrivalCheckState - Quest is running... terminate", bind_Utility.TextColorRed())
 			bind_Utility.WriteToConsole("ArrivalCheckState - Quest is running... terminate")
 
 		elseif targetSetId == main.ActiveBondageSetId
 
+			bind_Utility.WriteNotification("ArrivalCheckState - already in this set... terminating", bind_Utility.TextColorRed())
 			bind_Utility.WriteToConsole("ArrivalCheckState - already in this set... terminating")
 
 		else
@@ -672,16 +674,18 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
 
 	if main.ActiveBondageSetId == 0
-		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorRed())
+		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
 	else
 		if main.ActiveBondageSetId != currentBondageSetId
 			;update bondage??
-			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorRed())
+			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
 			UnregisterForUpdate()
 			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
 			GotoState("ArrivalCheckState")
 		else
+			bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
 			bind_Utility.WriteToConsole("Keep bondage outfit: " + currentBondageSetId)
+
 		endif
 	endif
 

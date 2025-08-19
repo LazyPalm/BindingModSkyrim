@@ -8,5 +8,9 @@
 			"0x58474|Devious Devices - Expansion.esm",
 			"0x1ab0e|Devious Devices - Expansion.esm"
 		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Gagged For Punishment Outfit"
 	}
 }

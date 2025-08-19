@@ -28,6 +28,10 @@
 			268435456
 		]
 	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "All Events Outfit"
+	},
 	"stringList" : 
 	{
 		"blocks" : 

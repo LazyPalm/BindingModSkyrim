@@ -8,5 +8,13 @@
 		"fixed_worn_items" : 
 		[
 		]
+	},
+	"int" : 
+	{
+		"remove_existing_gear" : 0
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Unsafe Areas Outfit"
 	}
 }

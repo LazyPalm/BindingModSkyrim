@@ -29,6 +29,10 @@
 			268435456
 		]
 	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Bound Sleep Outfit"
+	},
 	"stringList" : 
 	{
 		"blocks" : 
