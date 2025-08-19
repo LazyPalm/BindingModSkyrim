@@ -245,6 +245,13 @@ int[] bondageOutfitBlockToggle
 int[] bondageSetRemoveDdToggle
 int[] bondageSetRemoveGearToggle
 int bondageSetRemoveExistingGearToggle
+int inputDeviousKeywordSearch
+string deviousKeywordSearch
+string[] searchResults
+int menuSearchResults
+string selectedFoundItem
+int selectedFoundItemId
+int clickedFoundItem
 
 Actor theSub
 
@@ -562,8 +569,14 @@ function DisplayBondageOutfits()
         int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
 
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
-
         AddTextOption("", "")
+
+        AddHeaderOption("Add Item - Devious Devices")
+        AddHeaderOption("")
+        inputDeviousKeywordSearch = AddInputOption("Keyword Search", deviousKeywordSearch)
+        menuSearchResults = AddMenuOption("Items Found", selectedFoundItem)
+        clickedFoundItem = AddTextOption("Add DD found dd item", "")
+        AddTextOption("", "")        
 
         AddHeaderOption("Fixed Items - Devious Devices")
         AddHeaderOption("")
@@ -1950,6 +1963,10 @@ event OnOptionInputOpen(int option)
         SetInputDialogStartText(selectedBondageOutfit)
     endif
 
+    if option == inputDeviousKeywordSearch
+        SetInputDialogStartText(deviousKeywordSearch)
+    endif
+
 	; if option == inputSLUseTags
 	; 	SetInputDialogStartText(main.SexUseSLTags)
     ; elseif option == inputSLBlockTags
@@ -2021,6 +2038,18 @@ event OnOptionInputAccept(int option, string value)
         selectedBondageOutfitId = 0
         selectedBondageOutfitIndex = -1
         ForcePageReset()
+    endif
+
+    if option == inputDeviousKeywordSearch
+        SetInputOptionValue(inputDeviousKeywordSearch, "Running Search...")
+
+        selectedFoundItemId = -1
+        selectedFoundItem = ""
+
+        searchResults = bmanage.SearchDeviousItems(value)
+        bind_Utility.WriteToConsole("searchResults: " + searchResults.Length)
+
+        SetInputOptionValue(inputDeviousKeywordSearch, "Found: " + searchResults.Length)        
     endif
 
 	; if option == inputSLUseTags
@@ -2104,6 +2133,19 @@ Event OnOptionSelect(int option)
             if ShowMessage("Learn worn armor and clothing?", true, "$Yes", "$No")
                 gmanage.LearnWornItemsForBondageOutfit(theSub, selectedBondageOutfitId)
                 ForcePageReset()
+            endif
+        endif
+
+        if option == clickedFoundItem
+            if selectedFoundItemId > -1
+                if ShowMessage("Add DD item " + selectedFoundItem + "?", true, "$Yes", "$No")
+                    string resultsFile = "bind_dd_search_result.json"
+                    Form dev = JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
+                    if dev
+                        JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
+                    endif
+                    ForcePageReset()
+                endif
             endif
         endif
 
@@ -3251,6 +3293,11 @@ Event OnOptionMenuOpen(int option)
         SetMenuDialogStartIndex(bondageSetNames.Find(selectedBondageOutfit))
     endif
 
+    if option == menuSearchResults
+        SetMenuDialogOptions(searchResults)
+        SetMenuDialogStartIndex(0)
+    endif
+
 EndEvent
 
 Event OnOptionMenuAccept(int option, int index)
@@ -3431,6 +3478,12 @@ Event OnOptionMenuAccept(int option, int index)
         bondageOutfitFile = "bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
         ;SetMenuOptionValue(menuBondageOutfitsList, bondageSetNames[index])
         ForcePageReset()
+    endif
+
+    if option == menuSearchResults
+        selectedFoundItem = searchResults[index]
+        selectedFoundItemId = index
+        SetMenuOptionValue(menuSearchResults, selectedFoundItem)
     endif
 
 EndEvent

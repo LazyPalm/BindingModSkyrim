@@ -3,15 +3,24 @@
 	{
 		"fixed_bondage_items" : 
 		[
-			"0x14927|Devious Devices - Expansion.esm"
+			"0x14927|Devious Devices - Expansion.esm",
+			"0x1e687|Devious Devices - Expansion.esm"
 		],
 		"fixed_worn_items" : 
 		[
+			"0x855|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x852|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x89b|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x854|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x858|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x853|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x83f|DX Dark Knight Armor - My Final Version by Xtudo.esp",
+			"0x84e|DX Dark Knight Armor - My Final Version by Xtudo.esp"
 		]
 	},
 	"int" : 
 	{
-		"remove_existing_gear" : 0
+		"remove_existing_gear" : 1
 	},
 	"string" : 
 	{

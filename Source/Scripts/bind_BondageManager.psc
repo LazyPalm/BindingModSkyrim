@@ -2303,6 +2303,82 @@ function SaveWornDdItemsAsSet(Actor theSub)
 
 endfunction
 
+string[] function SearchDeviousItems(string keywords)
+
+    string[] keywordArr = StringUtil.Split(keywords, ",")
+
+    string f = "bind_dd_db.json"
+
+    int i = 0
+
+    int counter = 0
+    int groupNmber = 1
+
+    if !JsonUtil.JsonExists(f)
+
+        bind_Utility.WriteToConsole("Creating DD database json")
+
+        while i < bind_dd_all.GetSize()
+            Form dev =  bind_dd_all.GetAt(i)
+            if counter > 100
+                counter = 0
+                groupNmber += 1
+            Endif
+            JsonUtil.StringListAdd(f, "group_" + groupNmber + "_names", dev.GetName())
+            JsonUtil.FormListAdd(f, "group_" + groupNmber + "_items", dev)
+            i += 1
+            counter += 1
+        endwhile
+
+        JsonUtil.Save(f)
+
+    endif
+
+    string result = ""
+    int foundCount = 0
+
+    string resultsFile = "bind_dd_search_result.json"
+    JsonUtil.StringListClear(resultsFile, "found_names")
+    JsonUtil.FormListClear(resultsFile, "found_items")
+
+    i = 1
+    while i < 20
+        int idx = 0
+        int idx2 = 0
+        string[] itemNames = JsonUtil.StringListToArray(f, "group_" + i + "_names")
+        Form[] items = JsonUtil.FormListToArray(f, "group_" + i + "_items")
+        if itemNames.Length == 0
+            i = 20 ;break if empty
+        endif
+        while idx < itemNames.Length
+            string itemName = itemNames[idx]
+            bool passedTests = true
+            idx2 = 0
+            while idx2 < keywordArr.Length
+                if StringUtil.Find(itemName, keywordArr[idx2], 0) == -1
+                    passedTests = false
+                endif
+                idx2 += 1
+            endwhile
+            if passedTests
+                if result == ""
+                    result = itemName
+                else
+                    result += "|" + itemName
+                endif
+                JsonUtil.FormListAdd(resultsFile, "found_items", items[idx])
+                JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
+            endif
+            idx += 1
+        endwhile
+        i += 1
+    endwhile
+    JsonUtil.Save(resultsFile)
+
+    return StringUtil.Split(result, "|")
+
+endfunction
+
 
 bind_BondageManager function GetBindingBondageManager() global
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
@@ -2314,6 +2390,7 @@ bind_RulesManager property rms auto
 zadLibs property zlib auto
 
 FormList property bind_dd auto
+FormList property bind_dd_all auto
 
 FormList property bind_BondageList auto
 FormList property bind_BondageFactions auto
