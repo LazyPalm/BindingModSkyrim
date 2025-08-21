@@ -141,71 +141,216 @@ function EquipBondageOutfit(Actor a, int setId)
 
     if useRandom == 1
 
-        JsonUtil.FormListClear(f, "dynamic_bondage_items")
+        float expirationDate = JsonUtil.GetFloatValue(f, "dynamic_bondage_expires", 0.0)
+        if expirationDate < bind_Utility.GetTime() || JsonUtil.FormListCount(f, "dynamic_bondage_items") == 0
+            
+            debug.MessageBox("resetting dynamic gear")
 
-        int material = Utility.RandomInt(1, 3)
-        int color = 0
-        if material == 1 ;rope
-            color = Utility.RandomInt(1, 4)
-        elseif material == 2 ;leather
-            color = Utility.RandomInt(1, 3)
-        elseif material == 3 ;iron
-            color = 1
-        endif
+            JsonUtil.FormListClear(f, "dynamic_bondage_items")
+            JsonUtil.SetFloatValue(f, "dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
+      
+            int material = Utility.RandomInt(1, 4) ;change to 3
+            string materialSearch = ""
 
-        int[] chances = JsonUtil.IntListToArray(f, "random_bondage_chance")
-        bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
+            material = 3 ;for testing
 
-        ;anal plug - 0
-        if Utility.RandomInt(0, 100) < chances[0]
-            bind_Utility.WriteToConsole("using anal plug")
-            FormList fl = bind_dd.GetAt(0) as FormList
-            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
-        endif
-        ;vag plug - 1
-        if Utility.RandomInt(0, 100) < chances[1]
-            bind_Utility.WriteToConsole("using vag plug")
-            FormList fl = bind_dd.GetAt(1) as FormList
-            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
-        endif
-        ;vag piercing - 2
-        if Utility.RandomInt(0, 100) < chances[2]
-            bind_Utility.WriteToConsole("using vag piercing")
-            FormList fl = bind_dd.GetAt(2) as FormList
-            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
-        endif
-        ;nipple piercing - 3
-        if Utility.RandomInt(0, 100) < chances[3]
-            bind_Utility.WriteToConsole("using nip piercing")
-            FormList fl = bind_dd.GetAt(3) as FormList
-            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
-        endif
-        ;arms - 4
-        if Utility.RandomInt(0, 100) < chances[4]
-            bind_Utility.WriteToConsole("using arms")
-            FormList arms = bind_dd.GetAt(4) as FormList
-            FormList fl
-            if material == 3
-                fl = arms.GetAt(0) as FormList
-            elseif material == 2 && color == 1
-                fl = arms.GetAt(1) as FormList
-            elseif material == 2 && color == 2
-                fl = arms.GetAt(2) as FormList
-            elseif material == 2 && color == 3
-                fl = arms.GetAt(3) as FormList
-            elseif material == 1 && color == 1
-                fl = arms.GetAt(4) as FormList
-            elseif material == 1 && color == 2
-                fl = arms.GetAt(5) as FormList
-            elseif material == 1 && color == 3
-                fl = arms.GetAt(6) as FormList
-            elseif material == 1 && color == 4
-                fl = arms.GetAt(7) as FormList
+            if material == 1
+                materialSearch = "rope"
+            elseif material == 2
+                materialSearch = "leather"
+            elseif material == 3
+                materialSearch = "ebonite"
+            elseif material == 4
+                materialSearch = "iron"
             endif
-            JsonUtil.FormListAdd(f, "dynamic_bondage_items", fl.GetAt(Utility.RandomInt(0, fl.GetSize() - 1)))
-        endif
 
-        JsonUtil.Save(f)
+            int color = 0
+            string colorSearch = ""
+            if material == 1 ;rope
+                color = Utility.RandomInt(1, 4)
+                if color == 4
+                    colorSearch = "-black,-red,-white"
+                endif
+            elseif material == 2 || material == 3 ;leather
+                color = Utility.RandomInt(1, 3)
+            elseif material == 4 ;iron
+                ;color = 1
+            endif
+            if color == 1
+                colorSearch = "black"
+            elseif color == 2
+                colorSearch = "red"
+            elseif color == 3
+                colorSearch = "white"
+            endif
+
+            int[] chances = JsonUtil.IntListToArray(f, "random_bondage_chance")
+            bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
+
+            string searchString = ""
+            string rf = "bind_dd_search_result.json"
+
+            bool armsBound = false
+            Form bodyItem
+            Form armItem
+
+            ;anal plug - 0
+            if Utility.RandomInt(0, 100) < chances[0]
+                searchString = "anal,plug"
+                FindRandomItem(f, rf, searchString)
+            endif
+            ;vag plug - 1
+            if Utility.RandomInt(0, 100) < chances[1]
+                searchString = "vaginal,plug"
+                FindRandomItem(f, rf, searchString)
+            endif
+            ;vag piercing - 2
+            if Utility.RandomInt(0, 100) < chances[2]
+                searchString = "genital,piercing"
+                FindRandomItem(f, rf, searchString)
+            endif
+            ;nipple piercing - 3
+            if Utility.RandomInt(0, 100) < chances[3]
+                searchString = "nipple,piercing"
+                FindRandomItem(f, rf, searchString)
+            endif      
+            if Utility.RandomInt(0, 100) < chances[5] ;body - 5
+                if material == 1 || material == 2 || material == 3
+                    int bodyType = Utility.RandomInt(1, 3)
+                    if bodyType == 1
+                        searchString = "harness,-collar,-gag," + materialSearch + "," + colorSearch
+                    elseif bodyType == 2
+                        searchString = "corset," + materialSearch + "," + colorSearch
+                    elseif bodyType == 3
+                        searchString = "belt," + colorSearch
+                        if material == 1
+                            searchString = "crotch,-harness," + colorSearch
+                        endif
+                    endif
+                elseif material == 4
+                    int bodyType = Utility.RandomInt(1, 2)
+                    if bodyType == 1
+                        searchString = "belt,iron"
+                    elseif bodyType == 2 
+                        ;searchString = "iron chain harness,-("
+                        searchString = "iron chain harness,body"
+                    endif
+                endif
+                bodyItem = FindRandomItem(f, rf, searchString)
+            endif
+            ;arms - 4
+            if Utility.RandomInt(0, 100) < chances[4]
+                if material == 1 || material == 2 || material == 3
+                    int armType = Utility.RandomInt(1, 2)
+                    if armType == 1
+                        searchString = "binder,-strait," + materialSearch + "," + colorSearch
+                        armsBound = true
+                    elseif armType == 2
+                        searchString = "arm,cuff," + materialSearch + "," + colorSearch
+                    endif
+                elseif material == 4
+                    int bindArms = Utility.RandomInt(1, 2)
+                    ;bindArms = 1
+                    if bindArms == 1
+                        armsBound = true
+                        int armType = Utility.RandomInt(1, 3)
+                        if armType == 1
+                            searchString = "yoke"                        
+                        elseif armType == 2
+                            searchString = "manacles"
+                        elseif armType == 3
+                            searchString = "elbow shackles"
+                        endif
+                    elseif bindArms == 2
+                        searchString = "steel,cuffs,(arms)"
+                    endif
+                    ;debug.MessageBox(searchString)
+                endif
+                armItem = FindRandomItem(f, rf, searchString)
+            endif
+            if Utility.RandomInt(0, 100) < chances[6] ;legs
+                int legType = Utility.RandomInt(1, 2)
+                if material == 1 || material == 2 || material == 3
+                    searchString = "leg,cuff," + materialSearch + "," + colorSearch
+                elseif material == 4
+                    int bindLegs = Utility.RandomInt(1,2)
+                    if bindLegs == 1
+                        searchString = "fetters"
+                    else
+                        searchString = "steel,cuffs,(legs)"
+                    endif
+                endif
+                FindRandomItem(f, rf, searchString)
+            endif
+            if Utility.RandomInt(0, 100) < chances[7] ;boots
+                if material == 2 || material == 3
+                    searchString = "boots,-pony," + materialSearch + "," + colorSearch
+                    FindRandomItem(f, rf, searchString)
+                elseif material == 1 ;rope with iron boots (maybe get rid of this?)
+                    searchString = "boots,iron"
+                    FindRandomItem(f, rf, searchString)
+                elseif material == 4
+                    searchString = "boots," + materialSearch
+                    FindRandomItem(f, rf, searchString)
+                endif
+            endif
+            if Utility.RandomInt(0, 100) < chances[8] ;gloves
+                if material == 2 || material == 3
+                    searchString = "gloves," + materialSearch + "," + colorSearch
+                    FindRandomItem(f, rf, searchString)
+                endif
+            endif       
+            if Utility.RandomInt(0, 100) < chances[10] ;gag
+                if material == 4
+                    int gagType = Utility.RandomInt(1, 2)
+                    if gagType == 1
+                        searchString = "gag," + materialSearch
+                    else
+                        searchString = "bridle"
+                    endif
+                else
+                    searchString = "gag," + materialSearch + "," + colorSearch
+                endif
+                FindRandomItem(f, rf, searchString)
+            endif
+            if Utility.RandomInt(0, 100) < chances[11] ;blindfold
+                if material == 1 || material == 2 || material == 3
+                    searchString = "blindfold," + materialSearch + "," + colorSearch
+                    FindRandomItem(f, rf, searchString)
+                elseif material == 4
+                    searchString = "blindfold,leather,black"
+                    FindRandomItem(f, rf, searchString)
+                endif
+            endif
+            if Utility.RandomInt(0, 100) < chances[12] ;hood
+                if material == 1 || material == 4
+                    searchString = "hood,leather,black"
+                else
+                    searchString = "hood," + materialSearch + "," + colorSearch
+                endif
+                FindRandomItem(f, rf, searchString)
+            endif
+            if Utility.RandomInt(0, 100) < chances[9] ;collar - 9 (moved this up to let the body and arms unequip it)
+                if !zlib.GetRenderedDevice(bodyItem as Armor).HasKeyWord(zlib.zad_DeviousCollar) && !zlib.GetRenderedDevice(armItem as Armor).HasKeyWord(zlib.zad_DeviousCollar)
+                    if material == 4
+                        int collarType = Utility.RandomInt(1,2)
+                        if collarType == 1
+                            searchString = "collar,-chain," + materialSearch
+                        elseif collarType == 2
+                            searchString = "steel,collar,(padded),-posture"
+                        endif
+                    else
+                        searchString = "collar," + materialSearch + "," + colorSearch
+                    endif
+                    FindRandomItem(f, rf, searchString)
+                else
+                    bind_Utility.WriteToConsole("body item has collar")
+                endif
+            endif  
+
+            JsonUtil.Save(f)
+
+        endif
 
         setItems = JsonUtil.FormListToArray(f, "dynamic_bondage_items")
 
@@ -236,6 +381,17 @@ function EquipBondageOutfit(Actor a, int setId)
 
     EquippingBondageOutfit = false
 
+endfunction
+
+Form function FindRandomItem(string fileName, string resultsFileName, string searchString)
+    string[] items = SearchDeviousItems(searchString)
+    ;debug.MessageBox("search: " + searchString + " results: " + items)
+    Form dev = JsonUtil.FormListRandom(resultsFileName, "found_items")
+    if dev != none
+        bind_Utility.WriteToConsole("FindRandomItem: " + dev.GetName())
+        JsonUtil.FormListAdd(fileName, "dynamic_bondage_items", dev)
+    endif
+    return dev
 endfunction
 
 int function GetBondageSetForLocation(Location currentLocation, int currentBondageSet)
@@ -2355,8 +2511,16 @@ string[] function SearchDeviousItems(string keywords)
             bool passedTests = true
             idx2 = 0
             while idx2 < keywordArr.Length
-                if StringUtil.Find(itemName, keywordArr[idx2], 0) == -1
-                    passedTests = false
+                string searchFor = keywordArr[idx2]
+                if StringUtil.Find(searchFor, "-", 0) > -1
+                    searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
+                    if StringUtil.Find(itemName, searchFor, 0) > -1
+                        passedTests = false
+                    endif
+                else
+                    if StringUtil.Find(itemName, searchFor, 0) == -1
+                        passedTests = false
+                    endif
                 endif
                 idx2 += 1
             endwhile

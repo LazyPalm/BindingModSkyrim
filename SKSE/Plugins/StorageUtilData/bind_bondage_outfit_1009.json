@@ -1,13 +1,46 @@
 {
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 5.8042111396789551
+	},
 	"formList" : 
 	{
+		"dynamic_bondage_items" : 
+		[
+			"0x47566|Devious Devices - Integration.esm",
+			"0xf006|Devious Devices - Expansion.esm",
+			"0xf016|Devious Devices - Expansion.esm",
+			"0xf02c|Devious Devices - Expansion.esm"
+		],
 		"fixed_bondage_items" : 
 		[
 			"0x415a9|Devious Devices - Expansion.esm",
 			"0x14927|Devious Devices - Expansion.esm"
 		],
-		"fixed_worn_items" : 
+		"fixed_worn_items" : []
+	},
+	"int" : 
+	{
+		"use_random_bondage" : 1
+	},
+	"intList" : 
+	{
+		"block_slots" : [],
+		"random_bondage_chance" : 
 		[
+			25,
+			25,
+			25,
+			50,
+			100,
+			100,
+			50,
+			25,
+			25,
+			100,
+			25,
+			10,
+			10
 		]
 	},
 	"string" : 

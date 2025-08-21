@@ -12,7 +12,7 @@
 	"int" : 
 	{
 		"remove_existing_gear" : 1,
-		"use_random_bondage" : 0
+		"use_random_bondage" : 1
 	},
 	"intList" : 
 	{
@@ -31,6 +31,22 @@
 			67108864,
 			128,
 			8
+		],
+		"random_bondage_chance" : 
+		[
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0,
+			0
 		]
 	},
 	"string" : 

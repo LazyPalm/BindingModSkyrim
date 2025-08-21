@@ -252,6 +252,7 @@ int menuSearchResults
 string selectedFoundItem
 int selectedFoundItemId
 int clickedFoundItem
+int[] sliderChance
 
 Actor theSub
 
@@ -571,44 +572,91 @@ function DisplayBondageOutfits()
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
         AddTextOption("", "")
 
-        AddHeaderOption("Add Item - Devious Devices")
-        AddHeaderOption("")
-        inputDeviousKeywordSearch = AddInputOption("Keyword Search", deviousKeywordSearch)
-        menuSearchResults = AddMenuOption("Items Found", selectedFoundItem)
-        clickedFoundItem = AddTextOption("Add DD found dd item", "")
-        AddTextOption("", "")        
+        if useRandomBondage == 1
 
-        AddHeaderOption("Fixed Items - Devious Devices")
-        AddHeaderOption("")
-        clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
-        AddTextOption("", "")
-        Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
-        i = 0
-        while i < setItems.Length
-            bondageSetRemoveDdToggle[i] = AddTextOption(setItems[i].GetName(), "")
-            ;bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId))
-            i += 1
-        endwhile
-        if setItems.length > 0
-            if setItems.Length % 2 > 0
-                AddTextOption("", "")
-            endif
-        endif
+            int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
 
-        AddHeaderOption("Fixed Items - Clothing & Armor")
-        AddHeaderOption("")
-        clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
-        bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear", JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0))
-        Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
-        i = 0
-        while i < wornItems.Length
-            bondageSetRemoveGearToggle[i] = AddTextOption(wornItems[i].GetName(), "")
-            i += 1
-        endwhile
-        if wornItems.length > 0
-            if wornItems.Length % 2 > 0
-                AddTextOption("", "")
+            AddHeaderOption("Item Chances")
+            AddHeaderOption("")
+
+            sliderChance[0] = AddSliderOption("Anal Plug", chances[0], "{0}")
+            sliderChance[1] = AddSliderOption("Vaginal Plug", chances[1], "{0}")
+            sliderChance[2] = AddSliderOption("Genital Piercing", chances[2], "{0}")
+            sliderChance[3] = AddSliderOption("Nipple Piercing", chances[3], "{0}")
+            sliderChance[4] = AddSliderOption("Arm Bondage", chances[4], "{0}")
+            sliderChance[5] = AddSliderOption("Body Bondage", chances[5], "{0}")
+            sliderChance[6] = AddSliderOption("Leg Bondage", chances[6], "{0}")
+            sliderChance[7] = AddSliderOption("Boots", chances[7], "{0}")
+            sliderChance[8] = AddSliderOption("Gloves", chances[8], "{0}")
+            sliderChance[9] = AddSliderOption("Collar", chances[9], "{0}")
+            sliderChance[10] = AddSliderOption("Gag", chances[10], "{0}")
+            sliderChance[11] = AddSliderOption("Blindfold", chances[11], "{0}")
+            sliderChance[12] = AddSliderOption("Hood", chances[12], "{0}")
+            AddTextOption("", "")
+
+            AddHeaderOption("Current Dynamic Items - Devious Devices")
+            
+            float expirationDate = JsonUtil.GetFloatValue(bondageOutfitFile, "dynamic_bondage_expires", 0.0)
+            if expirationDate > 0.0
+                AddHeaderOption("Time Remaining: " + (expirationDate - bind_Utility.GetTime()))
+            else
+                AddHeaderOption("")
             endif
+
+            Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "dynamic_bondage_items")
+            i = 0
+            while i < setItems.Length
+                AddTextOption(setItems[i].GetName(), "")
+                i += 1
+            endwhile
+            if setItems.length > 0
+                if setItems.Length % 2 > 0
+                    AddTextOption("", "")
+                endif
+            endif
+
+        else
+
+            AddHeaderOption("Add Item - Devious Devices")
+            AddHeaderOption("")
+            inputDeviousKeywordSearch = AddInputOption("Keyword Search", deviousKeywordSearch)
+            menuSearchResults = AddMenuOption("Items Found", selectedFoundItem)
+            clickedFoundItem = AddTextOption("Add DD Found DD Item To Set", "")
+            AddTextOption("", "")        
+
+            AddHeaderOption("Fixed Items - Devious Devices")
+            AddHeaderOption("")
+            clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
+            AddTextOption("", "")
+            Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+            i = 0
+            while i < setItems.Length
+                bondageSetRemoveDdToggle[i] = AddTextOption(setItems[i].GetName(), "")
+                ;bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId))
+                i += 1
+            endwhile
+            if setItems.length > 0
+                if setItems.Length % 2 > 0
+                    AddTextOption("", "")
+                endif
+            endif
+
+            AddHeaderOption("Fixed Items - Clothing & Armor")
+            AddHeaderOption("")
+            clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
+            bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear On Outfit Equip", JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0))
+            Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+            i = 0
+            while i < wornItems.Length
+                bondageSetRemoveGearToggle[i] = AddTextOption(wornItems[i].GetName(), "")
+                i += 1
+            endwhile
+            if wornItems.length > 0
+                if wornItems.Length % 2 > 0
+                    AddTextOption("", "")
+                endif
+            endif
+
         endif
 
         AddHeaderOption("Block Equiping")
@@ -2114,6 +2162,21 @@ Event OnOptionSelect(int option)
             int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
             if useRandomBondage == 0
                 useRandomBondage = 1
+                if JsonUtil.IntListCount(bondageOutfitFile, "random_bondage_chance") == 0
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;a plug 0
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;v plug 1
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;v pier 2
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;n pier 3
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;arms 4
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;body 5
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;legs 6
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;boots 7
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;gloves 8
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;collar 9
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;gag 10
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;blindfold 11
+                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;hood 12
+                endif
             else
                 useRandomBondage = 0
             endif
@@ -2920,6 +2983,20 @@ EndEvent
 
 Event OnOptionSliderOpen(Int option)
 
+    int i
+    if selectedPage == "Bondage Outfits"
+        int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
+        while i < sliderChance.Length
+            if sliderChance[i] == option
+                SetSliderDialogStartValue(chances[i])
+                SetSliderDialogDefaultValue(50)
+                SetSliderDialogRange(0, 100)
+                SetSliderDialogInterval(5)
+            endif
+            i += 1
+        endwhile
+    endif
+
     If option == sliderFurnitureHours
         SetSliderDialogStartValue(main.PutOnDisplayHoursBetweenUse)
         SetSliderDialogDefaultValue(12)
@@ -3054,6 +3131,18 @@ Event OnOptionSliderOpen(Int option)
 EndEvent
 
 Event OnOptionSliderAccept(Int option, Float value)
+
+    int i
+    if selectedPage == "Bondage Outfits"
+        int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
+        while i < sliderChance.Length
+            if sliderChance[i] == option
+                JsonUtil.IntListSet(bondageOutfitFile, "random_bondage_chance", i, value as int)
+                ;ForcePageReset()
+            endif
+            i += 1
+        endwhile
+    endif
 
     If option == sliderFurnitureHours
         main.PutOnDisplayHoursBetweenUse = (value as int)  
@@ -3983,6 +4072,7 @@ function MakeArrays()
         bondageSetRemoveDdToggle = new int[25]
         bondageSetRemoveGearToggle = new int[25]
 
+        sliderChance = new int[13]
 
    endif
 
