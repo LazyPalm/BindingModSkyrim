@@ -83,6 +83,8 @@ function EquipBondageOutfit(Actor a, int setId)
 
     string f = "bind_bondage_outfit_" + setId + ".json"
 
+    StorageUtil.FormListClear(a, "bind_strip_list")
+
     bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
 
     RemoveAllBondageItems(a, true)
@@ -95,6 +97,7 @@ function EquipBondageOutfit(Actor a, int setId)
             If item.IsPlayable()
                 if a.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
+                    StorageUtil.FormListAdd(a, "bind_strip_list", item)
                 endif
             endif
             i += 1
@@ -109,6 +112,7 @@ function EquipBondageOutfit(Actor a, int setId)
             if item != none
                 if !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
+                    StorageUtil.FormListAdd(a, "bind_strip_list", item)
                     bind_Utility.DoSleep(0.25)
                 endif
             endif

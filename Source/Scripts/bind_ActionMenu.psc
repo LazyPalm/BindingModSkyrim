@@ -380,34 +380,34 @@ function ShowActionMenuNested()
     Actor dom = functions_script.GetDomRef()
 
     if safeZone ;!a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
-        actionMenu.SetPropertyIndexString("optionText", 3, "Safe Zone Bondage")
-        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Safe Zone Bondage")
-        actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)        
+        ; actionMenu.SetPropertyIndexString("optionText", 3, "Safe Zone Bondage")
+        ; actionMenu.SetPropertyIndexString("optionLabelText", 3, "Safe Zone Bondage")
+        ; actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)        
         ;actionMenu.SetPropertyIndexString("optionText", 3, "Bind Wrists")
         ;actionMenu.SetPropertyIndexString("optionLabelText", 3, "Bind Wrists")
         ;actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
     else
-        actionMenu.SetPropertyIndexString("optionText", 3, "Dangerous Area Bondage")
-        actionMenu.SetPropertyIndexString("optionLabelText", 3, "Dangerous Area Bondage")
-        actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
+        ; actionMenu.SetPropertyIndexString("optionText", 3, "Dangerous Area Bondage")
+        ; actionMenu.SetPropertyIndexString("optionLabelText", 3, "Dangerous Area Bondage")
+        ; actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
         ;actionMenu.SetPropertyIndexString("optionText", 3, "Free Wrists")
         ;actionMenu.SetPropertyIndexString("optionLabelText", 3, "Free Wrists")
         ;actionMenu.SetPropertyIndexBool("optionEnabled", 3, true)
     endif
 
-    actionMenu.SetPropertyIndexString("optionText", 4, "Choose Outfit")
-    actionMenu.SetPropertyIndexString("optionLabelText", 4, "Choose Outfit")
-    actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+    ; actionMenu.SetPropertyIndexString("optionText", 4, "Choose Outfit")
+    ; actionMenu.SetPropertyIndexString("optionLabelText", 4, "Choose Outfit")
+    ; actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
 
-    ; if !gear_manager.IsNude(a)
-    ;     actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
-    ;     actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
-    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
-    ; else
-    ;     actionMenu.SetPropertyIndexString("optionText", 4, "Dress")
-    ;     actionMenu.SetPropertyIndexString("optionLabelText", 4, "Dress")
-    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
-    ; endif
+    if !gear_manager.IsNude(a)
+        actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
+        actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
+        actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+    else
+        actionMenu.SetPropertyIndexString("optionText", 4, "Dress")
+        actionMenu.SetPropertyIndexString("optionLabelText", 4, "Dress")
+        actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
+    endif
 
     actionMenu.SetPropertyIndexString("optionText", 5, "Furniture")
     actionMenu.SetPropertyIndexString("optionLabelText", 5, "Furniture")
@@ -450,12 +450,12 @@ function ShowActionMenuNested()
         if a.IsOnMount()
             bind_Utility.WriteInternalMonologue("I need to get off this horse first...")
         else
-            if safeZone
-                ;bondage_manager.ActiveBondageSet = "" ;clear active set - this lets player pick a new set
-                functions_script.ApplySafeAreaBondage()
-            else
-                functions_script.ApplyDangerousAreaBondage()
-            endif
+            ; if safeZone
+            ;     ;bondage_manager.ActiveBondageSet = "" ;clear active set - this lets player pick a new set
+            ;     functions_script.ApplySafeAreaBondage()
+            ; else
+            ;     functions_script.ApplyDangerousAreaBondage()
+            ; endif
             ;functions_script.PoseForBondage()
             ; bind_Utility.DisablePlayer()
             ; if !isBoundFlag
@@ -472,7 +472,7 @@ function ShowActionMenuNested()
             ;         bind_MovementQuestScript.MakeComment(dom, a, bind_MovementQuestScript.GetCommentTypeRefuseToUntie())
             ;     endif
             ; endif
-            ; bind_Utility.EnablePlayer()
+            ;bind_Utility.EnablePlayer()
         endif
     elseif actionResult == 4
         if isBoundFlag && a.GetDistance(dom) > 1000
@@ -481,44 +481,44 @@ function ShowActionMenuNested()
             bind_Utility.WriteInternalMonologue("I need to get off this horse first...")
         else
             if isBoundFlag
-                bind_Utility.WriteInternalMonologue("I can't change outfits while bound...")
+                ; bind_Utility.WriteInternalMonologue("I can't change outfits while bound...")
                 ; bind_Utility.DisablePlayer()
                 ; ChooseOutfitMenu()
                 ; functions_script.EventDomTyingAnimation(a, dom, false)
                 ; bind_Utility.EnablePlayer()
 
-                ; if !gear_manager.IsNude(a)
-                ;     functions_script.EventDomTyingAnimation(a, dom, false)
-                ;     gear_manager.RemoveWornGear(a)
-                ; else
-                ;     if !nudeRule ;|| rules_manager.SuspendedNudity()
-                ;         functions_script.EventDomTyingAnimation(a, dom, false)
-                ;         ;gear_manager.RestoreWornGear(a)
-                ;         ChoseOutfitMenu()
-                ;     else
-                ;         bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " will not undress me...")
-                ;     endif
-                ; endif
-                ; bind_Utility.EnablePlayer()
-            else
-                bind_Utility.DisablePlayer()
-                ChooseOutfitMenu()
-                bind_MovementQuestScript.PlayDressUndress(a)
+                if !gear_manager.IsNude(a)
+                    functions_script.EventDomTyingAnimation(a, dom, false)
+                    gear_manager.RemoveWornGear(a)
+                else
+                    if !nudeRule ;|| rules_manager.SuspendedNudity()
+                        functions_script.EventDomTyingAnimation(a, dom, false)
+                        gear_manager.RestoreWornGear(a)
+                        ;ChoseOutfitMenu()
+                    else
+                        bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " will not undress me...")
+                    endif
+                endif
                 bind_Utility.EnablePlayer()
-
+            else
+                ; bind_Utility.DisablePlayer()
+                ; ChooseOutfitMenu()
                 ; bind_MovementQuestScript.PlayDressUndress(a)
-                ; if !gear_manager.IsNude(a)
-                ;     if think.IsAiReady()
-                ;         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
-                ;     endif
-                ;     gear_manager.RemoveWornGear(a)
-                ; else
-                ;     if think.IsAiReady()
-                ;         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
-                ;     endif
-                ;     ;gear_manager.RestoreWornGear(a)
-                ;     ChoseOutfitMenu()
-                ; endif
+                ; bind_Utility.EnablePlayer()
+
+                bind_MovementQuestScript.PlayDressUndress(a)
+                if !gear_manager.IsNude(a)
+                    if think.IsAiReady()
+                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
+                    endif
+                    gear_manager.RemoveWornGear(a)
+                else
+                    if think.IsAiReady()
+                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
+                    endif
+                    gear_manager.RestoreWornGear(a)
+                    ;ChoseOutfitMenu()
+                endif
             endif
         endif
     elseif actionResult == 5

@@ -601,20 +601,23 @@ state ArrivalCheckState
 		else
 
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
+			main.NeedsBondageSetChange = 1
+			bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
 
-			if main.AdventuringAutomatic == 1
+			; if main.AdventuringAutomatic == 1
 
-				bind_Utility.WriteToConsole("ArrivalCheckState - update bondage")
-				bind_Utility.WriteNotification("updating bondage...", bind_Utility.TextColorRed())
-				bms.EquipBondageOutfit(theSubRef, main.ActiveBondageSetId)
+			; 	bind_Utility.WriteToConsole("ArrivalCheckState - update bondage")
+			; 	bind_Utility.WriteNotification("updating bondage...", bind_Utility.TextColorRed())
+			; 	bms.EquipBondageOutfit(theSubRef, main.ActiveBondageSetId)
 
-			else
+			; else
 
-				bind_Utility.WriteNotification("start conversation?", bind_Utility.TextColorRed())
-				bind_Utility.WriteToConsole("ArrivalCheckState - start conversation")
-				debug.MessageBox("This is not coded yet... use auto")
+			; 	main.NeedsBondageSetChange = 1
+			; 	bind_Utility.WriteNotification("start conversation?", bind_Utility.TextColorRed())
+			; 	bind_Utility.WriteToConsole("ArrivalCheckState - start conversation")
+			; 	debug.MessageBox("This is not coded yet... use auto")
 
-			endif
+			; endif
 
 		endif
 
@@ -661,6 +664,8 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 
 	bind_Utility.WriteToConsole("DEBUG - Process location change")
 	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+
+	main.NeedsBondageSetChange = 0 ;reset this
 
 	; if newlocation.HasKeywordString("LocTypeCity")
 	; 	main.BondageSetLocation = "City"
@@ -2473,6 +2478,8 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 		bms.EquipBondageOutfit(sub, outfitId)
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
 	endif
+
+	main.NeedsBondageSetChange = 0
 
 	; if eventRemovedClothing
 	; 	GetSubDressed()

@@ -262,7 +262,7 @@ Event OnConfigOpen()
 
     theSub = fs.GetSubRef()
 
-    Pages = new string[19]
+    Pages = new string[18]
 
     Pages[0] = "Status Info"
     Pages[1] = "Bondage Status"
@@ -282,7 +282,7 @@ Event OnConfigOpen()
     Pages[15] = "Factions"
     Pages[16] = "Control Panel"
     Pages[17] = "SkyrimNet"
-    Pages[18] = "Outfits"
+    ;Pages[18] = "Outfits"
 
     MakeArrays()
 
@@ -484,9 +484,9 @@ Event OnPageReset(string page)
 
             DisplayOutfits()
 
-        elseif page == "Bondage Outfits"
+        ; elseif page == "Bondage Outfits"
 
-            DisplayBondageOutfits()
+        ;     DisplayBondageOutfits()
 
         EndIf
 
@@ -641,22 +641,22 @@ function DisplayBondageOutfits()
                 endif
             endif
 
-            AddHeaderOption("Fixed Items - Clothing & Armor")
-            AddHeaderOption("")
-            clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
-            bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear On Outfit Equip", JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0))
-            Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
-            i = 0
-            while i < wornItems.Length
-                bondageSetRemoveGearToggle[i] = AddTextOption(wornItems[i].GetName(), "")
-                i += 1
-            endwhile
-            if wornItems.length > 0
-                if wornItems.Length % 2 > 0
-                    AddTextOption("", "")
-                endif
-            endif
+        endif
 
+        AddHeaderOption("Fixed Items - Clothing & Armor")
+        AddHeaderOption("")
+        clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
+        bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear On Outfit Equip", JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0))
+        Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+        i = 0
+        while i < wornItems.Length
+            bondageSetRemoveGearToggle[i] = AddTextOption(wornItems[i].GetName(), "")
+            i += 1
+        endwhile
+        if wornItems.length > 0
+            if wornItems.Length % 2 > 0
+                AddTextOption("", "")
+            endif
         endif
 
         AddHeaderOption("Block Equiping")
@@ -1609,11 +1609,11 @@ Function DisplayPreferences()
     ;toggleManualAdventureMode = AddToggleOption("Switch to Manual (Action Menu)", main.AdventuringManual)
     ;toggleAdventuringFreeHands = AddToggleOption("Free Hands from Bondage", main.AdventuringFreeHands)
     ;toggleAdventuringAllowClothing = AddToggleOption("Allow Clothing", main.AdventuringAllowClothing)
-    toggleAdventuringAutomatic = AddToggleOption("Auto When Entering/Leaving", main.AdventuringAutomatic)
+    ;toggleAdventuringAutomatic = AddToggleOption("Auto When Entering/Leaving", main.AdventuringAutomatic)
     sliderAdventuringSeconds = AddSliderOption("Run Check After Seconds", main.AdventuringCheckAfterSeconds, "{0}")
     ;toggleAdventuringSuspendRules = AddToggleOption("Suspend Rules & Auto *", main.AdventuringSuspendRules)
     
-    ;AddTextOption("", "")
+    AddTextOption("", "")
 
 
     AddHeaderOption("Dominant Preferences")

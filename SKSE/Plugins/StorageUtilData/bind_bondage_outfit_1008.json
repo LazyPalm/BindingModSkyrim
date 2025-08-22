@@ -1,7 +1,7 @@
 {
 	"float" : 
 	{
-		"dynamic_bondage_expires" : 3.8741335868835449
+		"dynamic_bondage_expires" : 0.0
 	},
 	"formList" : 
 	{
@@ -15,7 +15,9 @@
 			"0x14927|Devious Devices - Expansion.esm",
 			"0x1e687|Devious Devices - Expansion.esm"
 		],
-		"fixed_worn_items" : []
+		"fixed_worn_items" : 
+		[
+		]
 	},
 	"int" : 
 	{

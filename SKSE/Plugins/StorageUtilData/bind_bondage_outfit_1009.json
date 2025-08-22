@@ -1,7 +1,7 @@
 {
 	"float" : 
 	{
-		"dynamic_bondage_expires" : 5.8042111396789551
+		"dynamic_bondage_expires" : 0.0
 	},
 	"formList" : 
 	{
@@ -25,7 +25,21 @@
 	},
 	"intList" : 
 	{
-		"block_slots" : [],
+		"block_slots" : 
+		[
+			4,
+			16,
+			65536,
+			524288,
+			8388608,
+			134217728,
+			268435456,
+			8,
+			67108864,
+			4194304,
+			16777216,
+			536870912
+		],
 		"random_bondage_chance" : 
 		[
 			25,
@@ -46,5 +60,23 @@
 	"string" : 
 	{
 		"bondage_outfit_name" : "City Bondage Outfit"
+	},
+	"stringList" : 
+	{
+		"blocks" : 
+		[
+			"Body - Slot 32",
+			"Forearms - Slot 34",
+			"Chest Primary - Slot 46",
+			"Pelvis Primary - Slot 49",
+			"Leg Primary - Slot 53",
+			"Shoulder - Slot 57",
+			"Arm Secondary - Slot 58",
+			"Hands - Slot 33",
+			"Chest Secondary - Slot 56",
+			"Pelvis Secondary - Slot 54",
+			"Leg Secondary - Slot 54",
+			"Arm Primary - Slot 59"
+		]
 	}
 }
