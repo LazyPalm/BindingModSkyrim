@@ -185,6 +185,7 @@ int toggleRulesMenuLockout
 int toggleRulesMenuLockoutValue
 
 int[] toggleBehaviorRules
+int[] toggleBehaviorRuleOptions
 int[] toggleBondageRules
 
 int[] toggleBehaviorHard
@@ -279,7 +280,7 @@ Event OnConfigOpen()
     Pages[12] = "Stripping"
     Pages[13] = "Debug"
     Pages[14] = "Dependencies"
-    Pages[15] = "Factions"
+    Pages[15] = "Current Factions"
     Pages[16] = "Control Panel"
     Pages[17] = "SkyrimNet"
     ;Pages[18] = "Outfits"
@@ -294,6 +295,9 @@ Event OnConfigOpen()
     endif
     if toggleBehaviorRules.Length != 50
         toggleBehaviorRules = new int[50]
+    endif
+    if toggleBehaviorRuleOptions.Length != 50
+        toggleBehaviorRuleOptions = new int[50]
     endif
     if toggleBondageRules.Length != 50
         toggleBondageRules = new int[50]
@@ -467,7 +471,7 @@ Event OnPageReset(string page)
 
             DisplayDependencies()
 
-        elseif page == "Factions"
+        elseif page == "Current Factions"
             
             DisplayFactions(Game.GetPlayer())
             DisplayFactions(fs.GetDomRef())
@@ -484,9 +488,9 @@ Event OnPageReset(string page)
 
             DisplayOutfits()
 
-        ; elseif page == "Bondage Outfits"
+        elseif page == "Bondage Outfits"
 
-        ;     DisplayBondageOutfits()
+            DisplayBondageOutfits()
 
         EndIf
 
@@ -1704,10 +1708,10 @@ Function DisplayBehaviorRules()
     ;     toggleBondageRules = new int[50]
     ; endif
 
-    AddTextOption("Behavior Rules menus have been moved", "")
-    AddTextOption("Action button -> Settings -> Manage Rules", "")
+    ; AddTextOption("Behavior Rules menus have been moved", "")
+    ; AddTextOption("Action button -> Settings -> Manage Rules", "")
 
-    return
+    ; return
 
     AddHeaderOption("Behavior Rules")
     AddHeaderOption("")
@@ -1741,13 +1745,56 @@ Function DisplayBehaviorRules()
         ;     ruleText += " - Permanent Safe Areas"
         ; endif
 
-        string displayText = behaviorList[i]
-        if ruleEndTime > 0.0
-            float hoursLeft = (ruleEndTime - bind_Utility.GetTime()) * 24.0
-            displayText += " (" + Math.Ceiling(hoursLeft) + "h)"
+        if bind_GlobalRulesControlledBy.GetValue() > 0
+
+            string ruleName = behaviorList[i]
+            if ruleEndTime > 0.0
+                float hoursLeft = (ruleEndTime - bind_Utility.GetTime()) * 24.0
+                ruleName += " (" + Math.Ceiling(hoursLeft) + "h)"
+            elseif ruleEndTime <= 0.0 && ruleSetting == 1
+                ruleName += " (expired)"
+            endif 
+
+            string displayText = ""
+            if ruleSetting == 1
+                displayText = "On"
+            endif
+
+            AddTextOption(ruleName, displayText)
+
+            ; string displayText = behaviorList[i]
+            ; if ruleEndTime > 0.0
+            ;     float hoursLeft = (ruleEndTime - bind_Utility.GetTime()) * 24.0
+            ;     displayText += " (" + Math.Ceiling(hoursLeft) + "h)"
+            ; endif
+
+        else
+
+            string displayText = ""
+            if ruleSetting == 1
+                displayText = "On"
+            endif
+
+            toggleBehaviorRules[i] = AddTextOption(behaviorList[i], displayText)
+
         endif
 
-        toggleBehaviorRules[i] = AddTextOption(displayText, FormatRuleText(ruleSetting, ruleOption))
+        string optionText = ""
+        if ruleOption == 1
+            optionText = "Blocked / Hard Limit"
+        elseif ruleOption == 2
+            optionText = "Safe Areas"
+        elseif ruleOption == 3
+            optionText = "Permanent"
+        elseif ruleOption == 4
+            optionText = "Permanent Safe Areas"
+        elseif ruleOption == 5
+            optionText = "Unsafe Areas"
+        elseif ruleOption == 6
+            optionText = "Permanent Unsafe Areas"
+        endif
+
+        toggleBehaviorRuleOptions[i] = AddTextOption("Options", optionText)
 
         ; If bind_GlobalRulesControlledBy.GetValue() > 0
         ;     string displayText = ""
@@ -1764,9 +1811,9 @@ Function DisplayBehaviorRules()
         i += 1
     endwhile
 
-    If ((behaviorList.Length as int) % 2) != 0.0
-        AddTextOption("", "")
-    EndIf
+    ; If ((behaviorList.Length as int) % 2) != 0.0
+    ;     AddTextOption("", "")
+    ; EndIf
 
 EndFunction
 
@@ -2123,9 +2170,9 @@ endEvent
 ; EndEvent
 
 string function FormatRuleText(int ruleSetting, int ruleOption)
-    string ruleText = "Off"
+    string ruleText = "off"
     if ruleSetting == 1
-        ruleText = "On"
+        ruleText = "ON"
     endif
     if ruleOption == 1
         ruleText += " - Blocked / Hard Limit"
@@ -2301,71 +2348,126 @@ Event OnOptionSelect(int option)
         completed = true
     endif
 
-    i = 0
-    if !completed
-        while i < rman.GetBehaviorRulesCount()
-            if option == toggleBehaviorRules[i]
-                int ruleSetting = rman.GetBehaviorRule(theSub, i)
-                int ruleOption = rman.GetBehaviorRuleOption(theSub, i)
-
-                if bind_GlobalRulesControlledBy.GetValue() > 0
-                    ruleOption += 1
-                    if ruleOption > 4
-                        ruleOption = 0
-                    endif
-                else
-                    ruleOption += 1
-                    if ruleOption > 4
-                        ruleOption = 0
-                        ruleSetting += 1
-                        if ruleSetting > 1
-                            ruleSetting = 0
-                        endif
-                    endif
-                endif
-
-                rman.SetBehaviorRule(theSub, i, ruleSetting)
-                rman.SetBehaviorRuleOption(theSub, i, ruleOption)
-
-                SetTextOptionValue(option, FormatRuleText(ruleSetting, ruleOption))
-                completed = true
-            endif
-            i += 1
-        endwhile
-    endif
-
-    if !completed
+    if selectedPage == "Rules - Behavior"
         i = 0
-        while i < rman.GetBondageRulesCount()
-            if option == toggleBondageRules[i]
-                int ruleSetting = StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
-                int ruleOption = StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
+        if !completed
+            while i < rman.GetBehaviorRulesCount()
+                if option == toggleBehaviorRuleOptions[i]
+                    int ruleOption = rman.GetBehaviorRuleOption(theSub, i)
+                    if bind_GlobalRulesControlledBy.GetValue() > 0
+                        ruleOption += 1
+                        if ruleOption > 6
+                            ruleOption = 0
+                        endif
 
-                if bind_GlobalRulesControlledBy.GetValue() > 0
-                    ruleOption += 1
-                    if ruleOption > 4
-                        ruleOption = 0
+                    else
+                        ruleOption += 1
+                        if ruleOption < 2
+                            ruleOption = 2
+                        elseif ruleOption == 3
+                            ruleOption = 5
+                        elseif ruleOption == 6
+                            ruleOption = 0
+                        endif
+
                     endif
-                else
-                    ruleOption += 1
-                    if ruleOption > 4
-                        ruleOption = 0
+                    string displayText = ""
+                    if ruleOption == 1
+                        displayText = "Blocked / Hard Limit"
+                    elseif ruleOption == 2
+                        displayText = "Safe Areas"
+                    elseif ruleOption == 3
+                        displayText = "Permanent"
+                    elseif ruleOption == 4
+                        displayText = "Permanent Safe Areas"
+                    elseif ruleOption == 5
+                        displayText = "Unsafe Areas"
+                    elseif ruleOption == 6
+                        displayText = "Permanent Unsafe Areas"
+                    endif
+                    rman.SetBehaviorRuleOption(theSub, i, ruleOption)
+                    SetTextOptionValue(option, displayText)
+                    completed = true
+                endif
+                if option == toggleBehaviorRules[i]
+                    int ruleSetting = rman.GetBehaviorRule(theSub, i)
+                    ;int ruleOption = rman.GetBehaviorRuleOption(theSub, i)
+
+                    if bind_GlobalRulesControlledBy.GetValue() > 0
+                        ; ruleOption += 1
+                        ; if ruleOption > 4
+                        ;     ruleOption = 0
+                        ; endif
+                    else
                         ruleSetting += 1
                         if ruleSetting > 1
                             ruleSetting = 0
                         endif
+
+                        ; if ruleOption == 2
+                        ;     ruleOption == 3
+                        ; else
+                        ;     if
+
+
+                        ; ruleOption += 1
+                        ; if ruleOption > 4
+                        ;     ruleOption = 0
+                        ;     ruleSetting += 1
+                        ;     if ruleSetting > 1
+                        ;         ruleSetting = 0
+                        ;     endif
+                        ; endif
                     endif
+
+                    string displayText = ""
+                    if ruleSetting == 1
+                        displayText = "On"
+                    endif
+
+                    rman.SetBehaviorRule(theSub, i, ruleSetting)
+                    ;rman.SetBehaviorRuleOption(theSub, i, ruleOption)
+
+                    SetTextOptionValue(option, displayText)
+                    completed = true
                 endif
-
-                StorageUtil.SetIntValue(theSub, "bind_rule_setting_" + i, ruleSetting)
-                StorageUtil.SetIntValue(theSub, "bind_rule_option_" + i, ruleOption)
-
-                SetTextOptionValue(option, FormatRuleText(ruleSetting, ruleOption))
-                completed = true
-            endif
-            i += 1
-        endwhile
+                i += 1
+            endwhile
+        endif
     endif
+
+    ; if !completed
+    ;     i = 0
+    ;     while i < rman.GetBondageRulesCount()
+    ;         if option == toggleBondageRules[i]
+    ;             int ruleSetting = StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
+    ;             int ruleOption = StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
+
+    ;             if bind_GlobalRulesControlledBy.GetValue() > 0
+    ;                 ruleOption += 1
+    ;                 if ruleOption > 4
+    ;                     ruleOption = 0
+    ;                 endif
+    ;             else
+    ;                 ruleOption += 1
+    ;                 if ruleOption > 4
+    ;                     ruleOption = 0
+    ;                     ruleSetting += 1
+    ;                     if ruleSetting > 1
+    ;                         ruleSetting = 0
+    ;                     endif
+    ;                 endif
+    ;             endif
+
+    ;             StorageUtil.SetIntValue(theSub, "bind_rule_setting_" + i, ruleSetting)
+    ;             StorageUtil.SetIntValue(theSub, "bind_rule_option_" + i, ruleOption)
+
+    ;             SetTextOptionValue(option, FormatRuleText(ruleSetting, ruleOption))
+    ;             completed = true
+    ;         endif
+    ;         i += 1
+    ;     endwhile
+    ; endif
 
     int idx = -1
     if !completed

@@ -12,6 +12,9 @@ event OnInit()
         theSub = fs.GetSubRef()
         theDom = fs.GetDomRef()
 
+        bcs.DoStartEvent()
+        bcs.SetEventName(self.GetName())
+
         GoToState("StartUpState")
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
@@ -37,6 +40,7 @@ state StartUpState
         if theDom.GetDistance(theSub) < 1500.0
             EventStart()
         else
+            ;debug.MessageBox("dom not in area... aborting")
             bind_Utility.WriteToConsole("aborting dismissed quest - dom not in area")
             self.Stop()
         endif
@@ -46,13 +50,15 @@ endstate
 
 function EventStart()
 
-    bcs.DoStartEvent()
-    bcs.SetEventName(self.GetName())
-
     GoToState("AttentionCheckState")
 
     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeHoldPosition())
+
+    if think.IsAiReady()
+        think.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to stand at attention and not to move until dismissed.")
+    else
+        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeHoldPosition())
+    endif
 
     bind_Utility.WriteInternalMonologue("I have been ordered to stay in attention until dismissed...")
 
@@ -60,11 +66,14 @@ function EventStart()
 
     RegisterForSingleUpdate(5.0)
 
+    ;debug.MessageBox("ran event start")
+
 endfunction
 
 state AttentionCheckState
 
     event PressedAction(bool longPress)
+        ;debug.MessageBox("pressed action")
         if !pressedKey
             pressedKey = true
             if !pms.InAttention()
@@ -80,10 +89,12 @@ state AttentionCheckState
 
         if pms.InAttention()
             ;suceess
+            ;debug.MessageBox("send to waiting")
             GoToState("WaitingState")
             RegisterForSingleUpdate(Utility.RandomFloat(15.0, 45.0))
         else
             ;failed
+            ;debug.MessageBox("not at attention")
             GoToState("")
             FailedToGetIntoAttention()
         endif
@@ -95,6 +106,7 @@ endstate
 state WaitingState
 
     event PressedAction(bool longPress)
+        ;debug.MessageBox("hit action key too soon, failed")
         GoToState("")
         pms.ResumeStanding()
         FailedToStayAtAttention()
@@ -133,11 +145,20 @@ endfunction
 
 function ReleaseFromAttention()
 
+    ;debug.MessageBox("releasing from attention")
+
     bind_MovementQuestScript.EndSandbox()
     bind_MovementQuestScript.WalkTo(theDom, theSub)
-    bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeDismissed())
+
+    if think.IsAiReady()
+        think.UseDirectNarration(theDom, thedom.GetDisplayName() + " releases {{ player.name }} from standing at attention.")
+    else
+        bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeDismissed())
+    endif
 
     GoToState("ResumeStandingState")
+
+    bind_Utility.WriteInternalMonologue("I am allowed to move again...")
 
 endfunction
 
@@ -166,3 +187,4 @@ bind_MainQuestScript property mqs auto
 bind_Controller property bcs auto
 bind_PoseManager property pms auto
 bind_Functions property fs auto
+bind_ThinkingDom property think auto

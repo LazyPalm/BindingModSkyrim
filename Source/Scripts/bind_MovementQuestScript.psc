@@ -389,7 +389,7 @@ function WalkTo(Actor a, ObjectReference target, float targetDistance = 128.0, i
         bind_Utility.WriteToConsole("tdist: " + targetDistance + " maxtics: " + maxTics + " tic: " + i + " distance: " + distanceFromTarget)
         if lastDistance - distanceFromTarget < 0.1
             ticksStuckAtThisDistance += 1
-            if ticksStuckAtThisDistance == 4
+            if ticksStuckAtThisDistance == 10
                 bind_Utility.WriteToConsole("stuck teleporting")
                 i = maxTics ;break the loop
             endif

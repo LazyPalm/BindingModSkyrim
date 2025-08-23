@@ -588,15 +588,15 @@ state ArrivalCheckState
 
 		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
 
-		if !ModInRunningState()
+		; if !ModInRunningState()
 
-			bind_Utility.WriteNotification("ArrivalCheckState - Quest is running... terminate", bind_Utility.TextColorRed())
-			bind_Utility.WriteToConsole("ArrivalCheckState - Quest is running... terminate")
+		; 	bind_Utility.WriteNotification("ArrivalCheckState - Quest is running... terminate", bind_Utility.TextColorRed())
+		; 	bind_Utility.WriteToConsole("ArrivalCheckState - Quest is running... terminate")
 
-		elseif targetSetId == main.ActiveBondageSetId
+		if targetSetId == main.ActiveBondageSetId
 
-			bind_Utility.WriteNotification("ArrivalCheckState - already in this set... terminating", bind_Utility.TextColorRed())
-			bind_Utility.WriteToConsole("ArrivalCheckState - already in this set... terminating")
+			bind_Utility.WriteNotification("ArrivalCheckState - already in this set...", bind_Utility.TextColorRed())
+			bind_Utility.WriteToConsole("ArrivalCheckState - already in this set...")
 
 		else
 
@@ -634,7 +634,7 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 
 	;NOTE - this will always be called first
 
-	bind_Utility.WriteToConsole("DEBUG - Process location change")
+	bind_Utility.WriteNotification("DEBUG - Process location change ", bind_Utility.TextColorBlue())
 
 	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
 	lastLocation = oldLocation
@@ -648,6 +648,7 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		main.SubIndoors = 1
 	else
 		main.SubIndoors = 0
+		lastOutdoorLoc = newLocation
 	endif
 
 	if newLocation.HasKeyword(LocTypePlayerHouse) || newLocation.HasKeyWord(LocTypeInn) || newLocation.HasKeyword(LocTypeCity) || newLocation.HasKeyword(LocTypeTown) || newlocation.HasKeyWord(LocTypeStore) || newlocation.HasKeyWord(LocTypeDwelling) || newlocation.HasKeyWord(LocTypeCastle) || newlocation.HasKeyWord(LocTypeHouse)
@@ -658,6 +659,47 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		bind_GlobalSafeZone.SetValue(1)
 	endif
 
+	bind_Utility.WriteToConsole("DEBUG - Process location change")
+	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+
+	if main.NeedsBondageSetChange == 1
+		;entered and left area before a change
+		main.NeedsBondageSetChange = 0 ;reset this
+		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
+		main.ActiveBondageSetId = targetSetId
+		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+	endif
+
+	int currentBondageSetId = main.ActiveBondageSetId
+	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
+
+	if main.ActiveBondageSetId == 0
+		bind_Utility.WriteToConsole("DEBUG - No bondage set could be found")
+		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
+	else
+		if main.ActiveBondageSetId != currentBondageSetId
+			;update bondage??
+			bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.ActiveBondageSetId)
+			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
+			UnregisterForUpdate()
+			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+			GotoState("ArrivalCheckState")
+		else
+			bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
+			bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + currentBondageSetId)
+
+		endif
+	endif
+
+	int count = newlocation.GetNumKeywords()
+	bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
+	int index
+	while (index < count)
+		Keyword kw = newlocation.GetNthKeyword(index)
+		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
+		index += 1
+	endwhile
+
 endfunction
 
 function ProcessLocationChange(Location oldLocation, Location newLocation)
@@ -665,43 +707,45 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	bind_Utility.WriteToConsole("DEBUG - Process location change")
 	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
 
-	main.NeedsBondageSetChange = 0 ;reset this
+	; main.NeedsBondageSetChange = 0 ;reset this
 
-	; if newlocation.HasKeywordString("LocTypeCity")
-	; 	main.BondageSetLocation = "City"
-	; elseif newLocation.HasKeywordString("LocTypeTown")
-	; 	main.BondageSetLocation = "Town"
+	; ; if newlocation.HasKeywordString("LocTypeCity")
+	; ; 	main.BondageSetLocation = "City"
+	; ; elseif newLocation.HasKeywordString("LocTypeTown")
+	; ; 	main.BondageSetLocation = "Town"
+	; ; endif
+
+	; ; bind_Utility.WriteNotification("BondageSetLocation: " + main.BondageSetLocation, bind_Utility.TextColorRed())
+
+	; int currentBondageSetId = main.ActiveBondageSetId
+	; main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
+
+	; if main.ActiveBondageSetId == 0
+	; 	bind_Utility.WriteToConsole("DEBUG - No bondage set could be found")
+	; 	bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
+	; else
+	; 	if main.ActiveBondageSetId != currentBondageSetId
+	; 		;update bondage??
+	; 		bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.ActiveBondageSetId)
+	; 		bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
+	; 		UnregisterForUpdate()
+	; 		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+	; 		GotoState("ArrivalCheckState")
+	; 	else
+	; 		bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
+	; 		bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + currentBondageSetId)
+
+	; 	endif
 	; endif
 
-	; bind_Utility.WriteNotification("BondageSetLocation: " + main.BondageSetLocation, bind_Utility.TextColorRed())
-
-	int currentBondageSetId = main.ActiveBondageSetId
-	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
-
-	if main.ActiveBondageSetId == 0
-		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
-	else
-		if main.ActiveBondageSetId != currentBondageSetId
-			;update bondage??
-			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
-			UnregisterForUpdate()
-			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
-			GotoState("ArrivalCheckState")
-		else
-			bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
-			bind_Utility.WriteToConsole("Keep bondage outfit: " + currentBondageSetId)
-
-		endif
-	endif
-
-	int count = newlocation.GetNumKeywords()
-	bind_Utility.WriteToConsole("keywords: " + count)
-	int index
-	while (index < count)
-		Keyword kw = newlocation.GetNthKeyword(index)
-		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
-		index += 1
-	endwhile
+	; int count = newlocation.GetNumKeywords()
+	; bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
+	; int index
+	; while (index < count)
+	; 	Keyword kw = newlocation.GetNthKeyword(index)
+	; 	bind_Utility.WriteToConsole("keyword: " + kw.GetString())
+	; 	index += 1
+	; endwhile
 
 	;clear stuff
 

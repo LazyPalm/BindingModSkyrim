@@ -83,7 +83,13 @@ function EquipBondageOutfit(Actor a, int setId)
 
     string f = "bind_bondage_outfit_" + setId + ".json"
 
-    StorageUtil.FormListClear(a, "bind_strip_list")
+    ;NOTE - there is probably no reason to clean this out
+    if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
+        StorageUtil.FormListClear(a, "bind_strip_list")
+        bind_Utility.WriteNotification("clearing strip buffer")
+    else
+        bind_Utility.WriteNotification("keeping strip buffer")
+    endif
 
     bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
 
@@ -97,7 +103,7 @@ function EquipBondageOutfit(Actor a, int setId)
             If item.IsPlayable()
                 if a.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
-                    StorageUtil.FormListAdd(a, "bind_strip_list", item)
+                    StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                 endif
             endif
             i += 1
@@ -112,7 +118,7 @@ function EquipBondageOutfit(Actor a, int setId)
             if item != none
                 if !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
-                    StorageUtil.FormListAdd(a, "bind_strip_list", item)
+                    StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                     bind_Utility.DoSleep(0.25)
                 endif
             endif
@@ -427,7 +433,24 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
-    if currentLocation.HasKeywordString("LocTypeTown") && outfitIds.Length == 0
+    bool buildingInCity = false
+    bool buildingInTown = false
+    if outfitIds.Length == 0
+        if currentLocation.HasKeywordString("LocTypeDwelling") || currentLocation.HasKeywordString("LocTypeStore") || currentLocation.HasKeywordString("LocTypeTemple") || currentLocation.HasKeywordString("LocTypeBarracks") || currentLocation.HasKeywordString("LocTypeCastle") || currentLocation.HasKeywordString("LocTypeJail")
+            isSafeArea = true
+            Location parentLoc = currentLocation.GetParent()
+            if parentLoc.HasKeywordString("LocTypeTown")
+                ;debug.MessageBox("building in town")
+                buildingInTown = true
+            elseif parentLoc.HasKeywordString("LocTypeCity")
+                ;debug.MessageBox("buildling in city")
+                buildingInCity = true
+                ;TODO - figure out the best way to do this by city, i.e. location_riften
+            endif 
+        endif
+    endif
+
+    if (currentLocation.HasKeywordString("LocTypeTown") || buildingInTown) && outfitIds.Length == 0
         isSafeArea = true
         outfitKey = "location_towns"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
@@ -475,7 +498,7 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
         endif
     endif
 
-    if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+    if (currentLocation.HasKeywordString("LocTypeCity") || buildingInCity) && outfitIds.Length == 0
         isSafeArea = true
         outfitKey = "location_any_city"
         bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)

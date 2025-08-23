@@ -503,6 +503,8 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 		if !BondageManager.EquippingBondageOutfit
 
+			bool nudeRule = RulesManager.IsNudityRequired(theSub, safeZone) 
+
 			int wearingSetId = StorageUtil.GetIntValue(theSub, "bind_wearing_outfit_id")
 			if wearingSetId > 0
 				Armor dev = akBaseObject as Armor
@@ -510,7 +512,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					int slotMask = dev.GetSlotMask()
 					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
 					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
-					if hasBlock
+					if hasBlock || nudeRule
 						if !dev.HasKeyWordString("zad_Lockable") && !dev.HasKeyWordString("zad_InventoryDevice") && !dev.HasKeyWordString("sexlabnostrip")
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")

@@ -7,7 +7,7 @@ event OnInit()
         ;debug.MessageBox("started arrival check")
 
         bcs.DoStartEvent(false)
-        bcs.SetEventName("Arrival Check")
+        bcs.SetEventName(self.GetName())
 
         bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
 
