@@ -174,12 +174,12 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Run Latency Check")
     ; listMenu.AddEntryItem("Browse Bondage Items")
     ; listMenu.AddEntryItem("Manage Favorites - For Bondage Rules")
-    listMenu.AddEntryItem("Manage Rules")
-    listMenu.AddEntryItem("Learn Worn DD Items as Set")    
+    ;listMenu.AddEntryItem("Manage Rules")
+    ;listMenu.AddEntryItem("Learn Worn DD Items as Set")    
     listMenu.AddEntryItem("Debug Tests")
     listMenu.AddEntryItem("Clear Future Doms List")
     listMenu.AddEntryItem("Run Dressing Room Quest")
-    listMenu.AddEntryItem("Manage Outfits")
+    ;listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
     ; listMenu.AddEntryItem("Dom Follow 30s")
     ; listMenu.AddEntryItem("Make Dom Say Follow Me")
@@ -204,16 +204,16 @@ function ShowSettingsMenu()
     ;     bondage_manager.BrowseDdItemsList(functions_script.GetSubRef(), none, 1)
     ; elseif listReturn == 4
     ;     bondage_manager.ManageFavorites(functions_script.GetSubRef())
+    ; elseif listReturn == 3
+    ;     rules_manager.ManageRules(functions_script.GetSubRef())
+    ; elseif listReturn == 3
+    ;     bondage_manager.SaveWornDdItemsAsSet(functions_script.GetSubRef())
     elseif listReturn == 3
-        rules_manager.ManageRules(functions_script.GetSubRef())
-    elseif listReturn == 4
-        bondage_manager.SaveWornDdItemsAsSet(functions_script.GetSubRef())
-    elseif listReturn == 5
         ShowDebugMenu()
-    elseif listReturn == 6
+    elseif listReturn == 4
         StorageUtil.FormListClear(functions_script.GetSubRef(), "bind_future_doms")
         debug.MessageBox("Future doms list has been cleared")
-    elseif listReturn == 7
+    elseif listReturn == 5
         Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
         bind_Functions f = bind_Functions.GetBindingFunctions()
         if f.ModInRunningState()
@@ -222,8 +222,8 @@ function ShowSettingsMenu()
                 q.Start()
             endif
         endif
-    elseif listReturn == 8
-        ShowOutfitsMenu()
+    ; elseif listReturn == 7
+    ;     ShowOutfitsMenu()
         ;     bind_MovementQuestScript.WalkTo(mqs.GetDomRef(), mqs.GetSubRef(), 128.0, 60)
     ; elseif listReturn == 3
     ;     bind_MovementQuestScript.StartWorking(mqs.GetDomRef())
