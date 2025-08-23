@@ -1,40 +1,5 @@
 Scriptname bind_ThinkingDom extends Quest conditional
 
-;big maybe idea
-;maybe have the point system based on good events (bondage show, no punishments that day, getting enough sleep, etc.) 
-;and bad events (masturbation with permission, gagged punishment, dom gets too much damage, missing bedtime)
-;you can use points to change rules, get sex, remove gag, craft, etc.?? buy items?
-
-;can spend points when punishements due
-
-;have dom personality to trigger events and when dom full control pick bondage
-
-;NOTE - probably very important since you can switch and then return to a follower (needs to be sticky)
-
-;NOTE - processing routine for this has to be segmented, would be tempting script lag fate to try and run a complex process every
-;cycle of the main timing loop
-
-;int property OutputNextEvent auto conditional
-
-;int property DialogAllowRulesConversation auto conditional
-
-;NOTE - trigger event will switch follower to force greet AI package(s)
-;Example - 
-    ;if user skipped time, dom will ask something to the effect of "Why did you ask the gods to speed up time?"
-    ;sub will have various conversation options
-        ;admit fault - use this to drill into shorter / longer events (attitude modifier adjusts this)
-        ;lie - setup a random (but display probably of success or failure - speech modifier?)
-        ;bratty / angry responses
-
-;Example 2
-    ;after care type conversations after flogging / long events
-    ;learn store materials / favorite items
-    ;use less liked items / furnitures / etc. for punishment
-
-;Example 3
-    ;more complex engagement options for players (for sure optional - only certains types would enjoy this)
-    ;push different characters to screen to force player attention (hit a key now, don't hit a key now) when stuck a place
-
 ;possibility for random basic personality traits?
 
 ;trust indicators (lie modifier)
@@ -831,6 +796,12 @@ event LeavingSafeAreaEvent()
     endif
 
 endevent
+
+function WriteShortTermEvent(Actor a, string eventType, string eventText)
+
+    SkyrimNetApi.RegisterShortLivedEvent(eventType + "_" + a.GetDisplayName(), eventType, "", eventText, 60000, a, None)
+
+endfunction
 
 bool function UseDirectNarration(Actor a, string commentPrompt)
 

@@ -6,6 +6,8 @@ string[] letters
 string selectedLetter
 int menuChangeLetter
 
+int inputDomTitle
+
 ;bondage
 int toggleHarshUseBoots
 int toggleHarshUseAnkles
@@ -113,6 +115,11 @@ int sliderRulesMaxBehavior
 int sliderRulesMinBondage
 int sliderRulesMaxBondage
 int toggleFreeDismissedDisabled
+int toggleWhippingRandom
+int sliderWhippingChance
+int sliderWhippingHours
+int toggleCampingRandom
+int sliderCampingChance
 
 int toggleRequireKneeling
 int toggleInfractionForNotKneeling
@@ -1557,15 +1564,6 @@ EndFunction
 
 Function DisplayEventSettings()
 
-    AddHeaderOption("Harsh Bondage")
-    AddHeaderOption("")
-    toggleRandomHarshBondage = AddToggleOption("Harsh Bondage - Random Use", main.HarshBondageRandomUse)
-    AddTextOption("", "")
-    sliderHarshBondageHours = AddSliderOption("Harsh Bondage - Hours Between Use", main.HarshBondageHoursBetweenUse, "{0}")
-    sliderHarshBondageChance = AddSliderOption("Harsh Bondage - Chance To Use", main.HarshBondageChance, "{0}%")
-    sliderHarshBondageMin = AddSliderOption("Harsh Bondage - Min. Minutes", main.HarshBondageMinMinutes, "{0}")
-    sliderHarshBonadgeMax = AddSliderOption("Harsh Bondage - Max Minutes", main.HarshBondageMaxMinutes, "{0}")
-
     ; toggleHarshUseBoots = AddToggleOption("Harsh Bondage - Use Boots", bmanage.HarshBondageUseBoots)
     ; toggleHarshUseAnkles = AddToggleOption("Harsh Bondage - Use Ankles", bmanage.HarshBondageUseAnkles)
     ; toggleHarshUseCollar = AddToggleOption("Harsh Bondage - Use Collar", bmanage.HarshBondageUseCollar)
@@ -1580,6 +1578,27 @@ Function DisplayEventSettings()
     AddTextOption("", "")
     ;toggleBedtimeUseHood = AddToggleOption("Bound Bedtime - Use Hood", bmanage.BedtimeUseHood)
 
+    AddHeaderOption("Camping")
+    AddHeaderOption("")
+    toggleCampingRandom = AddToggleOption("Camping - Random Use", main.CampingRandomUse)
+    sliderCampingChance = AddSliderOption("Camping - Chance For Camping", main.CampingChance, "{0}")
+
+    AddHeaderOption("Harsh Bondage")
+    AddHeaderOption("")
+    toggleRandomHarshBondage = AddToggleOption("Harsh Bondage - Random Use", main.HarshBondageRandomUse)
+    AddTextOption("", "")
+    sliderHarshBondageHours = AddSliderOption("Harsh Bondage - Hours Between Use", main.HarshBondageHoursBetweenUse, "{0}")
+    sliderHarshBondageChance = AddSliderOption("Harsh Bondage - Chance To Use", main.HarshBondageChance, "{0}%")
+    sliderHarshBondageMin = AddSliderOption("Harsh Bondage - Min. Minutes", main.HarshBondageMinMinutes, "{0}")
+    sliderHarshBonadgeMax = AddSliderOption("Harsh Bondage - Max Minutes", main.HarshBondageMaxMinutes, "{0}")
+
+    AddHeaderOption("Inspection")
+    AddHeaderOption("")
+    toggleInspections = AddToggleOption("Inspection - Random Inspections", main.InspectionsRandomUse)
+    AddTextOption("", "")
+    sliderInspectionsHours = AddSliderOption("Inspection - Hours Between", main.InspectionHoursBetween, "{0}")
+    sliderInspectionsChance = AddSliderOption("Inspection - Chance Of Inspection", main.InspectionChance, "{0}%")
+
     AddHeaderOption("Put On Display (Special Furniture)")
     AddHeaderOption("")
     toggleRandomSubInFurniture = AddToggleOption("Furniture - Random Use", main.PutOnDisplayRandomUse)
@@ -1589,12 +1608,12 @@ Function DisplayEventSettings()
     sliderFurnitureMin = AddSliderOption("Furniture - Min. Minutes", main.PutOnDisplayMinMinutes, "{0}")
     sliderFurnitureMax = AddSliderOption("Furniture - Max Minutes", main.PutOnDisplayMaxMinutes, "{0}")
     
-    AddHeaderOption("Inspection")
+    AddHeaderOption("Whipping")
     AddHeaderOption("")
-    toggleInspections = AddToggleOption("Inspection - Random Inspections", main.InspectionsRandomUse)
+    toggleWhippingRandom = AddToggleOption("Whipping - Random Use", main.WhippingRandomUse)
     AddTextOption("", "")
-    sliderInspectionsHours = AddSliderOption("Inspection - Hours Between", main.InspectionHoursBetween, "{0}")
-    sliderInspectionsChance = AddSliderOption("Inspection - Chance Of Inspection", main.InspectionChance, "{0}%")
+    sliderWhippingHours = AddSliderOption("Whipping - Hours Between", main.WhippingHoursBetween, "{0}")
+    sliderWhippingChance = AddSliderOption("Whipping - Chance Of Whipping", main.WhippingChance, "{0}%")
 
     AddHeaderOption("Other Events")
     AddHeaderOption("")
@@ -1666,6 +1685,9 @@ Function DisplayStatus()
 
     AddTextOption("Have Dominant", DisplayBoolean(main.IsSub))
     AddTextOption("Dominant Name", main.DominantName)
+
+    inputDomTitle = AddInputOption("Dominant Title", fs.GetDomTitle())
+
     If main.DominantSex == 1
         AddTextOption("Dominant Sex", "Female")
     Else
@@ -2062,6 +2084,10 @@ event OnOptionInputOpen(int option)
         SetInputDialogStartText(deviousKeywordSearch)
     endif
 
+    if option == inputDomTitle
+        SetInputDialogStartText(fs.GetDomTitle())
+    endif
+
 	; if option == inputSLUseTags
 	; 	SetInputDialogStartText(main.SexUseSLTags)
     ; elseif option == inputSLBlockTags
@@ -2120,6 +2146,13 @@ event OnOptionInputAccept(int option, string value)
             endif
             i += 1
         endwhile
+    endif
+
+    if option == inputDomTitle
+        if value != ""
+            fs.SettingsSetDomTitleByString(value)
+            SetInputOptionValue(option, value)
+        endif
     endif
 
     if option == inputBondageSetName
@@ -2657,6 +2690,16 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleInspections, main.InspectionsRandomUse)
     EndIf
 
+    if option == toggleWhippingRandom
+        main.WhippingRandomUse = ToggleValue(main.WhippingRandomUse)
+        SetToggleOptionValue(option, main.WhippingRandomUse)
+    endif
+
+    if option == toggleCampingRandom
+        main.CampingRandomUse = ToggleValue(main.CampingRandomUse)
+        SetToggleOptionValue(option, main.CampingRandomUse)
+    endif
+
     If option == toggleRunSafeword
         changeRunSafeword = ToggleValue(changeRunSafeword)
         SetToggleOptionValue(toggleRunSafeword, changeRunSafeword)
@@ -3154,6 +3197,24 @@ Event OnOptionSliderOpen(Int option)
         SetSliderDialogDefaultValue(10)
         SetSliderDialogRange(0, 100)
         SetSliderDialogInterval(1)
+    elseif option == sliderWhippingChance
+        SetSliderDialogStartValue(main.WhippingChance)
+        SetSliderDialogDefaultValue(main.WhippingChance)
+        SetSliderDialogRange(0, 100)
+        SetSliderDialogInterval(1)
+
+    elseif option == sliderWhippingHours
+        SetSliderDialogStartValue(main.WhippingHoursBetween)
+        SetSliderDialogDefaultValue(main.WhippingHoursBetween)
+        SetSliderDialogRange(0, 24)
+        SetSliderDialogInterval(1)
+
+    elseif option == sliderCampingChance
+        SetSliderDialogStartValue(main.CampingChance)
+        SetSliderDialogDefaultValue(main.CampingChance)
+        SetSliderDialogRange(0, 100)
+        SetSliderDialogInterval(1)
+
     ElseIf option == sliderRulesChance
         SetSliderDialogStartValue(bind_GlobalRulesChangeChance.GetValue())
         SetSliderDialogDefaultValue(25)
@@ -3288,6 +3349,14 @@ Event OnOptionSliderAccept(Int option, Float value)
     ElseIf option == sliderInspectionsChance
         main.InspectionChance = (value as int)
         bind_GlobalEventInspectionChance.SetValue(value)
+    elseif option == sliderWhippingChance
+        main.WhippingChance = (value as int)
+        main.bind_GlobalEventWhippingChance.SetValue(value)
+    elseif option == sliderWhippingHours
+        main.WhippingHoursBetween = (value as int)
+    elseif option == sliderCampingChance
+        main.CampingChance = (value as int)
+        main.bind_GlobalEventCampingChance.SetValue(value)
     ElseIf option == sliderRulesChance
         bind_GlobalRulesChangeChance.SetValue(value as int)
     elseif option == sliderRulesHoursBetween

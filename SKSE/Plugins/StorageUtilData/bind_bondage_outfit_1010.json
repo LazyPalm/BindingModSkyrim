@@ -1,26 +1,7 @@
 {
-	"float" : 
-	{
-		"dynamic_bondage_expires" : 2.1383473873138428
-	},
-	"formList" : 
-	{
-		"dynamic_bondage_items" : 
-		[
-			"0x47566|Devious Devices - Integration.esm"
-		],
-		"fixed_bondage_items" : 
-		[
-			"0x486d3|Devious Devices - Expansion.esm",
-			"0x486e3|Devious Devices - Expansion.esm",
-			"0x4ee2d|Devious Devices - Expansion.esm",
-			"0x1e687|Devious Devices - Expansion.esm"
-		]
-	},
 	"int" : 
 	{
-		"remove_existing_gear" : 1,
-		"use_random_bondage" : 1
+		"remove_existing_gear" : 1
 	},
 	"intList" : 
 	{
@@ -39,27 +20,11 @@
 			67108864,
 			128,
 			8
-		],
-		"random_bondage_chance" : 
-		[
-			25,
-			25,
-			25,
-			25,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0
 		]
 	},
 	"string" : 
 	{
-		"bondage_outfit_name" : "At Home Outfit"
+		"bondage_outfit_name" : "Whipping Outfit"
 	},
 	"stringList" : 
 	{

@@ -60,7 +60,7 @@ function EventStart()
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeHoldPosition())
     endif
 
-    bind_Utility.WriteInternalMonologue("I have been ordered to stay in attention until dismissed...")
+    bind_Utility.WriteInternalMonologue("I have been ordered to stay at attention until dismissed...")
 
     bind_MovementQuestScript.StartSandbox(theDom, theSub)
 

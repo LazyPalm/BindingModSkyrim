@@ -39,6 +39,10 @@
 		[
 			1003
 		],
+		"used_for_event_whipping" : 
+		[
+			1010
+		],
 		"used_for_location_all_areas" : [],
 		"used_for_location_any_city" : 
 		[
@@ -79,7 +83,7 @@
 			"Gagged For Punishment Outfit",
 			"Unsafe Areas Outfit",
 			"City Bondage Outfit",
-			"Bondage Set 10",
+			"Whipping Outfit",
 			"Bondage Set 11"
 		]
 	}

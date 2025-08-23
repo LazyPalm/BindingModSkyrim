@@ -2273,6 +2273,15 @@ string function SettingsGetDomTitle()
 	return domTitle
 endfunction
 
+function SettingsSetDomTitleByString(string title)
+	StorageUtil.SetStringValue(theDomRef, "bind_dom_new_name", title)
+	Actor tc = TitleContainer.GetReference() as Actor
+	tc.GetActorBase().SetName(title)
+	domTitle = title
+
+	;TODO - if AI is ready, this needs to be worked into the prompt so the LLM expects a specific title to be use in interactions
+endfunction
+
 function SettingsSetDomTitle()
 
     UIExtensions.InitMenu("UITextEntryMenu")

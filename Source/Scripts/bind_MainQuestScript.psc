@@ -102,6 +102,13 @@ int property InspectionsRandomUse auto conditional
 int property InspectionChance auto conditional
 int property InspectionHoursBetween auto conditional
 
+int property WhippingRandomUse auto conditional
+int property WhippingChance auto conditional
+int property WhippingHoursBetween auto conditional
+
+int property CampingRandomUse auto conditional
+int property CampingChance auto conditional
+
 int property DomPreferenceBoundSleepMinHours auto conditional
 int property DomPreferenceBoundSleepMaxHours auto conditional
 
@@ -183,6 +190,11 @@ GlobalVariable property bind_GlobalRulesNextRule auto
 GlobalVariable property bind_GlobalRulesHoursBetween auto
 
 GlobalVariable property bind_GlobalLocationHasBed auto
+
+GlobalVariable property bind_GlobalEventCampingChance auto
+GlobalVariable property bind_GlobalEventCampingNextRun auto
+GlobalVariable property bind_GlobalEventWhippingChance auto
+GlobalVariable property bind_GlobalEventWhippingNextRun auto
 
 event OnInit()
 
