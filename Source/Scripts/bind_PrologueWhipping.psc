@@ -62,10 +62,10 @@ auto state GetAttentionState
 
         else
             if !theSub.IsInFaction(bind_KneelingFaction)
-                bind_Utility.WriteNotification(fs.GetDomTitle() + " orders you to your knees...", bind_Utility.TextColorRed())
+                bind_Utility.WriteNotification(fs.GetDomTitle() + " signals for you to kneel...", bind_Utility.TextColorRed())
                 if think.IsAiReady() && !theSub.IsInFaction(bind_KneelingFaction)
                     if firstTime
-                        think.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to kneel.")
+                        ;think.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to kneel.")
                         firstTime = false
                     else
                         think.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to kneel. {{ player.name }} did not comply the first time.")
@@ -98,8 +98,8 @@ function PlayScene()
         bind_Utility.DoSleep(10.0)
         StartTheQuest()
     else   
-        debug.MessageBox("Still need to build this scene...")
-        StartTheQuest()
+
+        bind_PrologueWhippingScene.Start()
 
         ;todo - make a scene...
 
@@ -113,6 +113,8 @@ function StartTheQuest() ;NOTE - this is called from the blocking dialog in the 
     startedQuest = true
 
     bind_PoseManager.StandFromKneeling(theSub)
+
+    bind_Utility.DoSleep(1.0)
 
     bcs.DoEndEvent()
 
@@ -128,6 +130,8 @@ bind_MainQuestScript property main auto
 bind_Controller property bcs auto
 bind_Functions property fs auto
 bind_ThinkingDom property think auto
+
+Scene property bind_PrologueWhippingScene auto
 
 Faction property bind_KneelingFaction auto
 

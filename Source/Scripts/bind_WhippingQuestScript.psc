@@ -97,7 +97,7 @@ function StartTheQuest()
         whippingFramework = 2
         if bind_PamaHelper.CheckValid()
             int furnitureType = Utility.RandomInt(1, 2)
-            debug.MessageBox(furnitureType)
+            bind_Utility.WriteToConsole("whip furniture type: " + furnitureType)
             if think.IsAiReady()
                 if furnitureType == 1
                     think.WriteShortTermEvent(theSub, "bound", "{{ player.name }} is stretched standing between two bondage posts, wrists tied to each; ready to be whipped.")

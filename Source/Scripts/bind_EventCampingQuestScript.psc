@@ -513,6 +513,8 @@ function EndTheQuest()
 
     SetStage(20)
 
+    mqs.bind_GlobalEventCampingNextRun.SetValue(bind_Utility.AddTimeToCurrentTime(8, 0))
+
     self.Stop()
 
 endfunction

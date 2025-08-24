@@ -2508,19 +2508,19 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	;TODO - put back on clothing? not sure if outfit manager is going to be a thing in here. need to store?
 	;TODO - put back on correct bondage outfit
 
-	;restore removed gear
-	Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
-	if wornGear.Length > 0
-		int i = 0
-		while i < wornGear.Length
-			Form item = wornGear[i]
-			if !sub.IsEquipped(item)
-				sub.EquipItem(item, false, true)
-				bind_Utility.DoSleep(0.5)
-			endif
-			i += 1
-		endwhile
-	endif
+	; ;restore removed gear
+	; Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
+	; if wornGear.Length > 0
+	; 	int i = 0
+	; 	while i < wornGear.Length
+	; 		Form item = wornGear[i]
+	; 		if !sub.IsEquipped(item)
+	; 			sub.EquipItem(item, false, true)
+	; 			bind_Utility.DoSleep(0.5)
+	; 		endif
+	; 		i += 1
+	; 	endwhile
+	; endif
 
 	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
 

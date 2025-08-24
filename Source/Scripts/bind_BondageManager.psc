@@ -387,7 +387,7 @@ function EquipBondageOutfit(Actor a, int setId)
     StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
     StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(f, "bondage_outfit_name", ""))
 
-    bind_Utility.DoSleep(2.0)
+    bind_Utility.DoSleep(5.0)
 
     EquippingBondageOutfit = false
 

@@ -990,8 +990,15 @@ endfunction
 function StandFromKneeling(Actor a) global
 
     if StorageUtil.GetIntValue(a, "pose_high_kneel", 0) == 1
-		bind_Controller.SendActionKneelTriggerEvent()
+
+        bind_PoseManager pms = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+
+        pms.ResumeStanding()
+        bind_Utility.EnablePlayer()
+
+        ; bind_Controller.SendActionKneelTriggerEvent()
 		bind_Utility.DoSleep(2.0)
+
     endif
 
 endfunction
