@@ -11,6 +11,8 @@ ObjectReference furn
 
 ObjectReference furnitureMarker
 
+bool addFurniture = false
+
 event OnInit()
 
     if self.IsRunning()
@@ -34,6 +36,38 @@ event OnInit()
         bcs.SetEventName(self.GetName())
 
         SetObjectiveDisplayed(10, true)
+
+        if furn == none
+            addFurniture = true
+        else
+            if furn.GetDistance(theSub) > 1000.0
+                addFurniture = true
+            endif
+        endif
+
+        if addFurniture
+            ;debug.MessageBox("adding furniture...")
+            float z = theDom.GetAngleZ()
+            bind_MovementQuestScript.PlayDoWork(theDom)
+
+            Form dev
+            if mqs.SoftCheckDM3 == 1 && mqs.EnableModDM3 == 1 && Utility.RandomInt(1, 2) == 1
+                dev = bind_DM3Helper.GetRandomItem()
+            else
+                dev = bind_DDCFurnitureList.GetAt(Utility.RandomInt(0, bind_DDCFurnitureList.GetSize() - 1))
+            endif
+
+            bind_Utility.WriteToConsole("adding furniture: " + dev.GetName())
+            PO3_SKSEFunctions.AddKeywordToForm(dev, bind_FurnitureItem)
+            ObjectReference obj = theDom.PlaceAtMe(dev, 1, true, true)
+            obj.MoveTo(theDom, 120.0 * Math.Sin(theDom.GetAngleZ()), 120.0 * Math.Cos(theDom.GetAngleZ()), 0)
+            obj.SetAngle(0.0, 0.0, z)
+            obj.Enable()
+            obj.SetActorOwner(theSub.GetActorBase())
+            furn = obj
+            TheFurniture.ForceRefTo(obj)
+            bind_Utility.DoSleep(2.0)
+        endif
 
         furnitureMarker = furn.PlaceAtMe(bind_PutOnDisplayItemsList.GetAt(0))
         furnitureMarker.Enable()
@@ -193,6 +227,15 @@ function EventEnd()
 
     bind_GlobalEventPutOnDisplayNextRun.SetValue(bind_Utility.AddTimeToCurrentTime(mqs.PutOnDisplayHoursBetweenUse, 0))
 
+    if addFurniture
+        if !bind_Utility.ConfirmBox("Keep this bondage furniture?")
+            TheFurniture.Clear()
+            Utility.Wait(1.0)
+            furn.Delete()
+            furn = none
+        endif
+    endif
+
     bcs.DoEndEvent()
 
     self.Stop()
@@ -236,3 +279,6 @@ ReferenceAlias property TheFurniture auto
 Faction property bind_CrowdTriggerToWatch auto
 
 FormList property bind_PutOnDisplayItemsList auto
+FormList property bind_DDCFurnitureList auto
+
+Keyword property bind_FurnitureItem auto

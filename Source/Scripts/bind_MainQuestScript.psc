@@ -190,6 +190,7 @@ GlobalVariable property bind_GlobalRulesNextRule auto
 GlobalVariable property bind_GlobalRulesHoursBetween auto
 
 GlobalVariable property bind_GlobalLocationHasBed auto
+GlobalVariable property bind_GlobalLocationHasFurniture auto
 
 GlobalVariable property bind_GlobalEventCampingChance auto
 GlobalVariable property bind_GlobalEventCampingNextRun auto

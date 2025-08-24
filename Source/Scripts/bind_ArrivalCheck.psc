@@ -13,6 +13,9 @@ event OnInit()
 
         mqs.NeedsBondageSetChange = 0
 
+        bind_MovementQuestScript.FaceTarget(fs.GetDomRef(), fs.GetSubRef())
+        bind_MovementQuestScript.PlayDoWork(fs.GetDomRef())
+
         bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
 
         bcs.DoEndEvent(false)

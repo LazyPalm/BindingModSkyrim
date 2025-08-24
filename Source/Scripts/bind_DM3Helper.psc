@@ -21,6 +21,60 @@ string Function FurnitureList() Global
     return list
 EndFunction
 
+Activator function GetRandomItem() global
+
+    string dm3File = "dse-display-model.esp"
+
+    int i = Utility.RandomInt(1, 22)
+
+    If i == 1
+         return Game.GetFormFromFile(0x030053A3, dm3File) as Activator ;dse_dm_FurnAlessiasPerch01
+    ElseIf i == 2
+        return Game.GetFormFromFile(0x0300538F, dm3File) as Activator ;dse_dm_FurnAlokzaam01
+    ElseIf i == 3
+        return Game.GetFormFromFile(0x03005395, dm3File) as Activator ;dse_dm_FurnAlokzaam01
+    ElseIf i == 4
+        return Game.GetFormFromFile(0x03005396, dm3File) as Activator ;dse_dm_FurnAlokzaam01
+    ElseIf i == 5
+        return Game.GetFormFromFile(0x030059013, dm3File) as Activator ;dse_dm_FurnAlokzaam01
+    ElseIf i == 6
+        return Game.GetFormFromFile(0x030053A7, dm3File) as Activator ;dse_dm_FurnTheVigilant01
+    ElseIf i == 7
+        return Game.GetFormFromFile(0x030053A4, dm3File) as Activator ;dse_dm_FurnBovahdin01
+    ElseIf i == 8
+        return Game.GetFormFromFile(0x030063F4, dm3File) as Activator ;dse_dm_FurnCage01
+    ElseIf i == 9
+        return Game.GetFormFromFile(0x0300A52F, dm3File) as Activator ;dse_dm_FurnChair01
+    ElseIf i == 10
+        return Game.GetFormFromFile(0x030053A5, dm3File) as Activator ;dse_dm_FurnChapelDibella01
+    ElseIf i == 11
+        return Game.GetFormFromFile(0x03016254, dm3File) as Activator ;dse_dm_FurnChapelSouls01
+    ElseIf i == 12
+        return Game.GetFormFromFile(0x0301625A, dm3File) as Activator ;dse_dm_FurnCoffin01
+    ElseIf i == 13
+        return Game.GetFormFromFile(0x03016261, dm3File) as Activator ;dse_dm_FurnCoffin02
+    ElseIf i == 14
+        return Game.GetFormFromFile(0x0300182A, dm3File) as Activator ;dse_dm_FurnDollstand01
+    ElseIf i == 15
+        return Game.GetFormFromFile(0x03002DC0, dm3File) as Activator ;dse_dm_FurnDoubleDollstand01
+    ElseIf i == 16
+        return Game.GetFormFromFile(0x0300DB67, dm3File) as Activator ;dse_dm_FurnFrame01
+    ElseIf i == 17
+        return Game.GetFormFromFile(0x0300C5A1, dm3File) as Activator ;dse_dm_FurnMarasTear01
+    ElseIf i == 18
+        return Game.GetFormFromFile(0x03002DC5, dm3File) as Activator ;dse_dm_FurnPonyRope01
+    ElseIf i == 19
+        return Game.GetFormFromFile(0x03002DC6, dm3File) as Activator ;dse_dm_FurnPonyWood01
+    ElseIf i == 20
+        return Game.GetFormFromFile(0x03005E79, dm3File) as Activator ;dse_dm_FurnQueenbreaker01
+    ElseIf i == 21
+        return Game.GetFormFromFile(0x030053A6, dm3File) as Activator ;dse_dm_FurnSeatAlmalexia01
+    ElseIf i == 22
+        return Game.GetFormFromFile(0x030141F8, dm3File) as Activator ;dse_dm_FurnTheBoard01
+    endif
+
+endfunction
+
 function BuildFormList(FormList list) global
 
     string dm3File = "dse-display-model.esp"
