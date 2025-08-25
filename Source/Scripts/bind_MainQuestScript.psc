@@ -197,6 +197,11 @@ GlobalVariable property bind_GlobalEventCampingNextRun auto
 GlobalVariable property bind_GlobalEventWhippingChance auto
 GlobalVariable property bind_GlobalEventWhippingNextRun auto
 
+GlobalVariable property bind_GlobalEventHarshBondageNextRun auto
+GlobalVariable property bind_GlobalEventInspectionNextRun auto
+GlobalVariable property bind_GlobalEventPutOnDisplayNextRun auto
+
+
 event OnInit()
 
 endevent

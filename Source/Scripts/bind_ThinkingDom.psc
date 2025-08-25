@@ -7,6 +7,7 @@ int property EnableActionSex auto conditional
 int property EnableActionFurniture auto conditional
 int property EnableActionHarshBondage auto conditional
 int property EnableActionCamping auto conditional
+int property EnableActionInspection auto conditional
 
 ;possibility for random basic personality traits?
 
@@ -141,11 +142,11 @@ function RegisterFunctions()
     ;                                 "", "PAPYRUS", \
     ;                                 1, "")
 
-    ; SkyrimNetApi.RegisterAction("BindingCheckRules", "Makes sure {{ player.name }} is following their bondage rules.", \
-    ;                                 "bind_ThinkingDom", "BindingCheckRules_IsEligible", \
-    ;                                 "bind_ThinkingDom", "BindingCheckRules_Execute", \
-    ;                                 "", "PAPYRUS", \
-    ;                                 1, "")
+    SkyrimNetApi.RegisterAction("BindingInspection", "Start a body and pose inspection of {{ player.name }}.", \
+                                    "bind_ThinkingDom", "BindingInspection_IsEligible", \
+                                    "bind_ThinkingDom", "BindingInspection_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "")
 
     SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try on new bondage gear. Only use this if {{ player.name }} asks.", \
                                     "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
@@ -340,10 +341,21 @@ bool function AddBondageRule_IsEligible(Actor akOriginator, string contextJson, 
 
 endfunction
 
-bool function BindingCheckRules_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+bool function BindingInspection_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+
     bool result = true
     string reason = ""
+
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
+    if think.EnableActionInspection == 0
+        return false
+    endif
+    if bind_Utility.GetTime() < m.bind_GlobalEventInspectionNextRun.GetValue()
+        return false
+    endif
     if !f.UseSkyrimNetCheck(akOriginator)
         result = false
         reason = "Failed UseSkyrimNetCheck"
@@ -352,8 +364,11 @@ bool function BindingCheckRules_IsEligible(Actor akOriginator, string contextJso
         result = false ;needs to be safe area
         reason = "Failed Safe Area"
     endif
-    bind_Utility.WriteToConsole("SkyrimNet called: BindingCheckRules_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+    
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingInspection_IsEligible actor: " + akOriginator + " result: " + result + " reason: " + reason)
+    
     return result
+
 endfunction
 
 bool function BindingDressingRoom_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
@@ -456,7 +471,13 @@ bool function BindingWhip_IsEligible(Actor akOriginator, string contextJson, str
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+    
     if think.EnableActionWhip == 0
+        return false
+    endif
+
+    if bind_Utility.GetTime() < m.bind_GlobalEventWhippingNextRun.GetValue()
         return false
     endif
 
@@ -482,6 +503,7 @@ bool function BindingSex_IsEligible(Actor akOriginator, string contextJson, stri
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+
     if think.EnableActionSex == 0
         return false
     endif
@@ -510,7 +532,13 @@ bool function BindingFurniture_IsEligible(Actor akOriginator, string contextJson
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
     if think.EnableActionFurniture == 0
+        return false
+    endif
+
+    if bind_Utility.GetTime() < m.bind_GlobalEventPutOnDisplayNextRun.GetValue()
         return false
     endif
 
@@ -540,7 +568,13 @@ bool function BindingHarshBondage_IsEligible(Actor akOriginator, string contextJ
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
     if think.EnableActionHarshBondage== 0
+        return false
+    endif
+
+    if bind_Utility.GetTime() < m.bind_GlobalEventHarshBondageNextRun.GetValue()
         return false
     endif
 
@@ -568,7 +602,13 @@ bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, 
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
+
     if think.EnableActionCamping == 0
+        return false
+    endif
+
+    if bind_Utility.GetTime() < m.bind_GlobalEventCampingNextRun.GetValue()
         return false
     endif
 
@@ -662,13 +702,13 @@ function AddBondageRule_Execute(Actor akOriginator, string contextJson, string p
 
 endfunction
 
-function BindingCheckRules_Execute(Actor akOriginator, string contextJson, string paramsJson) global
-    bind_Utility.WriteToConsole("SkyrimNet called: BindingCheckRules_Execute actor: " + akOriginator)
-    Quest q = Quest.GetQuest("bind_RulesCheckQuest")
+function BindingInspection_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingInspection_Execute actor: " + akOriginator)
+    Quest q = Quest.GetQuest("bind_EventInspectionQuest")
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_PoseManager.StandFromKneeling(f.GetSubRef())
     if f.ModInRunningState()
-        debug.MessageBox("start bind_RulesCheckQuest quest")
+        debug.MessageBox("start bind_EventInspectionQuest quest")
         if !q.IsRunning()
             q.Start()
         endif

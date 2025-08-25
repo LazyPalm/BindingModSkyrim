@@ -2166,6 +2166,10 @@ event OnPauseStart()
 	; 	;gmanage.RestoreWornGear(theSubRef)
 	; 	restoredGear = 1
 	; endif
+	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", -1) ;store this (no outfits)
+	StorageUtil.SetIntValue(theSubRef, "bind_wearing_outfit_id", -1)
+	StorageUtil.SetStringValue(theSubRef, "bind_wearing_outfit_name", "")
+
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_restored_gear", restoredGear)
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_removed_bondage", removedBondage)
 endevent

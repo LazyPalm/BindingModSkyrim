@@ -270,6 +270,7 @@ int toggleEnableActionSex
 int toggleEnableActionFurniture
 int toggleEnableActionHarshBondage
 int toggleEnableActionCamping
+int toggleEnableActionInspection
 
 Actor theSub
 
@@ -798,7 +799,7 @@ function DisplaySkyrimNet()
         toggleEnableActionFurniture = AddToggleOption("Put On Display - Furniture", brain.EnableActionFurniture)
         toggleEnableActionHarshBondage = AddToggleOption("Harsh Bondage", brain.EnableActionHarshBondage)
         toggleEnableActionCamping = AddToggleOption("Camping", brain.EnableActionCamping)
-        AddTextOption("", "")
+        toggleEnableActionInspection = AddToggleOption("Inspection", brain.EnableActionInspection)
 
     else
 
@@ -2427,6 +2428,13 @@ Event OnOptionSelect(int option)
     if option == toggleEnableActionCamping
         int newValue = ToggleValue(brain.EnableActionCamping)
         brain.EnableActionCamping = newValue
+        SetToggleOptionValue(option,newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionInspection
+        int newValue = ToggleValue(brain.EnableActionInspection)
+        brain.EnableActionInspection = newValue
         SetToggleOptionValue(option,newValue)
         completed = true
     endif

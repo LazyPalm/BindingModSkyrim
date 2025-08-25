@@ -440,8 +440,10 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 
 	;debug.MessageBox("changed locations: " + MQS.IsSub)
 
-	if MQS.IsSub == 1
-		fs.ProcessLocationChangeAnyState(akOldLoc, akNewLoc)
+	if bind_GlobalModState.GetValue() == 1.0 || bind_GlobalModState.GetValue() == 4.0 ;this would exclued dhlp and paused states
+		if MQS.IsSub == 1
+			fs.ProcessLocationChangeAnyState(akOldLoc, akNewLoc)
+		endif
 	endif
 
 	if bind_GlobalModState.GetValue() == 1.0
