@@ -17,6 +17,7 @@ event OnInit()
         RegisterForModEvent("bind_CycleEvent", "CycleEvent")
         RegisterForModEvent("bind_QuestEvEndEvent", "QuestEvEndEvent")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+        RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
         minuteCounter = 5 ;change this to 10? have an MCM setting??
 
@@ -44,6 +45,12 @@ event SafewordEvent()
     bind_Utility.WriteToConsole("freed for work quest safeword ending")
     bind_GlobalSuspendHeavyBondage.SetValue(0)
     self.Stop()
+endevent
+
+event CombatStartedInEvent(Form akTarget)
+    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+        fs.Safeword()
+    endif
 endevent
 
 function FreeSub()

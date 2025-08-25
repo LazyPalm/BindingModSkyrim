@@ -262,6 +262,15 @@ int selectedFoundItemId
 int clickedFoundItem
 int[] sliderChance
 
+;AI thinking
+int toggleEnableActionDressingRoom
+int toggleEnableActionBed
+int toggleEnableActionWhip
+int toggleEnableActionSex
+int toggleEnableActionFurniture
+int toggleEnableActionHarshBondage
+int toggleEnableActionCamping
+
 Actor theSub
 
 string slTagsFile = "bind_sl_tags.json"
@@ -774,12 +783,22 @@ function DisplaySkyrimNet()
 
         AddTextOption("Slavery In Skyrim", "")
         AddTextOption("Indentured Servants In Skyrim", "")
-
         menuSlaveryInSkyrim = AddMenuOption("", slaveryInSkyrimTypes[main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() as int])
         menuIndenturedServants = AddMenuOption("", indenturedServantsInSkyrimTypes[main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() as int])
-
         menuSlaveryType = AddMenuOption("Slavery Type", slaveryTypes[main.SkryimNetSlaveryType])
+        AddTextOption("", "")
 
+        AddHeaderOption("Actions")
+        AddHeaderOption("")
+
+        toggleEnableActionDressingRoom = AddToggleOption("Dressing Room", brain.EnableActionDressingRoom)
+        toggleEnableActionBed = AddToggleOption("Bound Bedtime", brain.EnableActionBed)
+        toggleEnableActionWhip = AddToggleOption("Whipping", brain.EnableActionWhip)
+        toggleEnableActionSex = AddToggleOption("Bound Sex", brain.EnableActionSex)
+        toggleEnableActionFurniture = AddToggleOption("Put On Display - Furniture", brain.EnableActionFurniture)
+        toggleEnableActionHarshBondage = AddToggleOption("Harsh Bondage", brain.EnableActionHarshBondage)
+        toggleEnableActionCamping = AddToggleOption("Camping", brain.EnableActionCamping)
+        AddTextOption("", "")
 
     else
 
@@ -2362,6 +2381,55 @@ Event OnOptionSelect(int option)
     endif
 
     bool completed = false
+
+    if option == toggleEnableActionDressingRoom
+        int newValue = ToggleValue(brain.EnableActionDressingRoom)
+        brain.EnableActionDressingRoom = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionBed
+        int newValue = ToggleValue(brain.EnableActionBed)
+        brain.EnableActionBed = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionWhip
+        int newValue = ToggleValue(brain.EnableActionWhip)
+        brain.EnableActionWhip = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionSex
+        int newValue = ToggleValue(brain.EnableActionSex)
+        brain.EnableActionSex = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionFurniture
+        int newValue = ToggleValue(brain.EnableActionFurniture)
+        brain.EnableActionFurniture = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionHarshBondage
+        int newValue = ToggleValue(brain.EnableActionHarshBondage)
+        brain.EnableActionHarshBondage = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleEnableActionCamping
+        int newValue = ToggleValue(brain.EnableActionCamping)
+        brain.EnableActionCamping = newValue
+        SetToggleOptionValue(option,newValue)
+        completed = true
+    endif
 
     if option == actionKeyModifierOption && !completed
         int currentModifier = main.ActionKeyModifier

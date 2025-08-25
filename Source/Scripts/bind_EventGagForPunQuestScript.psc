@@ -15,6 +15,7 @@ event OnInit()
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+        RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
         EventStart()
 
@@ -26,6 +27,12 @@ event SafewordEvent()
     debug.MessageBox("Ending gagged for punishment quest")
     bind_Utility.WriteToConsole("gagged for punishment quest safeword ending")
     self.Stop()
+endevent
+
+event CombatStartedInEvent(Form akTarget)
+    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+        fs.Safeword()
+    endif
 endevent
 
 event PressedAction(bool longPress)

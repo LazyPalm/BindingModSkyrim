@@ -1752,7 +1752,7 @@ Function SafeWord()
 
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
-		listMenu.AddEntryItem("Remove Binding Bondage")
+		;listMenu.AddEntryItem("Remove Binding Bondage")
 		listMenu.AddEntryItem("Remove ALL Generic Bondage")
 		listMenu.AddEntryItem("Remove Binding Bondage & Restore")
 	EndIf
@@ -1762,9 +1762,9 @@ Function SafeWord()
 
 	listMenu.OpenMenu()
 	int listReturn = listMenu.GetResultInt()
-	if listReturn == 1
+	if listReturn == 0
 		removeAllGeneric = true
-	elseif listReturn == 2
+	elseif listReturn == 1
 		restoreBondage = true
 	endif
 
@@ -1830,6 +1830,11 @@ Function SafeWord()
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
 		endif
 
+	else
+		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", -1) ;store this (no outfits)
+		StorageUtil.SetIntValue(theSubRef, "bind_wearing_outfit_id", -1)
+		StorageUtil.SetStringValue(theSubRef, "bind_wearing_outfit_name", "")
+		main.ActiveBondageSetId = -1
 	endif
 
 	FutureDom.Clear()

@@ -18,6 +18,7 @@ event OnInit()
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("ZapSlaveActionDone", "OnSlaveActionDone")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+        RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
         menuActive = false
 
@@ -30,10 +31,18 @@ endevent
 event SafewordEvent()
     bind_Utility.WriteToConsole("whipping quest safeword ending")
 
-    ;if using ZAP
-    WhipScene.Stop()
+    if whippingFramework == 2
+        if bind_PamaHelper.CheckValid()
+            bind_PamaHelper.EndWhipActor(theSub)
+            bind_Utility.DoSleep()
+        endif
+    else
+        ;if using ZAP
+        WhipScene.Stop()
+    endif
 
     self.Stop()
+
 endevent
 
 Event OnSlaveActionDone(String asType, String asMessage, Form akMaster, Int aiSceneIndex)
@@ -43,6 +52,12 @@ Event OnSlaveActionDone(String asType, String asMessage, Form akMaster, Int aiSc
 EndEvent
 
 event PressedAction(bool longPress)
+endevent
+
+event CombatStartedInEvent(Form akTarget)
+    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+        fs.Safeword()
+    endif
 endevent
 
 state StartPhase

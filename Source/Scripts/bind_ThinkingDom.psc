@@ -1,5 +1,13 @@
 Scriptname bind_ThinkingDom extends Quest conditional
 
+int property EnableActionDressingRoom auto conditional
+int property EnableActionBed auto conditional
+int property EnableActionWhip auto conditional
+int property EnableActionSex auto conditional
+int property EnableActionFurniture auto conditional
+int property EnableActionHarshBondage auto conditional
+int property EnableActionCamping auto conditional
+
 ;possibility for random basic personality traits?
 
 ;trust indicators (lie modifier)
@@ -133,11 +141,11 @@ function RegisterFunctions()
     ;                                 "", "PAPYRUS", \
     ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("BindingCheckRules", "Makes sure {{ player.name }} is following their bondage rules.", \
-                                    "bind_ThinkingDom", "BindingCheckRules_IsEligible", \
-                                    "bind_ThinkingDom", "BindingCheckRules_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")
+    ; SkyrimNetApi.RegisterAction("BindingCheckRules", "Makes sure {{ player.name }} is following their bondage rules.", \
+    ;                                 "bind_ThinkingDom", "BindingCheckRules_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingCheckRules_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
 
     SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try on new bondage gear. Only use this if {{ player.name }} asks.", \
                                     "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
@@ -352,6 +360,11 @@ bool function BindingDressingRoom_IsEligible(Actor akOriginator, string contextJ
     bool result = true
     string reason = ""
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionDressingRoom == 0
+        result = false
+        reason = "Action not enabled"
+    endif
     if !f.UseSkyrimNetCheck(akOriginator)
         result = false
         reason = "Failed UseSkyrimNetCheck"
@@ -368,6 +381,11 @@ bool function BindingSleep_IsEligible(Actor akOriginator, string contextJson, st
     bool result = true
     string reason = ""
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionBed == 0
+        result = false
+        reason = "Action not enabled"
+    endif
     if !f.UseSkyrimNetCheck(akOriginator)
         result = false
         reason = "Failed UseSkyrimNetCheck"
@@ -437,6 +455,10 @@ bool function BindingWhip_IsEligible(Actor akOriginator, string contextJson, str
     bool result
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionWhip == 0
+        return false
+    endif
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
@@ -459,6 +481,10 @@ bool function BindingSex_IsEligible(Actor akOriginator, string contextJson, stri
     bool result
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionSex == 0
+        return false
+    endif
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
@@ -483,6 +509,10 @@ bool function BindingFurniture_IsEligible(Actor akOriginator, string contextJson
     bool result
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionFurniture == 0
+        return false
+    endif
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
@@ -509,6 +539,10 @@ bool function BindingHarshBondage_IsEligible(Actor akOriginator, string contextJ
     bool result
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionHarshBondage== 0
+        return false
+    endif
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false
@@ -533,6 +567,10 @@ bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, 
     bool result
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    if think.EnableActionCamping == 0
+        return false
+    endif
 
     if !f.UseSkyrimNetCheck(akOriginator)
         return false

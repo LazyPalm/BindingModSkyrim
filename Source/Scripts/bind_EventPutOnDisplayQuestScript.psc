@@ -19,6 +19,7 @@ event OnInit()
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+        RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
         if mqs.PutOnDisplayMinMinutes == 0 && mqs.PutOnDisplayMaxMinutes == 0
             mqs.PutOnDisplayMinMinutes = 10
@@ -89,6 +90,12 @@ event SafewordEvent()
 
     self.Stop()
 
+endevent
+
+event CombatStartedInEvent(Form akTarget)
+    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+        fs.Safeword()
+    endif
 endevent
 
 state KneelByFurnitureState

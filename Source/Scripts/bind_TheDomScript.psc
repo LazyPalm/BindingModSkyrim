@@ -8,10 +8,33 @@ Event OnActivate(ObjectReference akActionRef)
 
 EndEvent
 
+bool underAttackInEvent
+bool underAttack
+
 Event OnCombatStateChanged(Actor akTarget, int aeCombatState)
+
+    if bind_GlobalModState.GetValue() == bind_Controller.GetModStateEvent()
+        ;if event is running - this should be from a creature attack or a dragon attack if in a safe area
+        If aeCombatState == 1 && !underAttackInEvent
+            underAttackInEvent = true
+            ;debug.MessageBox("dom in combat...")
+            int handle = ModEvent.Create("bind_EventCombatStartedInEvent")
+            if handle
+                ModEvent.PushForm(handle, akTarget)
+                ModEvent.Send(handle)
+            endif
+        endif
+
+        if aeCombatState == 0
+            underAttackInEvent = false
+
+        endif
+    endif
     
-    if bind_GlobalModState.GetValue() == 1.0
+    if bind_GlobalModState.GetValue() == bind_Controller.GetModStateRunning()
         
+        underAttackInEvent = false ;this should always be false if not in an event
+
         ;bind_MainQuestScript MQS = (GetOwningQuest() as bind_MainQuestScript)
 
         ; if (akTarget == Game.GetPlayer())
@@ -24,14 +47,16 @@ Event OnCombatStateChanged(Actor akTarget, int aeCombatState)
         ;   endIf
         ; endIf
 
-        If aeCombatState == 1
+        If aeCombatState == 1 && !underAttack
 
             (GetOwningQuest() as bind_MainQuestScript).DomInCombat = 1
+            underAttack = true
         ;     ;Debug.Notification("dom started combat")
         ;     (GetOwningQuest() as bind_MainQuestScript).UntieBoundSubForCombat()
         EndIf
 
-        If aeCombatState == 0
+        If aeCombatState == 0 && underAttack
+            underAttack = false
             (GetOwningQuest() as bind_Functions).DirtFromCombat()
             (GetOwningQuest() as bind_MainQuestScript).DomInCombat = 0
         ;     ;Debug.Notification("dom ended combat")

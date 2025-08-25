@@ -43,6 +43,7 @@ event OnInit()
 			RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
 			RegisterForModEvent("AnimationEnd", "OnSexEndEvent")
 			RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+			RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
 			SetObjectiveDisplayed(10, true)
 
@@ -68,6 +69,12 @@ event SafewordEvent()
 
     self.Stop()
 
+endevent
+
+event CombatStartedInEvent(Form akTarget)
+    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+        fs.Safeword()
+    endif
 endevent
 
 event PressedAction(bool longPress)
