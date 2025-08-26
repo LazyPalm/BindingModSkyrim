@@ -2043,6 +2043,7 @@ Function DisplayDebug()
     AddHeaderOption("")
     toggleWriteLogs = AddToggleOption("Write Detailed Logs", main.WriteLogs)
     toggleDisplayLocationChange = AddToggleOption("Show Location Change", main.DisplayLocationChange)
+    AddTextOption("Binding Version", "0.4")
 
 EndFunction
 
