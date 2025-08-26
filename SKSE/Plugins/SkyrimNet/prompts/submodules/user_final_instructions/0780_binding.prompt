@@ -1,15 +1,19 @@
 {% set actor_name = decnpc(npc.UUID).name %}
 {% set wearing_collar = is_in_faction(player.UUID, "bind_WearingCollarFaction") %}
 {% set wearing_gag = is_in_faction(player.UUID, "bind_WearingGagFaction") %}
+{% set is_kneeling = is_in_faction(player.UUID, "bind_KneelingFaction") %}
 
 {# Player is sub and mod is active #}
 {% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
      {# NPC is the dominant #}
     {% if is_in_faction(npc.UUID, "bind_DominantFaction") %}
         {# sub is wearing a gag #}
-        {% if wearing_gag and is_in_faction(player.UUID, "bind_KneelingFaction") == false %}
+        {% if wearing_gag and is_kneeling == false %}
         - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that {{ actor_name }} can't understand them. This is VERY important for immersion. 
         - {{ actor_name }} will tell {{ player.name }} to be quiet if gagged in public.
+        {% endif %}
+        {% if wearing_gag and is_kneeling %}
+        - {{ actor_name }} loosened the gag in {{ player.name }}'s mouth so they might speak for a minute.
         {% endif %}
     {% endif %}
     {# normal NPC #}

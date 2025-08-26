@@ -471,7 +471,14 @@ Function DoHighKneel()
         ; EndIf
     EndIf
     bind_Utility.WriteToConsole("DoHighKneel idle: " + playIdle)
+
+    ;debug.MessageBox("DoHighKneel idle: " + playIdle)
+
     PoseIdleState = IDLE_STATE_KNEELING
+
+    PoseDisablePlayerControls()
+
+    bind_Utility.DoSleep(0.5)
 
     Debug.SendAnimationEvent(theSubRef, playIdle)
 
@@ -877,6 +884,7 @@ Function ResumeStanding()
     PoseIdleState = IDLE_STATE_NONE
 	Debug.SendAnimationEvent(theSubRef, standingIdle)
     RemovePosingFactions()
+    Game.EnablePlayerControls()
     EndQuests()
 EndFunction
 
@@ -1001,6 +1009,10 @@ function StandFromKneeling(Actor a) global
 
     endif
 
+endfunction
+
+function PoseDisablePlayerControls()
+    Game.DisablePlayerControls(abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = true, abMenu = false, abActivate = false, abJournalTabs = false, aiDisablePOVType = 0)
 endfunction
 
 ;zadexpressionlibs property zexplib auto
