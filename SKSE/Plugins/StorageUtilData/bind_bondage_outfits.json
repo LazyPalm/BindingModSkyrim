@@ -35,6 +35,10 @@
 		[
 			1006
 		],
+		"used_for_event_go_adventuringevent_free_for_work" : 
+		[
+			1006
+		],
 		"used_for_event_harsh_bondage" : 
 		[
 			1003
@@ -43,7 +47,10 @@
 		[
 			1010
 		],
-		"used_for_location_all_areas" : [],
+		"used_for_location_all_areas" : 
+		[
+			1011
+		],
 		"used_for_location_any_city" : 
 		[
 			1009
@@ -84,7 +91,7 @@
 			"Unsafe Areas Outfit",
 			"City Bondage Outfit",
 			"Whipping Outfit",
-			"Bondage Set 11"
+			"Always Secured Outfit"
 		]
 	}
 }

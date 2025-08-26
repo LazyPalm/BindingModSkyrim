@@ -30,8 +30,27 @@ bind_BondageManager function GetBondageManager() global
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
 endfunction
 
+Actor theSubRef
+
+bool setupOutfitUsedArray
+
 Function LoadGame(bool rebuildStorage = false)
     
+    theSubRef = Game.GetPlayer()
+
+    if !setupOutfitUsedArray
+        int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+        ;debug.MessageBox("bondageSetIds: " + bondageSetIds)
+        int idx = 0
+        while idx < bondageSetIds.Length
+            StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage", bondageSetIds[idx])
+            idx += 1
+        endwhile
+        int[] usage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
+        ;debug.MessageBox("usage: " + usage)
+        setupOutfitUsedArray = true
+    endif
+
     if bondageTypes.Length != 18
         bondageTypes = new string[18]
         bondageTypes[0] = "Ankle Shackles"
@@ -419,6 +438,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
@@ -430,6 +452,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
@@ -458,6 +483,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
     
@@ -494,6 +522,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
                 return currentBondageSet
             endif
             outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+            if outfitIds.Length > 0
+                outfitIds = NarrowToValidOutfits(outfitIds)
+            endif
             bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
         endif
     endif
@@ -506,6 +537,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
@@ -517,6 +551,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     elseif !isSafeArea && outfitIds.Length == 0
         ;dangerous area
@@ -527,6 +564,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
@@ -537,6 +577,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             return currentBondageSet
         endif
         outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
+        if outfitIds.Length > 0
+            outfitIds = NarrowToValidOutfits(outfitIds)
+        endif
         bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
     endif
 
@@ -544,10 +587,47 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
         return -1
     endif
 
+    ;this will narrow the list of valid outfits to ones that PC has marked as in use
+
+    ; int[] outfitUsage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
+    ; StorageUtil.IntListClear(theSubRef, "bind_bondage_outfit_usage_matches")
+
+    ; string validIds = ""
+    ; int idx = 0
+    ; while idx < outfitIds.Length
+    ;     if StorageUtil.IntListHas(theSubRef, "bind_bondage_outfit_usage", outfitIds[idx])
+    ;         StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage_matches", outfitIds[idx])
+    ;     endif
+    ;     idx += 1
+    ; endwhile
+
+    ; int[] matches = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage_matches")
+    ; if matches.Length == 0
+    ;     return -1
+    ; endif
+
+    ; debug.MessageBox(matches)
+
+    ; return matches[Utility.RandomInt(0, matches.Length - 1)]
+
     return outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
 
     ;debug.MessageBox(outfitIds)
 
+endfunction
+
+int[] function NarrowToValidOutfits(int[] outfitIds)
+    int[] outfitUsage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
+    StorageUtil.IntListClear(theSubRef, "bind_bondage_outfit_usage_matches")
+    int idx = 0
+    while idx < outfitIds.Length
+        if StorageUtil.IntListHas(theSubRef, "bind_bondage_outfit_usage", outfitIds[idx])
+            StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage_matches", outfitIds[idx])
+        endif
+        idx += 1
+    endwhile
+    int[] matches = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage_matches")
+    return matches
 endfunction
 
 ; function SetActiveBondageSet(bool safeLocation, Location currentLocation) 

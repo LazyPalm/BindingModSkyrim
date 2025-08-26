@@ -235,6 +235,7 @@ string[] materials
 string bondageOutfitsFile = "bind_bondage_outfits.json"
 string bondageOutfitFile
 
+int toggleUseOutfit
 int inputBondageSetName
 int clickedNewOutfit
 int menuBondageOutfitsList
@@ -582,6 +583,13 @@ function DisplayBondageOutfits()
 
         AddHeaderOption("Selected - " + selectedBondageOutfit)
         AddHeaderOption("")
+
+        int useOutfit = 0
+        if StorageUtil.IntListHas(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
+            useOutfit = 1
+        endif
+        toggleUseOutfit = AddToggleOption("Use This Set", useOutfit)
+        AddTextOption("", "")
 
         inputBondageSetName = AddInputOption("Bondage Outfit Name", selectedBondageOutfit)
         AddTextOption("Bondage Outfit ID", selectedBondageOutfitId) 
@@ -2182,10 +2190,11 @@ event OnOptionInputAccept(int option, string value)
         JsonUtil.SetStringValue(bondageOutfitFile, "bondage_outfit_name", value)
         JsonUtil.Save(bondageOutfitFile)
 
-        selectedBondageOutfit = ""
-        selectedBondageOutfitId = 0
-        selectedBondageOutfitIndex = -1
-        ForcePageReset()
+        ;selectedBondageOutfit = ""
+        ;selectedBondageOutfitId = 0
+        ;selectedBondageOutfitIndex = -1
+        ;ForcePageReset()
+        SetInputOptionValue(option, value)
     endif
 
     if option == inputDeviousKeywordSearch
@@ -2256,6 +2265,18 @@ Event OnOptionSelect(int option)
                 JsonUtil.Save(bondageOutfitsFile)
                 ForcePageReset()
             endif
+        endif
+
+        if option == toggleUseOutfit
+            int newValue = 0
+            if StorageUtil.IntListHas(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
+                StorageUtil.IntListRemove(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId, true)
+                newValue = 0
+            else
+                StorageUtil.IntListAdd(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
+                newValue = 1
+            endif
+            SetToggleOptionValue(option, newValue)
         endif
 
         if option == toggleBondageOutfitUseRandomBondage
