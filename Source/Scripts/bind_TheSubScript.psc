@@ -515,7 +515,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
 					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
 					if hasBlock || nudeRule
-						if !dev.HasKeyWordString("zad_Lockable") && !dev.HasKeyWordString("zad_InventoryDevice") && !dev.HasKeyWordString("sexlabnostrip")
+						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
 							theSub.UnequipItem(dev, false, true)

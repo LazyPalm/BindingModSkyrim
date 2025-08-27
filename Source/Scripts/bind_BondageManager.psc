@@ -94,6 +94,14 @@ EndFunction
 ;     endif
 ; endfunction
 
+bool function ZadKeywordsCheck(Form item)
+    bool lockable = item.HasKeyWordString("zad_Lockable")
+    bool inventory = item.HasKeyWordString("zad_InventoryDevice")
+    bool questItem = item.HasKeywordString("zad_QuestItem")
+    bool blockGeneric = item.HasKeyWordString("zad_BlockGeneric")
+    return (lockable || inventory || questItem || blockGeneric)
+endfunction
+
 function EquipBondageOutfit(Actor a, int setId)
 
     int i
@@ -120,7 +128,7 @@ function EquipBondageOutfit(Actor a, int setId)
         while i < inventory.Length
             Form item = inventory[i]
             If item.IsPlayable()
-                if a.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+                if a.IsEquipped(item) && !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                 endif
@@ -135,7 +143,7 @@ function EquipBondageOutfit(Actor a, int setId)
         while i < blocks.Length
             Armor item = a.GetWornForm(blocks[i]) as Armor
             if item != none
-                if !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+                if !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                     bind_Utility.DoSleep(0.25)

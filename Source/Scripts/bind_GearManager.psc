@@ -351,7 +351,7 @@ bool function RemoveWornGear(Actor act)
 
 		If item.IsPlayable()
 
-			if act.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+			if act.IsEquipped(item) && !bman.ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
 
 				int slot = -1
 				if item as Armor
@@ -1014,7 +1014,7 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
         Form dev = inventory[i]
 		if dev.IsPlayable()
 			if a.IsEquipped(dev)
-				if !dev.HasKeyWord(bman.zlib.zad_inventoryDevice) && !dev.HasKeyWord(bman.zlib.zad_Lockable) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+				if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
 					bind_Utility.WriteToConsole("LearnWornItemsForBondageOutfit - dev: " + dev.GetName())
 					;StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
 					JsonUtil.FormListAdd(bondageOutfitFile, "fixed_worn_items", dev, false)
@@ -1084,7 +1084,7 @@ function LearnOutfit(Actor a, string setName)
 	while i < inventory.Length
         Form dev = inventory[i]
 		if a.IsEquipped(dev)
-			if !dev.HasKeyWord(bman.zlib.zad_inventoryDevice) && !dev.HasKeyWord(bman.zlib.zad_Lockable) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+			if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
 
 				bool storeThis = true
 				if bodyItem != none && !allowBodyArmor
