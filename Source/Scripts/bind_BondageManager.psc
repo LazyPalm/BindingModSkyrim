@@ -120,7 +120,7 @@ function EquipBondageOutfit(Actor a, int setId)
 
     bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
 
-    RemoveAllBondageItems(a, true)
+    RemoveAllBondageItems(a, false)
 
     if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
         Form[] inventory = a.GetContainerForms()
@@ -130,6 +130,7 @@ function EquipBondageOutfit(Actor a, int setId)
             If item.IsPlayable()
                 if a.IsEquipped(item) && !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
+                    bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                 endif
             endif
@@ -145,6 +146,7 @@ function EquipBondageOutfit(Actor a, int setId)
             if item != none
                 if !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
+                    bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                     bind_Utility.DoSleep(0.25)
                 endif
@@ -832,7 +834,9 @@ bool function AddSpecificItem(Actor act, Form dev)
         SetBindingBondageItem(dev)
         result = zlib.LockDevice(act, dev as Armor, true)
         if result
-            StorageUtil.FormListAdd(act, "binding_bondage_specific_list", dev, false)
+            
+            StorageUtil.FormListAdd(act, "binding_worn_bondage_items", dev, false)
+            ;StorageUtil.FormListAdd(act, "binding_bondage_specific_list", dev, false)
         endif
     endif
     return result
@@ -844,14 +848,16 @@ bool function RemoveSpecificItem(Actor act, Form dev)
         SetBindingBondageItem(dev)
         result = zlib.UnlockDevice(act, dev as Armor, none, none, true)
         if result
-            StorageUtil.FormListRemove(act, "binding_bondage_specific_list", dev, true)
+            StorageUtil.FormListRemove(act, "binding_worn_bondage_items", dev, true)
+            ;StorageUtil.FormListRemove(act, "binding_bondage_specific_list", dev, true)
         endif
     endif
     return result
 endfunction
 
 Form[] function GetSpecificItems(Actor act)
-    return StorageUtil.FormListToArray(act, "binding_bondage_specific_list")
+    ;return StorageUtil.FormListToArray(act, "binding_bondage_specific_list")
+    return StorageUtil.FormListToArray(act, "binding_worn_bondage_items")
 endfunction
 
 ; bool function AddItemPassingDevice(Actor act, Armor dev)
@@ -1298,7 +1304,7 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
         while i < wornItems.Length
             Armor dev = wornItems[i] as Armor
             if zlib.UnlockDevice(act, dev, none, none, true)
-                bind_Utility.WriteToConsole("removing stored item: " + dev)                
+                bind_Utility.WriteToConsole("RemoveAllBondageItems - removing stored item: " + dev)                
             endif
             bind_Utility.DoSleep(sleepTime)
             i += 1
@@ -1318,26 +1324,28 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
                 Keyword kw = bind_DDKeywords.GetAt(i) as Keyword
                 if act.WornHasKeyword(kw)
                     if zlib.UnlockDeviceByKeyword(act, kw, false)
-                        bind_Utility.WriteToConsole("removing by keyword: " + kw)
+                        bind_Utility.WriteToConsole("RemoveAllBondageItems - removing by keyword: " + kw)
                     endif
                     bind_Utility.DoSleep(sleepTime)
                 endif
                 i += 1
             endwhile
         endif
-        if act.WornHasKeyWord(zlib.zad_Lockable)
-            debug.MessageBox("fail safe removal")
-        	Form[] inventory = act.GetContainerForms()
-            i = 0
-            while i < inventory.Length
-                Form dev = inventory[i]
-                if dev.HasKeyWord(zlib.zad_Lockable) && act.IsEquipped(dev)
-                    zlib.UnlockDevice(act, dev as Armor, none, none, true)
-                    bind_Utility.WriteToConsole("removing non-binding rendered item: " + dev.GetName())
-                endif
-                i += 1
-            endwhile
-        endif
+        ; if act.WornHasKeyWord(zlib.zad_Lockable)
+        ;     debug.MessageBox("fail safe removal")
+        ; 	Form[] inventory = act.GetContainerForms()
+        ;     i = 0
+        ;     while i < inventory.Length
+        ;         Form dev = inventory[i]
+        ;         if dev.HasKeyWord(zlib.zad_Lockable) && act.IsEquipped(dev)
+        ;             if !dev.HasKeyWord(zlib.zad_QuestItem) && !dev.HasKeyWord(zlib.zad_BlockGeneric)
+        ;                 zlib.UnlockDevice(act, dev as Armor, none, none, true)
+        ;                 bind_Utility.WriteToConsole("removing non-binding rendered item: " + dev.GetName())
+        ;             endif
+        ;         endif
+        ;         i += 1
+        ;     endwhile
+        ; endif
     endif
 
 	Form[] inventory = act.GetContainerForms()
@@ -1349,13 +1357,13 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
         
         ;TODO - figure out how to deal with failed render devices
 
-        if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev)
+        if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev) && !dev.HasKeyWord(zlib.zad_QuestItem)
             int flag = GetBindingBondageItem(dev)
             if flag == 1 || main.CleanUpNonBindingItemsFromBags == 1
-                bind_Utility.WriteToConsole("removing binding item: " + dev.GetName())
+                bind_Utility.WriteToConsole("RemoveAllBondageItems - removing binding item: " + dev.GetName())
                 act.RemoveItem(dev, 100, true, none)
             else
-                bind_Utility.WriteToConsole("leaving non-binding item: " + dev.GetName())
+                bind_Utility.WriteToConsole("RemoveAllBondageItems - leaving non-binding item: " + dev.GetName())
             endif
         endif
         i += 1
@@ -1414,219 +1422,219 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
 
 EndFunction
 
-function UpdateBondage(Actor a, bool removeExisting = false)
+; function UpdateBondage(Actor a, bool removeExisting = false)
 
-    ;debug.MessageBox("UpdateBondage called")
+;     ;debug.MessageBox("UpdateBondage called")
 
-    int i
-    int operation
-    int rank
+;     int i
+;     int operation
+;     int rank
 
-    bool safeArea = (StorageUtil.GetIntValue(a, "bind_safe_area", 0) == 1)
+;     bool safeArea = (StorageUtil.GetIntValue(a, "bind_safe_area", 0) == 1)
 
-    if !a.IsInFaction(bind_EventActiveFaction)
+;     if !a.IsInFaction(bind_EventActiveFaction)
 
-        ;NOT IN EVENT - RUNNING
+;         ;NOT IN EVENT - RUNNING
 
-        bind_Utility.WriteToConsole("UpdateBondage no event faction found")
+;         bind_Utility.WriteToConsole("UpdateBondage no event faction found")
 
-        if a.IsInFaction(bind_BondageRulesDisableFaction)
+;         if a.IsInFaction(bind_BondageRulesDisableFaction)
             
-            bind_Utility.WriteToConsole("UpdateBondage disable rules faction found")
+;             bind_Utility.WriteToConsole("UpdateBondage disable rules faction found")
 
-            ;remove all binding items
-            RemoveAllBondageItems(a, false)
-
-
-        else
-
-            bool removedAllItems = false
-
-            if removeExisting
-                RemoveAllBondageItems(a, false)
-                removedAllItems = true
-                bind_Utility.DoSleep(1.0) ;give dd enough time to clear so that keyword checks below are accurate
-            endif
-
-            ;apply rules bondage
-            ;i = 0
-
-            string[] ruleNames = rms.GetBondageRuleNameArray()
-
-            bind_Utility.WriteToConsole("UpdateBondage rulescheck:")
-
-        ; dRuleName[0] = "Ankle Shackles Rule"
-        ; dRuleName[1] = "Arm Cuffs Rule"
-        ; dRuleName[2] = "Blindfold Rule"
-        ; dRuleName[3] = "Boots Rule"
-        ; dRuleName[4] = "Belt Rule"
-        ; dRuleName[5] = "Collar Rule"
-        ; dRuleName[6] = "Corset Rule"
-        ; dRuleName[7] = "Gag Rule"
-        ; dRuleName[8] = "Gloves Rule"
-        ; dRuleName[9] = "Harness Rule"
-        ; dRuleName[10] = "Heavy Bondage Rule"
-        ; dRuleName[11] = "Hood Rule"
-        ; dRuleName[12] = "Leg Cuffs Rule"
-        ; dRuleName[13] = "Nipple Piercing Rule"
-        ; dRuleName[14] = "Vaginal Piercing Rule"
-        ; dRuleName[15] = "Anal Plug Rule"
-        ; dRuleName[16] = "Vaginal Plug Rule"
-        ; dRuleName[17] = "Suit Rule"
-
-            int[] equipOrder = new int[18]
-            equipOrder[0] = 15 ;anal plug
-            equipOrder[1] = 16 ;v plug
-            equipOrder[2] = 14 ;v piercing
-            equipOrder[3] = 13 ;n piercing
-            equipOrder[4] = 17 ;suits
-            equipOrder[5] = 9 ;harness
-            equipOrder[6] = 6 ;corset
-            equipOrder[7] = 4 ;belt
-            equipOrder[8] = 5 ;collar
-            equipOrder[9] = 8 ;gloves
-            equipOrder[10] = 3 ;boots
-            equipOrder[11] = 1 ;arm cuffs
-            equipOrder[12] = 12 ;leg cuffs
-            equipOrder[13] = 10 ;heavy bondage
-            equipOrder[14] = 0 ;ankle shackles
-            equipOrder[15] = 2 ;blindfold
-            equipOrder[16] = 11 ;hood
-            equipOrder[17] = 7 ;gag
+;             ;remove all binding items
+;             RemoveAllBondageItems(a, false)
 
 
-            int idx = 0
-            ;TODO - run this in reverse??? so plugs get set first - suit can block everyting else?
-            while idx < bind_DDKeywords.GetSize() ;bind_BondageRulesFactionList.GetSize()
+;         else
 
-                operation = 0
+;             bool removedAllItems = false
 
-                i = equipOrder[idx]
+;             if removeExisting
+;                 RemoveAllBondageItems(a, false)
+;                 removedAllItems = true
+;                 bind_Utility.DoSleep(1.0) ;give dd enough time to clear so that keyword checks below are accurate
+;             endif
 
-                int ruleSetting = StorageUtil.GetIntValue(a, "bind_rule_setting_" + i, 0)
-                int ruleOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + i, 0)
+;             ;apply rules bondage
+;             ;i = 0
 
-                ; if ruleOption == 1
-                ;     ruleText += " - Blocked / Hard Limit"
-                ; elseif ruleOption == 2
-                ;     ruleText += " - Safe Areas Only"
-                ; elseif ruleOption == 3
-                ;     ruleText += " - Always On"
-                ; elseif ruleOption == 4
-                ;     ruleText += " - Always On In Safe Areas"
-                ; endif
+;             string[] ruleNames = rms.GetBondageRuleNameArray()
 
-                ; if i == BONDAGE_TYPE_SUIT() && ruleSetting == 1 && !safeArea ;see if heavy bondage should be removed in unsafe areas
-                ;     ;debug.MessageBox("in the condition")
-                ;     ;heavy bondage check on suits - suits are lower in the list, so this should only happen for that slot
-                ;     if a.WornHasKeyWord(bind_DDKeywords.GetAt(BONDAGE_TYPE_HEAVYBONDAGE()) as Keyword)
-                ;         ;debug.MessageBox("found heavy bondage keyword")
-                ;         int heavyBondageOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + BONDAGE_TYPE_HEAVYBONDAGE(), 0)
-                ;         if heavyBondageOption == 2 || heavyBondageOption == 4
-                ;             ruleOption = heavyBondageOption
-                ;             bind_Utility.WriteToConsole("suits has heavy bondage - using heavy bondage safe areas option")
-                ;         endif
-                ;     endif
-                ; endif
+;             bind_Utility.WriteToConsole("UpdateBondage rulescheck:")
 
-                if ruleSetting == 1 ;a.IsInFaction(bind_BondageRulesFactionList.GetAt(i) as Faction)
-                    ;TODO - check faction rank??
+;         ; dRuleName[0] = "Ankle Shackles Rule"
+;         ; dRuleName[1] = "Arm Cuffs Rule"
+;         ; dRuleName[2] = "Blindfold Rule"
+;         ; dRuleName[3] = "Boots Rule"
+;         ; dRuleName[4] = "Belt Rule"
+;         ; dRuleName[5] = "Collar Rule"
+;         ; dRuleName[6] = "Corset Rule"
+;         ; dRuleName[7] = "Gag Rule"
+;         ; dRuleName[8] = "Gloves Rule"
+;         ; dRuleName[9] = "Harness Rule"
+;         ; dRuleName[10] = "Heavy Bondage Rule"
+;         ; dRuleName[11] = "Hood Rule"
+;         ; dRuleName[12] = "Leg Cuffs Rule"
+;         ; dRuleName[13] = "Nipple Piercing Rule"
+;         ; dRuleName[14] = "Vaginal Piercing Rule"
+;         ; dRuleName[15] = "Anal Plug Rule"
+;         ; dRuleName[16] = "Vaginal Plug Rule"
+;         ; dRuleName[17] = "Suit Rule"
+
+;             int[] equipOrder = new int[18]
+;             equipOrder[0] = 15 ;anal plug
+;             equipOrder[1] = 16 ;v plug
+;             equipOrder[2] = 14 ;v piercing
+;             equipOrder[3] = 13 ;n piercing
+;             equipOrder[4] = 17 ;suits
+;             equipOrder[5] = 9 ;harness
+;             equipOrder[6] = 6 ;corset
+;             equipOrder[7] = 4 ;belt
+;             equipOrder[8] = 5 ;collar
+;             equipOrder[9] = 8 ;gloves
+;             equipOrder[10] = 3 ;boots
+;             equipOrder[11] = 1 ;arm cuffs
+;             equipOrder[12] = 12 ;leg cuffs
+;             equipOrder[13] = 10 ;heavy bondage
+;             equipOrder[14] = 0 ;ankle shackles
+;             equipOrder[15] = 2 ;blindfold
+;             equipOrder[16] = 11 ;hood
+;             equipOrder[17] = 7 ;gag
+
+
+;             int idx = 0
+;             ;TODO - run this in reverse??? so plugs get set first - suit can block everyting else?
+;             while idx < bind_DDKeywords.GetSize() ;bind_BondageRulesFactionList.GetSize()
+
+;                 operation = 0
+
+;                 i = equipOrder[idx]
+
+;                 int ruleSetting = StorageUtil.GetIntValue(a, "bind_rule_setting_" + i, 0)
+;                 int ruleOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + i, 0)
+
+;                 ; if ruleOption == 1
+;                 ;     ruleText += " - Blocked / Hard Limit"
+;                 ; elseif ruleOption == 2
+;                 ;     ruleText += " - Safe Areas Only"
+;                 ; elseif ruleOption == 3
+;                 ;     ruleText += " - Always On"
+;                 ; elseif ruleOption == 4
+;                 ;     ruleText += " - Always On In Safe Areas"
+;                 ; endif
+
+;                 ; if i == BONDAGE_TYPE_SUIT() && ruleSetting == 1 && !safeArea ;see if heavy bondage should be removed in unsafe areas
+;                 ;     ;debug.MessageBox("in the condition")
+;                 ;     ;heavy bondage check on suits - suits are lower in the list, so this should only happen for that slot
+;                 ;     if a.WornHasKeyWord(bind_DDKeywords.GetAt(BONDAGE_TYPE_HEAVYBONDAGE()) as Keyword)
+;                 ;         ;debug.MessageBox("found heavy bondage keyword")
+;                 ;         int heavyBondageOption = StorageUtil.GetIntValue(a, "bind_rule_option_" + BONDAGE_TYPE_HEAVYBONDAGE(), 0)
+;                 ;         if heavyBondageOption == 2 || heavyBondageOption == 4
+;                 ;             ruleOption = heavyBondageOption
+;                 ;             bind_Utility.WriteToConsole("suits has heavy bondage - using heavy bondage safe areas option")
+;                 ;         endif
+;                 ;     endif
+;                 ; endif
+
+;                 if ruleSetting == 1 ;a.IsInFaction(bind_BondageRulesFactionList.GetAt(i) as Faction)
+;                     ;TODO - check faction rank??
                     
-                    operation = 1 ;normal check if equipped
+;                     operation = 1 ;normal check if equipped
                     
-                    if ruleOption == 2 || ruleOption == 4 ;safe area only
-                        if !safeArea
-                            operation = 2 ;remove this if not in a safe area
-                        endif
-                    endif
+;                     if ruleOption == 2 || ruleOption == 4 ;safe area only
+;                         if !safeArea
+;                             operation = 2 ;remove this if not in a safe area
+;                         endif
+;                     endif
                     
-                    if ruleOption == 5 || ruleOption == 6 ;unsafe area only
-                        if safeArea
-                            operation = 2 ;remove this if in safe area
-                        endif
-                    endif
+;                     if ruleOption == 5 || ruleOption == 6 ;unsafe area only
+;                         if safeArea
+;                             operation = 2 ;remove this if in safe area
+;                         endif
+;                     endif
 
-                    ;rank = a.GetFactionRank(bind_BondageRulesFactionList.GetAt(i) as Faction)
+;                     ;rank = a.GetFactionRank(bind_BondageRulesFactionList.GetAt(i) as Faction)
 
-                    ;bind_Utility.WriteToConsole("faction: " + i + " rank " + rank)
-                else
+;                     ;bind_Utility.WriteToConsole("faction: " + i + " rank " + rank)
+;                 else
 
-                    operation = 2 ;normal remove
+;                     operation = 2 ;normal remove
 
-                    ; if ruleOption == 2 || ruleOption == 4 ;safe area only
-                    ;     if !safeArea
-                    ;         operation = 3 ;don't try to remove this if in a safe area
-                    ;     endif
-                    ; endif
+;                     ; if ruleOption == 2 || ruleOption == 4 ;safe area only
+;                     ;     if !safeArea
+;                     ;         operation = 3 ;don't try to remove this if in a safe area
+;                     ;     endif
+;                     ; endif
 
-                    ; if ruleOption == 5 || ruleOption == 6 ;unsafe area only
-                    ;     if !safeArea
-                    ;         operation = 3 ;don't try to remove this if in an unsafe area
-                    ;     endif
-                    ; endif
+;                     ; if ruleOption == 5 || ruleOption == 6 ;unsafe area only
+;                     ;     if !safeArea
+;                     ;         operation = 3 ;don't try to remove this if in an unsafe area
+;                     ;     endif
+;                     ; endif
 
-                endif
+;                 endif
 
-                int kwc = 0
-                int ddResult = 0
+;                 int kwc = 0
+;                 int ddResult = 0
 
-                if operation == 1
-                    ;if !a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
-                    ;    kwc = 2
-                        ;bind_Utility.WriteToConsole("keyword not found: " + i)
-                        if AddItem(a, i)
-                            ddResult = 1
-                            ;bind_Utility.WriteToConsole("adding: " + i)
-                            bind_Utility.DoSleep(sleepTime)
-                        else
-                            ddResult = 2
-                        endif
-                    ;else
-                    ;    kwc = 1
-                    ;endif
-                elseif operation == 2
-                    ;if a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
-                    ;    kwc = 1
-                        ;bind_Utility.WriteToConsole("keyword found: " + i)
-                        if RemoveItem(a, i)
-                            ddResult = 1
-                            ;bind_Utility.WriteToConsole("removing: " + i)
-                            bind_Utility.DoSleep(sleepTime)
-                        else 
-                            ddResult = 2
-                        endif
-                    ;else
-                    ;    kwc = 2
-                    ;endif
-                elseif operation == 3
-                    ;leave the things alone
-                    if removedAllItems
-                        ;should we re-equip??
-                    endif
-                endif
+;                 if operation == 1
+;                     ;if !a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
+;                     ;    kwc = 2
+;                         ;bind_Utility.WriteToConsole("keyword not found: " + i)
+;                         if AddItem(a, i)
+;                             ddResult = 1
+;                             ;bind_Utility.WriteToConsole("adding: " + i)
+;                             bind_Utility.DoSleep(sleepTime)
+;                         else
+;                             ddResult = 2
+;                         endif
+;                     ;else
+;                     ;    kwc = 1
+;                     ;endif
+;                 elseif operation == 2
+;                     ;if a.WornHasKeyWord(bind_DDKeywords.GetAt(i) as Keyword)
+;                     ;    kwc = 1
+;                         ;bind_Utility.WriteToConsole("keyword found: " + i)
+;                         if RemoveItem(a, i)
+;                             ddResult = 1
+;                             ;bind_Utility.WriteToConsole("removing: " + i)
+;                             bind_Utility.DoSleep(sleepTime)
+;                         else 
+;                             ddResult = 2
+;                         endif
+;                     ;else
+;                     ;    kwc = 2
+;                     ;endif
+;                 elseif operation == 3
+;                     ;leave the things alone
+;                     if removedAllItems
+;                         ;should we re-equip??
+;                     endif
+;                 endif
 
-                bind_Utility.WriteToConsole("rule setting: " + ruleSetting + " rule option: " + ruleOption + " operation: " + operation + " keyword check: " + kwc + " dd result: " + ddresult + " - " + ruleNames[i])                
+;                 bind_Utility.WriteToConsole("rule setting: " + ruleSetting + " rule option: " + ruleOption + " operation: " + operation + " keyword check: " + kwc + " dd result: " + ddresult + " - " + ruleNames[i])                
 
-                idx += 1
+;                 idx += 1
 
-            endwhile
+;             endwhile
 
-        endif
+;         endif
 
-    else
+;     else
 
-        ;IN EVENT
+;         ;IN EVENT
 
-        ;check for event remove all bondage faction
-        ;run RemoveAllBondageItems(a) if so
+;         ;check for event remove all bondage faction
+;         ;run RemoveAllBondageItems(a) if so
 
-        ;
+;         ;
 
-    endif
+;     endif
 
 
 
-endfunction
+; endfunction
 
 
 int function GetBindingBondageItem(Form f)

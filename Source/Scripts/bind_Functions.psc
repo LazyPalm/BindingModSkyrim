@@ -1819,15 +1819,20 @@ Function SafeWord()
 	endwhile
 
 	if restoreBondage
-		WindowOutput("Safeword: re-applying bondage...")
-		;bms.UpdateBondage(theSubRef, true)
 
-		main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
-		int outfitId = main.ActiveBondageSetId
-		;debug.MessageBox("outfit id: " + outfitId)
-		if outfitId > 0
-			bms.EquipBondageOutfit(theSubRef, outfitId)
-			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
+		if main.IsSub == 1
+
+			WindowOutput("Safeword: re-applying bondage...")
+			;bms.UpdateBondage(theSubRef, true)
+
+			main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+			int outfitId = main.ActiveBondageSetId
+			;debug.MessageBox("outfit id: " + outfitId)
+			if outfitId > 0
+				bms.EquipBondageOutfit(theSubRef, outfitId)
+				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
+			endif
+
 		endif
 
 	else
@@ -2270,6 +2275,7 @@ function SetDom(Actor dom)
 
 	Location l
 	l = theDomRef.GetCurrentLocation()
+	ProcessLocationChangeAnyState(l, l)
 	ProcessLocationChange(l, l)
 
 	if bind_DefeatedQuest.IsRunning()

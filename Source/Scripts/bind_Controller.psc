@@ -1,7 +1,7 @@
 Scriptname bind_Controller extends Quest  
 
 Actor actorSub
-Actor actorDom
+;Actor actorDom
 
 bool processingKey = false
 
@@ -82,7 +82,7 @@ function LoadGame()
         adventure.LoadGame()
     endif
 
-    actorDom = TheDom.GetReference() as Actor
+    ;actorDom = fs.GetDomRef() ; TheDom.GetReference() as Actor
 
 endfunction
 
@@ -236,7 +236,7 @@ auto state RunningState
 
         if ReadyForStoryManager()
             bind_Utility.WriteToConsole("SendStoryEvent current location: " + fs.GetCurrentLocation())
-            bind_StoryManager.SendStoryEvent(fs.GetCurrentLocation(), actorDom, actorSub, 5555, 0)
+            bind_StoryManager.SendStoryEvent(fs.GetCurrentLocation(), fs.GetDomRef(), actorSub, 5555, 0)
         else
             bind_Utility.WriteToConsole("Could not SendStoryEvent due to ReadyForStoryManager check failure")
         endif
@@ -404,7 +404,7 @@ bool function ReadyForStoryManager()
     endif
 
     ;in combat check - dragons might be attaching city or towns
-    if actorSub.IsInCombat() || actorDom.IsInCombat() || actorSub.IsWeaponDrawn()
+    if actorSub.IsInCombat() || fs.GetDomRef().IsInCombat() || actorSub.IsWeaponDrawn()
         bind_Utility.WriteToConsole("ReadyForStoryManager - combat checks failed")
         result = false
     endif
@@ -417,7 +417,7 @@ bool function ReadyForStoryManager()
     endif
 
     ;sex lab assigns a faction during sex
-    if actorSub.IsInFaction(SexLabAnimatingFaction) || actorDom.IsInFaction(SexLabAnimatingFaction)
+    if actorSub.IsInFaction(SexLabAnimatingFaction) || fs.GetDomRef().IsInFaction(SexLabAnimatingFaction)
         bind_Utility.WriteToConsole("ReadyForStoryManager - sexlab faction checks failed")
         result = false
     endif

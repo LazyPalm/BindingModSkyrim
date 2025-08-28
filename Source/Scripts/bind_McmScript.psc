@@ -1,5 +1,7 @@
 Scriptname bind_McmScript extends SKI_ConfigBase  
 
+string version = "0.4.02"
+
 string selectedPage
 
 string[] letters
@@ -2043,7 +2045,7 @@ Function DisplayDebug()
     AddHeaderOption("")
     toggleWriteLogs = AddToggleOption("Write Detailed Logs", main.WriteLogs)
     toggleDisplayLocationChange = AddToggleOption("Show Location Change", main.DisplayLocationChange)
-    AddTextOption("Binding Version", "0.4.01")
+    AddTextOption("Binding Version", version)
 
 EndFunction
 
