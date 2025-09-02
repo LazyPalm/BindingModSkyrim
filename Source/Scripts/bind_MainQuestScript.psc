@@ -72,6 +72,14 @@ int property AdventuringAutomatic auto conditional
 int property AdventuringSafeBondageApplied auto conditional
 float property AdventuringCheckAfterSeconds auto conditional
 
+int property AdventuringCheckStatus auto conditional
+int property AdventuringUse auto conditional
+int property AdventuringPointCost auto conditional
+int property AdventuringGoodBehavior auto conditional
+int property AdventuringTimeOfDayCheck auto conditional
+int property AdventuringGoldGoal auto conditional
+int property AdventuringImporantKill auto conditional
+
 int property DomPreferenceUntieForCombat auto conditional
 
 int property DomPreferenceDressForCombat auto conditional

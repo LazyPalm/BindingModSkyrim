@@ -89,6 +89,13 @@ int sliderPunishmentMaxGold
 int sliderPunishmentGoldPercentage
 
 ;preferences
+int toggleAdventuringUse
+int sliderAdventuringPointCost
+int toggleAdventuringGoodBehavior
+int toggleAdventuringTimeOfDayCheck
+int sliderAdventuringGoldGoal
+int toggleAdventuringImporantKill
+
 int toggleManualAdventureMode
 int toggleAdventuringFreeHands
 int toggleAdventuringAllowClothing
@@ -1601,6 +1608,15 @@ Function DisplayEventSettings()
     ; toggleHarshUseChastity = AddToggleOption("Harsh Bondage - Use Chastity", bmanage.HarshBondageUseChastity)
     ; toggleHarshUseHood = AddToggleOption("Harsh Bondage - Use Hood", bmanage.HarshBondageUseHood)
     ; toggleHarshUseBlindfold = AddToggleOption("Harsh Bondage - Use Blindfold", bmanage.HarshBondageUseBlindfold)
+
+    AddHeaderOption("Adventuring")
+    AddHeaderOption("")
+    toggleAdventuringUse = AddToggleOption("Adventuring - Use", main.AdventuringUse)
+    sliderAdventuringPointCost = AddSliderOption("Adventuring - Point Cost", main.AdventuringPointCost, "{0}")
+    toggleAdventuringGoodBehavior = AddToggleOption("Adventuring - No Infractions", main.AdventuringGoodBehavior)
+    toggleAdventuringTimeOfDayCheck = AddToggleOption("Adventuring - Daytime Start Only", main.AdventuringTimeOfDayCheck)
+    sliderAdventuringGoldGoal = AddSliderOption("Adventuring - Gold Goal", main.AdventuringGoldGoal, "{0}")
+    toggleAdventuringImporantKill = AddToggleOption("Adventuring - Must Get Important Kill", main.AdventuringImporantKill)
 
     AddHeaderOption("Bound Bedtime (No Beds Rule Active)")
     AddHeaderOption("")
@@ -3154,6 +3170,30 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleOutfitsLearn, gmanage.OutfitsLearn)
     endif
 
+    if option == toggleAdventuringUse
+        int newValue = ToggleValue(main.AdventuringUse)
+        main.AdventuringUse = newValue
+        SetToggleOptionValue(toggleAdventuringUse, newValue)
+    endif
+
+    if option == toggleAdventuringGoodBehavior
+        int newValue = ToggleValue(main.AdventuringGoodBehavior)
+        main.AdventuringGoodBehavior = newValue
+        SetToggleOptionValue(toggleAdventuringGoodBehavior, newValue)
+    endif
+
+    if option == toggleAdventuringTimeOfDayCheck
+        int newValue = ToggleValue(main.AdventuringTimeOfDayCheck)
+        main.AdventuringTimeOfDayCheck = newValue
+        SetToggleOptionValue(toggleAdventuringTimeOfDayCheck, newValue)
+    endif
+
+    if option == toggleAdventuringImporantKill
+        int newValue = ToggleValue(main.AdventuringImporantKill)
+        main.AdventuringImporantKill = newValue
+        SetToggleOptionValue(toggleAdventuringImporantKill, newValue)
+    endif
+
 EndEvent
 
 Event OnConfigClose()
@@ -3389,6 +3429,19 @@ Event OnOptionSliderOpen(Int option)
         SetSliderDialogRange(5, 100)
         SetSliderDialogInterval(5)
 
+    elseif option == sliderAdventuringPointCost
+        SetSliderDialogStartValue(main.AdventuringPointCost)
+        SetSliderDialogDefaultValue(0)
+        SetSliderDialogRange(0, 5)
+        SetSliderDialogInterval(1)
+
+    elseif option == sliderAdventuringGoldGoal
+        SetSliderDialogStartValue(main.AdventuringGoldGoal)
+        SetSliderDialogDefaultValue(0)
+        SetSliderDialogRange(0, 1000)
+        SetSliderDialogInterval(25)
+
+
     EndIf
 
 EndEvent
@@ -3507,6 +3560,12 @@ Event OnOptionSliderAccept(Int option, Float value)
 
     elseif option == sliderPunishmentGoldPercentage
         bind_GlobalPunishmentGoldPercentage.SetValue(value as int)
+
+    elseif option == sliderAdventuringPointCost
+        main.AdventuringPointCost = value as int
+
+    elseif option == sliderAdventuringGoldGoal
+        main.AdventuringGoldGoal = value as int
 
     Endif
 

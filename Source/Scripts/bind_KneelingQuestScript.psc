@@ -84,6 +84,27 @@ event OnUpdate()
         endif
     endif
 
+    mqs.AdventuringCheckStatus = 0
+    if mqs.AdventuringUse == 1
+        mqs.AdventuringCheckStatus = 1
+        if mqs.AdventuringGoodBehavior == 1
+            if fs.GetRuleInfractions() > 0
+                mqs.AdventuringCheckStatus = 2 ;need punishment
+            endif            
+        endif
+        if mqs.AdventuringTimeOfDayCheck == 1 && mqs.AdventuringCheckStatus == 1
+            int currentHour = bind_Utility.GetCurrentHour()
+            if currentHour > 20 || currentHour < 4
+                mqs.AdventuringCheckStatus = 3 ;need to sleep
+            endif
+        endif
+        if mqs.AdventuringPointCost > 0 && mqs.AdventuringCheckStatus == 1
+            if fs.GetPoints() < mqs.AdventuringPointCost
+                mqs.AdventuringCheckStatus = 4 ;need more points
+            endif
+        endif
+    endif
+
     self.Stop() ;need this for testing
 
 endevent

@@ -180,6 +180,16 @@ float function AddTimeToTime(float t, int hours, int minutes = 0) global
     return newTimer
 endfunction
 
+int function GetCurrentHour() global
+
+    float currentGameDays = Utility.GetCurrentGameTime()
+    float totalHours = currentGameDays * 24.0
+    ;float currentHourFloat = totalHours % 24.0
+    int currentHour = (totalHours as int) % 24; currentHourFloat as int
+    return currentHour
+
+endfunction
+
 string function TextColorRed() global
     return "red"
 endfunction

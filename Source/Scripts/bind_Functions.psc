@@ -1423,6 +1423,16 @@ Function DeductPoint()
 	endif
 EndFunction
 
+Function DeductPoints(int points)
+	if bind_GlobalPoints.GetValue() > 0
+		bind_Utility.WriteNotification(points + " point(s) deducted...", bind_Utility.TextColorBlue())
+		bind_GlobalPoints.Mod((points * -1))
+	else
+		bind_Utility.WriteToConsole("DeductPoints is trying to go negative") ;this should not happen
+	endif
+EndFunction
+
+
 function AddPoint()
 	if bind_GlobalPoints.GetValue() < main.PointsMax
 		bind_Utility.WriteNotification("You have gained a point...", bind_Utility.TextColorBlue())

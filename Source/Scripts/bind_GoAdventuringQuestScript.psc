@@ -7,6 +7,11 @@ float waitForSeconds = 5.0
 
 bool endingQuest = false
 
+int startingGoldQty
+int startingDaderaKilled
+int startingDragonSouls
+int startingUndeadKilled
+
 event OnInit()
 
     if self.IsRunning()
@@ -20,8 +25,15 @@ event OnInit()
 
         bind_Utility.WriteNotification("Start Go Adventuring...", bind_Utility.TextColorRed())
 
-        bcs.DoStartEvent()
+        bcs.DoStartEvent(sendDhlp = false)
         bcs.SetEventName(self.GetName())
+
+        fs.DeductPoints(mqs.AdventuringPointCost)
+
+        startingGoldQty = theSub.GetGoldAmount()
+        startingDaderaKilled = Game.queryStat("Daedra Killed")
+        startingDragonSouls = Game.queryStat("Dragon Souls Collected")
+        startingUndeadKilled = Game.queryStat("Undead Killed")
 
         GetSubReady()
 
@@ -72,19 +84,77 @@ event SafewordEvent()
 
 endevent
 
+bool showingMenu = false
+
 event PressedAction(bool longPress)
 
-    if !endingQuest
-        if bind_Utility.ConfirmBox("End this adventure?", "I am ready to head back to town", "There is more gold to be found")
-            EndTheQuest()
-        endif
+    if !showingMenu
+        ShowMenu()    
     endif
+
+    ; if !endingQuest
+    ;     if bind_Utility.ConfirmBox("End this adventure?", "I am ready to head back to town", "There is more gold to be found")
+    ;         EndTheQuest()
+    ;     endif
+    ; endif
 
 endevent
 
+function ShowMenu()
+
+    showingMenu = true
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("End this adventure?")
+    listMenu.AddEntryItem("I am ready to head back to town")
+    listMenu.AddEntryItem("There is more gold to be found")
+    listMenu.AddEntryItem("See accomplishments")
+    ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+    if listReturn == 0
+        ShowMenu()
+    elseif listReturn == 1
+        EndTheQuest()
+    elseif listReturn == 2
+        ;close this menu
+    elseif listReturn == 3
+
+        listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+
+        int currentGoldQty = theSub.GetGoldAmount()
+        int goldChange = currentGoldQty - startingGoldQty
+
+        listMenu.AddEntryItem("Gold collected: " + goldChange)
+
+        int daderaKilled = Game.queryStat("Daedra Killed")
+        int dragonSouls = Game.queryStat("Dragon Souls Collected")
+        int undeadKilled = Game.queryStat("Undead Killed")
+
+        listMenu.AddEntryItem("Daedra Killed: " + (daderaKilled - startingDaderaKilled))
+        listMenu.AddEntryItem("Dragon Souls Collected: " + (dragonSouls - startingDragonSouls))
+        listMenu.AddEntryItem("Undead Killed: " + (undeadKilled - startingUndeadKilled))
+
+        listMenu.OpenMenu()
+        listReturn = listMenu.GetResultInt()
+
+        ShowMenu()
+
+    else
+        ShowMenu()
+    endif
+
+
+    showingMenu = false
+
+endfunction
+
 function CycleEvent(int cycles, int modState)
 
-    bind_Utility.WriteNotification("Go cycle: " + cycles, bind_Utility.TextColorRed())
+    bind_Utility.WriteToConsole("Go cycle: " + cycles)
 
     ; if modState == bind_Controller.GetModStateRunning() && runningFlag
     ;     ;this will only use minutes if no other events are running
@@ -107,6 +177,30 @@ endfunction
 function EndTheQuest()
 
     endingQuest = true
+
+    int currentGoldQty = theSub.GetGoldAmount()
+    int goldChange = currentGoldQty - startingGoldQty
+
+    bool metGoals = true
+
+    if mqs.AdventuringGoldGoal > 0
+        if goldChange < mqs.AdventuringGoldGoal
+            metGoals = false
+        endif
+    endif
+
+    if mqs.AdventuringImporantKill == 1
+        int daderaKilled = Game.queryStat("Daedra Killed")
+        int dragonSouls = Game.queryStat("Dragon Souls Collected")
+        int undeadKilled = Game.queryStat("Undead Killed")
+        if daderaKilled <= startingDaderaKilled && dragonSouls <= startingDragonSouls && (undeadKilled - 25 <= startingUndeadKilled)
+            metGoals = false
+        endif
+    endif
+
+    if !metGoals
+        fs.MarkSubBrokeRule("I failed to meet any adventure goals")
+    endif
 
     bind_Utility.DisablePlayer()
 
