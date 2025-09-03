@@ -95,6 +95,7 @@ int toggleAdventuringGoodBehavior
 int toggleAdventuringTimeOfDayCheck
 int sliderAdventuringGoldGoal
 int toggleAdventuringImporantKill
+int toggleAdventuringUseDwarven
 
 int toggleManualAdventureMode
 int toggleAdventuringFreeHands
@@ -1617,6 +1618,11 @@ Function DisplayEventSettings()
     toggleAdventuringTimeOfDayCheck = AddToggleOption("Adventuring - Daytime Start Only", main.AdventuringTimeOfDayCheck)
     sliderAdventuringGoldGoal = AddSliderOption("Adventuring - Gold Goal", main.AdventuringGoldGoal, "{0}")
     toggleAdventuringImporantKill = AddToggleOption("Adventuring - Must Get Important Kill", main.AdventuringImporantKill)
+
+    if main.SoftCheckDwarvenDeviousCuirass == 1
+        toggleAdventuringUseDwarven = AddToggleOption("Adventuring - Use Dwarven Devious Cuirass", main.AdventuringUseDwarven)
+        AddTextOption("", "")
+    endif
 
     AddHeaderOption("Bound Bedtime (No Beds Rule Active)")
     AddHeaderOption("")
@@ -3194,6 +3200,12 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleAdventuringImporantKill, newValue)
     endif
 
+    if option == toggleAdventuringUseDwarven
+        int newValue = ToggleValue(main.AdventuringUseDwarven)
+        main.AdventuringUseDwarven = newValue
+        SetToggleOptionValue(toggleAdventuringUseDwarven, newValue)
+    endif
+
 EndEvent
 
 Event OnConfigClose()
@@ -4356,7 +4368,7 @@ function MakeArrays()
         string temp = "location_all_areas|location_any_city|location_dawnstar|location_falkreath|location_windhelm|location_markarth|location_morthal|location_riften|"
         temp += "location_solitude|location_high_hrothgar|location_whiterun|location_winterhold|location_raven Rock|location_towns|location_player_home|location_safe_area|"
         temp += "location_unsafe_area|location_inn|event_any_event|event_harsh_bondage|event_bound_masturbation|event_bound_sex|event_dairy|event_bound_sleep|event_camping|"
-        temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuringevent_free_for_work"
+        temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuring|event_free_for_work"
         bondageOutfitUsageKey = StringUtil.Split(temp, "|")
         
         ;bondageOutfitUsageList = new string[32]

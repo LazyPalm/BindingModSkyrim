@@ -26,6 +26,7 @@ int property SoftCheckMME auto conditional
 int property SoftCheckChim auto conditional
 int property SoftCheckSkyrimNet auto conditional
 int property SoftCheckGoToBed auto conditional
+int property SoftCheckDwarvenDeviousCuirass auto conditional
 
 int property SoftCheckSweepingOrganizesStuff auto conditional
 
@@ -79,6 +80,7 @@ int property AdventuringGoodBehavior auto conditional
 int property AdventuringTimeOfDayCheck auto conditional
 int property AdventuringGoldGoal auto conditional
 int property AdventuringImporantKill auto conditional
+int property AdventuringUseDwarven auto conditional
 
 int property DomPreferenceUntieForCombat auto conditional
 

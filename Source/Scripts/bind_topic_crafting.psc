@@ -8,6 +8,8 @@ Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 ;(GetOwningQuest() as bind_MainQuestScript).FreedForCrafting()
 
+;debug.MessageBox("starting this...")
+
 bind_PoseManager.StandFromKneeling(Game.GetPlayer())
 
 bind_FreedForWorkQuest.Start()

@@ -12,6 +12,10 @@ int startingDaderaKilled
 int startingDragonSouls
 int startingUndeadKilled
 
+Form ddCuriass 
+Form ddBikini
+bool ddArmorEquipped = false
+
 event OnInit()
 
     if self.IsRunning()
@@ -71,6 +75,24 @@ function GetSubReady()
     bind_Utility.DisablePlayer()
 
     fs.EventGetSubReady(theSub, theDom, "event_go_adventuring") ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
+
+    if mqs.SoftCheckDwarvenDeviousCuirass == 1 && mqs.AdventuringUseDwarven == 1
+        ;FE000DE5
+        ddCuriass = Game.GetFormFromFile(0x01000DE5, "DwarvenDeviousCuirass NKSMedit.esp")
+        ddBikini = Game.GetFormFromFile(0x01000DED, "DwarvenDeviousCuirass NKSMedit.esp")
+        ;Form ddHelm = Game.GetFormFromFile(0x01000DEE, "DwarvenDeviousCuirass NKSMedit.esp")
+        ;Form ddHelmGag = Game.GetFormFromFile(0x01000DEF, "DwarvenDeviousCuirass NKSMedit.esp")
+        ;debug.MessageBox(ddCuriass)
+        theSub.EquipItem(ddCuriass, true, false)
+        bind_Utility.DoSleep()
+        theSub.EquipItem(ddBikini, true, false)
+        ddArmorEquipped = true
+
+        ; bind_Utility.DoSleep()
+        ; theSub.EquipItem(ddHelm, true, false)
+        ; bind_Utility.DoSleep()
+        ; theSub.EquipItem(ddHelmGag, true, false)
+    endif
 
     bind_Utility.EnablePlayer()
 
@@ -193,7 +215,7 @@ function EndTheQuest()
         int daderaKilled = Game.queryStat("Daedra Killed")
         int dragonSouls = Game.queryStat("Dragon Souls Collected")
         int undeadKilled = Game.queryStat("Undead Killed")
-        if daderaKilled <= startingDaderaKilled && dragonSouls <= startingDragonSouls && (undeadKilled - 25 <= startingUndeadKilled)
+        if daderaKilled <= startingDaderaKilled && dragonSouls <= startingDragonSouls && ((undeadKilled - startingUndeadKilled) < 25)
             metGoals = false
         endif
     endif
@@ -205,6 +227,15 @@ function EndTheQuest()
     bind_Utility.DisablePlayer()
 
     bind_MovementQuestScript.WalkTo(theDom, theSub)
+
+    if mqs.SoftCheckDwarvenDeviousCuirass == 1 && ddArmorEquipped
+        theSub.UnequipItem(ddCuriass, false, false)
+        bind_Utility.DoSleep()
+        ;theSub.RemoveItem(ddCuriass, 1)
+        theSub.UnequipItem(ddBikini, false, false)
+        bind_Utility.DoSleep()
+        ;theSub.RemoveItem(ddBikini, 1)
+    endif
 
     fs.EventCleanUpSub(theSub, theDom, true)
 

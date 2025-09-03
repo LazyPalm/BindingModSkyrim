@@ -358,6 +358,7 @@ Function SoftChecks()
 		main.SoftCheckChim = 0
 		main.SoftCheckSkyrimNet = 0
 		main.SoftCheckGoToBed = 0
+		main.SoftCheckDwarvenDeviousCuirass = 0
 		;WindowOutput("found at: " + Game.GetModByName("dse-display-model.esp"))
 		If bind_PamaHelper.CheckValid()
 			bind_Utility.WriteToConsole("soft check found PamaInteractiveBeatup.esm")
@@ -394,6 +395,9 @@ Function SoftChecks()
 		endif
 		if Game.IsPluginInstalled("SkyrimNet.esp")
 			main.SoftCheckSkyrimNet = 1
+		endif
+		if Game.IsPluginInstalled("DwarvenDeviousCuirass NKSMedit.esp")
+			main.SoftCheckDwarvenDeviousCuirass = 1
 		endif
 		; If Game.GetModByName("sweepingOrganizesStuff.esp") != 255
 		; 	SoftCheckSweepingOrganizesStuff = 1

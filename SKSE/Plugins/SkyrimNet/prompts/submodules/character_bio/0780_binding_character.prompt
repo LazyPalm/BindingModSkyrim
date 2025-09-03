@@ -6,6 +6,10 @@
 - {{ actor_name }} is currently adventuring, which could involve life and death situations, and should be a helpful party member and treat any slaves in the party as valued party members.
 {% endif %}
 
+{% if is_in_faction(actorUUID, "bind_DominantFaction") and get_global_value("bind_GlobalSafeZone") != 2 %}
+- {{ actor_name }} is a member of a party in a dangerous area, which could involve life and death situations. {{ actor_name }} should be a helpful party member and treat any slaves in the party as valued party members.
+{% endif %}
+
 {# nudity checks #}
 {% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspendex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") %}
 - {{ actor_name }} is wearing bikini armor or skimpy clothing.
