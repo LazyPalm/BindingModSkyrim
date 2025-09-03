@@ -75,7 +75,7 @@ function MilkUpdates(Actor sub)
 
     if mqs.SoftCheckMME == 1 && mqs.EnableModMME == 1 && fs.ModInRunningState()
         if sub.GetFactionRank(bind_MilkSlaveFaction) == 2 ;active
-            int hasPermission = StorageUtil.GetIntValue(sub, "bind_milking_permission", 0)
+            ;int hasPermission = StorageUtil.GetIntValue(sub, "bind_milking_permission", 0)
             ;debug.Notification("updating milk") ;TODO - remove this
             float currentMilk = bind_MMEHelper.GetMilkLevel(sub)
             float maxMilk = bind_MMEHelper.GetMilkMax(sub)

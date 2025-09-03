@@ -69,8 +69,9 @@ event PressedAction(bool longPress)
 
         float ct = bind_Utility.GetTime()
         float timeLeft = endTime - ct
+        float minutesLeft = (endTime - ct) * 1440.0
 
-        if bind_Utility.ConfirmBox("End crafting time? (" + timeLeft + " remaining)", "I am finished", "There is more to do")
+        if bind_Utility.ConfirmBox("End crafting time? (" + minutesLeft + " m)", "I am finished", "There is more to do")
             BindSub()
         endif
     endif

@@ -322,18 +322,28 @@ state WaitForMilkInInventory
             Form item = inventory[i]
             if item.HasKeywordString("MME_Milk")
                 theSub.RemoveItem(item, 1000, true, theDom)
+                ;debug.MessageBox("removing milk")
                 removedMilk = true
             endif
             i += 1
         endwhile
 
+        bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " collected my milk bottles...")
+        bind_Utility.DoSleep()
+        fs.AddPoint()
+        bind_Utility.DoSleep()
+
         ; if !removedMilk
         ;     RegisterForSingleUpdate(15.0)
         ; else
-            UnregisterForUpdate()
-            bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " collected my milk bottles...")
-            GoToState("")
-            EndTheQuest()
+
+        UnregisterForUpdate()
+        GoToState("")
+        EndTheQuest()            
+
+            ;bind_Utility.WriteInternalMonologue("I am getting rewarded for being a good cow...")            
+            
+
         ;endif
 
     endevent

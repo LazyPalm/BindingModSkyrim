@@ -1052,12 +1052,12 @@ Function SubEnteredFurniture(ObjectReference furn)
 	LogOutput("SubEnteredFurniture()")
 
 	if main.SoftCheckMME == 1 && main.EnableModMME == 1
-		if !bind_DairyQuest.IsRunning()
-			if furn.HasKeyWord(Keyword.GetKeyword("MME_zbfFurniture"))
-				CalculateDistanceAtAction()
-				MarkSubBrokeRule("I milked without having permission", true)
-			endif
-		endif
+		; if !bind_DairyQuest.IsRunning()
+		; 	if furn.HasKeyWord(Keyword.GetKeyword("MME_zbfFurniture"))
+		; 		CalculateDistanceAtAction()
+		; 		MarkSubBrokeRule("I milked without having permission", true)
+		; 	endif
+		; endif
 	endif
 
 	subInFurnitureItemRef = furn
@@ -1440,6 +1440,7 @@ EndFunction
 function AddPoint()
 	if bind_GlobalPoints.GetValue() < main.PointsMax
 		bind_Utility.WriteNotification("You have gained a point...", bind_Utility.TextColorBlue())
+		bind_Utility.DoSleep()
 		bind_GlobalPoints.Mod(1)
 	endif
 endfunction
