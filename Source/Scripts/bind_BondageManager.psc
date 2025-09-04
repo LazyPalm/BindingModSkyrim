@@ -418,6 +418,11 @@ function EquipBondageOutfit(Actor a, int setId)
 
     bind_Utility.DoSleep(5.0)
 
+    int handle = ModEvent.Create("bind_BondageOutfitEquipped")
+    if handle
+        ModEvent.Send(handle)
+    endif
+
     EquippingBondageOutfit = false
 
 endfunction
@@ -871,6 +876,10 @@ endfunction
 
 ;     return result
 ; endfunction
+
+Armor function GetRenderedItem(Form inventoryItem)
+    return zlib.GetRenderedDevice(inventoryItem as Armor)
+endfunction
 
 bool function AddItem(Actor act, int typeNumber, string setName = "")
 

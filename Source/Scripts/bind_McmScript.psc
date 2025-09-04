@@ -568,6 +568,27 @@ event OnOptionHighlight(int option)
     elseif option == toggleEnableSkyrimNet
         SetInfoText("This will enable the AI framework SkyrimNet.")
 
+    elseif option == toggleAdventuringUse
+        SetInfoText("Enable this to add an Adventuring Quest option during dialogue with the Dominant. This quest provides a formal way of earning gold or complete quests using a bondage outfit suited for dungeon crawling. It pairs well with any-location-bondage outfits when not adventuring. To replicate 0.3.x Binding, create Safe and Unsafe Area outfits and refrain from enabling this option.")
+
+    elseif option == sliderAdventuringPointCost
+        SetInfoText("This slider allows the player to set a point cost for starting the Adventuring Quest.")
+
+    elseif option == toggleAdventuringGoodBehavior
+        SetInfoText("Block starting the Adventuring Quest if the player is due punishments.")
+
+    elseif option == toggleAdventuringTimeOfDayCheck
+        SetInfoText("The dominant will block starting the Adventuring Quest from 8PM to 4AM.")
+
+    elseif option == sliderAdventuringGoldGoal
+        SetInfoText("This slider sets a gold goal for the Adventuring Quest. You must earn this much gold or earn a punishment.")
+
+    elseif option == toggleAdventuringImporantKill
+        SetInfoText("This slider sets a kills goal for the Adventuring Quest. Kill a Dragon, Dadera or 25 undead or earn a punishment. Will provide more options in future releases.")
+
+    elseif option == toggleAdventuringUseDwarven
+        SetInfoText("Lock the player into Dwarven Devious Armor for the duration of the quest.")
+
     endif
 
 endevent
