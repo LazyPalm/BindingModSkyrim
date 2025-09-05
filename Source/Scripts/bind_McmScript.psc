@@ -4,6 +4,9 @@ string version = "0.4.02"
 
 string selectedPage
 
+int clickedBackupBondageOutfits
+int clickedRestoreBondageOutfits
+
 string[] letters
 string selectedLetter
 int menuChangeLetter
@@ -291,7 +294,7 @@ Event OnConfigOpen()
 
     theSub = fs.GetSubRef()
 
-    Pages = new string[18]
+    Pages = new string[19]
 
     Pages[0] = "Status Info"
     Pages[1] = "Bondage Status"
@@ -311,7 +314,7 @@ Event OnConfigOpen()
     Pages[15] = "Current Factions"
     Pages[16] = "Control Panel"
     Pages[17] = "SkyrimNet"
-    ;Pages[18] = "Outfits"
+    Pages[18] = "Backup Settings"
 
     MakeArrays()
 
@@ -519,6 +522,10 @@ Event OnPageReset(string page)
         elseif page == "Bondage Outfits"
 
             DisplayBondageOutfits()
+        
+        elseif page == "Backup Settings"
+
+            DisplayBackup()
 
         EndIf
 
@@ -592,6 +599,17 @@ event OnOptionHighlight(int option)
     endif
 
 endevent
+
+function DisplayBackup()
+
+    AddHeaderOption("Bondage Outfit Backup")
+    AddHeaderOption("")
+
+    clickedBackupBondageOutfits = AddTextOption("Backup Bondage Outfits", "")
+
+    clickedRestoreBondageOutfits = AddTextOption("Restore Bondage Outfits", "")
+
+endfunction
 
 function DisplayBondageOutfits()
 
@@ -2297,6 +2315,65 @@ endfunction
 Event OnOptionSelect(int option)
 
     int i
+
+    if selectedPage == "Backup Settings"
+
+        if option == clickedBackupBondageOutfits
+            if ShowMessage("Make bondage outfit backup?", true, "$Yes", "$No")
+                string folder = "data/skse/plugins/StorageUtilData/"
+                string outfitsFileText = MiscUtil.ReadFromFile(folder + bondageOutfitsFile)
+                ;ShowMessage(outfitsFileText, false)
+                MiscUtil.WriteToFile(folder + "bind_bondage_outfits_backup.txt", outfitsFileText, false, false)
+
+                string backupOutfitList = ""
+
+                int[] outfitList = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+                i = 0
+                string outfitFileText
+                while i < outfitList.Length
+                    if backupOutfitList != ""
+                        backupOutfitList += "|"
+                    endif
+                    backupOutfitList += outfitList[i]
+                    outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+                    MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + "_backup.txt", outfitFileText, false, false)
+                    i += 1
+                endwhile
+
+                MiscUtil.WriteToFile(folder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+
+                ShowMessage("Backup Completed", false)
+            endif
+        endif
+
+        if option == clickedRestoreBondageOutfits
+            string folder = "data/skse/plugins/StorageUtilData/"
+            if !MiscUtil.FileExists(folder + "bind_bondage_outfits_backup.txt")
+                ShowMessage("No backup exists", false)
+            else
+                if ShowMessage("Restore bondage outfit backup? This will overwrite your current outfits", true, "$Yes", "$No")
+                    string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits_backup.txt")
+                    MiscUtil.WriteToFile(folder + bondageOutfitsFile, outfitsFileText, false, false)
+
+                    string backupOutfitList = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_list_backup.txt")
+                    string[] outfitList = StringUtil.Split(backupOutfitList, "|")
+                    
+                    ;ShowMessage(outfitList, false)
+
+                    i = 0
+                    string outfitFileText
+                    while i < outfitList.Length
+                        outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + "_backup.txt")
+                        MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                        i += 1
+                    endwhile
+
+                    ShowMessage("Restore Completed. You MUST reload the save to see changes.", false)
+                endif
+            endif
+        endif
+
+    endif
 
     if selectedPage == "Bondage Outfits"
 

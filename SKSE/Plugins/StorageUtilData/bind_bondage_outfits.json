@@ -1,7 +1,7 @@
 {
 	"int" : 
 	{
-		"last_set_uid" : 1011
+		"last_set_uid" : 1012
 	},
 	"intList" : 
 	{
@@ -17,7 +17,8 @@
 			1008,
 			1009,
 			1010,
-			1011
+			1011,
+			1012
 		],
 		"used_for_event_any_event" : 
 		[
@@ -26,6 +27,10 @@
 		"used_for_event_bound_sleep" : 
 		[
 			1005
+		],
+		"used_for_event_free_for_work" : 
+		[
+			1012
 		],
 		"used_for_event_gagged_for_punishment" : 
 		[
@@ -91,7 +96,8 @@
 			"Unsafe Areas Outfit",
 			"City Bondage Outfit",
 			"Whipping Outfit",
-			"Always Secured Outfit"
+			"Always Secured Outfit",
+			"Crafting Outfit"
 		]
 	}
 }
