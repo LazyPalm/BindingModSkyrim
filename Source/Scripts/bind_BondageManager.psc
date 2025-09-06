@@ -113,9 +113,9 @@ function EquipBondageOutfit(Actor a, int setId)
     ;NOTE - there is probably no reason to clean this out
     if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
         StorageUtil.FormListClear(a, "bind_strip_list")
-        bind_Utility.WriteNotification("clearing strip buffer")
+        bind_Utility.WriteToConsole("clearing strip buffer")
     else
-        bind_Utility.WriteNotification("keeping strip buffer")
+        bind_Utility.WriteToConsole("keeping strip buffer")
     endif
 
     bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
@@ -167,7 +167,7 @@ function EquipBondageOutfit(Actor a, int setId)
                 bind_Utility.DoSleep(0.25)
             endif
         else
-            bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
+            bind_Utility.WriteToConsole(item.GetName() + " is no longer in your bag")
         endif
         i += 1
     endwhile

@@ -225,7 +225,7 @@ function FreeSub()
 
     bind_Utility.EnablePlayer()
 
-    fs.AdjustRuleInfractions(-1)
+    ;fs.AdjustRuleInfractions(-1)
 
 endfunction
 

@@ -1,6 +1,6 @@
 Scriptname bind_McmScript extends SKI_ConfigBase  
 
-string version = "0.4.02"
+string version = "0.4.08"
 
 string selectedPage
 
@@ -1637,6 +1637,21 @@ Function DisplayPunishmentSettings()
     sliderPunishmentMaxGold = AddSliderOption("Gold Loss - Max", bind_GlobalPunishmentMaxGold.GetValue() as int, "{0}")
     sliderPunishmentGoldPercentage = AddSliderOption("Gold Loss - Percentage", bind_GlobalPunishmentGoldPercentage.GetValue() as int, "{0}")
 
+    AddTextOption("", "")
+
+    AddHeaderOption("Recent Infractions")
+    AddHeaderOption("")
+
+    int i = 0
+    string[] list = StorageUtil.StringListToArray(theSub, "bind_infractions_list")
+    float[] times = StorageUtil.FloatListToArray(theSub, "bind_infractions_time")
+    while i < list.Length
+        AddTextOption(times[i], "")
+        AddTextOption(list[i], "")
+
+        i += 1
+    endwhile
+
 EndFunction
 
 Function DisplayEventSettings()
@@ -2342,7 +2357,7 @@ Event OnOptionSelect(int option)
 
                 MiscUtil.WriteToFile(folder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
 
-                ShowMessage("Backup Completed", false)
+                ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 overwrite folder.", false)
             endif
         endif
 

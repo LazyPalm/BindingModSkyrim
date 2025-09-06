@@ -134,6 +134,8 @@ function StartTheQuest()
         slaveActions.WhipPlayer(theDom, "", 30.0, 50.0, "")
     endif
 
+    fs.EventStartCrowds()
+
 endfunction
 
 state PamaWhippingFirstStage
@@ -182,6 +184,8 @@ function WhippingCompleted()
     bind_MovementQuestScript.PlayReset(theSub)
 
     bind_MovementQuestScript.PlayKnockedDown(theSub, false)
+
+    fs.EventStopCrowds()
 
     if think.IsAiReady()
         think.UseDirectNarration(theDom, "{{ player.name }} collapses to the ground after the beating, spent and moaning.")

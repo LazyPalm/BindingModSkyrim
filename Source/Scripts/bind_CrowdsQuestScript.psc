@@ -9,6 +9,8 @@ Actor actor6
 
 bool currentlyActive
 
+int totalActors
+
 event OnInit()
 
     if self.IsRunning()
@@ -67,15 +69,50 @@ event QuestEvEndEvent()
 
 endevent
 
+int chatCount
+
 event CycleEvent(int cycles, int modState)
 
     if currentlyActive
-        SetActiveState(actor1, (Utility.RandomInt(1, 2) == 2))
-        SetActiveState(actor2, (Utility.RandomInt(1, 2) == 2))
-        SetActiveState(actor3, (Utility.RandomInt(1, 2) == 2))
-        SetActiveState(actor4, (Utility.RandomInt(1, 2) == 2))
-        SetActiveState(actor5, (Utility.RandomInt(1, 2) == 2))
-        SetActiveState(actor6, (Utility.RandomInt(1, 2) == 2))
+
+        chatCount = 0
+
+        SetActiveState(actor1, (Utility.RandomInt(1, 3) >= 2))
+        SetActiveState(actor2, (Utility.RandomInt(1, 3) >= 2))
+        SetActiveState(actor3, (Utility.RandomInt(1, 3) >= 2))
+        SetActiveState(actor4, (Utility.RandomInt(1, 3) >= 2))
+        SetActiveState(actor5, (Utility.RandomInt(1, 3) >= 2))
+        SetActiveState(actor6, (Utility.RandomInt(1, 3) >= 2))
+
+        ; if think.IsAiReady()
+
+        ;     if totalActors > 0
+        ;         int selectedActor = Utility.RandomInt(1, totalActors)
+        ;         Actor act
+        ;         if selectedActor == 1
+        ;             act = actor1
+        ;         elseif selectedActor == 2
+        ;             act = actor2
+        ;         elseif selectedActor == 3
+        ;             act = actor3
+        ;         elseif selectedActor == 4
+        ;             act = actor4
+        ;         elseif selectedActor == 5
+        ;             act = actor5
+        ;         elseif selectedActor == 6
+        ;             act = actor6
+        ;         endif
+        ;         debug.MessageBox("making comment: " + act.GetDisplayName())
+        ;         if StringUtil.Find(act.GetDisplayName(), "guard", 0) > -1
+        ;             think.UseDirectNarration(act, act.GetDisplayName() + " makes a lustful or lewd comment about {{ player.name }}'s current uncomfortable situation.")
+        ;         else
+        ;             think.UseDirectNarration(act, act.GetDisplayName() + " makes a comment {{ player.name }}'s current uncomfortable situation.")
+        ;         endif
+        ;     endif
+
+        ; endif
+
+
     endif
 
 endevent
@@ -90,42 +127,90 @@ function SetCrowd(ObjectReference c1, ObjectReference c2, ObjectReference c3, Ob
 
     ;debug.MessageBox("found a crowd!!!")
     
+    totalActors = 0
+
     if c1
         actor1 = c1 as Actor
-        SetFactions(actor1)
+        if think.IsAiReady()
+            ClearFactions(actor1)
+        else
+            SetFactions(actor1)
+        endif
         Crowd1.ForceRefTo(c1)
+        totalActors += 1
     endif
 
     if c2
         actor2 = c2 as Actor
-        SetFactions(actor2)
+        if think.IsAiReady()
+            ClearFactions(actor2)
+        else
+            SetFactions(actor2)
+        endif
         Crowd2.ForceRefTo(c2)
+        totalActors += 1
     endif
 
     if c3
         actor3 = c3 as Actor
-        SetFactions(actor3)
+        if think.IsAiReady()
+            ClearFactions(actor3)
+        else
+            SetFactions(actor3)
+        endif
         Crowd3.ForceRefTo(c3)
+        totalActors += 1
     endif
 
     if c4
         actor4 = c4 as Actor
-        SetFactions(actor4)
+        if think.IsAiReady()
+            ClearFactions(actor4)
+        else
+            SetFactions(actor4)
+        endif
         Crowd4.ForceRefTo(c4)
+        totalActors += 1
     endif
 
     if c5
         actor5 = c5 as Actor
-        SetFactions(actor5)
+        if think.IsAiReady()
+            ClearFactions(actor5)
+        else
+            SetFactions(actor5)
+        endif
         Crowd5.ForceRefTo(c5)
+        totalActors += 1
     endif
 
     if c6
         actor6 = c6 as Actor
-        SetFactions(actor6)
+        if think.IsAiReady()
+            ClearFactions(actor6)
+        else
+            SetFactions(actor6)
+        endif
         Crowd6.ForceRefTo(c6)
+        totalActors += 1
     endif
 
+endfunction
+
+function ClearFactions(Actor c)
+    if c.IsInFaction(bind_CrowdTypeLust)
+        c.RemoveFromFaction(bind_CrowdTypeLust)
+        SetActiveState(c, (Utility.RandomInt(1, 2) == 2))
+    endif
+    if c.IsInFaction(bind_CrowdTypeMock) 
+        c.RemoveFromFaction(bind_CrowdTypeMock)
+        SetActiveState(c, (Utility.RandomInt(1, 2) == 2))
+    endif 
+    if c.IsInFaction(bind_CrowdTypePity)
+        c.RemoveFromFaction(bind_CrowdTypePity)
+        SetActiveState(c, (Utility.RandomInt(1, 2) == 2))
+    endif
+    
 endfunction
 
 function SetFactions(Actor c)
@@ -149,9 +234,26 @@ function SetActiveState(Actor c, bool activeFlag)
         return
     endif
     if activeFlag
+
         if !c.IsInFaction(bind_CrowdIsActive)
             c.AddToFaction(bind_CrowdIsActive)
         endif
+
+        if think.IsAiReady()
+            if Utility.RandomInt(1, 2) == 2 && chatCount < 3
+                chatCount += 1
+                if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
+                    think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
+                else
+                    if Utility.RandomInt(1, 2) == 2 
+                        think.UseDirectNarration(c, c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.")
+                    else
+                        think.UseDirectNarration(c, c.GetDisplayName() + " makes a comment {{ player.name }}'s current situation.")
+                    endif
+                endif
+            endif
+        endif
+
     else
         if c.IsInFaction(bind_CrowdIsActive)
             c.RemoveFromFaction(bind_CrowdIsActive)
@@ -172,3 +274,6 @@ Faction property bind_CrowdTypeLust auto
 Faction property bind_CrowdTypeMock auto
 Faction property bind_CrowdTypePity auto
 Faction property bind_CrowdIsActive auto
+
+bind_ThinkingDom property think auto
+bind_Functions property fs auto

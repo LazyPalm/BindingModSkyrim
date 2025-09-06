@@ -146,6 +146,8 @@ function StartEvent()
 
     bind_Utility.EnablePlayer()
 
+    fs.EventStartCrowds()
+
     if !sms.StartSexScene(theSub, theDom)
         debug.MessageBox("Could not start sex scene")
         StopEvent(sexAnimationRan = false)
@@ -168,6 +170,8 @@ function StopEvent(bool sexAnimationRan)
     fs.EventCleanUpSub(theSub, theDom, true)
 
     bind_Utility.EnablePlayer()
+
+    fs.EventStopCrowds()
 
     bcs.DoEndEvent()
 

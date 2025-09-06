@@ -638,7 +638,9 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 
 	;NOTE - this will always be called first
 
-	bind_Utility.WriteNotification("DEBUG - Process location change ", bind_Utility.TextColorBlue())
+	if main.DisplayLocationChange == 1
+		bind_Utility.WriteNotification("DEBUG - Process location change ", bind_Utility.TextColorBlue())
+	endif
 
 	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
 	lastLocation = oldLocation
@@ -664,7 +666,9 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 	endif
 
 	bind_Utility.WriteToConsole("DEBUG - Process location change")
-	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+	if main.DisplayLocationChange == 1
+		bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+	endif
 
 	if main.NeedsBondageSetChange == 1
 		;entered and left area before a change
@@ -678,38 +682,44 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
 
 	if main.ActiveBondageSetId == 0
-		bind_Utility.WriteToConsole("DEBUG - No bondage set could be found")
-		bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
+		bind_Utility.WriteToConsole("DEBUG - No bondage outfit could be found")
+		bind_Utility.WriteNotification("No bondage outfit could be found", bind_Utility.TextColorGreen())
 	else
 		if main.ActiveBondageSetId != currentBondageSetId
 			;update bondage??
 			bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.ActiveBondageSetId)
-			bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
+			if main.DisplayLocationChange == 1
+				bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
+			endif
 			UnregisterForUpdate()
 			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
 			GotoState("ArrivalCheckState")
 		else
-			bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
+			if main.DisplayLocationChange == 1
+				bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
+			endif
 			bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + currentBondageSetId)
 
 		endif
 	endif
 
-	int count = newlocation.GetNumKeywords()
-	bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
-	int index
-	while (index < count)
-		Keyword kw = newlocation.GetNthKeyword(index)
-		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
-		index += 1
-	endwhile
+	; int count = newlocation.GetNumKeywords()
+	; bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
+	; int index
+	; while (index < count)
+	; 	Keyword kw = newlocation.GetNthKeyword(index)
+	; 	bind_Utility.WriteToConsole("keyword: " + kw.GetString())
+	; 	index += 1
+	; endwhile
 
 endfunction
 
 function ProcessLocationChange(Location oldLocation, Location newLocation)
 
 	bind_Utility.WriteToConsole("DEBUG - Process location change")
-	bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+	if main.DisplayLocationChange == 1
+		bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
+	endif
 
 	; main.NeedsBondageSetChange = 0 ;reset this
 
@@ -1095,37 +1105,44 @@ Function SubPrayedAtShrine()
 
 	;Prayer Rule:No Shoes,Prayer Rule:Nudity,Prayer Rule:Must Pose,Prayer Rule:Must Ask,Prayer Rule:Perfectly Clean,Prayer Rule:Whipped
 
+	string msg = ""
+
 	if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_PRAYER_NUDITY())  == 1 ; rman.GetBehaviorRuleByName("Prayer Rule:Nudity") == 1
 		if !gmanage.IsNude(theSubRef)
-			bind_Utility.WriteInternalMonologue("Oh no, I forgot to take off my clothes...")
+			msg = "Oh no, I forgot to take off my clothes before prayer..."
+			;bind_Utility.WriteInternalMonologue("Oh no, I forgot to take off my clothes...")
 			result = false
 		endif
 	endif
 
 	if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_PRAYER_NO_SHOES())  == 1 ;rman.GetBehaviorRuleByName("Prayer Rule:No Shoes") == 1
 		If !gmanage.IsWearingNoShoes(theSubRef)
-			bind_Utility.WriteInternalMonologue("Oh my, I forgot to remove my shoes...")
+			msg = "Oh my, I forgot to remove my shoes before prayer..."
+			;bind_Utility.WriteInternalMonologue("Oh my, I forgot to remove my shoes...")
 			result = false
 		EndIf
 	endif
 
 	if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_PRAYER_MUST_POSE())  == 1 ;rman.GetBehaviorRuleByName("Prayer Rule:Must Pose") == 1
 		If !pman.InPrayerPose() ; SubIdleState == IDLE_STATE_PRAYER
-			bind_Utility.WriteInternalMonologue("By the Divines, I forgot to pose...")
+			msg = "By the Divines, I forgot to pose before prayer..."
+			;bind_Utility.WriteInternalMonologue("By the Divines, I forgot to pose...")
 			result = false
 		EndIf
 	endif
 
 	if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_PRAYER_MUST_ASK())  == 1 ;rman.GetBehaviorRuleByName("Prayer Rule:Must Ask") == 1
 		if StorageUtil.GetIntValue(theSubRef, "bind_has_prayer_permission", 0) == 0
-			bind_Utility.WriteInternalMonologue("By the Divines, I didn't ask to pray...")
+			msg = "By the Divines, I didn't ask to pray..."
+			;bind_Utility.WriteInternalMonologue("By the Divines, I didn't ask to pray...")
 			result = false
 		endif
 	endif
 
 	if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_PRAYER_CLEAN())  == 1 ;rman.GetBehaviorRuleByName("Prayer Rule:Perfectly Clean") == 1
 		If main.SubDirtLevel > 0
-			bind_Utility.WriteInternalMonologue("I am far too dirty to recieve blessings...")
+			msg = "I am far too dirty to recieve blessings..."
+			;bind_Utility.WriteInternalMonologue("I am far too dirty to recieve blessings...")
 			result = false
 		EndIf
 	endif
@@ -1134,7 +1151,8 @@ Function SubPrayedAtShrine()
 		;TODO - store last whipped time
 		float lastWhipped = StorageUtil.GetFloatValue(theSubRef, "bind_last_whipped", 0.0)
 		if bind_Utility.GetTime() - lastWhipped >= 1.0 || lastWhipped == 0.0
-			bind_Utility.WriteInternalMonologue("I need to be red from a whip to recieve blessings...")
+			msg = "I need to be red from a whip to recieve blessings..."
+			;bind_Utility.WriteInternalMonologue("I need to be red from a whip to recieve blessings...")
 			result = false
 		endif
 	endif
@@ -1143,8 +1161,9 @@ Function SubPrayedAtShrine()
 		bind_Utility.WriteInternalMonologue("Hopefully the Divines will be pleased with my respect...")
 		;TODO - tailor these to shrine
 	else
-		AdjustRuleInfractions(1)
-		bind_Utility.WriteNotification("+1 infraction", bind_Utility.TextColorRed())
+		MarkSubBrokeRule(msg, true)
+		;AdjustRuleInfractions(1)
+		;bind_Utility.WriteNotification("+1 infraction", bind_Utility.TextColorRed())
 	EndIf
 
 	;zero out permissions flags
@@ -1628,10 +1647,18 @@ int Function MarkSubBrokeRule(string msg = "", bool runDistanceCheck = false)
 			If msg != ""
 				bind_Utility.WriteInternalMonologue(msg + "... +1 infraction")
 			Else
+				msg = "[rule infraction had no message]"
 				bind_Utility.WriteInternalMonologue("Oh no, I broke a rule... +1 infraction") ;this should never happen??
 			EndIf
 			;brain.MarkInfraction()
 			AdjustRuleInfractions(1)
+
+			StorageUtil.StringListAdd(theSubRef, "bind_infractions_list", msg)
+			StorageUtil.FloatListAdd(theSubRef, "bind_infractions_time", bind_Utility.GetTime())
+			if StorageUtil.StringListCount(theSubRef, "bind_infractions_list") > 30
+				StorageUtil.StringListShift(theSubRef, "bind_infractions_list") ;keeps this capped at 30
+				StorageUtil.FloatListShift(theSubRef, "bind_infractions_time")
+			endif
 		EndIf
 		return GetRuleInfractions()
 	EndIf
@@ -1957,7 +1984,7 @@ function ShowDDCFurnitureItems()
 	else
 		Form dev = bind_DDCFurnitureList.GetAt(listReturn - 1)
 		if dev
-			debug.MessageBox("DDC adding: " + dev.GetName() + " form: " + dev)
+			bind_Utility.WriteToConsole("DDC adding: " + dev.GetName() + " form: " + dev)
 			fman.AddFurnitureByForm(theSubRef, dev)
 		else
 			Debug.MessageBox("Could not get DDC furniture from list")
@@ -1993,7 +2020,7 @@ function ShowDSEFurnitureItems()
 		else
 			Form dev = bind_DSEFurnitureList.GetAt(listReturn - 1)
 			if dev
-				debug.MessageBox("DM3 (DSE) adding: " + dev.GetName() + " form: " + dev)
+				bind_Utility.WriteToConsole("DM3 (DSE) adding: " + dev.GetName() + " form: " + dev)
 				fman.AddFurnitureByForm(theSubRef, dev)
 			else
 				Debug.MessageBox("Could not get DM3 (DSE) furniture from list")
@@ -2036,7 +2063,7 @@ Function ShowZAPFurnitureItems(string letter)
 	Else
 		string selectedName = itemNames[listReturn - 1]
 		Form dev = items[listReturn - 1]
-		debug.MessageBox("ZAP adding: " + selectedName + " form: " + dev)
+		bind_Utility.WriteToConsole("ZAP adding: " + selectedName + " form: " + dev)
 		if selectedName != ""
 			if dev
 				fman.AddFurnitureByForm(theSubRef, dev)
@@ -2593,6 +2620,18 @@ function EventDomTyingAnimation(Actor sub, Actor dom, bool rotateSub = false)
 
 endfunction
 
+function EventStartCrowds()
+    if !theSubRef.IsInFaction(bind_CrowdTriggerToWatch)
+        theSubRef.AddToFaction(bind_CrowdTriggerToWatch)
+    endif
+endfunction
+
+function EventStopCrowds()
+    if theSubRef.IsInFaction(bind_CrowdTriggerToWatch)
+        theSubRef.RemoveFromFaction(bind_CrowdTriggerToWatch)
+    endif
+endfunction
+
 bool function InCityOrTownCheck()
 	if currentOutdoorLocation.HasKeyWord(LocTypeCity) || currentOutdoorLocation.HasKeyWord(LocTypeTown)
 		return true
@@ -3116,6 +3155,7 @@ Faction property bind_FutureDomFaction auto
 
 Faction property JobTrainerFaction auto
 
+Faction property bind_CrowdTriggerToWatch auto
 
 
 GlobalVariable property bind_GlobalInfractions auto
