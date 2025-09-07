@@ -17,6 +17,8 @@ int loadedSetId = 0
 string bondageOutfitsFile = "bind_bondage_outfits.json"
 string bondageOutfitFile
 
+int wearingSetId
+
 event OnInit()
 
     if self.IsRunning()
@@ -126,69 +128,82 @@ event OnInit()
         materialTypes[12] = "Iron/Steel"
         materialTypes[13] = "Chain"
 
-        usageKey = new string[30]
-        usageKey[0] = "location_all_areas"
-        usageKey[1] = "location_any_city"
-        usageKey[2] = "location_dawnstar"
-        usageKey[3] = "location_falkreath"
-        usageKey[4] = "location_windhelm"
-        usageKey[5] = "location_markarth"
-        usageKey[6] = "location_morthal"
-        usageKey[7] = "location_riften"
-        usageKey[8] = "location_solitude"
-        usageKey[9] = "location_high_hrothgar"
-        usageKey[10] = "location_whiterun"
-        usageKey[11] = "location_winterhold"
-        usageKey[12] = "location_raven Rock"       
-        usageKey[13] = "location_towns"
-        usageKey[14] = "location_player_home"
-        usageKey[15] = "event_any_event"
-        usageKey[16] = "event_harsh_bondage"
-        usageKey[17] = "event_bound_masturbation"
-        usageKey[18] = "event_bound_sex"
-        usageKey[19] = "event_dairy"
-        usageKey[20] = "event_bound_sleep"
-        usageKey[21] = "event_camping"
-        usageKey[22] = "event_put_on_display"
-        usageKey[23] = "event_public_humilation"
-        usageKey[24] = "event_whipping"
-        usageKey[25] = "event_souls_from_bones"
-        usageKey[26] = "event_word_wall"
-        usageKey[27] = "event_gagged_for_punishment"
-        usageKey[28] = "event_go_adventuring"
-        usageKey[29] = "event_free_for_work"
+        string temp = "location_all_areas|location_any_city|location_dawnstar|location_falkreath|location_windhelm|location_markarth|location_morthal|location_riften|"
+        temp += "location_solitude|location_high_hrothgar|location_whiterun|location_winterhold|location_raven Rock|location_towns|location_player_home|location_safe_area|"
+        temp += "location_unsafe_area|location_inn|event_any_event|event_harsh_bondage|event_bound_masturbation|event_bound_sex|event_dairy|event_bound_sleep|event_camping|"
+        temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuring|event_free_for_work"
+        usageKey = StringUtil.Split(temp, "|")
 
-        usageList = new string[30]
-        usageList[0] = "Location - All Areas"
-        usageList[1] = "Location - Any City"
-        usageList[2] = "Location - Dawnstar"
-        usageList[3] = "Location - Falkreath"
-        usageList[4] = "Location - Windhelm"
-        usageList[5] = "Location - Markarth"
-        usageList[6] = "Location - Morthal"
-        usageList[7] = "Location - Riften"
-        usageList[8] = "Location - Solitude"
-        usageList[9] = "Location - High Hrothgar"
-        usageList[10] = "Location - Whiterun"
-        usageList[11] = "Location - Winterhold"
-        usageList[12] = "Location - Raven Rock"       
-        usageList[13] = "Location - Towns"
-        usageList[14] = "Location - Player Home"
-        usageList[15] = "Event - Any Event"
-        usageList[16] = "Event - Harsh Bondage"
-        usageList[17] = "Event - Bound Masturbation"
-        usageList[18] = "Event - Bound Sex"
-        usageList[19] = "Event - Dairy"
-        usageList[20] = "Event - Bound Sleep"
-        usageList[21] = "Event - Camping"
-        usageList[22] = "Event - Put On Display"
-        usageList[23] = "Event - Public Humliation"
-        usageList[24] = "Event - Whipping"
-        usageList[25] = "Event - Souls From Bones"
-        usageList[26] = "Event - Word Wall"
-        usageList[27] = "Event - Gagged For Punishment"
-        usageList[28] = "Event - Go Adventuring"
-        usageList[29] = "Event - Free For Work"
+        temp = "Location - All Areas|Location - Any City|Location - Dawnstar|Location - Falkreath|Location - Windhelm|Location - Markarth|Location - Morthal|Location - Riften"
+        temp += "|Location - Solitude|Location - High Hrothgar|Location - Whiterun|Location - Winterhold|Location - Raven Rock |Location - Towns|Location - Player Home|Location - Safe Areas"
+        temp += "|Location - Unsafe Areas|Location - Inn|Event - Any Event|Event - Harsh Bondage|Event - Bound Masturbation|Event - Bound Sex|Event - Dairy|Event - Bound Sleep|Event - Camping"
+        temp += "|Event - Put On Display|Event - Public Humliation|Event - Whipping|Event - Souls From Bones|Event - Word Wall|Event - Gagged For Punishment|Event - Go Adventuring"
+        temp += "|Event - Free For Work"
+        usageList = StringUtil.Split(temp, "|")
+
+        ; usageKey = new string[30]
+        ; usageKey[0] = "location_all_areas"
+        ; usageKey[1] = "location_any_city"
+        ; usageKey[2] = "location_dawnstar"
+        ; usageKey[3] = "location_falkreath"
+        ; usageKey[4] = "location_windhelm"
+        ; usageKey[5] = "location_markarth"
+        ; usageKey[6] = "location_morthal"
+        ; usageKey[7] = "location_riften"
+        ; usageKey[8] = "location_solitude"
+        ; usageKey[9] = "location_high_hrothgar"
+        ; usageKey[10] = "location_whiterun"
+        ; usageKey[11] = "location_winterhold"
+        ; usageKey[12] = "location_raven Rock"       
+        ; usageKey[13] = "location_towns"
+        ; usageKey[14] = "location_player_home"
+        ; usageKey[15] = "event_any_event"
+        ; usageKey[16] = "event_harsh_bondage"
+        ; usageKey[17] = "event_bound_masturbation"
+        ; usageKey[18] = "event_bound_sex"
+        ; usageKey[19] = "event_dairy"
+        ; usageKey[20] = "event_bound_sleep"
+        ; usageKey[21] = "event_camping"
+        ; usageKey[22] = "event_put_on_display"
+        ; usageKey[23] = "event_public_humilation"
+        ; usageKey[24] = "event_whipping"
+        ; usageKey[25] = "event_souls_from_bones"
+        ; usageKey[26] = "event_word_wall"
+        ; usageKey[27] = "event_gagged_for_punishment"
+        ; usageKey[28] = "event_go_adventuring"
+        ; usageKey[29] = "event_free_for_work"
+
+        ; usageList = new string[30]
+        ; usageList[0] = "Location - All Areas"
+        ; usageList[1] = "Location - Any City"
+        ; usageList[2] = "Location - Dawnstar"
+        ; usageList[3] = "Location - Falkreath"
+        ; usageList[4] = "Location - Windhelm"
+        ; usageList[5] = "Location - Markarth"
+        ; usageList[6] = "Location - Morthal"
+        ; usageList[7] = "Location - Riften"
+        ; usageList[8] = "Location - Solitude"
+        ; usageList[9] = "Location - High Hrothgar"
+        ; usageList[10] = "Location - Whiterun"
+        ; usageList[11] = "Location - Winterhold"
+        ; usageList[12] = "Location - Raven Rock"       
+        ; usageList[13] = "Location - Towns"
+        ; usageList[14] = "Location - Player Home"
+        ; usageList[15] = "Event - Any Event"
+        ; usageList[16] = "Event - Harsh Bondage"
+        ; usageList[17] = "Event - Bound Masturbation"
+        ; usageList[18] = "Event - Bound Sex"
+        ; usageList[19] = "Event - Dairy"
+        ; usageList[20] = "Event - Bound Sleep"
+        ; usageList[21] = "Event - Camping"
+        ; usageList[22] = "Event - Put On Display"
+        ; usageList[23] = "Event - Public Humliation"
+        ; usageList[24] = "Event - Whipping"
+        ; usageList[25] = "Event - Souls From Bones"
+        ; usageList[26] = "Event - Word Wall"
+        ; usageList[27] = "Event - Gagged For Punishment"
+        ; usageList[28] = "Event - Go Adventuring"
+        ; usageList[29] = "Event - Free For Work"
 
         ; usageList[17] = "Day - Sundas"
         ; usageList[18] = "Day - Morndas"
@@ -207,16 +222,30 @@ event OnInit()
         bcs.DoStartEvent()
         bcs.SetEventName(self.GetName())
 
-       ; bind_Utility.DisablePlayer()
+        wearingSetId = StorageUtil.GetIntValue(theSub, "bind_wearing_outfit_id")
+        StorageUtil.SetIntValue(theSub, "bind_wearing_outfit_id", 0)
+
+        bind_Utility.DisablePlayer()
         ;fs.EventGetSubReady(theSub, theDom) ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
-       ;bind_Utility.EnablePlayer()
+        
+        if bind_Utility.ConfirmBox("Remove worn bondage items?")
+            bms.RemoveAllDetectedBondageItems(theSub)
+            bind_Utility.DoSleep(1.0)
+        endif
+
+        if bind_Utility.ConfirmBox("Remove worn clothing?")
+            gms.RemoveWornGear(theSub)
+            bind_Utility.DoSleep(1.0)
+        endif
+        
+        bind_Utility.EnablePlayer()
 
     endif
 
 endevent
 
 event SafewordEvent()
-    bind_Utility.WriteToConsole("souls from bones quest safeword ending")
+    bind_Utility.WriteToConsole("the dressing room quest safeword ending")
     self.Stop()
 endevent
 
@@ -258,6 +287,7 @@ function ParentMenu()
     listMenu.AddEntryItem("Load Outfit")
     ;listMenu.AddEntryItem("Add Item - By Bondage Type")
     listMenu.AddEntryItem("Add Item") ; - Binding List")
+    listMenu.AddEntryItem("Item Search")
     ;listMenu.AddEntryItem("Add Items - DD Lists")
     listMenu.AddEntryItem("Remove Item")
 
@@ -283,18 +313,64 @@ function ParentMenu()
         LoadSetsMenu()
     elseif listReturn == 4
         BondageTypesMenu()
+    elseif listReturn == 5
+        BondageItemSearch()
     ; elseif listReturn == 5
     ;     bms.BrowseDdItemsList(theSub, none, 2)
     ;     ;MaterialTypeMenu()
-    elseif listReturn == 5
-        RemoveItemsMenu()
     elseif listReturn == 6
-        SetUsesMenu()
+        RemoveItemsMenu()
     elseif listReturn == 7
-        DeleteSetMenu()
+        SetUsesMenu()
     elseif listReturn == 8
+        DeleteSetMenu()
+    elseif listReturn == 9
         SetArmorBlocks()
     
+    endif
+
+endfunction
+
+string keywords
+string[] searchResults
+string resultsFile = "bind_dd_search_result.json"
+
+function BondageItemSearch()
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("<-- Return To Menu")
+    listMenu.AddEntryItem("Directions")
+    listMenu.AddEntryItem("Keywords: " + keywords)
+
+    int i = 0
+    while i < searchResults.Length
+        listMenu.AddEntryItem(searchResults[i])
+        i += 1
+    endwhile
+
+    listMenu.OpenMenu()
+
+    int listReturn = listMenu.GetResultInt()
+    if listReturn == 0
+        ParentMenu()
+    elseif listReturn == 1
+        debug.MessageBox("Enter keywords seperated by commas to search for items. If you want to exclude a keyword use a minus in front of the keyword. Example: red,leather,-collar")
+        ;BondageItemSearch()
+    elseif listReturn == 2
+        UIExtensions.InitMenu("UITextEntryMenu")
+        UIExtensions.OpenMenu("UITextEntryMenu")
+        string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
+        if result != ""
+            keywords = result
+            searchResults = bms.SearchDeviousItems(keywords)
+            BondageItemSearch()
+        endif
+    elseif listReturn > 2
+        Form dev = JsonUtil.FormListGet(resultsFile, "found_items", listReturn - 3)
+        if dev
+            bms.AddSpecificItem(theSub, dev as Armor)
+        endif
     endif
 
 endfunction
@@ -390,6 +466,9 @@ endfunction
 
 function DeleteSetMenu()
 
+    debug.MessageBox("not working yet")
+    return
+
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     listMenu.AddEntryItem("Delete set " + loadedSetName)
     listMenu.AddEntryItem("Keep set " + loadedSetName)
@@ -442,6 +521,7 @@ function ClearItemsMenu()
         if listReturn == 0
         else
             loadedSetName = ""
+            StorageUtil.SetIntValue(theSub, "bind_wearing_outfit_id", 0)
         endif
 
     else
@@ -452,6 +532,8 @@ function ClearItemsMenu()
     endif
 
     bms.RemoveAllDetectedBondageItems(theSub)
+
+    gms.RemoveWornGear(theSub)
 
 endfunction
 
@@ -480,6 +562,7 @@ function LoadSetsMenu()
         loadedSetId = bondageSetIds[listReturn - 1]
         bondageOutfitFile = "bind_bondage_outfit_" + loadedSetId + ".json"
         LoadSet()
+        StorageUtil.SetIntValue(theSub, "bind_wearing_outfit_id", loadedSetId)
     endif
 
 endfunction
@@ -612,13 +695,14 @@ function EndTheQuest()
 
     bind_Utility.DisablePlayer()
 
-    bms.RemoveAllDetectedBondageItems(theSub)
+    ;bms.RemoveAllDetectedBondageItems(theSub)
 
     ;do a if dd keyword check and run this if so
     ;bms.RemoveAllDetectedBondageItems(theSub)
 
     ; bind_Utility.DoSleep(2.0)
-    ; fs.EventCleanUpSub(theSub, theDom, true)
+    fs.EventCleanUpSub(theSub, theDom, true)
+    
     bind_Utility.EnablePlayer()
 
     SetObjectiveDisplayed(10, false)
@@ -661,25 +745,29 @@ function SaveSet()
     JsonUtil.FormListClear(bondageOutfitFile, "fixed_bondage_items")
     ;StorageUtil.FormListClear(TheWardrobe, "set_" + loadedSetName)
 
-	Form[] inventory = theSub.GetContainerForms()
-	int i = 0
-    int kwi = 0
-	while i < inventory.Length
-        Form dev = inventory[i]
-        if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
-            bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
-            if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
-                bind_Utility.WriteToConsole("quest or blocking device")
-            else
-                bind_Utility.WriteToConsole("dev: " + dev.GetName() + " binding item: " + StorageUtil.GetIntValue(dev, "binding_bondage_item", 0))
+	; Form[] inventory = theSub.GetContainerForms()
+	; int i = 0
+    ; int kwi = 0
+	; while i < inventory.Length
+    ;     Form dev = inventory[i]
+    ;     if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
+    ;         bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
+    ;         if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
+    ;             bind_Utility.WriteToConsole("quest or blocking device")
+    ;         else
+    ;             bind_Utility.WriteToConsole("dev: " + dev.GetName() + " binding item: " + StorageUtil.GetIntValue(dev, "binding_bondage_item", 0))
 
-                ;StorageUtil.FormListAdd(TheWardrobe, "set_" + loadedSetName, dev, false)
-                JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
+    ;             ;StorageUtil.FormListAdd(TheWardrobe, "set_" + loadedSetName, dev, false)
+    ;             JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
 
-            endif
-        endif
-        i += 1
-    endwhile
+    ;         endif
+    ;     endif
+    ;     i += 1
+    ; endwhile
+
+    bms.LearnWornDdItemsToSet(theSub, loadedSetId)
+
+    gms.LearnWornItemsForBondageOutfit(theSub, loadedSetId)
 
     GoToState("")
 
@@ -697,15 +785,31 @@ function LoadSet()
 
     ;Form[] setItems = StorageUtil.FormListToArray(TheWardrobe, "set_" + loadedSetName)
 
-    Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+    int i
 
-    int i = 0
+    Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+    i = 0
+    while i < wornItems.Length
+        Form item = wornItems[i]
+        if theSub.GetItemCount(item) > 0
+            if !theSub.IsEquipped(item)
+                theSub.EquipItem(item, false, true)
+                bind_Utility.DoSleep(0.25)
+            endif
+        else
+            bind_Utility.WriteToConsole(item.GetName() + " is no longer in your bag")
+        endif
+        i += 1
+    endwhile
+
+    Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+    i = 0
     while i < setItems.Length
         Form dev = setItems[i]
         if dev
             ;bms.AddItemPassingDevice(theSub, dev as Armor)
             bms.AddSpecificItem(theSub, dev as Armor)
-            bind_Utility.DoSleep(0)
+            bind_Utility.DoSleep(0.25)
         endif
         i += 1
     endwhile

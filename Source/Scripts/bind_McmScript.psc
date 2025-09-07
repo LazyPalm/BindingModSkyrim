@@ -1,6 +1,6 @@
 Scriptname bind_McmScript extends SKI_ConfigBase  
 
-string version = "0.4.08"
+string version
 
 string selectedPage
 
@@ -291,6 +291,8 @@ Actor theSub
 string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
+
+    version = "0.4.09"
 
     theSub = fs.GetSubRef()
 

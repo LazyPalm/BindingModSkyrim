@@ -521,7 +521,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 							theSub.UnequipItem(dev, false, true)
 						endif
 					endif
-					bind_Utility.WriteToConsole("f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
+					bind_Utility.WriteToConsole("setId: " + wearingSetId + " f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
 				endif
 			endif
 
