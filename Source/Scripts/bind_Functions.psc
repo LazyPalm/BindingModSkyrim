@@ -1875,10 +1875,10 @@ Function SafeWord()
 			main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 			int outfitId = main.ActiveBondageSetId
 			;debug.MessageBox("outfit id: " + outfitId)
-			if outfitId > 0
+			;if outfitId > 0
 				bms.EquipBondageOutfit(theSubRef, outfitId)
 				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
-			endif
+			;endif
 
 		endif
 
@@ -2236,10 +2236,10 @@ event OnPauseEnd()
 		main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 		int outfitId = main.ActiveBondageSetId
 		;debug.MessageBox("outfit id: " + outfitId)
-		if outfitId > 0
+		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
-		endif
+		;endif
 
 	endif
 endevent
@@ -2513,9 +2513,9 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 	if outfitIds.Length > 0
 		int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
 		bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
-		if outfitId > 0
+		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
-		endif
+		;endif
 	endif
 
 	; if playAnimations
@@ -2589,10 +2589,10 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
-	if outfitId > 0
+	;if outfitId > 0
 		bms.EquipBondageOutfit(sub, outfitId)
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
-	endif
+	;endif
 
 	main.NeedsBondageSetChange = 0
 

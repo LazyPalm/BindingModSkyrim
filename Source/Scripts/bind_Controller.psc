@@ -118,7 +118,11 @@ event OnUpdate()
         ModEvent.Send(handle)
     endif
 
-	RegisterForSingleUpdate(60.0)
+    if main.NeedsBondageSetChange == 1
+        RegisterForSingleUpdate(20.0) ;speed this up
+    else
+	    RegisterForSingleUpdate(60.0)
+    endif
 
 endevent
 

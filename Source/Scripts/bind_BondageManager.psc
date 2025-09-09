@@ -104,6 +104,8 @@ endfunction
 
 function EquipBondageOutfit(Actor a, int setId)
 
+    float sleepWait = 0.1
+
     if setId == -1
 
         bind_Utility.WriteToConsole("EquipBondageOutfit - no outfit found - cleaning DD items off")
@@ -143,6 +145,7 @@ function EquipBondageOutfit(Actor a, int setId)
             If item.IsPlayable()
                 if a.IsEquipped(item) && !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
+                    bind_Utility.DoSleep(sleepWait)
                     bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
                 endif
@@ -161,7 +164,7 @@ function EquipBondageOutfit(Actor a, int setId)
                     a.UnequipItem(item, false, true)
                     bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
                     StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
-                    bind_Utility.DoSleep(0.25)
+                    bind_Utility.DoSleep(sleepWait)
                 endif
             endif
             i += 1
@@ -177,7 +180,7 @@ function EquipBondageOutfit(Actor a, int setId)
         if a.GetItemCount(item) > 0
             if !a.IsEquipped(item)
                 a.EquipItem(item, false, true)
-                bind_Utility.DoSleep(0.25)
+                bind_Utility.DoSleep(sleepWait)
             endif
         else
             bind_Utility.WriteToConsole(item.GetName() + " is no longer in your bag")
@@ -420,7 +423,7 @@ function EquipBondageOutfit(Actor a, int setId)
             Form dev = setItems[i]
             if dev
                 AddSpecificItem(a, dev as Armor)
-                bind_Utility.DoSleep(0.25)
+                bind_Utility.DoSleep(sleepWait)
             endif
             i += 1
         endwhile
@@ -429,7 +432,7 @@ function EquipBondageOutfit(Actor a, int setId)
     StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
     StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(f, "bondage_outfit_name", ""))
 
-    bind_Utility.DoSleep(5.0)
+    bind_Utility.DoSleep(2.0)
 
     int handle = ModEvent.Create("bind_BondageOutfitEquipped")
     if handle
