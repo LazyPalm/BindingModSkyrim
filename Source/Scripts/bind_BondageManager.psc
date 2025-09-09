@@ -104,6 +104,19 @@ endfunction
 
 function EquipBondageOutfit(Actor a, int setId)
 
+    if setId == -1
+
+        bind_Utility.WriteToConsole("EquipBondageOutfit - no outfit found - cleaning DD items off")
+
+        RemoveAllBondageItems(a, false)
+
+        StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", -1) ;NOTE - this is used by the sub alias to determine blocks
+        StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", "")
+
+        return
+
+    endif
+
     int i
 
     EquippingBondageOutfit = true

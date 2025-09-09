@@ -607,6 +607,7 @@ state ArrivalCheckState
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
 			main.NeedsBondageSetChange = 1
 			bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
+			bcs.AdvanceGameLoop()
 
 			; if main.AdventuringAutomatic == 1
 
@@ -692,7 +693,11 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 				bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
 			endif
 			UnregisterForUpdate()
-			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+			if isIndoors
+				RegisterForSingleUpdate(3.0)
+			else
+				RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+			endif
 			GotoState("ArrivalCheckState")
 		else
 			if main.DisplayLocationChange == 1

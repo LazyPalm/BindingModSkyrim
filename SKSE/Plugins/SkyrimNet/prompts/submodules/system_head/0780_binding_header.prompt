@@ -126,6 +126,7 @@
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} has agreed to follow {{ actor_name }}'s commands or be disciplined.
         - {{ actor_name }} should try to listen to {{ player.name }}'s feedback for enjoyable experiences and incorporate those into the BDSM dynamic.
+        - {{ actor_name }} does not need to talk about being a Dominant and should only make comments about {{ player.name }}'s submission during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
         {% endif %}
 
         {# player as non-con submissive #}
@@ -133,12 +134,14 @@
         - {{ actor_name }} is in a non-consensual BDSM relationship with {{ player.name }}.
         - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
         - {{ player.name }} is forced to follow {{ actor_name }}'s commands or be disciplined.
+        - {{ actor_name }} does not need to talk about being a Dominant and should only make comments about {{ player.name }}'s submission during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
         {% endif %}
 
         {# player as indentured servant #}
         {% if sub_type == 2 %}
         - {{ player.name }} has a debt of service to {{ actor_name }} by law and must render whatever services they require.
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined. This debt of service can be enforced by the Jarl of the hold that issued it.
+        - {{ actor_name }} does not need to talk about being a debt of service except during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
         {% endif %}
 
         {# player as pleasure slave #}
@@ -147,6 +150,7 @@
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} must offer their body to {{ actor_name }} whenever desired.
         - Pleasure slaves can fight when adventuring.
+        - {{ actor_name }} does not need to talk about being a Master and should only make comments about {{ player.name }}'s slavery if directly asked or during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}
@@ -161,6 +165,7 @@
         - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
         - {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
         - Fighting slaves can be used for sexual purposes.
+        - {{ actor_name }} does not need to talk about being a Master and should only make comments about {{ player.name }}'s slavery if directly asked or during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
         {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
         - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
         {% endif %}

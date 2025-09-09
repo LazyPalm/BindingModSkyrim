@@ -139,7 +139,7 @@ function WriteNotification(string msg, string color = "white") global
     if color == "red"
         debug.Notification("<font color='#ff0000'>" + msg + "</font>")
     elseif color == "blue"
-        debug.Notification("<font color='#00BFFF'>" + msg + "</font>")
+        debug.Notification("<font color='#0000FF'>" + msg + "</font>")
     elseif color == "violet"
         debug.Notification("<font color='#8000ff'>" + msg + "</font>")
     elseif color == "green"

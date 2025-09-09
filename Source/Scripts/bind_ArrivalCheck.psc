@@ -11,10 +11,14 @@ event OnInit()
 
         bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
 
+        bind_Utility.WriteToConsole("bind_ArrivalCheck outfit id: " + mqs.ActiveBondageSetId)
+
         mqs.NeedsBondageSetChange = 0
 
         bind_MovementQuestScript.FaceTarget(fs.GetDomRef(), fs.GetSubRef())
         bind_MovementQuestScript.PlayDoWork(fs.GetDomRef())
+
+        ;debug.MessageBox(mqs.ActiveBondageSetId)
 
         bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
 

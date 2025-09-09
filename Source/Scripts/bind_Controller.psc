@@ -122,6 +122,11 @@ event OnUpdate()
 
 endevent
 
+function AdvanceGameLoop()
+    UnregisterForUpdate()
+    RegisterForSingleUpdate(1.0)
+endfunction
+
 event OnKeyUp(Int KeyCode, Float HoldTime)	
 	ProcessInput(KeyCode, HoldTime)
 endevent
