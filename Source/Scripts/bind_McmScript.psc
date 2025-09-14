@@ -292,7 +292,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.13"
+    version = "0.4.14"
 
     theSub = fs.GetSubRef()
 
@@ -1171,6 +1171,9 @@ Function DisplayDependencies()
 
     AddTextOption("Go To Bed", DisplayBoolean(main.SoftCheckGoToBed))
     AddTextOption("", "")
+
+    AddTextOption("Gunslinger Poses", DisplayBoolean(main.SoftCheckGunslinger))
+    AddTextOption("* Tested with GSPoses SE 20 03 from LL", "")
 
     ; AddHeaderOption("Utility Mods")
     ; AddHeaderOption("")

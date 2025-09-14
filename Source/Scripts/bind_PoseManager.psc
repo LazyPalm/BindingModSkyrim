@@ -192,6 +192,29 @@ string Function _GetSystemName(string displayName)
         return "zapwripose10"
     ElseIf displayName == "zaparmbpose06 kneel"
         return "zaparmbpose06"
+    elseif displayname == "GS289"
+        return "GS289"
+    elseif displayname == "GS290"
+        return "GS290"
+    elseif displayname == "GS294"
+        return "GS294"
+    elseif displayname == "GS296"
+        return "GS296"
+    elseif displayname == "GS313"
+        return "GS313"
+    elseif displayname == "GS332"
+        return "GS332"
+    elseif displayname == "GS361"
+        return "GS361"
+    elseif displayname == "GS375"
+        return "GS375"
+    elseif displayname == "GS415"
+        return "GS415"
+    elseif displayname == "GS416"
+        return "GS416"
+    elseif displayname == "GS417"
+        return "GS417"
+
     Else
         return ""
     EndIf
@@ -215,6 +238,10 @@ string Function GetIdlesList()
     If main.SoftCheckDD == 1
         list = list + ",DD Kneel X Front,DD Kneel Hands Out,DD Inspection,DD Collar Me"
     EndIf
+
+    if main.SoftCheckGunslinger == 1
+        list = list + ",GS289,GS290,GS294,GS296,GS313,GS332,GS361,GS375,GS415,GS416,GS417"
+    endif
 
     ;Debug.MessageBox(list)
 
@@ -242,6 +269,7 @@ string Function GetHighKneel(bool bound = false)
     If result == ""
         result = GetHighKneelDefault()
     endif
+    bind_Utility.WriteToConsole("high kneel bound: " + bound + " result: " + result)
     return result
 EndFunction
 

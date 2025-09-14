@@ -27,6 +27,7 @@ int property SoftCheckChim auto conditional
 int property SoftCheckSkyrimNet auto conditional
 int property SoftCheckGoToBed auto conditional
 int property SoftCheckDwarvenDeviousCuirass auto conditional
+int property SoftCheckGunslinger auto conditional
 
 int property SoftCheckSweepingOrganizesStuff auto conditional
 
