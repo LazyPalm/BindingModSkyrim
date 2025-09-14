@@ -683,9 +683,32 @@ Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefere
 	; endIf
 EndEvent
 
+state ProcessingOnItemRemoved
+	Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
+	endevent
+endstate
+
 Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
 
+	GotoState("ProcessingOnItemRemoved")
+
 	Actor theSub = self.GetReference() as Actor
+
+	; if MQS.IsSub == 1 && bind_GlobalModState.GetValue() == bind_Controller.GetModStateEvent()
+	; 	If akBaseItem as potion
+	; 		StorageUtil.FormListAdd(theSub, "bind_quest_ate_potion", akBaseItem, true)
+	; 		; Potion food = akBaseItem as Potion
+	; 		; If food.IsFood()
+	; 		 	debug.MessageBox("in here??")
+	; 		; 	StorageUtil.FormListAdd(theSub, "bind_quest_ate_food", akBaseItem, true)
+	; 		; 	If food.GetUseSound() == ITMPotionUse
+	; 		; 		mqs.QuestDrankQty += 1
+	; 		; 	else
+	; 		; 		mqs.QuestAteQty += 1
+	; 		; 	EndIf
+	; 		; endif
+	; 	endif
+	; endif
 
 	If MQS.IsSub == 1 && bind_GlobalModState.GetValue() == 1.0
 
@@ -781,6 +804,8 @@ Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 		EndIf
 
 	EndIf
+
+	GotoState("")
 
 EndEvent
 

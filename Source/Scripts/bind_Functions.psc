@@ -1926,17 +1926,19 @@ Function ShowFurnitureSelectionMenu()
 	if listMenu
 		listMenu.AddEntryItem("Return to Furniture Menu")
 		listMenu.AddEntryItem("DDC Items")
+		listMenu.AddEntryItem("Search ZAP Items")
 		if main.SoftCheckDM3 == 1 && main.EnableModDM3 == 1
 			listMenu.AddEntryItem("DM3 (DSE)")
 		else
 			listMenu.AddEntryItem("DM3 (DSE) - Not found or not enabled")
 		endif
+	
 
-		int i = 0
-		while i < letters.Length
-			listMenu.AddEntryItem("ZAP Items " + letters[i])
-			i += 1
-		endwhile
+		; int i = 0
+		; while i < letters.Length
+		; 	listMenu.AddEntryItem("ZAP Items " + letters[i])
+		; 	i += 1
+		; endwhile
 
 		; int i = 0
 		; while i < furnitureTypes.Length
@@ -1953,13 +1955,15 @@ Function ShowFurnitureSelectionMenu()
 	elseif listReturn == 1
 		ShowDDCFurnitureItems()
 	elseif listReturn == 2
+		ShowZapFurnitureSearch()
+	elseif listReturn == 3
 		if main.SoftCheckDM3 == 1 && main.EnableModDM3 == 1
 			ShowDSEFurnitureItems()
 		else
 			Debug.MessageBox("DM3 (DSE) was not found or is not enabled")
 		endif
-	elseif listReturn > 2
-		ShowZAPFurnitureItems(letters[listReturn - 3])
+	; elseif listReturn > 2
+	; 	ShowZAPFurnitureItems(letters[listReturn - 3])
 	; Else
 	; 	fman.SetSelectedFuniture(furnitureTypes[listReturn - 1])
 	; 	bind_Utility.DoSleep(1.0)
@@ -1968,11 +1972,167 @@ Function ShowFurnitureSelectionMenu()
 
 EndFunction
 
+string zapKeywords
+string[] zapSearchResults
+Form[] zapSearchResultForms
+
+function ShowZapFurnitureSearch()
+
+	string zapFurnitureJson = "bind_zap_furniture.json"
+	string resultsFile = "bind_zap_search_result.json"
+
+	int i = 0
+
+	if !JsonUtil.JsonExists(zapFurnitureJson)
+		debug.MessageBox("Building ZAP DB - This may take several minutes")
+		i = 0
+		while i < bind_ZapFurnitureList.GetSize()
+			Form dev = bind_ZapFurnitureList.GetAt(i)
+			JsonUtil.StringListAdd(zapFurnitureJson, "zap_names", PO3_SKSEFunctions.GetFormEditorID(dev) + " - " + dev.GetName())
+			JsonUtil.FormlistAdd(zapFurnitureJson, "zap_items", dev)
+			i += 1
+		endwhile
+		JsonUtil.Save(zapFurnitureJson)
+		debug.MessageBox("Building ZAP DB - Completed")
+	endif
+
+	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+	if listMenu
+		listMenu.AddEntryItem("<-- Return to Furniture Menu")
+    	listMenu.AddEntryItem("Keywords: " + zapKeywords)
+	
+		if JsonUtil.JsonExists(resultsFile)
+			i = 0
+			while i < JsonUtil.StringListCount(resultsFile, "found_names")
+				listMenu.AddEntryItem(JsonUtil.StringListGet(resultsFile, "found_names", i))
+				i += 1
+			endwhile
+		endif
+
+	EndIf
+
+	listMenu.OpenMenu()
+	int listReturn = listMenu.GetResultInt()
+
+	If listReturn == 0
+		ShowFurnitureSelectionMenu()
+	elseif listReturn == 1
+        UIExtensions.InitMenu("UITextEntryMenu")
+        UIExtensions.OpenMenu("UITextEntryMenu")
+        string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
+        if result != ""
+            zapKeywords = result
+			if zapKeywords != ""
+				ZapFurnitureSearch()
+			endif
+            ShowZapFurnitureSearch()
+        endif
+	elseif listReturn > 1
+		;int idx = listReturn - 1
+		;debug.MessageBox("add: " + idx)
+		Form dev = JsonUtil.FormListGet(resultsFile, "found_items", listReturn - 1)
+		if dev != none
+			bind_Utility.WriteToConsole("ZAP adding: " + dev.GetName() + " form: " + dev)
+			fman.AddFurnitureByForm(theSubRef, dev)
+		endif
+	endif
+
+endfunction
+
+function ZapFurnitureSearch()
+
+	string zapFurnitureJson = "bind_zap_furniture.json"
+    string resultsFile = "bind_zap_search_result.json"
+    JsonUtil.StringListClear(resultsFile, "found_names")
+    JsonUtil.FormListClear(resultsFile, "found_items")
+
+	string[] keywordArr = StringUtil.Split(zapKeywords, ",")
+
+	int i = 0
+	int i2 = 0
+
+	int count = JsonUtil.StringListCount(zapFurnitureJson, "zap_names")
+
+	;debug.MessageBox(count)
+
+	while i < count
+		string itemName = JsonUtil.StringListGet(zapFurnitureJson, "zap_names", i)
+		;bind_Utility.WriteToConsole("itemName: " + itemName)
+		bool passedTests = true
+		i2 = 0
+		while i2 < keywordArr.Length
+			string searchFor = keywordArr[i2]
+			if StringUtil.Find(searchFor, "-", 0) > -1
+				searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
+				if StringUtil.Find(itemName, searchFor, 0) > -1
+					passedTests = false
+				endif
+			else
+				if StringUtil.Find(itemName, searchFor, 0) == -1
+					passedTests = false
+				endif
+			endif
+			i2 += 1
+		endwhile
+		if passedTests
+			bind_Utility.WriteToConsole("found: " + itemName)
+			JsonUtil.FormListAdd(resultsFile, "found_items", JsonUtil.FormListGet(zapFurnitureJson, "zap_items", i))
+			JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
+		endif
+		i += 1
+	endwhile
+
+	JsonUtil.Save(resultsFile)
+
+    ; i = 1
+    ; while i < 20
+    ;     int idx = 0
+    ;     int idx2 = 0
+    ;     string[] itemNames = JsonUtil.StringListToArray(f, "group_" + i + "_names")
+    ;     Form[] items = JsonUtil.FormListToArray(f, "group_" + i + "_items")
+    ;     if itemNames.Length == 0
+    ;         i = 20 ;break if empty
+    ;     endif
+    ;     while idx < itemNames.Length
+    ;         string itemName = itemNames[idx]
+    ;         bool passedTests = true
+    ;         idx2 = 0
+    ;         while idx2 < keywordArr.Length
+    ;             string searchFor = keywordArr[idx2]
+    ;             if StringUtil.Find(searchFor, "-", 0) > -1
+    ;                 searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
+    ;                 if StringUtil.Find(itemName, searchFor, 0) > -1
+    ;                     passedTests = false
+    ;                 endif
+    ;             else
+    ;                 if StringUtil.Find(itemName, searchFor, 0) == -1
+    ;                     passedTests = false
+    ;                 endif
+    ;             endif
+    ;             idx2 += 1
+    ;         endwhile
+    ;         if passedTests
+    ;             if result == ""
+    ;                 result = itemName
+    ;             else
+    ;                 result += "|" + itemName
+    ;             endif
+    ;             JsonUtil.FormListAdd(resultsFile, "found_items", items[idx])
+    ;             JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
+    ;         endif
+    ;         idx += 1
+    ;     endwhile
+    ;     i += 1
+    ; endwhile
+    ;JsonUtil.Save(resultsFile)
+
+endfunction
+
 function ShowDDCFurnitureItems()
 
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
-		listMenu.AddEntryItem("Return to Furniture Menu")
+		listMenu.AddEntryItem("<-- Return to Furniture Menu")
 		int i = 0
 		while i < bind_DDCFurnitureList.GetSize()
 			Form dev = bind_DDCFurnitureList.GetAt(i)
@@ -2008,7 +2168,7 @@ function ShowDSEFurnitureItems()
 
 		UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 		if listMenu
-			listMenu.AddEntryItem("Return to Furniture Menu")
+			listMenu.AddEntryItem("<-- Return to Furniture Menu")
 			int i = 0
 			while i < bind_DSEFurnitureList.GetSize()
 				Form dev = bind_DSEFurnitureList.GetAt(i)
@@ -2501,12 +2661,14 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	if eventName != ""
 		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + eventName)
+		outfitIds = bms.NarrowToValidOutfits(outfitIds)
 		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + outfitIds)
 	endif
 
 	bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
 	if outfitIds.Length == 0 || outfitIds == none
 		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_event_any_event")
+		outfitIds = bms.NarrowToValidOutfits(outfitIds)
 		bind_Utility.WriteToConsole("EventGetSubReady - any event: " + outfitIds)
 	endif
 

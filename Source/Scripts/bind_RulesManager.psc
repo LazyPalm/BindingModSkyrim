@@ -27,6 +27,10 @@ float property BehaviorFoodRuleMustAskEndTime auto conditional
 int property BehaviorEnterExitRuleCastlePermission auto conditional
 int property BehaviorEnterExitRuleInnPermission auto conditional
 int property BehaviorEnterExitRulePlayerHomePermission auto conditional
+int property BehaviorEnterExitRuleCastle auto conditional
+int property BehaviorEnterExitRuleInn auto conditional
+int property BehaviorEnterExitRulePlayerHome auto conditional
+int property BehaviorEnterExitRule auto conditional
 
 int property BehaviorStudiesAskToTrainMustAsk auto conditional
 int property BehaviorStudiesAskToTrainPermission auto conditional
@@ -1089,7 +1093,20 @@ function SetBehaviorRule(Actor a, int rule, bool on)
     elseif rule == BEHAVIOR_RULE_PRAYER_MUST_ASK()
         BehaviorRulePrayer = setting
 
+    elseif rule == BEHAVIOR_RULE_ENTRY_CASTLE()
+        BehaviorEnterExitRuleCastle = setting
+    elseif rule == BEHAVIOR_RULE_ENTRY_INN()
+        BehaviorEnterExitRuleInn = setting
+    elseif rule == BEHAVIOR_RULE_ENTRY_PLAYER_HOME()
+        BehaviorEnterExitRulePlayerHome = setting
+
       ;elseif other rules??
+    endif
+
+    if BehaviorEnterExitRuleCastle == 1 || BehaviorEnterExitRuleInn == 1 || BehaviorEnterExitRulePlayerHome == 1
+        BehaviorEnterExitRule = 1
+    else
+        BehaviorEnterExitRule = 0
     endif
 
 endfunction

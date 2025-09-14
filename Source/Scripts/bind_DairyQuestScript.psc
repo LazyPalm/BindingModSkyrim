@@ -11,6 +11,8 @@ bool pressedButton
 
 float startingLactacid
 
+int givenQty
+
 event OnInit()
 
     if self.IsRunning()
@@ -141,6 +143,9 @@ endstate
 
 function GiveLactacidBottle(int qty = 1)
 
+    givenQty = qty
+    ;StorageUtil.FormListClear(theSub, "bind_quest_ate_potion")
+
     UnregisterForUpdate()
     SetStage(20)
     SetObjectiveCompleted(5, true)
@@ -165,7 +170,7 @@ function GiveLactacidBottle(int qty = 1)
         SetObjectiveDisplayed(20, true)
         startingLactacid = bind_MMEHelper.GetLactacidLevel(theSub)
         GoToState("WaitForLactacidUpdate")
-        RegisterForSingleUpdate(15.0)
+        RegisterForSingleUpdate(10.0)
     else
         EndTheQuest()
     endif
@@ -181,10 +186,24 @@ state WaitForLactacidUpdate
 
     event OnUpdate()
         if bind_MMEHelper.CheckValid()
-            float lactacidLevel = bind_MMEHelper.GetLactacidLevel(theSub)
+
+            ; debug.MessageBox(StorageUtil.FormListToArray(theSub, "bind_quest_ate_potion"))
+
+            ; bool done = false
+            ; int consumedQty = StorageUtil.FormListCountValue(theSub, "bind_quest_ate_potion", bind_MMEHelper.GetLactacid())
+            ; if consumedQty >= givenQty
+            ;     done = true
+            ; endif
+
+            ;float lactacidLevel = bind_MMEHelper.GetLactacidLevel(theSub)
             ;debug.MessageBox(lactacidLevel)
-            if lactacidLevel == startingLactacid
-                RegisterForSingleUpdate(15.0)
+            ;debug.MessageBox("WaitForLactacidUpdate - calc: " + ((startingLactacid + givenQty) - lactacidLevel))
+            ;bind_Utility.WriteToConsole("WaitForLactacidUpdate - calc: " + ((startingLactacid + givenQty) - lactacidLevel))
+            int count = theSub.GetItemCount(bind_MMEHelper.GetLactacid())
+
+            if count > 0
+                bind_Utility.WriteToConsole("WaitForLactacidUpdate - count: " + count)
+                RegisterForSingleUpdate(10.0)
             else
                 ;sub drank potion
                 GoToState("")

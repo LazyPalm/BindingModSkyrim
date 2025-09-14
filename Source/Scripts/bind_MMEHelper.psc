@@ -75,3 +75,8 @@ function GiveLactacid(Actor a, int qty = 1) global
     MilkQUEST milk = GetMilkQuest()
     a.AddItem(milk.MME_Util_Potions.GetAt(0), qty, true)
 endfunction
+
+Form function GetLactacid() global
+    MilkQUEST milk = GetMilkQuest()
+    return milk.MME_Util_Potions.GetAt(0)
+endfunction

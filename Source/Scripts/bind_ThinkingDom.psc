@@ -328,9 +328,14 @@ bool function AddBondageRule_IsEligible(Actor akOriginator, string contextJson, 
         ;debug.MessageBox("safearea: " + result)
     endif
 
-    if m.bind_GlobalRulesBondageMax.GetValue() <= r.GetActiveBondageRulesCount(f.GetSubRef())
+    ; if m.bind_GlobalRulesBondageMax.GetValue() <= r.GetActiveBondageRulesCount(f.GetSubRef())
+    ;     result = false
+    ;     reason = "At max rules"
+    ; endif
+
+    if bind_Utility.GetTime() <  m.bind_GlobalRulesNextRule.GetValue()
         result = false
-        reason = "At max rules"
+        reason = "In cooldown"
     endif
 
     ;debug.MessageBox(result)

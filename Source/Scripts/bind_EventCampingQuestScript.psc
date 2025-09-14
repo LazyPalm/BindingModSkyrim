@@ -51,7 +51,7 @@ event OnInit()
         ;     mqs.DomPreferenceBoundSleepMaxHours = 8
         ; endif
 
-        bcs.DoStartEvent()
+        bcs.DoStartEvent(true)
         bcs.SetEventName(self.GetName())
 
         PrepareSub()
@@ -514,7 +514,7 @@ function EndTheQuest()
 
     bind_Utility.EnablePlayer()
 
-    bcs.DoEndEvent()
+    bcs.DoEndEvent(true)
 
     SetObjectiveDisplayed(100, false)
 

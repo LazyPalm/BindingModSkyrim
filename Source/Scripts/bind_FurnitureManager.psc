@@ -20,6 +20,8 @@ int dm3Slot = 0
 
 bool ddcEventRegistered
 
+string zapFurnitureJson = "bind_zap_furniture.json"
+
 Function LoadGame()
 
 	; bondageShell = zbfBondageShell.GetApi()

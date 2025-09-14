@@ -154,6 +154,9 @@ float property SubDistanceFromDomAtAction auto conditional
 
 int property GameplayAnyNpcCanDom auto conditional
 
+int property QuestDrankQty auto conditional
+int property QuestAteQty auto conditional
+
 ;***********************************************************
 ;thinking dom script conditional variables
 int property PunishmentsDue auto conditional
