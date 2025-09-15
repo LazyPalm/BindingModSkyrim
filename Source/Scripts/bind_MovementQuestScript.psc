@@ -156,12 +156,23 @@ int function GetCommentTypePoseOrderReset() global
     return 825
 endfunction
 
+int function GetCommentTypeEnterBuilding() global
+    return 830
+endfunction
+
+int function GetCommentTypeLeaveBuilding() global
+    return 835
+endfunction
+
 function MakeComment(Actor source, Actor target, int commentType) global
 
     bind_Utility.WriteToConsole("MakeComment source: " + source.GetDisplayName() + " target: " + target.GetDisplayName() + " commentType " + commentType)
 
     bind_MainQuestScript mq = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
     bind_ThinkingDom td = Quest.GetQuest("bind_MainQuest") as bind_ThinkingDom
+
+    bool makeCommentFlag = true
+
     if td.IsAiReady()
 
         string prompt = ""
@@ -177,9 +188,12 @@ function MakeComment(Actor source, Actor target, int commentType) global
 
         if prompt != ""
             td.UseDirectNarration(source, prompt)
+            makeCommentFlag = false
         endif
 
-    else
+    endif
+
+    if makeCommentFlag
 
         bind_MovementQuestScript bm = Quest.GetQuest("bind_MovementQuest") as bind_MovementQuestScript
 

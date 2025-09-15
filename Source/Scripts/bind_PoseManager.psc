@@ -17,6 +17,7 @@ int IDLE_STATE_BEING_WHIPPED = 11
 int IDLE_STATE_BOUND_ON_KNEES = 12
 int IDLE_STATE_CONVERSATION_POSE = 13
 int IDLE_STATE_INSPECTION = 14
+int IDLE_STATE_DOORSTEP = 15
 
 string idleHighKneel
 string idleHighKneelSystemName
@@ -68,6 +69,11 @@ string idleConversationPoseSystemName
 string idleConversationPoseBound
 string idleConversationPoseBoundSystemName
 
+string idleDoorstepPose
+string idleDoorstepPoseSystemName
+string idleDoorstepPoseBound
+string idleDoorstepPoseBoundSystemName
+
 bool setupCompleted
 
 bool replaceGag
@@ -81,6 +87,7 @@ Function LoadGame(Actor a)
 EndFunction
 
 Function ClearFavorites()
+
     idleHighKneel = ""
     idleHighKneelSystemName = ""
     idleHighKneelBound = ""
@@ -115,6 +122,27 @@ Function ClearFavorites()
     idleGetWhippedSystemName = ""
     idleGetWhippedBound = ""
     idleGetWhippedBoundSystemName = ""
+
+    idlePrayer = ""
+    idlePrayerSystemName = ""
+    idlePrayerBound = ""
+    idlePrayerBoundSystemName = ""
+
+    idleSitGround = ""
+    idleSitGroundSystemName = ""
+    idleSitGroundBound = ""
+    idleSitGroundBoundSystemName = ""
+
+    idleConversationPose = ""
+    idleConversationPoseSystemName = ""
+    idleConversationPoseBound = ""
+    idleConversationPoseBoundSystemName = ""
+
+    idleDoorstepPose = ""
+    idleDoorstepPoseSystemName = ""
+    idleDoorstepPoseBound = ""
+    idleDoorstepPoseBoundSystemName = ""
+
 EndFunction
 
 string Function _GetSystemName(string displayName)
@@ -478,6 +506,34 @@ EndFunction
 string Function GetConversationPoseDefault()
     return "Stand At Attention"
 EndFunction
+
+Function SetDoorstepPose(string idleName, bool bound = false)
+    If bound
+        idleDoorstepPoseBound = idleName
+        idleDoorstepPoseBoundSystemName = _GetSystemName(idleName)
+    Else
+        idleDoorstepPose = idleName
+        idleDoorstepPoseSystemName = _GetSystemName(idleName)
+    EndIf
+EndFunction
+
+string Function GetDoorstepPose(bool bound = false)
+    string result = ""
+    If bound
+        result = idleDoorstepPoseBound
+    Else    
+        result = idleDoorstepPose
+    EndIf
+    If result == ""
+        result = GetDoorstepPoseDefault()
+    endif
+    bind_Utility.WriteToConsole("doorstep post - bound: " + bound + " result: " + result)
+    return result
+EndFunction
+
+string Function GetDoorstepPoseDefault()
+    return "ZAP Deep Kneel"
+endfunction
 
 Function DoHighKneel()
     string playIdle
@@ -900,6 +956,29 @@ Function DoUndress()
 
 EndFunction
 
+bool Function InDoorstepPose()
+    If PoseIdleState == IDLE_STATE_DOORSTEP
+        return true
+    Else
+        return false 
+    EndIf
+EndFunction
+
+function DoDoorstepPose()
+    string playIdle
+    If theSubRef.WornHasKeyword(bman.zlib.zad_DeviousHeavyBondage)
+        playIdle = idleDoorstepPoseBoundSystemName
+    Else
+        playIdle = idleDoorstepPoseSystemName
+    EndIf
+    If playIdle == ""
+        playIdle = _GetSystemName(GetDoorstepPoseDefault())
+    EndIf
+    PoseIdleState = IDLE_STATE_DOORSTEP
+    AddToFaction(bind_PoseDoorstepFaction)
+    Debug.SendAnimationEvent(theSubRef, playIdle)
+endfunction
+
 Function ResumeStanding()    
 	string standingIdle 
     ;standingIdle = bman2.GetStandingIdle(0)
@@ -908,7 +987,7 @@ Function ResumeStanding()
     ;EndIf
     ;Debug.MessageBox("stand idle: " + standingIdle)
     ;main.SubDialogueInCorrectPose = 0
-	bind_Utility.LogOutput("returned idle: " + standingIdle)
+	bind_Utility.LogOutput("Pose Manager - ResumeStanding() idle: " + standingIdle)
     PoseIdleState = IDLE_STATE_NONE
 	Debug.SendAnimationEvent(theSubRef, standingIdle)
     RemovePosingFactions()
@@ -1074,6 +1153,7 @@ Faction property bind_PoseSitOnGroundFaction auto
 Faction property bind_PoseSpreadKneelFaction auto
 Faction property bind_PoseWhippedFaction auto
 Faction property bind_PoseInspectionFaction auto
+Faction property bind_PoseDoorstepFaction auto
 
 Faction property bind_WearingGagFaction auto
 Faction property bind_WearingLocationSpecificBondageFaction auto

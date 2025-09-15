@@ -39,7 +39,9 @@ function ShowMoreMenu()
     if listReturn == 0
         ShowActionMenu()
     elseif listReturn == 1
-        bind_BoundMasturbationQuest.Start()
+        if functions_script.ModInRunningState()
+            bind_BoundMasturbationQuest.Start()
+        endif
     endif
 
 endfunction
@@ -265,6 +267,7 @@ function ShowPoseMenu()
     listMenu.AddEntryItem("Sit On Groud")
     listMenu.AddEntryItem("Conversation - For Dialogue")
     listMenu.AddEntryItem("Deep Kneel - For Sleep")
+    listMenu.AddEntryItem("Doorstep Kneel - Entry/Exit")
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
@@ -325,6 +328,18 @@ function ShowPoseMenu()
     elseif listReturn == 10    
         pose_manager.DoDeepKneel()
         functions_script.PoseForSleep()
+    elseif listReturn == 11
+        pose_manager.DoDoorstepPose()
+        if think.IsAiReady()
+            ;have skyrimnet call an action
+        else
+
+        endif
+        if functions_script.ModInRunningState()
+            if !bind_EntryExitQuest.IsRunning()
+                bind_EntryExitQuest.Start()
+            endif
+        endif
     endif
 
 endfunction
@@ -633,5 +648,6 @@ bind_Functions property functions_script auto
 bind_ThinkingDom property think auto
 
 Quest property bind_BoundMasturbationQuest auto
+Quest property bind_EntryExitQuest auto
 
 GlobalVariable property bind_GlobalSafeZone auto
