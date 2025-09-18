@@ -43,6 +43,8 @@ int property BehaviorRuleLearnSpellPermission auto conditional
 
 int property BehaviorRulePrayer auto conditional
 
+int property BehaviorRuleBikiniArmor auto conditional
+int property BehaviorRuleEroticArmor auto conditional
 
 ; string bondageRulesKeys = ""
 ; string[] bondageRulesArr
@@ -500,8 +502,26 @@ endfunction
 
 bool function IsBikiniRequired(Actor a, bool safeArea)
 
-    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_BIKINI())
-    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_BIKINI())
+    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_BIKINI_ARMOR())
+    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_BIKINI_ARMOR())
+
+    bool onlySafeAreas = false
+    if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
+        onlySafeAreas = true
+    endif
+        
+    if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
+        return true
+    else
+        return false
+    endif
+
+endfunction
+
+bool function IsEroticArmorRequired(Actor a, bool safeArea)
+
+    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_EROTIC_ARMOR())
+    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_EROTIC_ARMOR())
 
     bool onlySafeAreas = false
     if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
@@ -855,7 +875,7 @@ int function BEHAVIOR_RULE_ASK_TO_TRAIN()
     return 19
 endfunction
 
-int function BEHAVIOR_RULE_BIKINI()
+int function BEHAVIOR_RULE_BIKINI_ARMOR()
     return 20
 endfunction
 
@@ -1100,6 +1120,14 @@ function SetBehaviorRule(Actor a, int rule, bool on)
     elseif rule == BEHAVIOR_RULE_ENTRY_PLAYER_HOME()
         BehaviorEnterExitRulePlayerHome = setting
 
+    elseif rule == BEHAVIOR_RULE_BIKINI_ARMOR()
+        BehaviorRuleBikiniArmor = setting
+        BehaviorRuleEroticArmor = 0
+        StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_EROTIC_ARMOR(), 0)
+    elseif rule == BEHAVIOR_RULE_EROTIC_ARMOR()
+        BehaviorRuleEroticArmor = setting
+        BehaviorRuleBikiniArmor = 0
+        StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_BIKINI_ARMOR(), 0)
       ;elseif other rules??
     endif
 

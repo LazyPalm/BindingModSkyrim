@@ -112,11 +112,23 @@ string[] slotFriendlyName
 
 ; bool wasUndressed
 
+Keyword slaArmorPrettyKeyword
+Keyword eroticArmorKeyword
+Keyword slaAmorSpendexKeyword
+Keyword slaArmorHalfNakedBikniKeyword
+Keyword slaArmorHalfNakedKeyword
+
 Function LoadGame(bool rebuildStorage = false)	
     SetupStorage(rebuildStorage)
 EndFunction
 
 Function SetupStorage(bool rebuildStorage)
+
+	slaArmorPrettyKeyword = Keyword.GetKeyword("sla_armorpretty")
+	eroticArmorKeyword = Keyword.GetKeyword("Eroticarmor")
+	slaAmorSpendexKeyword = Keyword.GetKeyword("sla_armorspendex")
+	slaArmorHalfNakedBikniKeyword = Keyword.GetKeyword("sla_armorhalfnakedbikini")
+	slaArmorHalfNakedKeyword = Keyword.GetKeyword("sla_armorhalfnaked")
 
 	if slotProtectionArray.Length != 27
 		slotProtectionArray = new int[27]
@@ -237,6 +249,22 @@ Function SetupStorage(bool rebuildStorage)
     ; EndIf
 
 EndFunction
+
+bool function IsBinkiArmor(Armor a)
+	if a.HasKeyWord(slaArmorHalfNakedBikniKeyword) ||  a.HasKeyWord(slaArmorHalfNakedKeyword)
+		return true
+	else
+		return false
+	endif
+endfunction
+
+bool function IsEroticArmor(Armor a)
+	if a.HasKeyWord(slaArmorPrettyKeyword) || a.HasKeyWord(eroticArmorKeyword) || a.HasKeyWord(slaAmorSpendexKeyword) || a.HasKeyWord(slaArmorHalfNakedKeyword)
+		return true
+	else
+		return false
+	endif
+endfunction
 
 string[] function GetSlotMaskNames()
 	return slotNameArray
@@ -1140,6 +1168,88 @@ function LearnOutfit(Actor a, string setName)
 
 endfunction
 
+Form[] wornItems 
+Form[] inBag
+
+function WhitelistItems(Actor a)
+
+	wornItems = new Form[128]
+	inBag = a.GetContainerForms()
+
+	int i = 0
+	int i2 = 0	
+	while i < inBag.Length
+		Form dev = inBag[i]
+		if dev as Armor
+			if dev.IsPlayable()
+				wornItems[i2] = dev
+				i2 += 1
+			endif
+		endif
+		i += 1
+	endwhile
+
+	WhitelistItemsLoaded(a)
+
+endfunction
+
+function WhitelistItemsLoaded(Actor a)
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+	int i = 0
+	while i < wornItems.Length
+		Form dev = wornItems[i]
+		string inWhiteList = ""
+		if StorageUtil.FormListHas(a, "bind_bikini_white_list", dev)
+			inWhiteList = "BIKINI - "
+		endif
+		if StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
+			inWhiteList = "EROTIC - "
+		endif
+		listMenu.AddEntryItem(inWhiteList + dev.GetName())
+		i += 1
+	endwhile
+
+	; int i = 0
+	; int i2 = 0	
+	; while i < slotFriendlyName.Length
+	; 	Form dev = a.GetWornForm(slotMaskArray[i])
+	; 	if dev != none
+	; 		wornItems[i2] = dev
+	; 		i2 += 1
+	; 		string inWhiteList = ""
+	; 		if StorageUtil.FormListHas(a, "bind_bikini_white_list", dev)
+	; 			inWhiteList = "BIKINI - "
+	; 		endif
+	; 		if StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
+	; 			inWhiteList = "EROTIC - "
+	; 		endif
+	; 		listMenu.AddEntryItem(inWhiteList + dev.GetName())
+	; 	endif
+	; 	i += 1
+	; endwhile
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+	if listReturn >= 0
+		Form dev = wornItems[listReturn]
+		;debug.MessageBox(dev)
+		if StorageUtil.FormListHas(a, "bind_bikini_white_list", dev)
+			StorageUtil.FormListRemove(a, "bind_bikini_white_list", dev)
+			StorageUtil.FormListAdd(a, "bind_erotic_white_list", dev)
+		elseif StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
+			StorageUtil.FormListRemove(a, "bind_erotic_white_list", dev)
+		else
+			StorageUtil.FormListAdd(a, "bind_bikini_white_list", dev)
+		endif
+		WhitelistItemsLoaded(a)
+	endif
+
+
+endfunction
+
 ; function SetAmmo(Form a)
 ; 	gearBufferAmmo = a
 ; endfunction
@@ -1157,3 +1267,17 @@ Keyword property ClothingBody auto
 
 ObjectReference property StorageChest auto
 ObjectReference property StorageChestDom auto
+
+;*************************************************************
+;interesting functions
+;
+;; 36 - ring slot
+;Armor myPrecious = gollum.GetEquippedArmorInSlot(36)
+;
+; ; Force the player to unequip the full helmets
+; Game.GetPlayer().UnequipItemSlot(30)
+;
+;int SlotMask = ArmorProperty.GetSlotMask()
+; if (SlotMask == 4)
+; 	Debug.Trace("This armor is equipped on the body, and only the body.")
+; endif

@@ -181,6 +181,7 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Debug Tests")
     listMenu.AddEntryItem("Clear Future Doms List")
     listMenu.AddEntryItem("Run Dressing Room Quest")
+    listMenu.AddEntryItem("Whitelist Items")
     ;listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
     ; listMenu.AddEntryItem("Dom Follow 30s")
@@ -224,6 +225,8 @@ function ShowSettingsMenu()
                 q.Start()
             endif
         endif
+    elseif listReturn == 6
+        gear_manager.WhitelistItems(Game.GetPlayer())
     ; elseif listReturn == 7
     ;     ShowOutfitsMenu()
         ;     bind_MovementQuestScript.WalkTo(mqs.GetDomRef(), mqs.GetSubRef(), 128.0, 60)

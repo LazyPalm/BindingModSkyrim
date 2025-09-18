@@ -511,9 +511,13 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 			if wearingSetId > 0
 				Armor dev = akBaseObject as Armor
 				if dev != none
+					
 					int slotMask = dev.GetSlotMask()
+					
 					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
+					
 					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
+					
 					if hasBlock || nudeRule
 						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
@@ -521,7 +525,9 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 							theSub.UnequipItem(dev, false, true)
 						endif
 					endif
+
 					bind_Utility.WriteToConsole("setId: " + wearingSetId + " f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
+
 				endif
 			endif
 
@@ -542,6 +548,30 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 		;MQS.ResetStripBuffers(0) ;do we need to do this still?
 
 		If MQS.IsSub == 1 ;&& fs.GetModState() == 1 ;TODO - && mod running state check from global
+
+			Armor item = akBaseObject as Armor
+			if item != none
+				if !item.IsJewelry()
+					if RulesManager.IsBikiniRequired(theSub, safeZone)
+						if GearManager.IsBinkiArmor(item) || StorageUtil.FormListHas(theSub, "bind_bikini_white_list", item)
+							;debug.Notification("bikini armor - YES")
+						else
+							;debug.Notification("bikini armor - NO")
+							bind_Utility.WriteInternalMonologue("I am only allowed to wear bikini armor...")
+							theSub.UnequipItem(item, false, true)						
+						endif
+					elseif RulesManager.IsEroticArmorRequired(theSub, safeZone)
+						if GearManager.IsEroticArmor(item) || StorageUtil.FormListHas(theSub, "bind_erotic_white_list", item)
+							;debug.Notification("erotic armor - YES")
+						else
+							;debug.Notification("erotic armor - NO")
+							bind_Utility.WriteInternalMonologue("I am only allowed to wear erotic armor...")
+							theSub.UnequipItem(item, false, true)	
+						endif
+					endif
+				endif
+			endif
+
 
 			;Debug.MessageBox(akBaseObject)
 

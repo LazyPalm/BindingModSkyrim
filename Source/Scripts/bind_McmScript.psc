@@ -292,7 +292,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.15"
+    version = "0.4.16"
 
     theSub = fs.GetSubRef()
 
@@ -597,6 +597,51 @@ event OnOptionHighlight(int option)
 
     elseif option == toggleAdventuringUseDwarven
         SetInfoText("Lock the player into Dwarven Devious Armor for the duration of the quest.")
+
+    elseif option == toggleBehaviorRules[0]
+        SetInfoText("No slot 32 armor is allowed. Player must remain nude.")
+    elseif option == toggleBehaviorRules[1]
+        SetInfoText("Not allowed to sleep in beds. Must ask Dom to sleep - starts Bound Sleep quest.")
+    elseif option == toggleBehaviorRules[2]
+        SetInfoText("When entering castles, inns, and player homes, Dom might order the player to stand at attention.")
+    elseif option == toggleBehaviorRules[3]
+        SetInfoText("When using shrines, player must remove shoes.")
+    elseif option == toggleBehaviorRules[4]
+        SetInfoText("When using shrines, player must remove slot 32 body item.")
+    elseif option == toggleBehaviorRules[5]
+        SetInfoText("When using shrines, player must use the Prayer pose from the Action menu.")
+    elseif option == toggleBehaviorRules[6]
+        SetInfoText("Player must ask Dom before using a shrine.")
+    elseif option == toggleBehaviorRules[7]
+        SetInfoText("If Dirt & Blood or Bathing in Skyrim are enabled, player must be washed before using a shrine.")
+    elseif option == toggleBehaviorRules[8]
+        SetInfoText("Player must be whipped before using a shrine. Lasts 1 game day.")
+    elseif option == toggleBehaviorRules[9]
+        SetInfoText("Player must used the conversation pose to have the Dom start a conversation. No direct NPC conversation is allowed.")
+    elseif option == toggleBehaviorRules[10]
+        SetInfoText("Player must ask the dom before speaking to an NPC. Lasts until location changes.")
+    elseif option == toggleBehaviorRules[11]
+        SetInfoText("Player must use the Conversation pose from the Action menu before starting coversation with an NPC.")
+    elseif option == toggleBehaviorRules[12]
+        SetInfoText("Player must ask the Dom before entering or leaving a castle.")
+    elseif option == toggleBehaviorRules[13]
+        SetInfoText("Player must ask the Dom before entering or leaving a inn.")
+    elseif option == toggleBehaviorRules[14]
+        SetInfoText("Player must ask the Dom before entering or leaving a player home.")
+    elseif option == toggleBehaviorRules[15]
+        SetInfoText("Player must ask the Dom before consuming food or drink.")
+    elseif option == toggleBehaviorRules[16]
+        SetInfoText("Player must use the Sit on Ground pose before consuming food or drink.")
+    elseif option == toggleBehaviorRules[17]
+        SetInfoText("Player has 1 game hour to thank Dom after having sex.")
+    elseif option == toggleBehaviorRules[18]
+        SetInfoText("Player must ask the Dom before reading books to learn spells or skills.")
+    elseif option == toggleBehaviorRules[19]
+        SetInfoText("Player must ask the Dom before speaking to a trainer.")
+    elseif option == toggleBehaviorRules[20]
+        SetInfoText("Player must wear Binki armor (slaArmorHalfNakedBikniKeyword, slaArmorHalfNakedKeyword).")
+    elseif option == toggleBehaviorRules[21]
+        SetInfoText("Player must wear Binki armor (slaArmorPrettyKeyword, eroticArmorKeyword, slaAmorSpendexKeyword, slaArmorHalfNakedKeyword).")
 
     endif
 
