@@ -1,7 +1,7 @@
 {
 	"int" : 
 	{
-		"last_set_uid" : 1012
+		"last_set_uid" : 1013
 	},
 	"intList" : 
 	{
@@ -18,7 +18,8 @@
 			1009,
 			1010,
 			1011,
-			1012
+			1012,
+			1013
 		],
 		"used_for_event_any_event" : 
 		[
@@ -80,6 +81,20 @@
 		"used_for_location_unsafe_area" : 
 		[
 			1008
+		],
+		"enabled_oufits" : 
+		[
+			1001,
+			1002,
+			1003,
+			1004,
+			1005,
+			1006,
+			1007,
+			1008,
+			1010,
+			1012,
+			1013
 		]
 	},
 	"stringList" : 
@@ -97,7 +112,8 @@
 			"City Bondage Outfit",
 			"Whipping Outfit",
 			"Always Secured Outfit",
-			"Crafting Outfit"
+			"Crafting Outfit",
+			"Erotic Armor Bondage Outfit"
 		]
 	}
 }

@@ -6,6 +6,11 @@
 			"0x3d2eb|Devious Devices - Expansion.esm"
 		]
 	},
+	"int" : 
+	{
+		"remove_existing_gear" : 0,
+		"use_random_bondage" : 0
+	},
 	"string" : 
 	{
 		"bondage_outfit_name" : "Crafting Outfit"

@@ -7,6 +7,11 @@
 			"0x1ab0e|Devious Devices - Expansion.esm"
 		]
 	},
+	"int" : 
+	{
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
 	"intList" : 
 	{
 		"block_slots" : 

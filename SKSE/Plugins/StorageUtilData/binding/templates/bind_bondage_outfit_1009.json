@@ -1,7 +1,7 @@
 {
 	"float" : 
 	{
-		"dynamic_bondage_expires" : 3.1946790218353271
+		"dynamic_bondage_expires" : 0.0
 	},
 	"formList" : 
 	{
@@ -24,7 +24,8 @@
 	},
 	"int" : 
 	{
-		"use_random_bondage" : 1
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
 	},
 	"intList" : 
 	{

@@ -32,7 +32,6 @@ function ShowMoreMenu()
     listMenu.AddEntryItem("<-- Return To Menu")
     listMenu.AddEntryItem("Masturbate")
 
-
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
 
@@ -40,7 +39,11 @@ function ShowMoreMenu()
         ShowActionMenu()
     elseif listReturn == 1
         if functions_script.ModInRunningState()
-            bind_BoundMasturbationQuest.Start()
+            if functions_script.GetSubRef().WornHasKeyword(bondage_manager.zlib.zad_DeviousBelt)
+                debug.MessageBox("You look down helplessly at the belt locking away your sex. There will be no self pleasure for now...")
+            else
+                bind_BoundMasturbationQuest.Start()
+            endif
         endif
     endif
 

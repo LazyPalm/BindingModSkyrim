@@ -1028,8 +1028,10 @@ endevent
 
 function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 
+	bind_MainQuestScript m = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+
 	string bondageOutfitFile
-    bondageOutfitFile = "bind_bondage_outfit_" + outfitId + ".json"
+    bondageOutfitFile = "binding/games/" + m.SaveGameUid + "/bind_bondage_outfit_" + outfitId + ".json"
 
     GoToState("WorkingState")
 

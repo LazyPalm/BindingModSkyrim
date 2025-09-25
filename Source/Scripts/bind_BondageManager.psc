@@ -24,7 +24,8 @@ string[] bondageTypes
 
 float sleepTime = 0.5
 
-string bondageOutfitsFile = "bind_bondage_outfits.json"
+string bondageOutfitsFileBase = "bind_bondage_outfits.json"
+string bondageOutfitsFile = ""
 
 bind_BondageManager function GetBondageManager() global 
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
@@ -33,23 +34,57 @@ endfunction
 Actor theSubRef
 
 bool setupOutfitUsedArray
+bool createdOutfitLocalFiles
 
 Function LoadGame(bool rebuildStorage = false)
     
     theSubRef = Game.GetPlayer()
 
-    if !setupOutfitUsedArray
-        int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
-        ;debug.MessageBox("bondageSetIds: " + bondageSetIds)
-        int idx = 0
-        while idx < bondageSetIds.Length
-            StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage", bondageSetIds[idx])
-            idx += 1
+    ;createdOutfitLocalFiles = false ;remove this
+
+    bondageOutfitsFile = "binding/games/" + main.SaveGameUid + "/" + bondageOutfitsFileBase
+
+    if !createdOutfitLocalFiles
+
+        string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
+        string targetFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/"
+
+        string outfitsFileText = MiscUtil.ReadFromFile(folder + bondageOutfitsFileBase)
+        ;ShowMessage(outfitsFileText, false)
+        MiscUtil.WriteToFile(targetFolder + bondageOutfitsFileBase, outfitsFileText, false, false)
+
+        string backupOutfitList = ""
+
+        int[] outfitList = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+        int i = 0
+        string outfitFileText
+        while i < outfitList.Length
+            if backupOutfitList != ""
+                backupOutfitList += "|"
+            endif
+            backupOutfitList += outfitList[i]
+            outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+            MiscUtil.WriteToFile(targetFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+            i += 1
         endwhile
-        int[] usage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
-        ;debug.MessageBox("usage: " + usage)
-        setupOutfitUsedArray = true
+
+        MiscUtil.WriteToFile(folder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+
+        createdOutfitLocalFiles = true
     endif
+
+    ; if !setupOutfitUsedArray
+    ;     int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+    ;     ;debug.MessageBox("bondageSetIds: " + bondageSetIds)
+    ;     int idx = 0
+    ;     while idx < bondageSetIds.Length
+    ;         StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage", bondageSetIds[idx])
+    ;         idx += 1
+    ;     endwhile
+    ;     int[] usage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
+    ;     ;debug.MessageBox("usage: " + usage)
+    ;     setupOutfitUsedArray = true
+    ; endif
 
     if bondageTypes.Length != 18
         bondageTypes = new string[18]
@@ -104,6 +139,10 @@ endfunction
 
 function EquipBondageOutfit(Actor a, int setId)
 
+    ; if StorageUtil.GetIntValue(a, "bind_wearing_outfit_id") == setId
+    ;     debug.MessageBox("this should not happen??")
+    ; endif
+
     float sleepWait = 0.1
 
     if setId == -1
@@ -123,7 +162,7 @@ function EquipBondageOutfit(Actor a, int setId)
 
     EquippingBondageOutfit = true
 
-    string f = "bind_bondage_outfit_" + setId + ".json"
+    string f = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + setId + ".json"
 
     ;NOTE - there is probably no reason to clean this out
     if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
@@ -144,10 +183,12 @@ function EquipBondageOutfit(Actor a, int setId)
             Form item = inventory[i]
             If item.IsPlayable()
                 if a.IsEquipped(item) && !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
-                    a.UnequipItem(item, false, true)
-                    bind_Utility.DoSleep(sleepWait)
-                    bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
-                    StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
+                    if !((item as Armor).IsJewelry())
+                        a.UnequipItem(item, false, true)
+                        bind_Utility.DoSleep(sleepWait)
+                        bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
+                        StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
+                    endif
                 endif
             endif
             i += 1
@@ -199,7 +240,7 @@ function EquipBondageOutfit(Actor a, int setId)
         float expirationDate = JsonUtil.GetFloatValue(f, "dynamic_bondage_expires", 0.0)
         if expirationDate < bind_Utility.GetTime() || JsonUtil.FormListCount(f, "dynamic_bondage_items") == 0
             
-            debug.MessageBox("resetting dynamic gear")
+            bind_Utility.WriteNotification("resetting dynamic gear", bind_Utility.TextColorRed())
 
             JsonUtil.FormListClear(f, "dynamic_bondage_items")
             JsonUtil.SetFloatValue(f, "dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
@@ -243,7 +284,7 @@ function EquipBondageOutfit(Actor a, int setId)
             bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
 
             string searchString = ""
-            string rf = "bind_dd_search_result.json"
+            string rf = "binding/bind_dd_search_result.json"
 
             bool armsBound = false
             Form bodyItem
@@ -461,6 +502,11 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
 
     bool isSafeArea = false
 
+    if !JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", currentBondageSet)
+        ;check to see if the current set is still enabled
+        currentBondageSet = -1
+    endif
+
     if currentLocation.HasKeywordString("LocTypePlayerHouse")
         isSafeArea = true
         outfitKey = "location_player_home"
@@ -648,11 +694,11 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
 endfunction
 
 int[] function NarrowToValidOutfits(int[] outfitIds)
-    int[] outfitUsage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
+    int[] outfitUsage = JsonUtil.IntListToArray(bondageOutfitsFile, "enabled_oufits")
     StorageUtil.IntListClear(theSubRef, "bind_bondage_outfit_usage_matches")
     int idx = 0
     while idx < outfitIds.Length
-        if StorageUtil.IntListHas(theSubRef, "bind_bondage_outfit_usage", outfitIds[idx])
+        if JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", outfitIds[idx])
             StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage_matches", outfitIds[idx])
         endif
         idx += 1
@@ -2485,7 +2531,7 @@ endfunction
 function LearnWornDdItemsToSet(Actor theSub, int outfitId)
 
     string bondageOutfitFile
-    bondageOutfitFile = "bind_bondage_outfit_" + outfitId + ".json"
+    bondageOutfitFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + outfitId + ".json"
 
     GoToState("WorkingState")
 
@@ -2534,7 +2580,7 @@ function SaveWornDdItemsAsSet(Actor theSub)
         JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", nextId, false)
         JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", nextId)
         JsonUtil.Save(bondageOutfitsFile)
-        bondageOutfitFile = "bind_bondage_outfit_" + nextId + ".json"
+        bondageOutfitFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + nextId + ".json"
         ;loadedSetId = nextId
 
         ;StorageUtil.StringListAdd(TheWardrobe, "sets_list", result)
@@ -2611,7 +2657,7 @@ string[] function SearchDeviousItems(string keywords)
 
     string[] keywordArr = StringUtil.Split(keywords, ",")
 
-    string f = "bind_dd_db.json"
+    string f = "binding/bind_dd_db.json"
 
     int i = 0
 
@@ -2641,7 +2687,7 @@ string[] function SearchDeviousItems(string keywords)
     string result = ""
     int foundCount = 0
 
-    string resultsFile = "bind_dd_search_result.json"
+    string resultsFile = "binding/bind_dd_search_result.json"
     JsonUtil.StringListClear(resultsFile, "found_names")
     JsonUtil.FormListClear(resultsFile, "found_items")
 

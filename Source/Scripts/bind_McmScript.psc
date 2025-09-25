@@ -6,6 +6,8 @@ string selectedPage
 
 int clickedBackupBondageOutfits
 int clickedRestoreBondageOutfits
+int clickedResetCurrentSaveBondageOutfits
+int clickedUpdateTemplateFromCurrentSave
 
 string[] letters
 string selectedLetter
@@ -245,7 +247,8 @@ int toggleOutfitsLearn
 ;bondage outfits
 string[] materials
 
-string bondageOutfitsFile = "bind_bondage_outfits.json"
+string bondageOutfitsFileBase = "bind_bondage_outfits.json"
+string bondageOutfitsFile
 string bondageOutfitFile
 
 int toggleUseOutfit
@@ -292,7 +295,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.16"
+    version = "0.4.17"
 
     theSub = fs.GetSubRef()
 
@@ -396,6 +399,8 @@ Event OnConfigOpen()
 EndEvent
 
 Event OnPageReset(string page)
+
+    bondageOutfitsFile = "binding/games/" + main.SaveGameUid + "/" + bondageOutfitsFileBase
 
     ; string msg = "does this work??"
 	; bool continue = ShowMessage(msg, true, "$Yes", "$No")
@@ -652,9 +657,13 @@ function DisplayBackup()
     AddHeaderOption("Bondage Outfit Backup")
     AddHeaderOption("")
 
-    clickedBackupBondageOutfits = AddTextOption("Backup Bondage Outfits", "")
+    clickedBackupBondageOutfits = AddTextOption("Backup: bondage templates", "")
 
-    clickedRestoreBondageOutfits = AddTextOption("Restore Bondage Outfits", "")
+    clickedRestoreBondageOutfits = AddTextOption("Restore: bondage templates", "")
+
+    clickedResetCurrentSaveBondageOutfits = AddTextOption("Reset: save game bondage outfits", "")
+
+    clickedUpdateTemplateFromCurrentSave = AddTextOption("Update: templates from save", "")
 
 endfunction
 
@@ -681,7 +690,7 @@ function DisplayBondageOutfits()
         AddHeaderOption("")
 
         int useOutfit = 0
-        if StorageUtil.IntListHas(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
+        if JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", selectedBondageOutfitId)
             useOutfit = 1
         endif
         toggleUseOutfit = AddToggleOption("Use This Set", useOutfit)
@@ -697,12 +706,12 @@ function DisplayBondageOutfits()
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
         AddTextOption("", "")
 
-        if useRandomBondage == 1
+        ;if useRandomBondage == 1
 
             int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
 
             AddHeaderOption("Item Chances")
-            AddHeaderOption("")
+            AddHeaderOption("* Used when random bondage is ENABLED")
 
             sliderChance[0] = AddSliderOption("Anal Plug", chances[0], "{0}")
             sliderChance[1] = AddSliderOption("Vaginal Plug", chances[1], "{0}")
@@ -740,20 +749,20 @@ function DisplayBondageOutfits()
                 endif
             endif
 
-        else
+        ;else
 
             AddHeaderOption("Add Item - Devious Devices")
-            AddHeaderOption("")
+            AddHeaderOption("* Used when random bondage is DISABLED")
             inputDeviousKeywordSearch = AddInputOption("Keyword Search", deviousKeywordSearch)
             menuSearchResults = AddMenuOption("Items Found", selectedFoundItem)
-            clickedFoundItem = AddTextOption("Add DD Found DD Item To Set", "")
+            clickedFoundItem = AddTextOption("Add Found DD Item To Fixed Items", "")
             AddTextOption("", "")        
 
             AddHeaderOption("Fixed Items - Devious Devices")
-            AddHeaderOption("")
+            AddHeaderOption("* Used when random bondage is DISABLED")
             clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
             AddTextOption("", "")
-            Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+            setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
             i = 0
             while i < setItems.Length
                 bondageSetRemoveDdToggle[i] = AddTextOption(setItems[i].GetName(), "")
@@ -766,7 +775,7 @@ function DisplayBondageOutfits()
                 endif
             endif
 
-        endif
+        ;endif
 
         AddHeaderOption("Fixed Items - Clothing & Armor")
         AddHeaderOption("")
@@ -1836,6 +1845,13 @@ EndFunction
 
 Function DisplayStatus()
 
+    AddHeaderOption("Save Information")
+    AddHeaderOption("")
+    AddTextOption("Save UID", main.SaveGameUid)
+    AddTextOption("", "")
+    AddTextOption(bondageOutfitsFile, "")
+    AddTextOption(bondageOutfitsFileBase, "")
+
     AddHeaderOption("Submissive Status")
     AddHeaderOption("")
 
@@ -2383,16 +2399,18 @@ Event OnOptionSelect(int option)
 
     if selectedPage == "Backup Settings"
 
-        if option == clickedBackupBondageOutfits
-            if ShowMessage("Make bondage outfit backup?", true, "$Yes", "$No")
-                string folder = "data/skse/plugins/StorageUtilData/"
-                string outfitsFileText = MiscUtil.ReadFromFile(folder + bondageOutfitsFile)
+        if option == clickedResetCurrentSaveBondageOutfits
+            if ShowMessage("Reset current save bondage outfits from bondage outfit template data?", true, "$Yes", "$No")
+                string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
+                string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/"
+                string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
                 ;ShowMessage(outfitsFileText, false)
-                MiscUtil.WriteToFile(folder + "bind_bondage_outfits_backup.txt", outfitsFileText, false, false)
+                MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
 
                 string backupOutfitList = ""
 
-                int[] outfitList = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+                int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
+
                 i = 0
                 string outfitFileText
                 while i < outfitList.Length
@@ -2401,26 +2419,65 @@ Event OnOptionSelect(int option)
                     endif
                     backupOutfitList += outfitList[i]
                     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                    MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + "_backup.txt", outfitFileText, false, false)
+                    MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
                     i += 1
                 endwhile
 
-                MiscUtil.WriteToFile(folder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+                selectedBondageOutfit = ""
+                selectedBondageOutfitId = 0
 
-                ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 overwrite folder.", false)
+                ShowMessage("Bondage outfits refreshed from template data. Be sure to re-load the save.", false)
+            endif
+        endif
+
+        if option == clickedBackupBondageOutfits
+            if ShowMessage("Make bondage outfit templates backup?", true, "$Yes", "$No")
+                string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
+                string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/"
+                string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
+                ;ShowMessage(outfitsFileText, false)
+                MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+
+                string backupOutfitList = ""
+
+                int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
+
+                i = 0
+                string outfitFileText
+                while i < outfitList.Length
+                    if backupOutfitList != ""
+                        backupOutfitList += "|"
+                    endif
+                    backupOutfitList += outfitList[i]
+                    outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+                    MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                    i += 1
+                endwhile
+
+                MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+
+                ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 binding_backup overwrite folder.", false)
             endif
         endif
 
         if option == clickedRestoreBondageOutfits
-            string folder = "data/skse/plugins/StorageUtilData/"
-            if !MiscUtil.FileExists(folder + "bind_bondage_outfits_backup.txt")
+            string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
+            string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/"
+            if !MiscUtil.FileExists(backupFolder + "bind_bondage_outfits.json")
                 ShowMessage("No backup exists", false)
             else
-                if ShowMessage("Restore bondage outfit backup? This will overwrite your current outfits", true, "$Yes", "$No")
-                    string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits_backup.txt")
-                    MiscUtil.WriteToFile(folder + bondageOutfitsFile, outfitsFileText, false, false)
+                if ShowMessage("Restore bondage outfit templates backup? This will overwrite your current outfit templates.", true, "$Yes", "$No")
 
-                    string backupOutfitList = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_list_backup.txt")
+                    string outfitsFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfits.json")
+
+                    ;debug.MessageBox(outfitsFileText)
+
+                    MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+
+                    string backupOutfitList = MiscUtil.ReadFromFile(backupfolder + "bind_bondage_outfit_list_backup.txt")
+
+                    debug.MessageBox(backupOutfitList)
+
                     string[] outfitList = StringUtil.Split(backupOutfitList, "|")
                     
                     ;ShowMessage(outfitList, false)
@@ -2428,13 +2485,45 @@ Event OnOptionSelect(int option)
                     i = 0
                     string outfitFileText
                     while i < outfitList.Length
-                        outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + "_backup.txt")
+                        outfitFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
                         MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
                         i += 1
                     endwhile
 
-                    ShowMessage("Restore Completed. You MUST reload the save to see changes.", false)
+                    ShowMessage("Restore Completed. Template data will be available for new games.", false)
                 endif
+            endif
+        endif
+
+        if option == clickedUpdateTemplateFromCurrentSave
+            string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
+            string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/"
+            if ShowMessage("Update bondage outfit templates with data from this save game? WARNING: this will overwrite templates for new games.", true, "$Yes", "$No")
+
+                string outfitsFileText = MiscUtil.ReadFromFile(gameFolder + "bind_bondage_outfits.json")
+                ;ShowMessage(outfitsFileText, false)
+                MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+
+                string backupOutfitList = ""
+
+                int[] outfitList = JsonUtil.IntListToArray("binding/games/" + main.SaveGameUid + "/bind_bondage_outfits.json", "bondage_set_ids")
+
+                i = 0
+                string outfitFileText
+                while i < outfitList.Length
+                    if backupOutfitList != ""
+                        backupOutfitList += "|"
+                    endif
+                    backupOutfitList += outfitList[i]
+                    outfitFileText = MiscUtil.ReadFromFile(gameFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+                    MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                    i += 1
+                endwhile
+
+                selectedBondageOutfit = ""
+                selectedBondageOutfitId = 0
+
+                ShowMessage("Bondage template update completed.", false)
             endif
         endif
 
@@ -2457,11 +2546,11 @@ Event OnOptionSelect(int option)
 
         if option == toggleUseOutfit
             int newValue = 0
-            if StorageUtil.IntListHas(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
-                StorageUtil.IntListRemove(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId, true)
+            if JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", selectedBondageOutfitId)
+                JsonUtil.IntListRemove(bondageOutfitsFile, "enabled_oufits", selectedBondageOutfitId, true)
                 newValue = 0
             else
-                StorageUtil.IntListAdd(theSub, "bind_bondage_outfit_usage", selectedBondageOutfitId)
+                JsonUtil.IntListAdd(bondageOutfitsFile, "enabled_oufits", selectedBondageOutfitId)
                 newValue = 1
             endif
             SetToggleOptionValue(option, newValue)
@@ -2491,7 +2580,10 @@ Event OnOptionSelect(int option)
             endif
             JsonUtil.SetIntValue(bondageOutfitFile, "use_random_bondage", useRandomBondage)
             JsonUtil.Save(bondageOutfitFile)
-            ForcePageReset()
+            SetToggleOptionValue(toggleBondageOutfitUseRandomBondage, useRandomBondage)
+            ;bind_Utility.DoSleep(1.0)
+            ;ForcePageReset()
+            ;DisplayBondageOutfits()
         endif
 
         if option == clickedLearnBondageOutfit
@@ -2511,7 +2603,7 @@ Event OnOptionSelect(int option)
         if option == clickedFoundItem
             if selectedFoundItemId > -1
                 if ShowMessage("Add DD item " + selectedFoundItem + "?", true, "$Yes", "$No")
-                    string resultsFile = "bind_dd_search_result.json"
+                    string resultsFile = "binding/bind_dd_search_result.json"
                     Form dev = JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
                     if dev
                         JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
@@ -2530,6 +2622,7 @@ Event OnOptionSelect(int option)
                 SetToggleOptionValue(option, 0)
             endif
             JsonUtil.Save(bondageOutfitFile)
+            
         endif
 
         i = 0
@@ -2542,7 +2635,8 @@ Event OnOptionSelect(int option)
                     JsonUtil.IntListAdd(bondageOutfitsFile, "used_for_" + bondageOutfitUsageKey[i], selectedBondageOutfitId)
                     SetToggleOptionValue(option, 1)
                 endif
-                JsonUtil.Save(bondageOutfitFile)
+                JsonUtil.Save(bondageOutfitsFile)
+                ;debug.MessageBox("save: " + bondageOutfitsFile)
             endif
             i += 1
         endwhile
@@ -4069,7 +4163,7 @@ Event OnOptionMenuAccept(int option, int index)
         selectedBondageOutfit = bondageSetNames[index]
         selectedBondageOutfitId = bondageSetIds[index]
         selectedBondageOutfitIndex = index
-        bondageOutfitFile = "bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
+        bondageOutfitFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
         ;SetMenuOptionValue(menuBondageOutfitsList, bondageSetNames[index])
         ForcePageReset()
     endif

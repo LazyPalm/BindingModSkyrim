@@ -518,7 +518,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					
 					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
 					
-					if hasBlock || nudeRule
+					if hasBlock || (nudeRule && slotMask != 128) ;allow shoes on nudity rule
 						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")

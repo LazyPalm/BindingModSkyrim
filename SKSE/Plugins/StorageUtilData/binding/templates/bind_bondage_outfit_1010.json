@@ -1,7 +1,8 @@
 {
 	"int" : 
 	{
-		"remove_existing_gear" : 1
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
 	},
 	"intList" : 
 	{

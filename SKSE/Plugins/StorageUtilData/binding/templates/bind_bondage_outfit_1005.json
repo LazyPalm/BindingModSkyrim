@@ -3,12 +3,17 @@
 	{
 		"fixed_bondage_items" : 
 		[
-			"0x592b0|Devious Devices - Expansion.esm",
-			"0x592c4|Devious Devices - Expansion.esm",
-			"0x592b9|Devious Devices - Expansion.esm",
-			"0x1dcf|Devious Devices - Expansion.esm",
-			"0x592bf|Devious Devices - Expansion.esm"
+			"0x5255c|Devious Devices - Expansion.esm",
+			"0x5255d|Devious Devices - Expansion.esm",
+			"0x5255b|Devious Devices - Expansion.esm",
+			"0x592b4|Devious Devices - Expansion.esm",
+			"0x592be|Devious Devices - Expansion.esm"
 		]
+	},
+	"int" : 
+	{
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
 	},
 	"intList" : 
 	{
@@ -22,8 +27,8 @@
 			67108864,
 			524288,
 			4194304,
-			8388608,
 			16777216,
+			8388608,
 			134217728,
 			536870912,
 			268435456
@@ -31,7 +36,7 @@
 	},
 	"string" : 
 	{
-		"bondage_outfit_name" : "Harsh Bondage Outfit"
+		"bondage_outfit_name" : "Bound Sleep Outfit"
 	},
 	"stringList" : 
 	{
@@ -45,8 +50,8 @@
 			"Chest Secondary - Slot 56",
 			"Pelvis Primary - Slot 49",
 			"Pelvis Secondary - Slot 54",
-			"Leg Primary - Slot 53",
 			"Leg Secondary - Slot 54",
+			"Leg Primary - Slot 53",
 			"Shoulder - Slot 57",
 			"Arm Primary - Slot 59",
 			"Arm Secondary - Slot 58"

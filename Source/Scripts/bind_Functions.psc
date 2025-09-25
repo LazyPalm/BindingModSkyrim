@@ -40,9 +40,9 @@ int OBJECTIVE_SELECTED_FURNITURE = 500
 
 int inConversation = 0
 
-int saveGameUid
+;int saveGameUid
 
-string bondageOutfitsFile = "bind_bondage_outfits.json"
+string bondageOutfitsFile 
 
 Event OnInit()
 
@@ -76,10 +76,13 @@ function LoadGame()
 
 	main.SubName = theSubRef.GetActorBase().GetName()
 
-	if saveGameUid == 0
+	if main.SaveGameUid == 0
 		;NOTE - not sure if still using this for MCM saves
-		saveGameUid = Utility.RandomInt(1000000, 5000000)
+		;saveGameUid = Utility.RandomInt(1000000, 5000000)
+		main.SaveGameUid = Utility.RandomInt(1000000, 5000000)
 	endif
+
+	bondageOutfitsFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfits.json"
 
 	RegisterForControl("Activate")
 
@@ -108,10 +111,10 @@ function LoadGame()
 
 	SoftChecks()
 
-	if saveGameUid == 0
-		saveGameUid = Utility.RandomInt(1000000, 5000000)
-		;TODO - add this to a global??
-	endif
+	; if saveGameUid == 0
+	; 	saveGameUid = Utility.RandomInt(1000000, 5000000)
+	; 	;TODO - add this to a global??
+	; endif
 
 	gmanage.LoadGame(false)
 	brain.LoadGame(false)
@@ -1982,8 +1985,8 @@ Form[] zapSearchResultForms
 
 function ShowZapFurnitureSearch()
 
-	string zapFurnitureJson = "bind_zap_furniture.json"
-	string resultsFile = "bind_zap_search_result.json"
+	string zapFurnitureJson = "binding/bind_zap_furniture.json"
+	string resultsFile = "binding/bind_zap_search_result.json"
 
 	int i = 0
 
@@ -2045,8 +2048,8 @@ endfunction
 
 function ZapFurnitureSearch()
 
-	string zapFurnitureJson = "bind_zap_furniture.json"
-    string resultsFile = "bind_zap_search_result.json"
+	string zapFurnitureJson = "binding/bind_zap_furniture.json"
+    string resultsFile = "binding/bind_zap_search_result.json"
     JsonUtil.StringListClear(resultsFile, "found_names")
     JsonUtil.FormListClear(resultsFile, "found_items")
 
