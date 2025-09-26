@@ -24,6 +24,8 @@
 	},
 	"int" : 
 	{
+		"outfit_enabled" : 0,
+		"outfit_id" : 1009,
 		"remove_existing_gear" : 1,
 		"use_random_bondage" : 0
 	},

@@ -11,6 +11,8 @@
 	},
 	"int" : 
 	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1007,
 		"remove_existing_gear" : 1,
 		"use_random_bondage" : 0
 	},
@@ -24,6 +26,10 @@
 	},
 	"stringList" : 
 	{
-		"blocks" : []
+		"blocks" : [],
+		"used_for" : 
+		[
+			"event_gagged_for_punishment"
+		]
 	}
 }

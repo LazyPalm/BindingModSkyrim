@@ -462,6 +462,8 @@ bool function RestoreWornGear(Actor act)
 	
 	endwhile
 
+	StorageUtil.FormListClear(act, "bind_strip_list")
+
 	return true
 
 endfunction
@@ -1031,7 +1033,7 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 	bind_MainQuestScript m = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
 
 	string bondageOutfitFile
-    bondageOutfitFile = "binding/games/" + m.SaveGameUid + "/bind_bondage_outfit_" + outfitId + ".json"
+    bondageOutfitFile = m.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
 
     GoToState("WorkingState")
 

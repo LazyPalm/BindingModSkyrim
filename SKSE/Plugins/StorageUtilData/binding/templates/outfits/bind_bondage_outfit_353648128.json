@@ -1,8 +1,16 @@
 {
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x1e687|Devious Devices - Expansion.esm"
+		]
+	},
 	"int" : 
 	{
-		"remove_existing_gear" : 1,
-		"use_random_bondage" : 0
+		"outfit_enabled" : 1,
+		"outfit_id" : 353648128,
+		"remove_existing_gear" : 0
 	},
 	"intList" : 
 	{
@@ -15,17 +23,16 @@
 			8388608,
 			134217728,
 			268435456,
-			536870912,
-			16777216,
-			4194304,
+			8,
 			67108864,
-			128,
-			8
+			4194304,
+			16777216,
+			536870912
 		]
 	},
 	"string" : 
 	{
-		"bondage_outfit_name" : "Whipping Outfit"
+		"bondage_outfit_name" : "Inn"
 	},
 	"stringList" : 
 	{
@@ -38,12 +45,15 @@
 			"Leg Primary - Slot 53",
 			"Shoulder - Slot 57",
 			"Arm Secondary - Slot 58",
-			"Arm Primary - Slot 59",
-			"Leg Secondary - Slot 54",
-			"Pelvis Secondary - Slot 54",
+			"Hands - Slot 33",
 			"Chest Secondary - Slot 56",
-			"Feet  - Slot 37",
-			"Hands - Slot 33"
+			"Pelvis Secondary - Slot 54",
+			"Leg Secondary - Slot 54",
+			"Arm Primary - Slot 59"
+		],
+		"used_for" : 
+		[
+			"location_inn"
 		]
 	}
 }

@@ -8,11 +8,20 @@
 	},
 	"int" : 
 	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1006,
 		"remove_existing_gear" : 0,
 		"use_random_bondage" : 0
 	},
 	"string" : 
 	{
 		"bondage_outfit_name" : "Go Adventuring Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_go_adventuring"
+		]
 	}
 }

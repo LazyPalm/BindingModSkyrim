@@ -12,14 +12,15 @@
 		[
 			"0x3d2e6|Devious Devices - Expansion.esm",
 			"0x1f6c9|Devious Devices - Expansion.esm",
-			"0x14929|Devious Devices - Expansion.esm",
-			"0x14927|Devious Devices - Expansion.esm"
+			"0x1e687|Devious Devices - Expansion.esm"
 		],
 		"fixed_worn_items" : []
 	},
 	"int" : 
 	{
-		"remove_existing_gear" : 1,
+		"outfit_enabled" : 1,
+		"outfit_id" : 1002,
+		"remove_existing_gear" : 0,
 		"use_random_bondage" : 0
 	},
 	"intList" : 
@@ -48,6 +49,10 @@
 	},
 	"stringList" : 
 	{
-		"blocks" : []
+		"blocks" : [],
+		"used_for" : 
+		[
+			"location_safe_area"
+		]
 	}
 }

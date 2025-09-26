@@ -12,6 +12,8 @@
 	},
 	"int" : 
 	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1005,
 		"remove_existing_gear" : 1,
 		"use_random_bondage" : 0
 	},
@@ -55,6 +57,10 @@
 			"Shoulder - Slot 57",
 			"Arm Primary - Slot 59",
 			"Arm Secondary - Slot 58"
+		],
+		"used_for" : 
+		[
+			"event_bound_sleep"
 		]
 	}
 }

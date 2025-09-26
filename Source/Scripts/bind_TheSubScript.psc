@@ -492,6 +492,8 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 	; 	endif
 	; endif
 
+	bool removed = false
+
 	bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
 
 	; if akBaseObject as Armor
@@ -523,6 +525,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
 							theSub.UnequipItem(dev, false, true)
+							removed = true
 						endif
 					endif
 
@@ -558,7 +561,8 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 						else
 							;debug.Notification("bikini armor - NO")
 							bind_Utility.WriteInternalMonologue("I am only allowed to wear bikini armor...")
-							theSub.UnequipItem(item, false, true)						
+							theSub.UnequipItem(item, false, true)	
+							removed = true					
 						endif
 					elseif RulesManager.IsEroticArmorRequired(theSub, safeZone)
 						if GearManager.IsEroticArmor(item) || StorageUtil.FormListHas(theSub, "bind_erotic_white_list", item)
@@ -567,6 +571,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 							;debug.Notification("erotic armor - NO")
 							bind_Utility.WriteInternalMonologue("I am only allowed to wear erotic armor...")
 							theSub.UnequipItem(item, false, true)	
+							removed = true
 						endif
 					endif
 				endif
@@ -615,8 +620,31 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 		EndIf
 
+
+
 		;BondageManager.DetectAddedItem(theSub, akBaseObject, 0)
 
+	endif
+
+	if !removed
+		if akBaseObject as Armor && StorageUtil.FormListCount(theSub, "bind_strip_list") > 0
+			Armor dev = akBaseObject as Armor
+			int slot = dev.GetSlotMask() ;TODO - use this to remove other items from array
+			int idx = 0
+			Form[] list = StorageUtil.FormListToArray(theSub, "bind_strip_list")
+			while idx < list.Length
+				Armor listItem = list[idx] as Armor
+				if listItem.GetSlotMask() == slot
+					StorageUtil.FormListRemove(theSub, "bind_strip_list", listItem)
+					bind_Utility.WriteToConsole("strip list removed: " + listItem.GetName())
+				endif
+				idx += 1
+			endwhile
+			StorageUtil.FormListAdd(theSub, "bind_strip_list", dev)
+			bind_Utility.WriteToConsole("strip list appended: " + dev.GetName())
+		endif
+		;StorageUtil.FormListClear(theSub, "bind_strip_list")
+		;bind_Utility.WriteToConsole("strip array cleared")
 	endif
 
 	;NOTE - this might be worth turn back on

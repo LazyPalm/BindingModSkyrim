@@ -12,13 +12,14 @@
 		],
 		"fixed_bondage_items" : 
 		[
-			"0x14927|Devious Devices - Expansion.esm",
 			"0x1e687|Devious Devices - Expansion.esm"
 		],
 		"fixed_worn_items" : []
 	},
 	"int" : 
 	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1008,
 		"remove_existing_gear" : 0,
 		"use_random_bondage" : 0
 	},
@@ -45,5 +46,12 @@
 	"string" : 
 	{
 		"bondage_outfit_name" : "Unsafe Areas Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"location_unsafe_area"
+		]
 	}
 }

@@ -14,7 +14,6 @@ int[] blockSlots
 string loadedSetName = ""
 int loadedSetId = 0
 
-string bondageOutfitsFile
 string bondageOutfitFile
 
 int wearingSetId
@@ -24,8 +23,6 @@ event OnInit()
     if self.IsRunning()
         
         GoToState("")
-
-        bondageOutfitsFile = "binding/games/" + mqs.SaveGameUid + "/bind_bondage_outfits.json"
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
@@ -432,7 +429,7 @@ function SetUsesMenu()
 
         ;bind_Utility.WriteToConsole("used_for_" + usageList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + usageList[i]))
 
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + usageKey[i], loadedSetId)
+        bool hasSet = JsonUtil.StringListHas(bondageOutfitFile, "used_for", usageKey[i])
 
         string inUseText = ""
         if hasSet
@@ -449,14 +446,14 @@ function SetUsesMenu()
         ParentMenu()
     elseif listReturn >= 1
 
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + usageKey[listReturn - 1], loadedSetId)
+        bool hasSet =  JsonUtil.StringListHas(bondageOutfitFile, "used_for", usageKey[i])
         if hasSet
             ;bind_Utility.WriteToConsole("removing from uses: used_for_" + usageKey[listReturn - 1] + " set: " + loadedSetName)
-            JsonUtil.IntListRemove(bondageOutfitsFile, "used_for_" + usageKey[listReturn - 1], loadedSetId)
-            JsonUtil.Save(bondageOutfitsFile)
+            JsonUtil.StringListRemove(bondageOutfitFile, "used_for", usageKey[listReturn - 1])
+            JsonUtil.Save(bondageOutfitFile)
         else
-            int idx = JsonUtil.IntListAdd(bondageOutfitsFile, "used_for_" + usageKey[listReturn - 1], loadedSetId)
-            JsonUtil.Save(bondageOutfitsFile)
+            JsonUtil.StringListAdd(bondageOutfitFile, "used_for", usageKey[listReturn - 1], false)
+            JsonUtil.Save(bondageOutfitFile)
             ;bind_Utility.WriteToConsole("adding to uses: used_for_" + usageKey[listReturn - 1] + " set: " + loadedSetName + " idx: " + idx)
         endif
 
@@ -546,10 +543,22 @@ function LoadSetsMenu()
     listMenu.AddEntryItem("<-- Return To Menu")
 
     ;string[] setsList = StorageUtil.StringListToArray(TheWardrobe, "sets_list")
-    string[] bondageSetNames = JsonUtil.StringListToArray(bondageOutfitsFile, "bondage_set_names")
-    int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
 
+    StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
+    StorageUtil.IntListClear(theSub, "bind_bondage_files_list")
+
+    string[] list = MiscUtil.FilesInFolder(mqs.GameSaveFolder)
     int i = 0
+    while i < list.Length
+        StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_list", JsonUtil.GetStringValue(mqs.GameSaveFolderJson + list[i], "bondage_outfit_name", ""))
+        StorageUtil.IntListAdd(theSub, "bind_bondage_files_list", JsonUtil.GetIntValue(mqs.GameSaveFolderJson + list[i], "outfit_id", 0))
+        i += 1
+    endwhile
+
+    string[] bondageSetNames = JsonUtil.StringListToArray(theSub, "bind_bondage_outfits_list")
+    int[] bondageSetIds = JsonUtil.IntListToArray(theSub, "bind_bondage_files_list")
+
+    i = 0
     while i < bondageSetNames.Length
         listMenu.AddEntryItem("Outfit - " + bondageSetNames[i])
         i += 1
@@ -562,7 +571,7 @@ function LoadSetsMenu()
     elseif listReturn >= 1
         loadedSetName = bondageSetNames[listReturn - 1]
         loadedSetId = bondageSetIds[listReturn - 1]
-        bondageOutfitFile = "binding/games/" + mqs.SaveGameUid + "/bind_bondage_outfit_" + loadedSetId + ".json"
+        bondageOutfitFile = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + loadedSetId + ".json"
         LoadSet()
         StorageUtil.SetIntValue(theSub, "bind_wearing_outfit_id", loadedSetId)
     endif
@@ -726,14 +735,13 @@ function SaveSet()
         if result != ""
             loadedSetName = result
 
-            int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
-            JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", loadedSetName, false)
-            int nextId = lastUid + 1
-            JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", nextId, false)
-            JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", nextId)
-            JsonUtil.Save(bondageOutfitsFile)
-            bondageOutfitFile = "binding/games/" + mqs.SaveGameUid + "/bind_bondage_outfit_" + nextId + ".json"
-            loadedSetId = nextId
+            int uid = Utility.RandomInt(100000000,999999999)
+            string fileName = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + uid + ".json"
+            JsonUtil.SetStringValue(fileName, "bondage_outfit_name", loadedSetName)
+            JsonUtil.SetIntValue(fileName, "outfit_id", uid)
+            JsonUtil.Save(fileName)
+            bondageOutfitFile = fileName
+            loadedSetId = uid
 
             ;StorageUtil.StringListAdd(TheWardrobe, "sets_list", result)
         else

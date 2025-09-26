@@ -1,0 +1,89 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"dynamic_bondage_items" : 
+		[
+			"0x409a2|Devious Devices - Integration.esm"
+		],
+		"fixed_bondage_items" : 
+		[
+			"0x486d3|Devious Devices - Expansion.esm",
+			"0x486e3|Devious Devices - Expansion.esm",
+			"0x4ee2d|Devious Devices - Expansion.esm",
+			"0x1e687|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1001,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 1
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			16,
+			65536,
+			524288,
+			8388608,
+			134217728,
+			268435456,
+			536870912,
+			16777216,
+			4194304,
+			67108864,
+			128,
+			8
+		],
+		"random_bondage_chance" : 
+		[
+			35,
+			35,
+			25,
+			25,
+			50,
+			50,
+			0,
+			0,
+			0,
+			50,
+			25,
+			25,
+			10
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "At Home Outfit"
+	},
+	"stringList" : 
+	{
+		"blocks" : 
+		[
+			"Body - Slot 32",
+			"Forearms - Slot 34",
+			"Chest Primary - Slot 46",
+			"Pelvis Primary - Slot 49",
+			"Leg Primary - Slot 53",
+			"Shoulder - Slot 57",
+			"Arm Secondary - Slot 58",
+			"Arm Primary - Slot 59",
+			"Leg Secondary - Slot 54",
+			"Pelvis Secondary - Slot 54",
+			"Chest Secondary - Slot 56",
+			"Feet  - Slot 37",
+			"Hands - Slot 33"
+		],
+		"used_for" : 
+		[
+			"location_player_home"
+		]
+	}
+}

@@ -420,7 +420,7 @@ function ShowActionMenuNested()
     ; actionMenu.SetPropertyIndexString("optionLabelText", 4, "Choose Outfit")
     ; actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
 
-    if !gear_manager.IsNude(a)
+    if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
         actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
         actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
         actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
@@ -508,7 +508,7 @@ function ShowActionMenuNested()
                 ; functions_script.EventDomTyingAnimation(a, dom, false)
                 ; bind_Utility.EnablePlayer()
 
-                if !gear_manager.IsNude(a)
+                if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
                     functions_script.EventDomTyingAnimation(a, dom, false)
                     gear_manager.RemoveWornGear(a)
                 else
@@ -528,7 +528,7 @@ function ShowActionMenuNested()
                 ; bind_Utility.EnablePlayer()
 
                 bind_MovementQuestScript.PlayDressUndress(a)
-                if !gear_manager.IsNude(a)
+                if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
                     if think.IsAiReady()
                         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
                     endif

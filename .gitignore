@@ -9,3 +9,5 @@ SkyrimSE.code-workspace
 skyrimse.ppj
 *.ppj
 *.ppj
+*.code-workspace
+*.ppj

@@ -42,8 +42,6 @@ int inConversation = 0
 
 ;int saveGameUid
 
-string bondageOutfitsFile 
-
 Event OnInit()
 
 	if self.IsRunning()
@@ -82,7 +80,8 @@ function LoadGame()
 		main.SaveGameUid = Utility.RandomInt(1000000, 5000000)
 	endif
 
-	bondageOutfitsFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfits.json"
+	main.GameSaveFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
+	main.GameSaveFolderJson = "binding/games/" + main.SaveGameUid + "/outfits/"
 
 	RegisterForControl("Activate")
 
@@ -593,6 +592,22 @@ bool safeAreaOldState
 
 ; endstate
 
+state NoBondageOutfitState
+
+	event OnUpdate()
+
+		EventCleanUpSub(theSubRef, theDomRef, true) ;should we do this?
+
+		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+
+		main.NeedsBondageSetChange = 0
+
+		GotoState("")
+
+	endevent
+
+endstate
+
 state ArrivalCheckState
 
 	event OnUpdate()
@@ -692,6 +707,8 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 	if main.ActiveBondageSetId == 0
 		bind_Utility.WriteToConsole("DEBUG - No bondage outfit could be found")
 		bind_Utility.WriteNotification("No bondage outfit could be found", bind_Utility.TextColorGreen())
+		GoToState("NoBondageOutfitState")
+		RegisterForSingleUpdate(3.0)
 	else
 		if main.ActiveBondageSetId != currentBondageSetId
 			;update bondage??
@@ -2666,17 +2683,47 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	int[] outfitIds
 
+	string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+	StorageUtil.IntListClear(sub, "binding_found_outfit_id_list")
+
 	if eventName != ""
-		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + eventName)
-		outfitIds = bms.NarrowToValidOutfits(outfitIds)
-		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + outfitIds)
+
+        i = 0
+        while i < fList.Length
+            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", eventName)
+                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
+                    ;debug.MessageBox(fList[i])
+                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
+                    StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
+                endif
+            endif
+            i += 1
+        endwhile
+
+		outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
+		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + eventName + " - outfits: " + outfitIds)
+
 	endif
 
-	bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
+	;bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
 	if outfitIds.Length == 0 || outfitIds == none
-		outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_event_any_event")
-		outfitIds = bms.NarrowToValidOutfits(outfitIds)
-		bind_Utility.WriteToConsole("EventGetSubReady - any event: " + outfitIds)
+
+        i = 0
+        while i < fList.Length
+            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", "event_any_event")
+                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
+                    debug.MessageBox(fList[i])
+                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
+                    StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
+                endif
+            endif
+            i += 1
+        endwhile
+
+		outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
+		bind_Utility.WriteToConsole("EventGetSubReady - eventName: any event - outfits: " + outfitIds)
+
 	endif
 
 	if outfitIds.Length > 0
@@ -2684,6 +2731,12 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 		bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
+
+		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
+		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
+			eventRemovedClothing = true
+		endif
+
 		;endif
 	endif
 
@@ -2739,19 +2792,23 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	;TODO - put back on clothing? not sure if outfit manager is going to be a thing in here. need to store?
 	;TODO - put back on correct bondage outfit
 
-	; ;restore removed gear
-	; Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
-	; if wornGear.Length > 0
-	; 	int i = 0
-	; 	while i < wornGear.Length
-	; 		Form item = wornGear[i]
-	; 		if !sub.IsEquipped(item)
-	; 			sub.EquipItem(item, false, true)
-	; 			bind_Utility.DoSleep(0.5)
-	; 		endif
-	; 		i += 1
-	; 	endwhile
-	; endif
+	;restore removed gear
+	if eventRemovedClothing
+		Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
+		if wornGear.Length > 0
+			int i = 0
+			while i < wornGear.Length
+				Form item = wornGear[i]
+				if sub.GetItemCount(item) > 0
+					if !sub.IsEquipped(item)
+						sub.EquipItem(item, false, true)
+						bind_Utility.DoSleep(0.5)
+					endif
+				endif
+				i += 1
+			endwhile
+		endif
+	endif
 
 	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
 

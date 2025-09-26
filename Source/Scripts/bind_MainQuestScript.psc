@@ -1,11 +1,14 @@
 Scriptname bind_MainQuestScript extends Quest conditional 
 
 int property SaveGameUid auto conditional
+string property GameSaveFolder auto conditional
+string property GameSaveFolderJson auto conditional
 
 string property ActiveQuestName auto conditional
 
 ;string property BondageSetLocation auto conditional
 int property ActiveBondageSetId auto conditional
+string property ActiveBondageSetName auto conditional
 int property NeedsBondageSetChange auto conditional
 
 int property LogOutputToScreen auto conditional

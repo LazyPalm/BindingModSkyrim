@@ -24,9 +24,6 @@ string[] bondageTypes
 
 float sleepTime = 0.5
 
-string bondageOutfitsFileBase = "bind_bondage_outfits.json"
-string bondageOutfitsFile = ""
-
 bind_BondageManager function GetBondageManager() global 
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
 endfunction
@@ -34,7 +31,7 @@ endfunction
 Actor theSubRef
 
 bool setupOutfitUsedArray
-bool createdOutfitLocalFiles
+bool createdOutfitLocalFiles = false
 
 Function LoadGame(bool rebuildStorage = false)
     
@@ -42,49 +39,33 @@ Function LoadGame(bool rebuildStorage = false)
 
     ;createdOutfitLocalFiles = false ;remove this
 
-    bondageOutfitsFile = "binding/games/" + main.SaveGameUid + "/" + bondageOutfitsFileBase
+    StorageUtil.StringListClear(theSubRef, "bind_bondage_outfit_file_list")
 
     if !createdOutfitLocalFiles
 
-        string folder = "data/skse/plugins/StorageUtilData/binding/templates/"
-        string targetFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/"
-
-        string outfitsFileText = MiscUtil.ReadFromFile(folder + bondageOutfitsFileBase)
-        ;ShowMessage(outfitsFileText, false)
-        MiscUtil.WriteToFile(targetFolder + bondageOutfitsFileBase, outfitsFileText, false, false)
-
-        string backupOutfitList = ""
-
-        int[] outfitList = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
+        string templateFolder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+        string[] fList = MiscUtil.FilesInFolder(templateFolder)
+        ;debug.MessageBox(fList)
         int i = 0
-        string outfitFileText
-        while i < outfitList.Length
-            if backupOutfitList != ""
-                backupOutfitList += "|"
-            endif
-            backupOutfitList += outfitList[i]
-            outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-            MiscUtil.WriteToFile(targetFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+        while i < fList.Length
+            string outfitFileText = MiscUtil.ReadFromFile(templateFolder + fList[i])
+            StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
+            MiscUtil.WriteToFile(main.GameSaveFolder + fList[i], outfitFileText, false, false)
             i += 1
         endwhile
 
-        MiscUtil.WriteToFile(folder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
-
         createdOutfitLocalFiles = true
-    endif
 
-    ; if !setupOutfitUsedArray
-    ;     int[] bondageSetIds = JsonUtil.IntListToArray(bondageOutfitsFile, "bondage_set_ids")
-    ;     ;debug.MessageBox("bondageSetIds: " + bondageSetIds)
-    ;     int idx = 0
-    ;     while idx < bondageSetIds.Length
-    ;         StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage", bondageSetIds[idx])
-    ;         idx += 1
-    ;     endwhile
-    ;     int[] usage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
-    ;     ;debug.MessageBox("usage: " + usage)
-    ;     setupOutfitUsedArray = true
-    ; endif
+    else
+
+        string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+        int i = 0
+        while i < fList.Length
+            StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
+            i += 1
+        endwhile
+
+    endif
 
     if bondageTypes.Length != 18
         bondageTypes = new string[18]
@@ -162,7 +143,7 @@ function EquipBondageOutfit(Actor a, int setId)
 
     EquippingBondageOutfit = true
 
-    string f = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + setId + ".json"
+    string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + setId + ".json"
 
     ;NOTE - there is probably no reason to clean this out
     if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
@@ -196,6 +177,7 @@ function EquipBondageOutfit(Actor a, int setId)
     else
         ;note - no need to do this if all existing gear is being removed
         ;unequip blocks
+        StorageUtil.FormListClear(a, "bind_strip_list_blocked")
         int[] blocks = JsonUtil.IntListToArray(f, "block_slots")
         i = 0
         while i < blocks.Length
@@ -204,10 +186,29 @@ function EquipBondageOutfit(Actor a, int setId)
                 if !ZadKeywordsCheck(item) && !item.HasKeyWordString("sexlabnostrip")
                     a.UnequipItem(item, false, true)
                     bind_Utility.WriteToConsole("EquipBondageOutfit - removing: " + item)
-                    StorageUtil.FormListAdd(a, "bind_strip_list", item, false)
+                    StorageUtil.FormListAdd(a, "bind_strip_list_blocked", item, false)
+                    StorageUtil.FormListRemove(a, "bind_strip_list", item)
                     bind_Utility.DoSleep(sleepWait)
                 endif
             endif
+            i += 1
+        endwhile
+
+        Form[] addBackItems = StorageUtil.FormListToArray(a, "bind_strip_list")
+        i = 0
+        while i < addBackItems.Length
+            if a.GetItemCount(addBackItems[i]) > 0
+                a.EquipItem(addBackItems[i], false, true)
+            endif
+            bind_Utility.DoSleep(sleepWait)
+            i += 1
+        endwhile
+
+        StorageUtil.FormListClear(a, "bind_strip_list")
+        Form[] blockItems = StorageUtil.FormListToArray(a, "bind_strip_list_blocked")
+        i = 0
+        while i < blockItems.Length
+            StorageUtil.FormListAdd(a, "bind_strip_list", blockItems[i])
             i += 1
         endwhile
 
@@ -502,37 +503,23 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
 
     bool isSafeArea = false
 
-    if !JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", currentBondageSet)
-        ;check to see if the current set is still enabled
-        currentBondageSet = -1
-    endif
+    ; if !JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", currentBondageSet)
+    ;     ;check to see if the current set is still enabled
+    ;     currentBondageSet = -1
+    ; endif
+
+    StorageUtil.StringListClear(theSubRef, "binding_location_tags")
 
     if currentLocation.HasKeywordString("LocTypePlayerHouse")
         isSafeArea = true
         outfitKey = "location_player_home"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     endif
 
     if currentLocation.HasKeywordString("LocTypeInn")
         isSafeArea = true
         outfitKey = "location_inn"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     endif
 
     bool buildingInCity = false
@@ -552,24 +539,20 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
         endif
     endif
 
-    if (currentLocation.HasKeywordString("LocTypeTown") || buildingInTown) && outfitIds.Length == 0
+    if currentLocation.HasKeywordString("LocTypeTown") || buildingInTown
         isSafeArea = true
         outfitKey = "location_towns"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     endif
     
-    if currentLocation.HasKeywordString("LocTypeCity") && outfitIds.Length == 0
+    if currentLocation.HasKeywordString("LocTypeCity") || buildingInCity
         isSafeArea = true
         outfitKey = ""
         string locationName = currentLocation.GetName()
+        if buildingInCity
+            Location parentLoc = currentLocation.GetParent()
+            locationName = parentLoc.GetName()
+        endif
         if locationName == "Dawnstar"
             outfitKey = "location_dawnstar"
         elseif locationName == "Falkreath"
@@ -594,302 +577,78 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
             outfitKey = "location_raven Rock"  
         endif
         if outfitKey != ""
-            bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-            if hasSet
-                return currentBondageSet
-            endif
-            outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-            if outfitIds.Length > 0
-                outfitIds = NarrowToValidOutfits(outfitIds)
-            endif
-            bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+            StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
         endif
     endif
 
-    if (currentLocation.HasKeywordString("LocTypeCity") || buildingInCity) && outfitIds.Length == 0
+    if (currentLocation.HasKeywordString("LocTypeCity") || buildingInCity)
         isSafeArea = true
         outfitKey = "location_any_city"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     endif
 
-    if isSafeArea && outfitIds.Length == 0
+    if isSafeArea
         ;debug.MessageBox("safe area")
         outfitKey = "location_safe_area"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     elseif !isSafeArea && outfitIds.Length == 0
         ;dangerous area
         ;debug.MessageBox("unsafe area")
         outfitKey = "location_unsafe_area"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
-        endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
+        StorageUtil.StringListAdd(theSubRef, "binding_location_tags", outfitKey)
     endif
 
-    if outfitIds.Length == 0
-        outfitKey = "location_all_areas"
-        bool hasSet = JsonUtil.IntListHas(bondageOutfitsFile, "used_for_" + outfitKey, currentBondageSet)
-        if hasSet
-            return currentBondageSet
+    StorageUtil.StringListAdd(theSubRef, "binding_location_tags", "location_all_areas")
+
+    string[] locTagList = StorageUtil.StringListToArray(theSubRef, "binding_location_tags")
+
+    ;debug.MessageBox(locTagList)
+    bind_Utility.WriteToConsole("search for tags: " + locTagList)
+
+    string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+    bool foundOutfits = false
+    bool outfitValid = false
+
+    StorageUtil.IntListClear(theSubRef, "binding_found_outfit_id_list")
+
+    int i = 0
+    int i2 = 0
+    while i < locTagList.Length
+        string tag = locTagList[i]
+        i2 = 0
+        while i2 < fList.Length
+            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[i2], "used_for", tag)
+                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i2], "outfit_enabled", 0) == 1
+                    ;debug.MessageBox(fList[i2])
+                    bind_Utility.WriteToConsole("found: " + fList[i2])
+                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i2], "outfit_id", -1)
+                    if outfitId == currentBondageSet
+                        outfitValid = true
+                    endif
+                    StorageUtil.IntListAdd(theSubRef, "binding_found_outfit_id_list", outfitId)
+                    foundOutfits = true
+                endif
+            endif
+            i2 += 1
+        endwhile
+        i += 1
+        if foundOutfits
+            i = 500 ;break the loop on this tag
         endif
-        outfitIds = JsonUtil.IntListToArray(bondageOutfitsFile, "used_for_" + outfitKey)
-        if outfitIds.Length > 0
-            outfitIds = NarrowToValidOutfits(outfitIds)
-        endif
-        bind_Utility.WriteToConsole("key: " + outfitKey + " outfitIds: " + outfitIds)
-    endif
-
-    if outfitIds.Length == 0
-        return -1
-    endif
-
-    ;this will narrow the list of valid outfits to ones that PC has marked as in use
-
-    ; int[] outfitUsage = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage")
-    ; StorageUtil.IntListClear(theSubRef, "bind_bondage_outfit_usage_matches")
-
-    ; string validIds = ""
-    ; int idx = 0
-    ; while idx < outfitIds.Length
-    ;     if StorageUtil.IntListHas(theSubRef, "bind_bondage_outfit_usage", outfitIds[idx])
-    ;         StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage_matches", outfitIds[idx])
-    ;     endif
-    ;     idx += 1
-    ; endwhile
-
-    ; int[] matches = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage_matches")
-    ; if matches.Length == 0
-    ;     return -1
-    ; endif
-
-    ; debug.MessageBox(matches)
-
-    ; return matches[Utility.RandomInt(0, matches.Length - 1)]
-
-    return outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
-
-    ;debug.MessageBox(outfitIds)
-
-endfunction
-
-int[] function NarrowToValidOutfits(int[] outfitIds)
-    int[] outfitUsage = JsonUtil.IntListToArray(bondageOutfitsFile, "enabled_oufits")
-    StorageUtil.IntListClear(theSubRef, "bind_bondage_outfit_usage_matches")
-    int idx = 0
-    while idx < outfitIds.Length
-        if JsonUtil.IntListHas(bondageOutfitsFile, "enabled_oufits", outfitIds[idx])
-            StorageUtil.IntListAdd(theSubRef, "bind_bondage_outfit_usage_matches", outfitIds[idx])
-        endif
-        idx += 1
     endwhile
-    int[] matches = StorageUtil.IntListToArray(theSubRef, "bind_bondage_outfit_usage_matches")
-    return matches
+
+    if outfitValid
+        return currentBondageSet
+    endif
+
+    int[] list = StorageUtil.IntListToArray(theSubRef, "binding_found_outfit_id_list")
+
+    return list[Utility.RandomInt(0, list.Length - 1)]
+
+    ;return outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
+
 endfunction
-
-; function SetActiveBondageSet(bool safeLocation, Location currentLocation) 
-
-;     bind_Utility.WriteToConsole("SetActiveBondageSet - safeLocation: " + safeLocation + " currentLocation: " + currentLocation)
-
-;     ActiveBondageSet = ""
-
-;     ;test current set to see if it is still active vs clearing??
-;     ;bool hasSet = StorageUtil.StringListHas(TheWardrobe, "used_for_" + queststList[i], ActiveBondageSet)
-
-;     int dayOfWeek = GetDayOfWeek()
-
-;     ; queststList[0] = "Location - All Areas"
-;     ; queststList[1] = "Location - All Safe Areas"
-;     ; queststList[2] = "Location - All Dangerous Areas"
-;     ; queststList[3] = "Location - Any City"
-;     ; queststList[4] = "Location - Dawnstar"
-;     ; queststList[5] = "Location - Falkreath"
-;     ; queststList[6] = "Location - Windhelm"
-;     ; queststList[7] = "Location - Markarth"
-;     ; queststList[8] = "Location - Morthal"
-;     ; queststList[9] = "Location - Riften"
-;     ; queststList[10] = "Location - Solitude"
-;     ; queststList[11] = "Location - High Hrothgar"
-;     ; queststList[12] = "Location - Whiterun"
-;     ; queststList[13] = "Location - Winterhold"
-;     ; queststList[14] = "Location - Raven Rock"       
-;     ; queststList[15] = "Location - Towns"
-;     ; queststList[16] = "Location - Player Home"
-;     ; queststList[17] = "Day - Sundas"
-;     ; queststList[18] = "Day - Morndas"
-;     ; queststList[19] = "Day - Tirdas"
-;     ; queststList[20] = "Day - Middas"
-;     ; queststList[21] = "Day - Turdas"
-;     ; queststList[22] = "Day - Fredas"
-;     ; queststList[23] = "Day - Loredas"
-
-;     bool found = false
-
-;     string[] setsList
-
-;     if !safeLocation
-;         ;debug.MessageBox("looking for dangerous areas sets")
-;         setsList = GetSetsByUsage("Location - All Dangerous Areas")
-;         if setsList.Length > 0
-;             found = true
-;         endif
-
-;     elseif currentLocation.HasKeywordString("LocTypePlayerHouse")
-;         setsList = GetSetsByUsage("Location - Player Home")
-;         if setsList.Length > 0
-;             found = true
-;         endif
-
-;     elseif currentLocation.HasKeywordString("LocTypeTown")
-;         ;debug.MessageBox("in a town??")
-;         setsList = GetSetsByUsage("Location - Towns")
-;         if setsList.Length > 0
-;             found = true
-;         endif
-
-;     elseif currentLocation.HasKeywordString("LocTypeCity")
-
-;         string locationName = currentLocation.GetName()
-
-;         ;debug.MessageBox(currentLocation.GetName())
-
-;         if locationName == "Dawnstar"
-;             setsList = GetSetsByUsage("Location - Dawnstar")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Falkreath"
-;             setsList = GetSetsByUsage("Location - Falkreath")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Windhelm"
-;             setsList = GetSetsByUsage("Location - Windhelm")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Markarth"
-;             setsList = GetSetsByUsage("Location - Markarth")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Morthal"
-;             setsList = GetSetsByUsage("Location - Morthal")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Riften"
-;             setsList = GetSetsByUsage("Location - Riften")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Solitude"
-;             setsList = GetSetsByUsage("Location - Solitude")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "High Hrothgar"
-;             setsList = GetSetsByUsage("Location - High Hrothgar")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Whiterun"
-;             setsList = GetSetsByUsage("Location - Whiterun")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Winterhold"
-;             setsList = GetSetsByUsage("Location - Winterhold")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         elseif locationName == "Raven Rock"
-;             setsList = GetSetsByUsage("Location - Raven Rock")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-
-;         endif
-
-;     endif
-
-;     if !found
-;         if currentLocation.HasKeywordString("LocTypeCity")
-;             ;check any city
-;             setsList = GetSetsByUsage("Location - Any City")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-;         endif
-;     endif
-
-;     if !found
-;         if safeLocation
-;             setsList = GetSetsByUsage("Location - All Safe Areas")
-;             if setsList.Length > 0
-;                 found = true
-;             endif
-;         ; else
-;         ;     setsList = GetSetsByUsage("Location - All Dangerous Areas")
-;         ;     if setsList.Length > 0
-;         ;         found = true
-;         ;     endif
-;         endif
-;     endif
-
-;     if !found
-;         ;check all areas
-;         setsList = GetSetsByUsage("Location - All Areas")
-;         if setsList.Length > 0
-;             found = true
-;         endif
-;     endif
-       
-;     if setsList.Length > 0
-;         ActiveBondageSet = setsList[Utility.RandomInt(0, setsList.Length - 1)]
-;     endif
-
-;     if ActiveBondageSet != ""
-;         bind_Utility.WriteNotification("Switched to bondage set " + ActiveBondageSet)
-;     else
-;         bind_Utility.WriteNotification("No bondage set found, using random items")
-;     endif
-
-;     ;debug.MessageBox("day of week: " + dayOfWeek + " active set: " + ActiveBondageSet)
-
-;     bind_Utility.WriteToConsole("Selected bondage set: " + ActiveBondageSet)
-
-; endfunction
 
 string[] function GetSetsByUsage(string usage)
     return StorageUtil.StringListToArray(TheWardrobe, "used_for_" + usage)
@@ -2531,7 +2290,7 @@ endfunction
 function LearnWornDdItemsToSet(Actor theSub, int outfitId)
 
     string bondageOutfitFile
-    bondageOutfitFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + outfitId + ".json"
+    bondageOutfitFile = main.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
 
     GoToState("WorkingState")
 
@@ -2572,17 +2331,12 @@ function SaveWornDdItemsAsSet(Actor theSub)
     UIExtensions.OpenMenu("UITextEntryMenu")
     string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
     if result != ""
-        ;loadedSetName = result
-
-        int lastUid = JsonUtil.GetIntValue(bondageOutfitsFile, "last_set_uid", 1000)
-        JsonUtil.StringListAdd(bondageOutfitsFile, "bondage_set_names", result, false)
-        int nextId = lastUid + 1
-        JsonUtil.IntListAdd(bondageOutfitsFile, "bondage_set_ids", nextId, false)
-        JsonUtil.SetIntValue(bondageOutfitsFile, "last_set_uid", nextId)
-        JsonUtil.Save(bondageOutfitsFile)
-        bondageOutfitFile = "binding/games/" + main.SaveGameUid + "/bind_bondage_outfit_" + nextId + ".json"
-        ;loadedSetId = nextId
-
+        int uid = Utility.RandomInt(100000000,999999999)
+        string fileName = main.GameSaveFolderJson + "bind_bondage_outfit_" + uid + ".json"
+        JsonUtil.SetStringValue(fileName, "bondage_outfit_name", result)
+        JsonUtil.SetIntValue(fileName, "outfit_id", uid)
+        JsonUtil.Save(fileName)
+        bondageOutfitFile = fileName
         ;StorageUtil.StringListAdd(TheWardrobe, "sets_list", result)
     else
         return
