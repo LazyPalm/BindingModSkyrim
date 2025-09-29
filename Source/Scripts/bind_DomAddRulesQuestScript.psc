@@ -158,7 +158,7 @@ function DomRuleSceneEndedFunction()
     if think.IsAiReady()
         ;SkyrimNetApi.DirectNarration(playerResponse, theDom)
         think.UseDirectNarration(theDom, playerResponse)
-        bind_Utility.DoSleep(10.0)
+        ;bind_Utility.DoSleep(10.0)
         DomRuleSceneGiveThanksEndedFunction()
     else
         bind_DoAdRuQuSceneGiveThanks.Start()

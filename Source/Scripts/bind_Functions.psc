@@ -693,13 +693,14 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
 	endif
 
-	if main.NeedsBondageSetChange == 1
-		;entered and left area before a change
-		main.NeedsBondageSetChange = 0 ;reset this
-		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
-		main.ActiveBondageSetId = targetSetId
-		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
-	endif
+	;TODO - test with this off 9/29/25 - it is causing issues leaving areas without dom
+	; if main.NeedsBondageSetChange == 1
+	; 	;entered and left area before a change
+	; 	main.NeedsBondageSetChange = 0 ;reset this
+	; 	int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
+	; 	main.ActiveBondageSetId = targetSetId
+	; 	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+	; endif
 
 	int currentBondageSetId = main.ActiveBondageSetId
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)

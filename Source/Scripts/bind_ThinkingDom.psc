@@ -197,6 +197,12 @@ function RegisterFunctions()
 
     ;RegisterBondageRule()
 
+    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things.", \  
+                                    "bind_ThinkingDom", "BindingPermissions_IsEligible", \
+                                    "bind_ThinkingDom", "BindingPermissions_Execute", \
+                                    "", "PAPYRUS", \
+                                    1, "{\"permission\":\"entry|exit\"}")  
+
 
 endfunction
 
@@ -639,6 +645,24 @@ bool function BindingCamping_IsEligible(Actor akOriginator, string contextJson, 
 
 endfunction
 
+bool function BindingPermissions_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingPermissions_IsEligible actor: " + akOriginator)
+
+    bool result
+
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+
+    if !f.UseSkyrimNetCheck(akOriginator)
+        return false
+    endif
+
+    result = true
+
+    return result
+
+endfunction
+
 ; function BindingTieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
 ;     bind_Utility.WriteToConsole("SkyrimNet called: BindingTieWrists_Execute actor: " + akOriginator)
@@ -832,6 +856,35 @@ function BindingCamping_Execute(Actor akOriginator, string contextJson, string p
 
 endfunction
 
+function BindingPermissions_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingPermissions_Execute actor: " + akOriginator)
+
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_ThinkingDom t = bind_ThinkingDom.GetThinkingDom()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
+
+    if f.ModInRunningState()
+
+        string permission = SkyrimNetApi.GetJsonString(paramsJson, "permission", "") 
+
+        if permission == "entry"
+            
+            ObjectReference ref = t.BuildingDoor.GetReference()
+            if ref
+                StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
+                StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
+            endif
+            bind_Utility.WriteInternalMonologue("I have permission to enter...")
+
+        elseif permission == "exit"
+
+        endif
+
+    endif
+
+endfunction
+
 event ConversationPoseEvent()
 
     if main.EnableModSkyrimNet == 1
@@ -977,3 +1030,5 @@ bind_PoseManager property pms auto
 
 Quest property bind_WhippingQuest auto
 Quest property bind_EventPutOnDisplayQuest auto
+
+ReferenceAlias property BuildingDoor auto

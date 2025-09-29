@@ -34,7 +34,7 @@
         <Import>C:\Modding\MO2\mods\pamaInteractiveBeatup_V_\scripts\source</Import>
         <Import>C:\Modding\MO2\mods\Milk Mod Economy\Scripts\Source</Import>
         <Import>C:\Modding\MO2\mods\Go to bed\source\scripts</Import>
-        
+
     </Imports>
     <Folders>
         <Folder>.\Source\Scripts</Folder>
