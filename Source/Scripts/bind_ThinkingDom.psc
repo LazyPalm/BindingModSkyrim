@@ -201,7 +201,7 @@ function RegisterFunctions()
                                     "bind_ThinkingDom", "BindingPermissions_IsEligible", \
                                     "bind_ThinkingDom", "BindingPermissions_Execute", \
                                     "", "PAPYRUS", \
-                                    1, "{\"permission\":\"entry|exit\"}")  
+                                    1, "{\"permission\":\"entry|exit|prayer|speech|learn spell|eat|drink|train|masturbate\"}")  
 
 
 endfunction
@@ -868,16 +868,54 @@ function BindingPermissions_Execute(Actor akOriginator, string contextJson, stri
 
         string permission = SkyrimNetApi.GetJsonString(paramsJson, "permission", "") 
 
-        if permission == "entry"
-            
+        if permission == "entry" || permission == "exit"
+
+            string msg = "enter"
+            if permission == "exit"
+                msg = "leave"
+            endif
             ObjectReference ref = t.BuildingDoor.GetReference()
             if ref
                 StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
                 StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
             endif
-            bind_Utility.WriteInternalMonologue("I have permission to enter...")
+            bind_Utility.WriteInternalMonologue("I have permission to " + msg + "...")
 
-        elseif permission == "exit"
+        elseif permission == "prayer"
+
+            StorageUtil.SetIntValue(f.GetSubRef(), "bind_has_prayer_permission", 1)
+            bind_Utility.WriteInternalMonologue("I have permission to seek a blessing...")
+
+        elseif permission == "speech"
+
+            StorageUtil.SetIntValue(f.GetSubRef(), "bind_has_speech_permission", 1)
+            bind_Utility.WriteInternalMonologue("I have permission to speak...")
+
+        elseif permission == "learn spell"
+
+            StorageUtil.SetIntValue(f.GetSubRef(), "bind_has_read_scroll_permission", 1)
+            StorageUtil.SetFloatValue(f.GetSubRef(), "bind_has_read_scroll_permmission_end", bind_Utility.AddTimeToCurrentTime(1, 0))
+            bind_Utility.WriteInternalMonologue("I have permission to learn a spell...")
+
+        elseif permission == "eat" || permission == "drink"
+
+            bind_RulesManager r = bind_rulesManager.GetRulesManager()
+            r.BehaviorFoodRuleMustAskPermission = 1
+            r.BehaviorFoodRuleMustAskEndTime = bind_Utility.AddTimeToCurrentTime(0, 30) ;grant 30 minutes
+            bind_Utility.WriteInternalMonologue("I have permission to " + permission + "...")
+
+        elseif permission == "train"
+
+            bind_RulesManager r = bind_rulesManager.GetRulesManager()
+            r.BehaviorStudiesAskToTrainPermission = 1
+            r.BehaviorStudiesAskToTrainEndTime = bind_Utility.AddTimeToCurrentTime(0, 15)
+            bind_Utility.WriteInternalMonologue("I have 15 minutes to speak to this trainer...")
+
+        elseif permission == "masturbate"
+
+            bind_SexManager sms = Quest.GetQuest("bind_MainQuest") as bind_SexManager
+            sms.SubHasMasturbationPermission = 1
+            bind_Utility.WriteInternalMonologue("I have permission to pleasure myself...")
 
         endif
 

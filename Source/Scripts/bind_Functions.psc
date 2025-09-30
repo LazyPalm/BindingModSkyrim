@@ -2736,6 +2736,7 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
 		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
 			eventRemovedClothing = true
+
 		endif
 
 		;endif
@@ -2814,11 +2815,13 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
 
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+	;debug.MessageBox(currentLocation.GetName())
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	;if outfitId > 0
 		bms.EquipBondageOutfit(sub, outfitId)
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
+		;debug.MessageBox(outfitId)
 	;endif
 
 	main.NeedsBondageSetChange = 0

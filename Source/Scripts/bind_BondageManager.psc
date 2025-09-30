@@ -197,10 +197,24 @@ function EquipBondageOutfit(Actor a, int setId)
         Form[] addBackItems = StorageUtil.FormListToArray(a, "bind_strip_list")
         i = 0
         while i < addBackItems.Length
-            if a.GetItemCount(addBackItems[i]) > 0
+            bool blockedFlag = false
+            int slot = (addBackItems[i] as Armor).GetSlotMask()
+            int i2 = 0
+            while i2 < blocks.Length
+                if blocks[i2] == slot
+                    blockedFlag = true
+                    i2 = 500
+                endif
+                i2 += 1
+            endwhile
+            if a.GetItemCount(addBackItems[i]) > 0 && !blockedFlag
+                bind_Utility.WriteToConsole("EquipBondageOutfit - strip list restore: " + addBackItems[i].GetName())
                 a.EquipItem(addBackItems[i], false, true)
+                bind_Utility.DoSleep(sleepWait)
             endif
-            bind_Utility.DoSleep(sleepWait)
+            if blockedFlag
+                StorageUtil.FormListAdd(a, "bind_strip_list_blocked", addBackItems[i], false)
+            endif
             i += 1
         endwhile
 
@@ -221,6 +235,7 @@ function EquipBondageOutfit(Actor a, int setId)
         Form item = wornItems[i]
         if a.GetItemCount(item) > 0
             if !a.IsEquipped(item)
+                bind_Utility.WriteToConsole("EquipBondageOutfit - fixed worn items add: " + item.GetName())
                 a.EquipItem(item, false, true)
                 bind_Utility.DoSleep(sleepWait)
             endif
