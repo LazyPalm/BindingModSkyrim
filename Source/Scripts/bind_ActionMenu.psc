@@ -11,6 +11,20 @@ event OnInit()
 
 endEvent
 
+function LoadGame()
+
+    ;debug.MessageBox("action menu load game...")
+
+    RegisterForModEvent("BindingPlayerChatCompleted", "OnBindingPlayerChatCompleted")
+
+endfunction
+
+event OnBindingPlayerChatCompleted(string eventName, string strArg, float numArg, Form sender)
+    
+    debug.MessageBox("response: " + strArg)
+
+endevent
+
 event LatencyCheck(float timeIn)
 
     float timeOut = bind_Utility.GetTime()
@@ -57,6 +71,7 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("Test Dom Rule Change")
     listMenu.AddEntryItem("Direct Narration Test")
     listMenu.AddEntryItem("Skyrim Bondage Rule Test")
+    listMenu.AddEntryItem("Server Test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -74,6 +89,48 @@ function ShowDebugMenu()
         if think.IsAiReady()
             bind_ThinkingDom.AddBondageRule_Execute(functions_script.GetDomRef(), "", "{\"rule\":\"Random Rule\"}")
         endif
+    elseif listReturn == 4
+
+	; Initialize the Text Entry Menu
+	UIExtensions.InitMenu("UITextEntryMenu")
+
+	; Set up the menu text prompts
+	;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "text", "Enter a name:")
+	;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "defaultText", "DefaultName")
+
+	; Optionally specify max input length
+	UIExtensions.SetMenuPropertyString("UITextEntryMenu", "title", "Name Your Item")
+	UIExtensions.SetMenuPropertyInt("UITextEntryMenu", "maxLength", 20)
+
+	; Open the menu and store the result
+	int result = UIExtensions.OpenMenu("UITextEntryMenu")
+
+	if result == 1
+		; The player confirmed their input
+		string userInput = UIExtensions.GetMenuResultString("UITextEntryMenu")
+		;Debug.Notification("Player entered: " + userInput)
+
+
+        if functions_script.GetConversationTarget() != none && userInput != ""
+		    bind_Utility.PlayerChat(functions_script.GetConversationTarget() as Actor, userInput)
+            ;DynamicScene.Start()
+        else
+            debug.Notification("No actor targeted")
+        endif
+
+		; string llmResponse = MakeAiRequest(userInput, actorName)
+
+		;ShowActorSubtitle(targetedActor, llmResponse)
+
+		;Debug.Notification("LLM: " + llmResponse)
+		MiscUtil.PrintConsole("User to LLM: " + userInput)
+		;ConsoleUtil.PrintMessage("LLM: " + llmResponse)
+
+		; Do something useful with the input—like set a name or store it in a property
+	else
+		Debug.Notification("Text entry was canceled")
+	endif
+
     endif
 
 endfunction
@@ -657,3 +714,5 @@ Quest property bind_BoundMasturbationQuest auto
 Quest property bind_EntryExitQuest auto
 
 GlobalVariable property bind_GlobalSafeZone auto
+
+Scene property DynamicScene auto

@@ -1,5 +1,10 @@
 Scriptname bind_Utility extends Quest  
 
+string function GetComputerTime() global native
+bool function ShowSleepDialogue() global native
+function PlayerChat(Actor act, string chatText) global native
+function PlayerChatOutput(Actor act, string chatText) global native
+
 Function WindowOutput(string msg) global
 	Debug.Notification(msg)
 EndFunction

@@ -63,9 +63,17 @@ Event OnInit()
 
 EndEvent
 
+bool sending = false
+
 function LoadGame()
 
 	;3/23/25 - updated
+
+	; if !sending
+	; 	sending = true
+	; 	debug.MessageBox("server test: " + bind_Utility.ServerTest())
+	; 	sending = false
+	; endif
 
 	if TheDom.GetReference()
 		;note - needed this fix after migrating code to this script (for existing saves)
@@ -124,6 +132,9 @@ function LoadGame()
 
 	;TODO - change bondage manager structures to use storageutil
 	bms.LoadGame(false)
+
+	bind_ActionMenu amenu = Quest.GetQuest("bind_MainQuest") as bind_ActionMenu
+	amenu.LoadGame()
 
 	if theDomRef != none
 		string title = StorageUtil.GetStringValue(theDomRef, "bind_dom_new_name")

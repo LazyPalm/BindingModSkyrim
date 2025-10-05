@@ -540,50 +540,60 @@ endfunction
 
 function ShowSleepMenu()
 
-    if mqs.SoftCheckGoToBed == 1
-        float startTime = bind_Utility.GetTime()
-        GTB_UIUtil.ShowSleepWaitMenu(true)
-        bind_Utility.DoSleep(2.0)
-        float sleepTime = bind_Utility.GetTime() - startTime
-        bind_Utility.WriteToConsole("sleep time: " + sleepTime)
-        if sleepTime > 0.01 ;one hour was .042 when testing
-            UnregisterForUpdate()
-            WakeDom()
-        endif
-    else
-
-        UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-
-        int max = 10
-
-        listMenu.AddEntryItem("I will just keep waiting...")
-        int i = 1
-        while i <= max
-            if i == 1
-                listMenu.AddEntryItem("Sleep " + i + " hour")
-            else
-                listMenu.AddEntryItem("Sleep " + i + " hours")
-            endif
-            i += 1
-        endwhile
-
-        listMenu.OpenMenu()
-        int listReturn = listMenu.GetResultInt()
-        if listReturn == 0
-        elseif listReturn > 0 && listReturn <= max            
-            if bind_Utility.FakeSleep(listReturn)
-                if !theSub.HasSpell(Rested)
-                    theSub.AddSpell(Rested)
-                    bind_Utility.DoSleep()
-                endif
-                Rested.Cast(theSub)
-            endif
-            UnregisterForUpdate()
-            WakeDom()
-        else
-        endif
-
+    float startTime = bind_Utility.GetTime()
+    bind_Utility.ShowSleepDialogue()
+    bind_Utility.DoSleep(2.0)
+    float sleepTime = bind_Utility.GetTime() - startTime
+    bind_Utility.WriteToConsole("sleep time: " + sleepTime)
+    if sleepTime > 0.01 ;one hour was .042 when testing
+        UnregisterForUpdate()
+        WakeDom()
     endif
+
+    ; if mqs.SoftCheckGoToBed == 1
+    ;     float startTime = bind_Utility.GetTime()
+    ;     GTB_UIUtil.ShowSleepWaitMenu(true)
+    ;     bind_Utility.DoSleep(2.0)
+    ;     float sleepTime = bind_Utility.GetTime() - startTime
+    ;     bind_Utility.WriteToConsole("sleep time: " + sleepTime)
+    ;     if sleepTime > 0.01 ;one hour was .042 when testing
+    ;         UnregisterForUpdate()
+    ;         WakeDom()
+    ;     endif
+    ; else
+
+    ;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+
+    ;     int max = 10
+
+    ;     listMenu.AddEntryItem("I will just keep waiting...")
+    ;     int i = 1
+    ;     while i <= max
+    ;         if i == 1
+    ;             listMenu.AddEntryItem("Sleep " + i + " hour")
+    ;         else
+    ;             listMenu.AddEntryItem("Sleep " + i + " hours")
+    ;         endif
+    ;         i += 1
+    ;     endwhile
+
+    ;     listMenu.OpenMenu()
+    ;     int listReturn = listMenu.GetResultInt()
+    ;     if listReturn == 0
+    ;     elseif listReturn > 0 && listReturn <= max            
+    ;         if bind_Utility.FakeSleep(listReturn)
+    ;             if !theSub.HasSpell(Rested)
+    ;                 theSub.AddSpell(Rested)
+    ;                 bind_Utility.DoSleep()
+    ;             endif
+    ;             Rested.Cast(theSub)
+    ;         endif
+    ;         UnregisterForUpdate()
+    ;         WakeDom()
+    ;     else
+    ;     endif
+
+    ; endif
 
 endfunction
 

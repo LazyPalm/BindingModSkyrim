@@ -723,7 +723,7 @@ Event OnItemAdded(Form akBaseItem, int aiItemCount, ObjectReference akItemRefere
 
 	Actor theSub = self.GetReference() as Actor
 
-	if MQS.SoftCheckMME == 1 && MQS.EnableModMME == 1
+	if MQS.SoftCheckMME == 1 && MQS.EnableModMME == 1 && MQS.IsSub == 1
 		;todo - find the keyword for milk - use this to set a flag that will start a quest to get the dom to collect new bottles
 		if akBaseItem.HasKeywordString("MME_Milk") && bind_GlobalModState.GetValue() == 1.0
 			;debug.MessageBox("in here??")
