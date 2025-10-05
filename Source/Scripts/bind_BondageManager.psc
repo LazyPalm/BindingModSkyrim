@@ -39,7 +39,7 @@ Function LoadGame(bool rebuildStorage = false)
 
     ;createdOutfitLocalFiles = false ;remove this
 
-    StorageUtil.StringListClear(theSubRef, "bind_bondage_outfit_file_list")
+    ;StorageUtil.StringListClear(theSubRef, "bind_bondage_outfit_file_list")
 
     if !createdOutfitLocalFiles
 
@@ -49,7 +49,7 @@ Function LoadGame(bool rebuildStorage = false)
         int i = 0
         while i < fList.Length
             string outfitFileText = MiscUtil.ReadFromFile(templateFolder + fList[i])
-            StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
+           ; StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
             MiscUtil.WriteToFile(main.GameSaveFolder + fList[i], outfitFileText, false, false)
             i += 1
         endwhile
@@ -58,12 +58,12 @@ Function LoadGame(bool rebuildStorage = false)
 
     else
 
-        string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
-        int i = 0
-        while i < fList.Length
-            StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
-            i += 1
-        endwhile
+        ; string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+        ; int i = 0
+        ; while i < fList.Length
+        ;     StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
+        ;     i += 1
+        ; endwhile
 
     endif
 

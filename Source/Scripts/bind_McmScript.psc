@@ -3980,19 +3980,35 @@ Event OnOptionMenuOpen(int option)
 
     if option == menuBondageOutfitsList
 
-        StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
-        StorageUtil.StringListClear(theSub, "bind_bondage_files_list")
-        ;string[] list = MiscUtil.FilesInFolder(main.GameSaveFolder)
-        string[] list = StorageUtil.StringListToArray(theSub, "bind_bondage_outfit_file_list")
-        ;debug.MessageBox(list)
+        StorageUtil.StringListClear(theSub, "bind_bondage_outfits_names_temp")
+
+        bondageSetFileNames = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+        ;debug.MessageBox(bondageSetFileNames)
+
         int i = 0
-        while i < list.Length
-            StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_list", JsonUtil.GetStringValue(main.GameSaveFolderJson + list[i], "bondage_outfit_name", ""))
-            StorageUtil.StringListAdd(theSub, "bind_bondage_files_list", list[i])
+        while i < bondageSetFileNames.Length
+            string outfitName = JsonUtil.GetStringValue(main.GameSaveFolderJson + bondageSetFileNames[i], "bondage_outfit_name")
+            StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_names_temp", outfitName)
+            ;StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", bondageSetFileNames[i])
             i += 1
         endwhile
-        bondageSetNames = StorageUtil.StringListToArray(theSub, "bind_bondage_outfits_list")
-        bondageSetFileNames = StorageUtil.StringListToArray(theSub, "bind_bondage_files_list")
+
+        bondageSetNames = StorageUtil.StringListToArray(theSub, "bind_bondage_outfits_names_temp")
+
+        ; StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
+        ; StorageUtil.StringListClear(theSub, "bind_bondage_files_list")
+        ; ;string[] list = MiscUtil.FilesInFolder(main.GameSaveFolder)
+        ; string[] list = StorageUtil.StringListToArray(theSub, "bind_bondage_outfit_file_list")
+        ; ;debug.MessageBox(list)
+        ; int i = 0
+        ; while i < list.Length
+        ;     StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_list", JsonUtil.GetStringValue(main.GameSaveFolderJson + list[i], "bondage_outfit_name", ""))
+        ;     StorageUtil.StringListAdd(theSub, "bind_bondage_files_list", list[i])
+        ;     i += 1
+        ; endwhile
+        ; bondageSetNames = StorageUtil.StringListToArray(theSub, "bind_bondage_outfits_list")
+        ; bondageSetFileNames = StorageUtil.StringListToArray(theSub, "bind_bondage_files_list")
 
         ;debug.MessageBox(bondageSetFileNames)
 
