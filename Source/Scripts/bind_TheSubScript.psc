@@ -156,6 +156,11 @@ Event OnCrosshairRefChange(ObjectReference ref)
 		fs.ClearConversationTargetNpc()
 	endif
 
+	if ref as Actor
+		currentConversationTarget = ref
+		fs.SetConversationTargetNpc(ref as Actor)
+	endif
+
 	;TODO - not sure about this only working while running state
 	;this is to keep it from ditching targets while an event is running, but targeting in the event might be needed?? 3/8/25
 	if bind_GlobalModState.GetValue() == 1.0
@@ -180,8 +185,8 @@ Event OnCrosshairRefChange(ObjectReference ref)
 					EndIf
 					if ref as Actor
 						;MQS.SetConversationTarget(ref as Actor)
-						currentConversationTarget = ref
-						fs.SetConversationTargetNpc(ref as Actor)
+						;currentConversationTarget = ref
+						;fs.SetConversationTargetNpc(ref as Actor)
 						;if RulesManager.BehaviorStudiesAskToTrainMustAsk == 1 && RulesManager.BehaviorStudiesAskToTrainPermission == 0
 						if ref == fs.GetDomRef()
 
