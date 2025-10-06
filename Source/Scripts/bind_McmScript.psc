@@ -297,7 +297,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.21"
+    version = "0.4.22"
 
     theSub = fs.GetSubRef()
 
@@ -2504,33 +2504,38 @@ Event OnOptionSelect(int option)
 
         if option == clickedUpdateTemplateFromCurrentSave
             string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+            string folderJson = "binding/templates/outfits/"
             ;string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
             if ShowMessage("Update bondage outfit templates with data from this save game? WARNING: this will overwrite templates for new games.", true, "$Yes", "$No")
 
-                debug.MessageBox("still working on this...")
+                ;bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
+                int[] setIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
+                i = 0
+                while i < setIdList.Length
 
-                ; string outfitsFileText = MiscUtil.ReadFromFile(gameFolder + "bind_bondage_outfits.json")
-                ; ;ShowMessage(outfitsFileText, false)
-                ; MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+                    int setId = setIdList[i]
 
-                ; string backupOutfitList = ""
+                    string fileName = folder + "bind_bondage_outfit_" + setId + ".json"
+                    string jsonFileName = folderJson + "bind_bondage_outfit_" + setId + ".json"
 
-                ; int[] outfitList = JsonUtil.IntListToArray("binding/games/" + main.SaveGameUid + "/bind_bondage_outfits.json", "bondage_set_ids")
+                    MiscUtil.WriteToFile(fileName, "{}", false, false) ;clear the json
+                                        
+                    JsonUtil.SetIntValue(jsonFileName, "outfit_id", setId)
+                    JsonUtil.SetFloatValue(jsonFileName, "dynamic_bondage_expires", 0.0)
+                    JsonUtil.FormListCopy(jsonFileName, "dynamic_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items"))
+                    JsonUtil.FormListCopy(jsonFileName, "fixed_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_fixed_bondage_items"))
+                    JsonUtil.SetIntValue(jsonFileName, "outfit_enabled", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_outfit_enabled"))
+                    JsonUtil.SetIntValue(jsonFileName, "remove_existing_gear", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_remove_existing_gear"))
+                    JsonUtil.SetIntValue(jsonFileName, "use_random_bondage", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_use_random_bondage"))
+                    JsonUtil.IntListCopy(jsonFileName, "block_slots", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_block_slots"))
+                    JsonUtil.IntListCopy(jsonFileName, "random_bondage_chance", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_random_bondage_chance"))
+                    JsonUtil.StringListCopy(jsonFileName, "used_for", JsonUtil.StringListToArray(main.BindingGameOutfitFile, setId + "_used_for"))
+                    JsonUtil.SetStringValue(jsonFileName, "bondage_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name"))
+                    JsonUtil.Save(jsonFileName)
 
-                ; i = 0
-                ; string outfitFileText
-                ; while i < outfitList.Length
-                ;     if backupOutfitList != ""
-                ;         backupOutfitList += "|"
-                ;     endif
-                ;     backupOutfitList += outfitList[i]
-                ;     outfitFileText = MiscUtil.ReadFromFile(gameFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                ;     MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
-                ;     i += 1
-                ; endwhile
+                    i += 1
 
-                ; selectedBondageOutfit = ""
-                ; selectedBondageOutfitId = 0
+                endwhile
 
                 ShowMessage("Bondage template update completed.", false)
             endif
