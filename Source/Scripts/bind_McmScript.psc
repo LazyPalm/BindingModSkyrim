@@ -247,7 +247,7 @@ int toggleOutfitsLearn
 ;bondage outfits
 string[] materials
 
-string bondageOutfitFile
+;string bondageOutfitFile
 
 int toggleUseOutfit
 int inputBondageSetName
@@ -279,6 +279,7 @@ int[] sliderChance
 string[] bondageSetNames
 string[] bondageSetFileNames
 int[] bondageSetIds
+int currentBondageOutfitIndex
 
 ;AI thinking
 int toggleEnableActionDressingRoom
@@ -688,7 +689,7 @@ function DisplayBondageOutfits()
         AddHeaderOption("Selected - " + selectedBondageOutfit)
         AddHeaderOption("")
 
-        toggleUseOutfit = AddToggleOption("Use This Set", JsonUtil.GetIntValue(bondageOutfitFile, "outfit_enabled", 0))
+        toggleUseOutfit = AddToggleOption("Use This Set", JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_outfit_enabled", 0))
         AddTextOption("", "")
 
         inputBondageSetName = AddInputOption("Bondage Outfit Name", selectedBondageOutfit)
@@ -696,24 +697,24 @@ function DisplayBondageOutfits()
         
         ;delete set goes here
 
-        int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
+        int useRandomBondage = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", 0)
 
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
         AddTextOption("", "")
 
         ;if useRandomBondage == 1
 
-            int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
+            int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance")
 
             if chances.Length != 13
                 chances = new int[13]
                 i  = 0
                 while i < 13
                     chances[i] = 0
-                    JsonUtil.IntListSet(bondageOutfitFile, "random_bondage_chance", i, 0)
+                    JsonUtil.IntListSet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", i, 0)
                     i += 1
                 endwhile
-                JsonUtil.Save(bondageOutfitFile)
+                JsonUtil.Save(main.BindingGameOutfitFile)
             endif
 
             AddHeaderOption("Item Chances")
@@ -736,14 +737,14 @@ function DisplayBondageOutfits()
 
             AddHeaderOption("Current Dynamic Items - Devious Devices")
             
-            float expirationDate = JsonUtil.GetFloatValue(bondageOutfitFile, "dynamic_bondage_expires", 0.0)
+            float expirationDate = JsonUtil.GetFloatValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_dynamic_bondage_expires", 0.0)
             if expirationDate > 0.0
                 AddHeaderOption("Time Remaining: " + (expirationDate - bind_Utility.GetTime()))
             else
                 AddHeaderOption("")
             endif
 
-            Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "dynamic_bondage_items")
+            Form[] setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_dynamic_bondage_items")
             i = 0
             while i < setItems.Length
                 AddTextOption(setItems[i].GetName(), "")
@@ -768,7 +769,7 @@ function DisplayBondageOutfits()
             AddHeaderOption("* Used when random bondage is DISABLED")
             clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
             AddTextOption("", "")
-            setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+            setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items")
             i = 0
             while i < setItems.Length
                 bondageSetRemoveDdToggle[i] = AddTextOption(setItems[i].GetName(), "")
@@ -785,8 +786,8 @@ function DisplayBondageOutfits()
         AddHeaderOption("Fixed Items - Clothing & Armor")
         AddHeaderOption("")
         clickedLearnWornGear = AddTextOption("Learn Worn Gear", "")
-        bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear On Outfit Equip", JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0))
-        Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+        bondageSetRemoveExistingGearToggle = AddToggleOption("Remove Existing Gear On Outfit Equip", JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 0))
+        Form[] wornItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_worn_items")
         i = 0
         while i < wornItems.Length
             bondageSetRemoveGearToggle[i] = AddTextOption(wornItems[i].GetName(), "")
@@ -802,7 +803,7 @@ function DisplayBondageOutfits()
         AddHeaderOption("")
         i = 0
         while i < bondageOutfitBlocks.Length
-            bondageOutfitBlockToggle[i] = AddToggleOption(bondageOutfitBlocks[i], JsonUtil.StringListHas(bondageOutfitFile, "blocks", bondageOutfitBlocks[i]))
+            bondageOutfitBlockToggle[i] = AddToggleOption(bondageOutfitBlocks[i], JsonUtil.IntListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i]))
             i += 1
         endwhile
         AddTextOption("", "")
@@ -811,7 +812,7 @@ function DisplayBondageOutfits()
         AddHeaderOption("")
         int i = 0
         while i < bondageSetUsedForToggle.Length
-            bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.StringListHas(bondageOutfitFile, "used_for", bondageOutfitUsageKey[i]))
+            bondageSetUsedForToggle[i] = AddToggleOption(bondageOutfitUsageList[i], JsonUtil.StringListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i]))
             i += 1
         endwhile
 
@@ -2333,8 +2334,11 @@ event OnOptionInputAccept(int option, string value)
 
     if option == inputBondageSetName
         SetInputOptionValue(inputBondageSetName, value)
-        JsonUtil.SetStringValue(bondageOutfitFile, "bondage_outfit_name", value)
-        JsonUtil.Save(bondageOutfitFile)
+        JsonUtil.SetStringValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_bondage_outfit_name", value)
+
+        JsonUtil.StringListSet(main.BindingGameOutfitFile, "outfit_name_list", currentBondageOutfitIndex, value)
+
+        JsonUtil.Save(main.BindingGameOutfitFile)
 
         ;selectedBondageOutfit = ""
         ;selectedBondageOutfitId = 0
@@ -2548,11 +2552,11 @@ Event OnOptionSelect(int option)
         if option == toggleUseOutfit
             int newValue = 0
 
-            if JsonUtil.GetIntValue(bondageOutfitFile, "outfit_enabled", 0) == 1
-                JsonUtil.SetIntValue(bondageOutfitFile, "outfit_enabled", 0)
+            if JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_outfit_enabled", 0) == 1
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_outfit_enabled", 0)
                 newValue = 0
             else
-                JsonUtil.SetIntValue(bondageOutfitFile, "outfit_enabled", 1)
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_outfit_enabled", 1)
                 newValue = 1
             endif    
 
@@ -2560,29 +2564,29 @@ Event OnOptionSelect(int option)
         endif
 
         if option == toggleBondageOutfitUseRandomBondage
-            int useRandomBondage = JsonUtil.GetIntValue(bondageOutfitFile, "use_random_bondage", 0)
+            int useRandomBondage = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", 0)
             if useRandomBondage == 0
                 useRandomBondage = 1
-                if JsonUtil.IntListCount(bondageOutfitFile, "random_bondage_chance") == 0
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;a plug 0
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;v plug 1
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;v pier 2
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;n pier 3
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;arms 4
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;body 5
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;legs 6
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;boots 7
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;gloves 8
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;collar 9
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;gag 10
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;blindfold 11
-                    JsonUtil.IntListAdd(bondageOutfitFile, "random_bondage_chance", 0) ;hood 12
+                if JsonUtil.IntListCount(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance") == 0
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;a plug 0
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;v plug 1
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;v pier 2
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;n pier 3
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;arms 4
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;body 5
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;legs 6
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;boots 7
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;gloves 8
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;collar 9
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;gag 10
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;blindfold 11
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", 0) ;hood 12
                 endif
             else
                 useRandomBondage = 0
             endif
-            JsonUtil.SetIntValue(bondageOutfitFile, "use_random_bondage", useRandomBondage)
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", useRandomBondage)
+            JsonUtil.Save(main.BindingGameOutfitFile)
             SetToggleOptionValue(toggleBondageOutfitUseRandomBondage, useRandomBondage)
             ;bind_Utility.DoSleep(1.0)
             ;ForcePageReset()
@@ -2609,7 +2613,7 @@ Event OnOptionSelect(int option)
                     string resultsFile = "binding/bind_dd_search_result.json"
                     Form dev = JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
                     if dev
-                        JsonUtil.FormListAdd(bondageOutfitFile, "fixed_bondage_items", dev, false)
+                        JsonUtil.FormListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", dev, false)
                     endif
                     ForcePageReset()
                 endif
@@ -2617,28 +2621,28 @@ Event OnOptionSelect(int option)
         endif
 
         if option == bondageSetRemoveExistingGearToggle
-            if JsonUtil.GetIntValue(bondageOutfitFile, "remove_existing_gear", 0) == 0
-                JsonUtil.SetIntValue(bondageOutfitFile, "remove_existing_gear", 1)
+            if JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 0) == 0
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 1)
                 SetToggleOptionValue(option, 1)
             else
-                JsonUtil.SetIntValue(bondageOutfitFile, "remove_existing_gear", 0)
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 0)
                 SetToggleOptionValue(option, 0)
             endif
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.Save(main.BindingGameOutfitFile)
             
         endif
 
         i = 0
         while i < bondageSetUsedForToggle.Length
             if option == bondageSetUsedForToggle[i]
-                if JsonUtil.StringListHas(bondageOutfitFile, "used_for", bondageOutfitUsageKey[i])
-                    JsonUtil.StringListRemove(bondageOutfitFile, "used_for", bondageOutfitUsageKey[i])
+                if JsonUtil.StringListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i])
+                    JsonUtil.StringListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i])
                     SetToggleOptionValue(option, 0)
                 else
-                    JsonUtil.StringListAdd(bondageOutfitFile, "used_for", bondageOutfitUsageKey[i])
+                    JsonUtil.StringListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i])
                     SetToggleOptionValue(option, 1)
                 endif
-                JsonUtil.Save(bondageOutfitFile)
+                JsonUtil.Save(main.BindingGameOutfitFile)
 
             endif
             i += 1
@@ -2647,16 +2651,16 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageOutfitBlockToggle.Length
             if option == bondageOutfitBlockToggle[i]
-                if JsonUtil.StringListHas(bondageOutfitFile, "blocks", bondageOutfitBlocks[i])
-                    JsonUtil.StringListRemove(bondageOutfitFile, "blocks", bondageOutfitBlocks[i])
-                    JsonUtil.IntListRemove(bondageOutfitFile, "block_slots", bondageOutfitBlocksSlots[i])
+                if JsonUtil.IntListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i])
+                    ;JsonUtil.StringListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_blocks", bondageOutfitBlocks[i])
+                    JsonUtil.IntListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i])
                     SetToggleOptionValue(option, 0)
                 else
-                    JsonUtil.StringListAdd(bondageOutfitFile, "blocks", bondageOutfitBlocks[i])
-                    JsonUtil.IntListAdd(bondageOutfitFile, "block_slots", bondageOutfitBlocksSlots[i])
+                    ;JsonUtil.StringListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_blocks", bondageOutfitBlocks[i])
+                    JsonUtil.IntListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i])
                     SetToggleOptionValue(option, 1)
                 endif
-                JsonUtil.Save(bondageOutfitFile)
+                JsonUtil.Save(main.BindingGameOutfitFile)
             endif
             i += 1
         endwhile
@@ -2664,9 +2668,9 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageSetRemoveDdToggle.Length
             if option == bondageSetRemoveDdToggle[i]
-                Form dev = JsonUtil.FormListGet(bondageOutfitFile, "fixed_bondage_items", i)
+                Form dev = JsonUtil.FormListGet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", i)
                 if ShowMessage("Remove " + dev.GetName() + "?", true, "$Yes", "$No")
-                    JsonUtil.FormListRemove(bondageOutfitFile, "fixed_bondage_items", dev, true)
+                    JsonUtil.FormListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", dev, true)
                     ForcePageReset()
                 endif
             endif
@@ -2676,9 +2680,9 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageSetRemoveGearToggle.Length
             if option == bondageSetRemoveGearToggle[i]
-                Form dev = JsonUtil.FormListGet(bondageOutfitFile, "fixed_worn_items", i)
+                Form dev = JsonUtil.FormListGet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_worn_items", i)
                 if ShowMessage("Remove " + dev.GetName() + "?", true, "$Yes", "$No")
-                    JsonUtil.FormListRemove(bondageOutfitFile, "fixed_worn_items", dev, true)
+                    JsonUtil.FormListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_worn_items", dev, true)
                     ForcePageReset()
                 endif
             endif
@@ -3542,7 +3546,7 @@ Event OnOptionSliderOpen(Int option)
 
     int i
     if selectedPage == "Bondage Outfits"
-        int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
+        int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance")
         while i < sliderChance.Length
             if sliderChance[i] == option
                 SetSliderDialogStartValue(chances[i])
@@ -3722,10 +3726,10 @@ Event OnOptionSliderAccept(Int option, Float value)
 
     int i
     if selectedPage == "Bondage Outfits"
-        int[] chances = JsonUtil.IntListToArray(bondageOutfitFile, "random_bondage_chance")
+        int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance")
         while i < sliderChance.Length
             if sliderChance[i] == option
-                JsonUtil.IntListSet(bondageOutfitFile, "random_bondage_chance", i, value as int)
+                JsonUtil.IntListSet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance", i, value as int)
                 ;ForcePageReset()
             endif
             i += 1
@@ -3980,21 +3984,24 @@ Event OnOptionMenuOpen(int option)
 
     if option == menuBondageOutfitsList
 
-        StorageUtil.StringListClear(theSub, "bind_bondage_outfits_names_temp")
+        ; StorageUtil.StringListClear(theSub, "bind_bondage_outfits_names_temp")
 
-        bondageSetFileNames = MiscUtil.FilesInFolder(main.GameSaveFolder)
+        ; bondageSetFileNames = MiscUtil.FilesInFolder(main.GameSaveFolder)
 
-        ;debug.MessageBox(bondageSetFileNames)
+        ; ;debug.MessageBox(bondageSetFileNames)
 
-        int i = 0
-        while i < bondageSetFileNames.Length
-            string outfitName = JsonUtil.GetStringValue(main.GameSaveFolderJson + bondageSetFileNames[i], "bondage_outfit_name")
-            StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_names_temp", outfitName)
-            ;StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", bondageSetFileNames[i])
-            i += 1
-        endwhile
+        ; int i = 0
+        ; while i < bondageSetFileNames.Length
+        ;     string outfitName = JsonUtil.GetStringValue(main.GameSaveFolderJson + bondageSetFileNames[i], "bondage_outfit_name")
+        ;     StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_names_temp", outfitName)
+        ;     ;StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", bondageSetFileNames[i])
+        ;     i += 1
+        ; endwhile
 
-        bondageSetNames = StorageUtil.StringListToArray(theSub, "bind_bondage_outfits_names_temp")
+        ; bondageSetNames = StorageUtil.StringListToArray(theSub, "bind_bondage_outfits_names_temp")
+
+        bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
+        bondageSetIds = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
 
         ; StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
         ; StorageUtil.StringListClear(theSub, "bind_bondage_files_list")
@@ -4195,15 +4202,19 @@ Event OnOptionMenuAccept(int option, int index)
 
     if option == menuBondageOutfitsList
 
-        string fileName = main.GameSaveFolderJson + bondageSetFileNames[index]
+        ; string fileName = main.GameSaveFolderJson + bondageSetFileNames[index]
 
-        ;ShowMessage(fileName, false)
+        ; ;ShowMessage(fileName, false)
 
-        selectedBondageOutfit = JsonUtil.GetStringValue(fileName, "bondage_outfit_name", "") ;bondageSetNames[index]
-        selectedBondageOutfitId = JsonUtil.GetIntValue(fileName, "outfit_id", 0) ;bondageSetIds[index]
-        ;selectedBondageOutfitIndex = index
+        ; selectedBondageOutfit = JsonUtil.GetStringValue(fileName, "bondage_outfit_name", "") ;bondageSetNames[index]
+        ; selectedBondageOutfitId = JsonUtil.GetIntValue(fileName, "outfit_id", 0) ;bondageSetIds[index]
+        ; ;selectedBondageOutfitIndex = index
         
-        bondageOutfitFile = fileName ;main.GameSaveFolderJson + "/bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
+        ; bondageOutfitFile = fileName ;main.GameSaveFolderJson + "/bind_bondage_outfit_" + selectedBondageOutfitId + ".json"
+
+        selectedBondageOutfit = bondageSetNames[index]
+        selectedBondageOutfitId = bondageSetIds[index]
+        currentBondageOutfitIndex = index
 
         ;SetMenuOptionValue(menuBondageOutfitsList, bondageSetNames[index])
         ForcePageReset()

@@ -41,20 +41,52 @@ Function LoadGame(bool rebuildStorage = false)
 
     ;StorageUtil.StringListClear(theSubRef, "bind_bondage_outfit_file_list")
 
+    if !MiscUtil.FileExists("data/skse/plugins/StorageUtilData/binding/games/outfits_" + main.SaveGameUid + ".json") && createdOutfitLocalFiles
+        createdOutfitLocalFiles = false
+        debug.MessageBox("Creating missing outfits file")
+    endif
+
     if !createdOutfitLocalFiles
 
+        createdOutfitLocalFiles = true
+
         string templateFolder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+        string templateFolderJson = "binding/templates/outfits/"
+
         string[] fList = MiscUtil.FilesInFolder(templateFolder)
         ;debug.MessageBox(fList)
         int i = 0
         while i < fList.Length
-            string outfitFileText = MiscUtil.ReadFromFile(templateFolder + fList[i])
-           ; StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
-            MiscUtil.WriteToFile(main.GameSaveFolder + fList[i], outfitFileText, false, false)
+        ;     string outfitFileText = MiscUtil.ReadFromFile(templateFolder + fList[i])
+        ;    ; StorageUtil.StringListAdd(theSubRef, "bind_bondage_outfit_file_list", fList[i])
+        ;     MiscUtil.WriteToFile(main.GameSaveFolder + fList[i], outfitFileText, false, false)
+
+            int outfitId = JsonUtil.GetIntValue(templateFolderJson + fList[i], "outfit_id")
+            string outfitName = JsonUtil.GetStringValue(templateFolderJson + fList[i], "bondage_outfit_name")
+
+            JsonUtil.IntListAdd(main.BindingGameOutfitFile, "outfit_id_list", outfitId)
+            JsonUtil.StringListAdd(main.BindingGameOutfitFile, "outfit_name_list", outfitName)
+
+            JsonUtil.SetFloatValue(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_expires", 0.0)
+
+            JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "dynamic_bondage_items"))
+            JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_fixed_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "fixed_bondage_items"))
+
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_outfit_enabled", JsonUtil.GetIntValue(templateFolderJson + fList[i], "outfit_enabled"))
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_remove_existing_gear", JsonUtil.GetIntValue(templateFolderJson + fList[i], "remove_existing_gear"))
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_use_random_bondage", JsonUtil.GetIntValue(templateFolderJson + fList[i], "use_random_bondage"))
+
+            JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_block_slots", JsonUtil.IntListToArray(templateFolderJson + fList[i], "block_slots"))
+            JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_random_bondage_chance", JsonUtil.IntListToArray(templateFolderJson + fList[i], "random_bondage_chance"))
+
+            JsonUtil.StringListCopy(main.BindingGameOutfitFile, outfitId + "_used_for", JsonUtil.StringListToArray(templateFolderJson + fList[i], "used_for"))
+
+            JsonUtil.SetStringValue(main.BindingGameOutfitFile, outfitId + "_bondage_outfit_name", JsonUtil.GetStringValue(templateFolderJson + fList[i], "bondage_outfit_name"))
+
             i += 1
         endwhile
 
-        createdOutfitLocalFiles = true
+        JsonUtil.Save(main.BindingGameOutfitFile)
 
     else
 
@@ -143,7 +175,7 @@ function EquipBondageOutfit(Actor a, int setId)
 
     EquippingBondageOutfit = true
 
-    string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + setId + ".json"
+    ;string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + setId + ".json"
 
     ;NOTE - there is probably no reason to clean this out
     if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
@@ -153,11 +185,11 @@ function EquipBondageOutfit(Actor a, int setId)
         bind_Utility.WriteToConsole("keeping strip buffer")
     endif
 
-    bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
+    ;bind_Utility.WriteToConsole("EquipBondageOutfit f: " + f)
 
     RemoveAllBondageItems(a, false)
 
-    if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
+    if JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_remove_existing_gear", 0) == 1
         Form[] inventory = a.GetContainerForms()
         i = 0
         while i < inventory.Length
@@ -178,7 +210,7 @@ function EquipBondageOutfit(Actor a, int setId)
         ;note - no need to do this if all existing gear is being removed
         ;unequip blocks
         StorageUtil.FormListClear(a, "bind_strip_list_blocked")
-        int[] blocks = JsonUtil.IntListToArray(f, "block_slots")
+        int[] blocks = JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_block_slots")
         i = 0
         while i < blocks.Length
             Armor item = a.GetWornForm(blocks[i]) as Armor
@@ -229,7 +261,7 @@ function EquipBondageOutfit(Actor a, int setId)
     endif
 
     ;does the set have stored armor & clothing?
-    Form[] wornItems = JsonUtil.FormListToArray(f, "fixed_worn_items")
+    Form[] wornItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_fixed_worn_items")
     i = 0
     while i < wornItems.Length
         Form item = wornItems[i]
@@ -245,7 +277,7 @@ function EquipBondageOutfit(Actor a, int setId)
         i += 1
     endwhile
 
-    int useRandom = JsonUtil.GetIntValue(f, "use_random_bondage", 0)
+    int useRandom = JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_use_random_bondage", 0)
 
     Form[] setItems
 
@@ -253,13 +285,13 @@ function EquipBondageOutfit(Actor a, int setId)
 
     if useRandom == 1
 
-        float expirationDate = JsonUtil.GetFloatValue(f, "dynamic_bondage_expires", 0.0)
-        if expirationDate < bind_Utility.GetTime() || JsonUtil.FormListCount(f, "dynamic_bondage_items") == 0
+        float expirationDate = JsonUtil.GetFloatValue(main.BindingGameOutfitFile, setId + "_dynamic_bondage_expires", 0.0)
+        if expirationDate < bind_Utility.GetTime() || JsonUtil.FormListCount(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items") == 0
             
             bind_Utility.WriteNotification("resetting dynamic gear", bind_Utility.TextColorRed())
 
-            JsonUtil.FormListClear(f, "dynamic_bondage_items")
-            JsonUtil.SetFloatValue(f, "dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
+            JsonUtil.FormListClear(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items")
+            JsonUtil.SetFloatValue(main.BindingGameOutfitFile, setId + "_dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
       
             int material = Utility.RandomInt(1, 4) ;change to 3
             string materialSearch = ""
@@ -296,7 +328,7 @@ function EquipBondageOutfit(Actor a, int setId)
                 colorSearch = "white"
             endif
 
-            int[] chances = JsonUtil.IntListToArray(f, "random_bondage_chance")
+            int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_random_bondage_chance")
             bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
 
             string searchString = ""
@@ -309,22 +341,22 @@ function EquipBondageOutfit(Actor a, int setId)
             ;anal plug - 0
             if Utility.RandomInt(0, 100) < chances[0]
                 searchString = "anal,plug"
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             ;vag plug - 1
             if Utility.RandomInt(0, 100) < chances[1]
                 searchString = "vaginal,plug"
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             ;vag piercing - 2
             if Utility.RandomInt(0, 100) < chances[2]
                 searchString = "genital,piercing"
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             ;nipple piercing - 3
             if Utility.RandomInt(0, 100) < chances[3]
                 searchString = "nipple,piercing"
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif      
             if Utility.RandomInt(0, 100) < chances[5] ;body - 5
                 if material == 1 || material == 2 || material == 3
@@ -348,7 +380,7 @@ function EquipBondageOutfit(Actor a, int setId)
                         searchString = "iron chain harness,body"
                     endif
                 endif
-                bodyItem = FindRandomItem(f, rf, searchString)
+                bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             ;arms - 4
             if Utility.RandomInt(0, 100) < chances[4]
@@ -378,7 +410,7 @@ function EquipBondageOutfit(Actor a, int setId)
                     endif
                     ;debug.MessageBox(searchString)
                 endif
-                armItem = FindRandomItem(f, rf, searchString)
+                armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[6] ;legs
                 int legType = Utility.RandomInt(1, 2)
@@ -392,24 +424,24 @@ function EquipBondageOutfit(Actor a, int setId)
                         searchString = "steel,cuffs,(legs)"
                     endif
                 endif
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[7] ;boots
                 if material == 2 || material == 3
                     searchString = "boots,-pony," + materialSearch + "," + colorSearch
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 elseif material == 1 ;rope with iron boots (maybe get rid of this?)
                     searchString = "boots,iron"
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 elseif material == 4
                     searchString = "boots," + materialSearch
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
             endif
             if Utility.RandomInt(0, 100) < chances[8] ;gloves
                 if material == 2 || material == 3
                     searchString = "gloves," + materialSearch + "," + colorSearch
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
             endif       
             if Utility.RandomInt(0, 100) < chances[10] ;gag
@@ -423,15 +455,15 @@ function EquipBondageOutfit(Actor a, int setId)
                 else
                     searchString = "gag," + materialSearch + "," + colorSearch
                 endif
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[11] ;blindfold
                 if material == 1 || material == 2 || material == 3
                     searchString = "blindfold," + materialSearch + "," + colorSearch
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 elseif material == 4
                     searchString = "blindfold,leather,black"
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
             endif
             if Utility.RandomInt(0, 100) < chances[12] ;hood
@@ -440,7 +472,7 @@ function EquipBondageOutfit(Actor a, int setId)
                 else
                     searchString = "hood," + materialSearch + "," + colorSearch
                 endif
-                FindRandomItem(f, rf, searchString)
+                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[9] ;collar - 9 (moved this up to let the body and arms unequip it)
                 if !zlib.GetRenderedDevice(bodyItem as Armor).HasKeyWord(zlib.zad_DeviousCollar) && !zlib.GetRenderedDevice(armItem as Armor).HasKeyWord(zlib.zad_DeviousCollar)
@@ -454,21 +486,21 @@ function EquipBondageOutfit(Actor a, int setId)
                     else
                         searchString = "collar," + materialSearch + "," + colorSearch
                     endif
-                    FindRandomItem(f, rf, searchString)
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 else
                     bind_Utility.WriteToConsole("body item has collar")
                 endif
             endif  
 
-            JsonUtil.Save(f)
+            JsonUtil.Save(main.BindingGameOutfitFile)
 
         endif
 
-        setItems = JsonUtil.FormListToArray(f, "dynamic_bondage_items")
+        setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items")
 
     else
     
-        setItems = JsonUtil.FormListToArray(f, "fixed_bondage_items")
+        setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_fixed_bondage_items")
 
     endif
 
@@ -487,7 +519,7 @@ function EquipBondageOutfit(Actor a, int setId)
     endif
 
     StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
-    StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(f, "bondage_outfit_name", ""))
+    StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
 
     bind_Utility.DoSleep(2.0)
 
@@ -500,13 +532,13 @@ function EquipBondageOutfit(Actor a, int setId)
 
 endfunction
 
-Form function FindRandomItem(string fileName, string resultsFileName, string searchString)
+Form function FindRandomItem(string fileName, string resultsFileName, string searchString, int setId)
     string[] items = SearchDeviousItems(searchString)
     ;debug.MessageBox("search: " + searchString + " results: " + items)
     Form dev = JsonUtil.FormListRandom(resultsFileName, "found_items")
     if dev != none
         bind_Utility.WriteToConsole("FindRandomItem: " + dev.GetName())
-        JsonUtil.FormListAdd(fileName, "dynamic_bondage_items", dev)
+        JsonUtil.FormListAdd(fileName, setId + "_dynamic_bondage_items", dev)
     endif
     return dev
 endfunction
@@ -620,7 +652,9 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     ;debug.MessageBox(locTagList)
     bind_Utility.WriteToConsole("search for tags: " + locTagList)
 
-    string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+    ;string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+    int[] outfitIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
 
     bool foundOutfits = false
     bool outfitValid = false
@@ -632,12 +666,12 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     while i < locTagList.Length
         string tag = locTagList[i]
         i2 = 0
-        while i2 < fList.Length
-            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[i2], "used_for", tag)
-                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i2], "outfit_enabled", 0) == 1
+        while i2 < outfitIdList.Length
+            if JsonUtil.StringListHas(main.BindingGameOutfitFile, outfitIdList[i2] + "_used_for", tag)
+                if JsonUtil.GetIntValue(main.BindingGameOutfitFile, outfitIdList[i2] + "_outfit_enabled", 0) == 1
                     ;debug.MessageBox(fList[i2])
-                    bind_Utility.WriteToConsole("found: " + fList[i2])
-                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i2], "outfit_id", -1)
+                    bind_Utility.WriteToConsole("found: " + outfitIdList[i2])
+                    int outfitId = outfitIdList[i2]; JsonUtil.GetIntValue(main.BindingGameOutfitFile, outfitIdList[i2] + "_outfit_id", -1)
                     if outfitId == currentBondageSet
                         outfitValid = true
                     endif

@@ -4,6 +4,9 @@ int property SaveGameUid auto conditional
 string property GameSaveFolder auto conditional
 string property GameSaveFolderJson auto conditional
 
+string property BindingGameFolder auto conditional ;this should replace the two above?
+string property BindingGameOutfitFile auto conditional
+
 string property ActiveQuestName auto conditional
 
 ;string property BondageSetLocation auto conditional

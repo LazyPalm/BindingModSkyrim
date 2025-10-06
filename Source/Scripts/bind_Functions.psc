@@ -90,6 +90,8 @@ function LoadGame()
 
 	main.GameSaveFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
 	main.GameSaveFolderJson = "binding/games/" + main.SaveGameUid + "/outfits/"
+	main.BindingGameFolder = "binding/games/"
+	main.BindingGameOutfitFile = main.BindingGameFolder + "outfits_" + main.SaveGameUid + ".json"
 
 	RegisterForControl("Activate")
 
