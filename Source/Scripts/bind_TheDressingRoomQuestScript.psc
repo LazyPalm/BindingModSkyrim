@@ -385,7 +385,7 @@ function SetArmorBlocks()
 
         ;bind_Utility.WriteToConsole("used_for_" + usageList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + usageList[i]))
 
-        bool hasBlock = JsonUtil.StringListHas(bondageOutfitFile, "blocks", blocks[i])
+        bool hasBlock = JsonUtil.StringListHas(mqs.BindingGameOutfitFile, loadedSetId + "_blocks", blocks[i])
 
         string blockText = ""
         if hasBlock
@@ -402,15 +402,15 @@ function SetArmorBlocks()
         ParentMenu()
     elseif listReturn >= 1
         int id = listReturn - 1
-        bool hasBlock = JsonUtil.StringListHas(bondageOutfitFile, "blocks", blocks[id])
+        bool hasBlock = JsonUtil.StringListHas(mqs.BindingGameOutfitFile, loadedSetId + "_blocks", blocks[id])
         if hasBlock
-            JsonUtil.StringListRemove(bondageOutfitFile, "blocks", blocks[id])
-            JsonUtil.IntListRemove(bondageOutfitFile, "block_slots", blockSlots[id])
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.StringListRemove(mqs.BindingGameOutfitFile, loadedSetId + "_blocks", blocks[id])
+            JsonUtil.IntListRemove(mqs.BindingGameOutfitFile, loadedSetId + "_block_slots", blockSlots[id])
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
         else
-            JsonUtil.StringListAdd(bondageOutfitFile, "blocks", blocks[id])
-            JsonUtil.IntListAdd(bondageOutfitFile, "block_slots", blockSlots[id])
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.StringListAdd(mqs.BindingGameOutfitFile, loadedSetId + "_blocks", blocks[id])
+            JsonUtil.IntListAdd(mqs.BindingGameOutfitFile, loadedSetId + "_block_slots", blockSlots[id])
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
         endif
 
         SetArmorBlocks()
@@ -429,7 +429,7 @@ function SetUsesMenu()
 
         ;bind_Utility.WriteToConsole("used_for_" + usageList[i] + " count: " + StorageUtil.StringListCount(TheWardrobe, "used_for_" + usageList[i]))
 
-        bool hasSet = JsonUtil.StringListHas(bondageOutfitFile, "used_for", usageKey[i])
+        bool hasSet = JsonUtil.StringListHas(mqs.BindingGameOutfitFile, loadedSetId + "_used_for", usageKey[i])
 
         string inUseText = ""
         if hasSet
@@ -446,14 +446,14 @@ function SetUsesMenu()
         ParentMenu()
     elseif listReturn >= 1
 
-        bool hasSet =  JsonUtil.StringListHas(bondageOutfitFile, "used_for", usageKey[i])
+        bool hasSet =  JsonUtil.StringListHas(mqs.BindingGameOutfitFile, loadedSetId + "_used_for", usageKey[i])
         if hasSet
             ;bind_Utility.WriteToConsole("removing from uses: used_for_" + usageKey[listReturn - 1] + " set: " + loadedSetName)
-            JsonUtil.StringListRemove(bondageOutfitFile, "used_for", usageKey[listReturn - 1])
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.StringListRemove(mqs.BindingGameOutfitFile, loadedSetId + "_used_for", usageKey[listReturn - 1])
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
         else
-            JsonUtil.StringListAdd(bondageOutfitFile, "used_for", usageKey[listReturn - 1], false)
-            JsonUtil.Save(bondageOutfitFile)
+            JsonUtil.StringListAdd(mqs.BindingGameOutfitFile, loadedSetId + "_used_for", usageKey[listReturn - 1], false)
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
             ;bind_Utility.WriteToConsole("adding to uses: used_for_" + usageKey[listReturn - 1] + " set: " + loadedSetName + " idx: " + idx)
         endif
 
@@ -544,19 +544,21 @@ function LoadSetsMenu()
 
     ;string[] setsList = StorageUtil.StringListToArray(TheWardrobe, "sets_list")
 
-    StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
-    StorageUtil.IntListClear(theSub, "bind_bondage_files_list")
+    ; StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
+    ; StorageUtil.IntListClear(theSub, "bind_bondage_files_list")
 
-    string[] list = MiscUtil.FilesInFolder(mqs.GameSaveFolder)
-    int i = 0
-    while i < list.Length
-        StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_list", JsonUtil.GetStringValue(mqs.GameSaveFolderJson + list[i], "bondage_outfit_name", ""))
-        StorageUtil.IntListAdd(theSub, "bind_bondage_files_list", JsonUtil.GetIntValue(mqs.GameSaveFolderJson + list[i], "outfit_id", 0))
-        i += 1
-    endwhile
+    ; string[] list = MiscUtil.FilesInFolder(mqs.GameSaveFolder)
+    ; int i = 0
+    ; while i < list.Length
+    ;     StorageUtil.StringListAdd(theSub, "bind_bondage_outfits_list", JsonUtil.GetStringValue(mqs.GameSaveFolderJson + list[i], "bondage_outfit_name", ""))
+    ;     StorageUtil.IntListAdd(theSub, "bind_bondage_files_list", JsonUtil.GetIntValue(mqs.GameSaveFolderJson + list[i], "outfit_id", 0))
+    ;     i += 1
+    ; endwhile
 
-    string[] bondageSetNames = JsonUtil.StringListToArray(theSub, "bind_bondage_outfits_list")
-    int[] bondageSetIds = JsonUtil.IntListToArray(theSub, "bind_bondage_files_list")
+    int i
+
+    string[] bondageSetNames = JsonUtil.StringListToArray(mqs.BindingGameOutfitFile, "outfit_name_list")
+    int[] bondageSetIds = JsonUtil.IntListToArray(mqs.BindingGameOutfitFile, "outfit_id_list")
 
     i = 0
     while i < bondageSetNames.Length
@@ -571,7 +573,7 @@ function LoadSetsMenu()
     elseif listReturn >= 1
         loadedSetName = bondageSetNames[listReturn - 1]
         loadedSetId = bondageSetIds[listReturn - 1]
-        bondageOutfitFile = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + loadedSetId + ".json"
+        ;bondageOutfitFile = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + loadedSetId + ".json"
         LoadSet()
         StorageUtil.SetIntValue(theSub, "bind_wearing_outfit_id", loadedSetId)
     endif
@@ -736,12 +738,18 @@ function SaveSet()
             loadedSetName = result
 
             int uid = Utility.RandomInt(100000000,999999999)
-            string fileName = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + uid + ".json"
-            JsonUtil.SetStringValue(fileName, "bondage_outfit_name", loadedSetName)
-            JsonUtil.SetIntValue(fileName, "outfit_id", uid)
-            JsonUtil.Save(fileName)
-            bondageOutfitFile = fileName
+            ;string fileName = mqs.GameSaveFolderJson + "bind_bondage_outfit_" + uid + ".json"
+            
+            JsonUtil.StringListAdd(mqs.BindingGameOutfitFile, "outfit_name_list", loadedSetName)
+            JsonUtil.IntListAdd(mqs.BindingGameOutfitFile, "outfit_id_list", uid)
+
+            ;JsonUtil.SetStringValue(fileName, "bondage_outfit_name", loadedSetName)
+            ;JsonUtil.SetIntValue(fileName, "outfit_id", uid)
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
+            ;bondageOutfitFile = fileName
             loadedSetId = uid
+
+            JsonUtil.Save(mqs.BindingGameOutfitFile)
 
             ;StorageUtil.StringListAdd(TheWardrobe, "sets_list", result)
         else
@@ -752,7 +760,7 @@ function SaveSet()
 
     GoToState("WorkingState")
 
-    JsonUtil.FormListClear(bondageOutfitFile, "fixed_bondage_items")
+    JsonUtil.FormListClear(mqs.BindingGameOutfitFile, "fixed_bondage_items")
     ;StorageUtil.FormListClear(TheWardrobe, "set_" + loadedSetName)
 
 	; Form[] inventory = theSub.GetContainerForms()
@@ -779,9 +787,7 @@ function SaveSet()
 
     gms.LearnWornItemsForBondageOutfit(theSub, loadedSetId)
 
-    GoToState("")
-
-    JsonUtil.Save(bondageOutfitFile)
+    GoToState("") 
 
     debug.MessageBox("Set " + loadedSetName + " saved")
 
@@ -797,7 +803,7 @@ function LoadSet()
 
     int i
 
-    Form[] wornItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_worn_items")
+    Form[] wornItems = JsonUtil.FormListToArray(mqs.BindingGameOutfitFile, loadedSetId + "_fixed_worn_items")
     i = 0
     while i < wornItems.Length
         Form item = wornItems[i]
@@ -812,7 +818,7 @@ function LoadSet()
         i += 1
     endwhile
 
-    Form[] setItems = JsonUtil.FormListToArray(bondageOutfitFile, "fixed_bondage_items")
+    Form[] setItems = JsonUtil.FormListToArray(mqs.BindingGameOutfitFile, loadedSetId + "_fixed_bondage_items")
     i = 0
     while i < setItems.Length
         Form dev = setItems[i]

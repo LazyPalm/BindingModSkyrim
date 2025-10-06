@@ -1032,12 +1032,12 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 
 	bind_MainQuestScript m = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
 
-	string bondageOutfitFile
-    bondageOutfitFile = m.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
+	; string bondageOutfitFile
+    ; bondageOutfitFile = m.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
 
     GoToState("WorkingState")
 
-    JsonUtil.FormListClear(bondageOutfitFile, "fixed_worn_items")
+    JsonUtil.FormListClear(m.BindingGameOutfitFile, outfitId + "_fixed_worn_items")
 
 	Form[] inventory = a.GetContainerForms()
 	int i = 0
@@ -1049,7 +1049,7 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 				if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
 					bind_Utility.WriteToConsole("LearnWornItemsForBondageOutfit - dev: " + dev.GetName())
 					;StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
-					JsonUtil.FormListAdd(bondageOutfitFile, "fixed_worn_items", dev, false)
+					JsonUtil.FormListAdd(m.BindingGameOutfitFile, outfitId + "_fixed_worn_items", dev, false)
 				else
 
 				endif
@@ -1060,7 +1060,7 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 
     GoToState("")
 
-    JsonUtil.Save(bondageOutfitFile)
+    JsonUtil.Save(m.BindingGameOutfitFile)
 
 endfunction
 
