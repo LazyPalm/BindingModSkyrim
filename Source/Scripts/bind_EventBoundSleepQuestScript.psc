@@ -244,7 +244,7 @@ endstate
 function ShowSleepMenu()
 
     float startTime = bind_Utility.GetTime()
-    bind_Utility.ShowSleepDialogue()
+    bind_SkseFunctions.ShowSleepDialogue()
     bind_Utility.DoSleep(2.0)
     float sleepTime = bind_Utility.GetTime() - startTime
     bind_Utility.WriteToConsole("sleep time: " + sleepTime)

@@ -200,6 +200,8 @@ function SaveThePlayer(bool addGag)
     ; bind_MovementQuestScript.StartHogtied(theSub)
 
     futureDom.MoveTo(theSub)
+    futureDom.SetPosition(futureDom.GetPositionX() + Utility.RandomFloat(-250.0, 250.0), futureDom.GetPositionY() + Utility.RandomFloat(-250.0, 250.0), futureDom.GetPositionZ() + 100.0) ;adding z in case elevation changes
+
 
     FadeToBlackHoldImod.Remove()
 

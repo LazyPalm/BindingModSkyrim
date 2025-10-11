@@ -297,7 +297,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.22"
+    version = "0.4.23"
 
     theSub = fs.GetSubRef()
 
@@ -3241,6 +3241,24 @@ Event OnOptionSelect(int option)
     If option == toggleStartupQuests
         main.DomStartupQuestsEnabled = ToggleValue(main.DomStartupQuestsEnabled)
         SetToggleOptionValue(toggleStartupQuests, main.DomStartupQuestsEnabled)
+        if main.DomStartupQuestsEnabled == 0
+            Form[] futureDoms = StorageUtil.FormListToArray(fs.GetSubRef(), "bind_future_doms")
+            if futureDoms.Length > 0
+                int fdi = 0
+                while fdi < futureDoms.Length
+                    Actor fd = futureDoms[fdi] as Actor
+                    if fd.IsInFaction(fs.bind_FutureDomFaction)
+                        fd.RemoveFromFaction(fs.bind_FutureDomFaction)
+                    endif
+                    fdi += 1
+                endwhile
+                StorageUtil.FormListClear(fs.GetSubRef(), "bind_future_doms")
+            endif
+            Quest q = Quest.GetQuest("bind_DefeatedQuest")
+            if q.IsRunning()
+                q.Stop()
+            endif
+        endif
     EndIf
 
     if option == toggleFakeSleep

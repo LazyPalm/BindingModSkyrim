@@ -15,13 +15,14 @@ function LoadGame()
 
     ;debug.MessageBox("action menu load game...")
 
+    UnregisterForModEvent("BindingPlayerChatCompleted")
     RegisterForModEvent("BindingPlayerChatCompleted", "OnBindingPlayerChatCompleted")
 
 endfunction
 
-event OnBindingPlayerChatCompleted(string eventName, string strArg, float numArg, Form sender)
+event OnBindingPlayerChatCompleted(string eventName, string result, float numArg)
     
-    debug.MessageBox("response: " + strArg)
+    debug.MessageBox("response: " + result)
 
 endevent
 
@@ -112,7 +113,7 @@ function ShowDebugMenu()
 
 
         if functions_script.GetConversationTarget() != none && userInput != ""
-		    bind_Utility.PlayerChat(functions_script.GetConversationTarget() as Actor, userInput)
+		    bind_SkseFunctions.PlayerChat(functions_script.GetConversationTarget() as Actor, userInput)
             ;DynamicScene.Start()
         else
             debug.Notification("No actor targeted")
@@ -274,8 +275,21 @@ function ShowSettingsMenu()
     elseif listReturn == 3
         ShowDebugMenu()
     elseif listReturn == 4
+        Form[] futureDoms = StorageUtil.FormListToArray(functions_script.GetSubRef(), "bind_future_doms")
+        int fdi = 0
+        while fdi < futureDoms.Length
+            Actor fd = futureDoms[fdi] as Actor
+            if fd.IsInFaction(functions_script.bind_FutureDomFaction)
+                fd.RemoveFromFaction(functions_script.bind_FutureDomFaction)
+            endif
+            fdi += 1
+        endwhile
         StorageUtil.FormListClear(functions_script.GetSubRef(), "bind_future_doms")
-        debug.MessageBox("Future doms list has been cleared")
+        Quest q = Quest.GetQuest("bind_DefeatedQuest")
+        if q.IsRunning()
+            q.Stop()
+        endif
+        debug.MessageBox("Future doms list has been cleared. Defeat quest has been reset.")
     elseif listReturn == 5
         Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
         bind_Functions f = bind_Functions.GetBindingFunctions()
@@ -426,6 +440,8 @@ auto state StandingState
 
 endstate
 
+Form[] removedItems
+
 function ShowActionMenuNested()
 
     bool safeZone = (bind_GlobalSafeZone.GetValue() >= 2.0)
@@ -477,7 +493,7 @@ function ShowActionMenuNested()
     ; actionMenu.SetPropertyIndexString("optionLabelText", 4, "Choose Outfit")
     ; actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
 
-    if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
+    if !bind_SkseFunctions.NudityTest(a)  ;!gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
         actionMenu.SetPropertyIndexString("optionText", 4, "Strip")
         actionMenu.SetPropertyIndexString("optionLabelText", 4, "Strip")
         actionMenu.SetPropertyIndexBool("optionEnabled", 4, true)
@@ -565,13 +581,19 @@ function ShowActionMenuNested()
                 ; functions_script.EventDomTyingAnimation(a, dom, false)
                 ; bind_Utility.EnablePlayer()
 
-                if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
+                if !gear_manager.IsNude(a) ;|| StorageUtil.FormListCount(a, "bind_strip_list") == 0
                     functions_script.EventDomTyingAnimation(a, dom, false)
-                    gear_manager.RemoveWornGear(a)
+                    ;gear_manager.RemoveWornGear(a)
+                    Form[] rItems = bind_SkseFunctions.DoStripActor(a, removeDevious = true)
+                    ;debug.MessageBox(rItems)
+                    ;MiscUtil.WriteToFile("test.txt", rItems[0], false, false)
+                    StorageUtil.FormListCopy(a, "bind_strip_items_list", rItems)
                 else
                     if !nudeRule ;|| rules_manager.SuspendedNudity()
                         functions_script.EventDomTyingAnimation(a, dom, false)
-                        gear_manager.RestoreWornGear(a)
+                        bind_SkseFunctions.DoDressActor(a, StorageUtil.FormListToArray(a, "bind_strip_items_list"))
+                        bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " is dressing me...")
+                            ;gear_manager.RestoreWornGear(a)
                         ;ChoseOutfitMenu()
                     else
                         bind_Utility.WriteInternalMonologue(functions_script.GetDomTitle() + " will not undress me...")
@@ -585,16 +607,34 @@ function ShowActionMenuNested()
                 ; bind_Utility.EnablePlayer()
 
                 bind_MovementQuestScript.PlayDressUndress(a)
-                if !gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0
+                bool isNude = bind_SkseFunctions.NudityTest(a)
+                ;debug.MessageBox("isnude: " + isNude)
+                if !isNude  ;!gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0 
                     if think.IsAiReady()
                         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
                     endif
-                    gear_manager.RemoveWornGear(a)
+                    ;gear_manager.RemoveWornGear(a)
+                    Form[] rItems = bind_SkseFunctions.DoStripActor(a, removeDevious = false)
+                    ;debug.MessageBox(rItems)
+                    StorageUtil.FormListCopy(a, "bind_strip_items_list", rItems)
+                    ;int count = bind_SkseFunctions.StripItemsCount()
+                    ;debug.MessageBox("removed count: " + count)
+                    ;debug.MessageBox("item @ 0: " + bind_Utility.GetStripItem(0))
+                    ; int idx = 0
+                    ; StorageUtil.FormListClear(a, "bind_strip_items_list")
+                    ; while idx < count
+                    ;     StorageUtil.FormListAdd(a, "bind_strip_items_list", bind_SkseFunctions.GetStripItem(idx))
+                    ;     idx += 1
+                    ; endwhile
                 else
                     if think.IsAiReady()
                         think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
                     endif
-                    gear_manager.RestoreWornGear(a)
+
+                    bind_SkseFunctions.DoDressActor(a, StorageUtil.FormListToArray(a, "bind_strip_items_list"))
+                    ;bind_Utility.DoDressActor(a, removedItems)
+                    ;removedItems = none
+                    ;gear_manager.RestoreWornGear(a)
                     ;ChoseOutfitMenu()
                 endif
             endif

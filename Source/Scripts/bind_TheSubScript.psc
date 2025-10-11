@@ -559,7 +559,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 			Armor item = akBaseObject as Armor
 			if item != none
-				if !item.IsJewelry()
+				if !item.IsJewelry() && !item.HasKeywordString("zad_InventoryDevice") && !item.HasKeywordString("zad_Lockable") && !item.HasKeywordString("sexlabnostrip")
 					if RulesManager.IsBikiniRequired(theSub, safeZone)
 						if GearManager.IsBinkiArmor(item) || StorageUtil.FormListHas(theSub, "bind_bikini_white_list", item)
 							;debug.Notification("bikini armor - YES")

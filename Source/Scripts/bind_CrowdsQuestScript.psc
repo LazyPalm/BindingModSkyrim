@@ -243,11 +243,14 @@ function SetActiveState(Actor c, bool activeFlag)
             if Utility.RandomInt(1, 2) == 2 && chatCount < 3
                 chatCount += 1
                 if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
+                    bind_Utility.WriteToConsole("crowds quest - guard " + c.GetDisplayName() + " makes a comment")
                     think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
                 else
                     if Utility.RandomInt(1, 2) == 2 
+                        bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " chats with dom")
                         think.UseDirectNarration(c, c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.")
                     else
+                        bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
                         think.UseDirectNarration(c, c.GetDisplayName() + " makes a comment {{ player.name }}'s current situation.")
                     endif
                 endif
