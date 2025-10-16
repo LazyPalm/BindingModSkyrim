@@ -24,6 +24,9 @@ int POSE_ATTENTION = 5
 
 int sexEvent
 
+bool domStartedSex = false
+bool sexAnimationRan = false
+
 ObjectReference startingMarker
 
 event OnInit()
@@ -43,6 +46,8 @@ event OnInit()
         bcs.DoStartEvent()
         bcs.SetEventName(self.GetName())
 
+        domStartedSex = false
+        sexAnimationRan = false
         removedHeavyBondage = false
         removedShackles = false
         commandCount = 0
@@ -102,6 +107,8 @@ endevent
 event OnSexEndEvent(string eventName, string argString, float argNum, form sender)
 
     ;debug.MessageBox("in sex end??")
+
+    sexAnimationRan = true
 
     sexEvent = 3 ;end this
     IssueNextCommand()
@@ -512,6 +519,8 @@ endfunction
 
 function HaveSex()
 
+    domStartedSex = true
+
     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentDomStartingSex())
 
     bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is going to have sex with me.")
@@ -571,6 +580,19 @@ endstate
 function EventEnd()
 
     bind_Utility.DisablePlayer()
+
+    if sexAnimationRan && domStartedSex
+        bind_RulesManager rms = Quest.GetQuest("bind_MainQuest") as bind_RulesManager
+        Quest q = Quest.GetQuest("bind_SexGiveThanksQuest")
+        if rms.GetBehaviorRule(theSub, rms.BEHAVIOR_RULE_SEX_GIVE_THANKS()) == 1 
+            sms.SubRequiredToThankForSex = 1
+            if !q.IsRunning()
+                q.Start()
+            endif
+        else
+            sms.SubRequiredToThankForSex = 0
+        endif
+    endif
 
     if orderedToStrip && gms.IsNude(theSub)
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeGetDressedCommand())

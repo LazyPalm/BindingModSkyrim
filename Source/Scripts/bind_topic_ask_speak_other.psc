@@ -7,6 +7,7 @@ Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
 ;speech permission other
+bind_PoseManager.StandFromKneeling(Game.GetPlayer())
 (GetOwningQuest() as bind_Functions).GrantSpeechPermission()
 ;END CODE
 EndFunction

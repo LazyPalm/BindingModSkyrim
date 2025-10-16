@@ -891,7 +891,8 @@ function DisplaySkyrimNet()
         slaveryInSkyrimTypes[1] = "Slavery Uncommon / Tolerated"
         slaveryInSkyrimTypes[2] = "Slavery Commmon / Legal"
         slaveryInSkyrimTypes[3] = "Slavery Government Sanctioned"
-        slaveryInSkyrimTypes[4] = "Custom"
+        slaveryInSkyrimTypes[4] = "Kinky Skyrim"
+        slaveryInSkyrimTypes[5] = "Custom"
 
         indenturedServantsInSkyrimTypes = new string[3]
         indenturedServantsInSkyrimTypes[0] = "Indentured Rare / Frowned Upon"

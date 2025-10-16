@@ -46,6 +46,8 @@ int property BehaviorRulePrayer auto conditional
 int property BehaviorRuleBikiniArmor auto conditional
 int property BehaviorRuleEroticArmor auto conditional
 
+int property BehaviorRuleSpeechAsk auto conditional
+
 ; string bondageRulesKeys = ""
 ; string[] bondageRulesArr
 ; int[] bondageRulesSettingsArr
@@ -1128,7 +1130,15 @@ function SetBehaviorRule(Actor a, int rule, bool on)
         BehaviorRuleEroticArmor = setting
         BehaviorRuleBikiniArmor = 0
         StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_BIKINI_ARMOR(), 0)
-      ;elseif other rules??
+    
+    elseif rule == BEHAVIOR_RULE_SPEECH_ASK()
+        BehaviorRuleSpeechAsk = setting
+        
+    
+        ;elseif other rules??
+
+    
+
     endif
 
     if BehaviorEnterExitRuleCastle == 1 || BehaviorEnterExitRuleInn == 1 || BehaviorEnterExitRulePlayerHome == 1
