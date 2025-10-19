@@ -56,7 +56,7 @@
     {% endif %}
 
     {% if has_slavery == 4 %}
-    - Skyrim is a kinky place with interesting sexual practices and BDSM and sexual slavery are not out of the ordinary.
+    - Skyrim is a kinky place with interesting sexual practices; BDSM and sexual slavery are not out of the ordinary.
     - People will not pay attention to, nor comment about, public BDSM or sex slaves.
     {% endif %}
 

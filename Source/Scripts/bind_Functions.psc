@@ -2695,7 +2695,8 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	bind_MovementQuestScript.PlayDoWork(dom)
 
-	int[] outfitIds
+	;int[] outfitIds
+	int eventOutfitId = 0
 
 	string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
 
@@ -2703,50 +2704,54 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	if eventName != ""
 
-        i = 0
-        while i < fList.Length
-            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", eventName)
-                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
-                    ;debug.MessageBox(fList[i])
-                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
-                    StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
-                endif
-            endif
-            i += 1
-        endwhile
+		eventOutfitId = bms.GetBondageOutfitForEvent(eventName)
 
-		outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
-		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + eventName + " - outfits: " + outfitIds)
+        ; i = 0
+        ; while i < fList.Length
+        ;     if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", eventName)
+        ;         if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
+        ;             ;debug.MessageBox(fList[i])
+        ;             int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
+        ;             StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
+        ;         endif
+        ;     endif
+        ;     i += 1
+        ; endwhile
+
+		; outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
+		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + eventName + " - outfit: " + eventOutfitId)
 
 	endif
 
 	;bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
-	if outfitIds.Length == 0 || outfitIds == none
+	if eventOutfitId == 0 ; outfitIds.Length == 0 || outfitIds == none
 
-        i = 0
-        while i < fList.Length
-            if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", "event_any_event")
-                if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
-                    debug.MessageBox(fList[i])
-                    int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
-                    StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
-                endif
-            endif
-            i += 1
-        endwhile
+		eventOutfitId = bms.GetBondageOutfitForEvent("event_any_event")
 
-		outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
-		bind_Utility.WriteToConsole("EventGetSubReady - eventName: any event - outfits: " + outfitIds)
+        ; i = 0
+        ; while i < fList.Length
+        ;     if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", "event_any_event")
+        ;         if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
+        ;             debug.MessageBox(fList[i])
+        ;             int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
+        ;             StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
+        ;         endif
+        ;     endif
+        ;     i += 1
+        ; endwhile
+
+		; outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
+		bind_Utility.WriteToConsole("EventGetSubReady - eventName: any event - outfit: " + eventOutfitId)
 
 	endif
 
-	if outfitIds.Length > 0
-		int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
-		bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
+	if eventOutfitId > 0 ; outfitIds.Length > 0
+		; int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
+		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
 		;if outfitId > 0
-			bms.EquipBondageOutfit(theSubRef, outfitId)
+			bms.EquipBondageOutfit(theSubRef, eventOutfitId)
 
-		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + outfitId + ".json"
+		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + eventOutfitId + ".json"
 		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
 			eventRemovedClothing = true
 

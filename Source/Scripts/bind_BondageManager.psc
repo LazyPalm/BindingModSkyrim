@@ -698,6 +698,36 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
 
 endfunction
 
+int function GetBondageOutfitForEvent(string eventName)
+
+    int[] outfitIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
+
+    bool foundOutfits = false
+    bool outfitValid = false
+
+    StorageUtil.IntListClear(theSubRef, "binding_found_outfit_id_list")
+
+    int i = 0
+
+    while i < outfitIdList.Length
+        if JsonUtil.StringListHas(main.BindingGameOutfitFile, outfitIdList[i] + "_used_for", eventName)
+            if JsonUtil.GetIntValue(main.BindingGameOutfitFile, outfitIdList[i] + "_outfit_enabled", 0) == 1
+                ;debug.MessageBox(fList[i2])
+                bind_Utility.WriteToConsole("found: " + outfitIdList[i])
+                int outfitId = outfitIdList[i]; JsonUtil.GetIntValue(main.BindingGameOutfitFile, outfitIdList[i2] + "_outfit_id", -1)
+                StorageUtil.IntListAdd(theSubRef, "binding_found_outfit_id_list", outfitId)
+                foundOutfits = true
+            endif
+        endif
+        i += 1
+    endwhile
+
+    int[] list = StorageUtil.IntListToArray(theSubRef, "binding_found_outfit_id_list")
+
+    return list[Utility.RandomInt(0, list.Length - 1)]
+
+endfunction
+
 string[] function GetSetsByUsage(string usage)
     return StorageUtil.StringListToArray(TheWardrobe, "used_for_" + usage)
 endfunction

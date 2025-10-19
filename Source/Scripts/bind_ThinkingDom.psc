@@ -197,7 +197,7 @@ function RegisterFunctions()
 
     ;RegisterBondageRule()
 
-    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things.", \  
+    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things. These permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate.", \  
                                     "bind_ThinkingDom", "BindingPermissions_IsEligible", \
                                     "bind_ThinkingDom", "BindingPermissions_Execute", \
                                     "", "PAPYRUS", \
@@ -868,6 +868,8 @@ function BindingPermissions_Execute(Actor akOriginator, string contextJson, stri
 
         string permission = SkyrimNetApi.GetJsonString(paramsJson, "permission", "") 
 
+        ;(these permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate)
+
         if permission == "entry" || permission == "exit"
 
             string msg = "enter"
@@ -934,7 +936,7 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        ;UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
+        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
     endif
 
 endevent
