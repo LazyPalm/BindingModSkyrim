@@ -1,0 +1,17 @@
+{% if render_mode == "full" or render_mode == "dialogue_target" or render_mode == "thoughts" or render_mode == "transform" %}
+{% set actor_name = decnpc(actorUUID).name %}
+{% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") %}
+{# gear #}
+{{ "### Collar State" }}
+{% if wearing_collar %}
+- {{ actor_name }} is collared.
+{% else %}
+- {{ actor_name }} is not wearing a collar.
+{% endif %}
+
+{# posing #}
+{% if is_in_faction(actorUUID, "bind_KneelingFaction") %} 
+{{ "### Pose" }}
+- {{ actor_name }} is kneeling submissively.
+{% endif %}
+{% endif %}

@@ -1,5 +1,4 @@
-
-{% if render_mode == "full" and not isTimePaused %}
+{% if render_mode == "full" or render_mode == "thoughts" or render_mode == "transform" %}
 {% set actor_name = decnpc(npc.UUID).name %}
 {% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
 {% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
@@ -20,7 +19,7 @@
 
 {# Player is sub and mod is active #}
 {% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
-
+{{ "## "}} Skyrim Slavery
     {# slavery type #}
     {% if sub_type == 0 or sub_type == 1 %}
     {% endif %}
@@ -36,6 +35,14 @@
     {% if sub_type == 5 %}
     {# ENTER CUSTOM HERE #}
     {% endif %}
+
+{% if is_in_faction(actorUUID, "bind_AdventuringFaction") %}
+- {{ actor_name }} is currently adventuring, which could involve life and death situations, and should be a helpful party member and treat any slaves in the party as valued party members.
+{% endif %}
+
+{% if is_in_faction(actorUUID, "bind_DominantFaction") and get_global_value("bind_GlobalSafeZone") != 2 %}
+- {{ actor_name }} is a member of a party in a dangerous area, which could involve life and death situations. {{ actor_name }} should be a helpful party member and treat any slaves in the party as valued party members.
+{% endif %}
 
     {# slavery in skyrim #}
     {% if has_slavery == 0 %}
