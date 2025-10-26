@@ -1,0 +1,54 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x5255c|Devious Devices - Expansion.esm",
+			"0x5255d|Devious Devices - Expansion.esm",
+			"0x5255b|Devious Devices - Expansion.esm",
+			"0x592b4|Devious Devices - Expansion.esm",
+			"0x592be|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1005,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			8,
+			16,
+			128,
+			65536,
+			67108864,
+			524288,
+			4194304,
+			16777216,
+			8388608,
+			134217728,
+			536870912,
+			268435456
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Bound Sleep Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_bound_sleep"
+		]
+	}
+}

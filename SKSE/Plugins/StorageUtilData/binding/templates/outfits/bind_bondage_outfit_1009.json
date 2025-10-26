@@ -1,0 +1,69 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"dynamic_bondage_items" : 
+		[
+			"0x409a2|Devious Devices - Integration.esm",
+			"0x231f|Devious Devices - Expansion.esm",
+			"0xf016|Devious Devices - Expansion.esm",
+			"0xf02c|Devious Devices - Expansion.esm",
+			"0xf04e|Devious Devices - Expansion.esm",
+			"0x13352|Devious Devices - Expansion.esm",
+			"0x159ba|Devious Devices - Expansion.esm"
+		],
+		"fixed_bondage_items" : 
+		[
+			"0x415a9|Devious Devices - Expansion.esm",
+			"0x14927|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 0,
+		"outfit_id" : 1009,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			16,
+			65536,
+			524288,
+			8388608,
+			134217728,
+			268435456,
+			8,
+			67108864,
+			4194304,
+			16777216,
+			536870912
+		],
+		"random_bondage_chance" : 
+		[
+			25,
+			25,
+			25,
+			50,
+			100,
+			100,
+			50,
+			25,
+			25,
+			100,
+			25,
+			10,
+			10
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "City Bondage Outfit"
+	}
+}

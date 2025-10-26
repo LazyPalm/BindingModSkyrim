@@ -1,0 +1,55 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"dynamic_bondage_items" : 
+		[
+			"0x159a8|Devious Devices - Expansion.esm",
+			"0xe538|Devious Devices - Expansion.esm"
+		],
+		"fixed_bondage_items" : 
+		[
+			"0x1e687|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1008,
+		"remove_existing_gear" : 0,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"random_bondage_chance" : 
+		[
+			0,
+			0,
+			0,
+			0,
+			0,
+			100,
+			0,
+			0,
+			0,
+			100,
+			0,
+			0,
+			0
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Unsafe Areas Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"location_unsafe_area"
+		]
+	}
+}

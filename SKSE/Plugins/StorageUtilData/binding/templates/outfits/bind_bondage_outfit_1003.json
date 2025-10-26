@@ -1,0 +1,56 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x592c4|Devious Devices - Expansion.esm",
+			"0x592b9|Devious Devices - Expansion.esm",
+			"0x1dcf|Devious Devices - Expansion.esm",
+			"0x592bf|Devious Devices - Expansion.esm",
+			"0x509c8|Devious Devices - Expansion.esm",
+			"0x50a00|Devious Devices - Expansion.esm",
+			"0x1c62a|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1003,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			8,
+			16,
+			128,
+			65536,
+			67108864,
+			524288,
+			4194304,
+			8388608,
+			16777216,
+			134217728,
+			536870912,
+			268435456
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Harsh Bondage Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_harsh_bondage"
+		]
+	}
+}

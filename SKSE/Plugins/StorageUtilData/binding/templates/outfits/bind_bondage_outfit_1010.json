@@ -1,0 +1,43 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1010,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			16,
+			65536,
+			524288,
+			8388608,
+			134217728,
+			268435456,
+			536870912,
+			16777216,
+			4194304,
+			67108864,
+			128,
+			8
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Whipping Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_whipping"
+		]
+	}
+}

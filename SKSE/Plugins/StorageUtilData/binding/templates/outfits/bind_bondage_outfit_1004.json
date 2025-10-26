@@ -1,0 +1,43 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1004,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			8,
+			4,
+			16,
+			128,
+			65536,
+			67108864,
+			524288,
+			4194304,
+			8388608,
+			16777216,
+			134217728,
+			536870912,
+			268435456
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "All Events Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_any_event"
+		]
+	}
+}

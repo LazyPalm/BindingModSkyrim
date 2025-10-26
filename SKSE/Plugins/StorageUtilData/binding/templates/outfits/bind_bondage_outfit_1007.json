@@ -1,0 +1,34 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x32744|Devious Devices - Integration.esm",
+			"0x32743|Devious Devices - Integration.esm",
+			"0x58474|Devious Devices - Expansion.esm",
+			"0x1ab0e|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 1007,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Gagged For Punishment Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_gagged_for_punishment"
+		]
+	}
+}

@@ -1,0 +1,24 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x1856|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 0,
+		"outfit_id" : 1013,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Erotic Armor Bondage Outfit"
+	}
+}
