@@ -561,7 +561,7 @@ event OnOptionHighlight(int option)
 
     ;outfits management help
     elseif option == toggleBondageOutfitRulesBased
-        SetInfoText("Enabling this option will cause the set to use the Bondage Rules system to determine which items should be equipped. It works with both random and fixed item sets. In a random set, all chance percentages are treated as 100 %, so the rules alone decide what is equipped. Fixed sets are preferable because if an item is missing from the set, the rule cannot be enforced.")
+        SetInfoText("Enabling this option will cause the set to use the Bondage Rules system to determine which items should be equipped. It works with both random and fixed item sets. In a random set, all chance percentages are treated as 100%, so the rules alone decide what is equipped. Complete sets are preferable because if an item is missing from the set, the rule cannot be enforced.")
 
     ;events help
     elseif option == toggleEventWordWall
