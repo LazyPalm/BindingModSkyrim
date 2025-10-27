@@ -197,7 +197,7 @@ function RegisterFunctions()
 
     ;RegisterBondageRule()
 
-    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things. These permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate.", \  
+    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things. This MUST be called before the player can have permission to do these things, dialogue responses alone will not grant permission. These permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate.", \  
                                     "bind_ThinkingDom", "BindingPermissions_IsEligible", \
                                     "bind_ThinkingDom", "BindingPermissions_Execute", \
                                     "", "PAPYRUS", \

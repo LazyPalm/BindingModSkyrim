@@ -3,6 +3,8 @@ Scriptname bind_DomAddRulesQuestScript extends Quest
 Actor theSub
 Actor theDom
 
+bool doBondageRules = false
+
 int add = 0
 int choice = 0
 int rule = 0
@@ -176,18 +178,32 @@ function DomRuleSceneGiveThanksEndedFunction()
 
     ;debug.MessageBox("this happened??")
 
+    int setId = StorageUtil.GetIntValue(theSub, "bind_wearing_outfit_id", 0)
+
     if add == 1 && choice == 2
         bind_Utility.WriteToConsole("add type number: " + rule)
-        if !theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
-            bind_Utility.WriteToConsole("not in faction: " + bms.WearingBondageItemFaction(rule))
-            bms.AddItem(theSub, rule)
-        endif    
+        if setId > 0
+            bms.EquipBondageOutfit(theSub, setId)
+        endif
+        ; if !theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
+        ;     bind_Utility.WriteToConsole("not in faction: " + bms.WearingBondageItemFaction(rule))
+        ;     ;bms.AddItem(theSub, rule)
+        ;     if setId > 0
+        ;         bms.EquipBondageOutfit(theSub, setId)
+        ;     endif
+        ; endif    
     elseif add == 2 && choice == 2
         bind_Utility.WriteToConsole("remove type number: " + rule)
-        if theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
-            bind_Utility.WriteToConsole("in faction: " + bms.WearingBondageItemFaction(rule))
-            bms.RemoveItem(theSub, rule)
-        endif   
+        if setId > 0
+            bms.EquipBondageOutfit(theSub, setId)
+        endif
+        ; if theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
+        ;     bind_Utility.WriteToConsole("in faction: " + bms.WearingBondageItemFaction(rule))
+        ;     ;bms.RemoveItem(theSub, rule)
+        ;     if setId > 0
+        ;         bms.EquipBondageOutfit(theSub, setId)
+        ;     endif
+        ; endif   
     endif
 
     if add == 1
@@ -258,7 +274,9 @@ function HybridManagedRuleChange()
     endif
 
     ;choice only supported
-    choice = 1
+    if !doBondageRules
+        choice = 1
+    endif
 
     if choice == 1
         ;behavior
@@ -361,8 +379,10 @@ function SubManagedPickChoice()
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 
     listMenu.AddEntryItem("<-- Go Back")
-    listMenu.AddEntryItem("Behavior rule"); (default)")
-    ;listMenu.AddEntryItem("Bondage rule")
+    listMenu.AddEntryItem("Behavior rule (default)")
+    if doBondageRules
+        listMenu.AddEntryItem("Bondage rule")
+    endif
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
@@ -372,8 +392,8 @@ function SubManagedPickChoice()
         return
     elseif listReturn == 1
         choice = 1
-    ; elseif listReturn == 2
-    ;     choice = 2
+    elseif listReturn == 2
+        choice = 2
     else
         choice = 1
     endif
@@ -438,6 +458,26 @@ function SubManagedPickRule()
 
 endfunction
 
+bool function HasBondageRulesOutfit()
+
+    int[] outfitIdList = JsonUtil.IntListToArray(bmqs.BindingGameOutfitFile, "outfit_id_list")
+
+    bool found = false
+
+    int i = 0
+    while i < outfitIdList.Length
+        if JsonUtil.GetIntValue(bmqs.BindingGameOutfitFile, outfitIdList[i] + "_rules_based", 0) == 1   
+            found = true
+        endif
+        i += 1
+    endwhile
+
+    bind_Utility.WriteToConsole("add rules quest - rules based outfit check: " + found)
+
+    return found
+
+endfunction
+
 function EventStart()
 
     if bind_GlobalRulesBehaviorMax.GetValue() == 0.0 && bind_GlobalRulesBondageMax.GetValue() == 0.0
@@ -445,6 +485,8 @@ function EventStart()
         self.Stop()
         return
     endif
+
+    doBondageRules = HasBondageRulesOutfit()
 
     bcs.DoStartEvent()
     bcs.SetEventName(self.GetName())
@@ -713,6 +755,10 @@ function DomManagedRuleChange()
                 choice = 2
             elseif actionType == "4" ;add behavior rule
                 add = 1
+                choice = 1
+            endif
+
+            if !doBondageRules
                 choice = 1
             endif
 

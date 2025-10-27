@@ -209,6 +209,7 @@ int toggleRulesMenuLockoutValue
 int[] toggleBehaviorRules
 int[] toggleBehaviorRuleOptions
 int[] toggleBondageRules
+int[] toggleBondageRuleOptions
 
 int[] toggleBehaviorHard
 int[] toggleBondageHard
@@ -257,6 +258,7 @@ string selectedBondageOutfit
 int selectedBondageOutfitId
 ;int selectedBondageOutfitIndex
 int toggleBondageOutfitUseRandomBondage
+int toggleBondageOutfitRulesBased
 string[] bondageOutfitUsageKey
 string[] bondageOutfitUsageList
 int[] bondageSetUsedForToggle
@@ -297,11 +299,11 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.23"
+    version = "0.4.24"
 
     theSub = fs.GetSubRef()
 
-    Pages = new string[19]
+    Pages = new string[20]
 
     Pages[0] = "Status Info"
     Pages[1] = "Bondage Status"
@@ -322,6 +324,7 @@ Event OnConfigOpen()
     Pages[16] = "Control Panel"
     Pages[17] = "SkyrimNet"
     Pages[18] = "Backup Settings"
+    Pages[19] = "Rules - Bondage"
 
     MakeArrays()
 
@@ -339,6 +342,9 @@ Event OnConfigOpen()
     endif
     if toggleBondageRules.Length != 50
         toggleBondageRules = new int[50]
+    endif
+    if toggleBondageRuleOptions.Length != 50
+        toggleBondageRuleOptions = new int[50]
     endif
 
     string[] useTags = StorageUtil.StringListToArray(theSub, "bind_use_sl_tags")
@@ -469,9 +475,9 @@ Event OnPageReset(string page)
 
             DisplayBehaviorRules()
 
-        ; elseif page == "Rules - Bondage"
+        elseif page == "Rules - Bondage"
 
-        ;     DisplayBondageRules()
+            DisplayBondageRules()
 
         ElseIf page == "Rules Settings"
         
@@ -552,6 +558,10 @@ event OnOptionHighlight(int option)
         SetInfoText("This is an experimental feature. When it enabled it will allow you to add any NPC as your dominant. They will stay at a fixed location and you will be required to report in regularly. You can will gain access to their residence.")
     elseif option == toggleCleanUpNonBindingItemsFromBags
         SetInfoText("Enabling this will destroy all unused/unequiped Devious Devices items from player inventory. If Disabled, mod will only remove Binding unequipped Devious Devices items (from failed or layered equips).")
+
+    ;outfits management help
+    elseif option == toggleBondageOutfitRulesBased
+        SetInfoText("Enabling this option will cause the set to use the Bondage Rules system to determine which items should be equipped. It works with both random and fixed item sets. In a random set, all chance percentages are treated as 100 %, so the rules alone decide what is equipped. Fixed sets are preferable because if an item is missing from the set, the rule cannot be enforced.")
 
     ;events help
     elseif option == toggleEventWordWall
@@ -698,9 +708,10 @@ function DisplayBondageOutfits()
         ;delete set goes here
 
         int useRandomBondage = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", 0)
+        int useRulesBased = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", 0)
 
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
-        AddTextOption("", "")
+        toggleBondageOutfitRulesBased = AddToggleOption("Use Bondage Rules", useRulesBased)
 
         ;if useRandomBondage == 1
 
@@ -2016,51 +2027,132 @@ Function DisplayBehaviorRules()
 
 EndFunction
 
-; function DisplayBondageRules()
+string[] bondageList
+int[] bondageHard
+int[] bondageSettings
 
-;     AddTextOption("Bondage Rules menus have been moved", "")
-;     AddTextOption("Action button -> Settings -> Manage Rules", "")
+function DisplayBondageRules()
 
-;     return
+    int[] outfitIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
 
-;     AddHeaderOption("Bondage Rules")
-;     AddHeaderOption("")
+    bool found = false
 
-;     string[] bondageList = rman.GetBondageRuleNameArray() ; rman.GetBondageRulesList()
-;     ;int[] bondageSettings = rman.GetBondageRulesSettingsList()
-;     ;int[] bondageHard = rman.GetBondageHardLimitsList()
+    int i = 0
+    while i < outfitIdList.Length
+        if JsonUtil.GetIntValue(main.BindingGameOutfitFile, outfitIdList[i] + "_rules_based", 0) == 1   
+            found = true
+        endif
+        i += 1
+    endwhile
 
-;     int i = 0
-;     while i < bondageList.Length
+    if found
+        AddTextOption("Rules Based Outfits Found", "Yes")
+    else
+        AddTextOption("Rules Based Outfits Found", "No")
+    endif
+    AddTextOption("", "")
+    AddTextOption("", "")
+    AddTextOption("", "")
 
-;         int ruleSetting = rman.GetBondageRule(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
-;         int ruleOption = rman.GetBondageRuleOption(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
+    AddHeaderOption("Bondage Rules")
+    AddHeaderOption("")
 
-;         ; string ruleText = "Off"
-;         ; if ruleSetting == 1
-;         ;     ruleText = "On"
-;         ; endif
-;         ; if ruleOption == 1
-;         ;     ruleText += " - Blocked / Hard Limit"
-;         ; elseif ruleOption == 2
-;         ;     ruleText += " - Safe Areas"
-;         ; elseif ruleOption == 3
-;         ;     ruleText += " - Permanent"
-;         ; elseif ruleOption == 4
-;         ;     ruleText += " - Permanent Safe Areas"
-;         ; endif
+    bondageList = rman.GetBondageRuleNameArray() 
 
-;         toggleBondageRules[i] = AddTextOption(bondageList[i], FormatRuleText(ruleSetting, ruleOption))
+    i = 0
+    while i < bondageList.Length
 
-;         i += 1
+        int ruleSetting = rman.GetBondageRule(theSub, i)
+        int ruleOption = rman.GetBondageRuleOption(theSub, i)
+        float ruleEndTime = 0.0
 
-;     endwhile
+        if ruleSetting == 1
+            ruleEndTime = rman.GetBondageRuleEnd(theSub, i)
+        endif
 
-;     If ((bondageList.Length as int) % 2) != 0.0
-;         AddTextOption("", "")
-;     EndIf
+        if bind_GlobalRulesControlledBy.GetValue() > 0
 
-; endfunction
+            string ruleName = bondageList[i]
+            if ruleEndTime > 0.0
+                float hoursLeft = (ruleEndTime - bind_Utility.GetTime()) * 24.0
+                ruleName += " (" + Math.Ceiling(hoursLeft) + "h)"
+            elseif ruleEndTime <= 0.0 && ruleSetting == 1
+                ruleName += " (expired)"
+            endif 
+
+            string displayText = ""
+            if ruleSetting == 1
+                displayText = "On"
+            endif
+
+            AddTextOption(ruleName, displayText)
+
+        else
+
+            string displayText = ""
+            if ruleSetting == 1
+                displayText = "On"
+            endif
+
+            toggleBondageRules[i] = AddTextOption(bondageList[i], displayText)
+
+        endif
+
+        string optionText = ""
+        if ruleOption == 1
+            optionText = "Blocked / Hard Limit"
+        elseif ruleOption == 2
+            optionText = "Safe Areas"
+        elseif ruleOption == 3
+            optionText = "Permanent"
+        elseif ruleOption == 4
+            optionText = "Permanent Safe Areas"
+        elseif ruleOption == 5
+            optionText = "Unsafe Areas"
+        elseif ruleOption == 6
+            optionText = "Permanent Unsafe Areas"
+        endif
+
+        toggleBondageRuleOptions[i] = AddTextOption("Options", optionText)
+
+        i += 1
+    endwhile
+
+    ; string[] bondageList = rman.GetBondageRuleNameArray() ; rman.GetBondageRulesList()
+    ; ;int[] bondageSettings = rman.GetBondageRulesSettingsList()
+    ; ;int[] bondageHard = rman.GetBondageHardLimitsList()
+
+    ; int i = 0
+    ; while i < bondageList.Length
+
+    ;     int ruleSetting = rman.GetBondageRule(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_setting_" + i, 0)
+    ;     int ruleOption = rman.GetBondageRuleOption(theSub, i) ;StorageUtil.GetIntValue(theSub, "bind_rule_option_" + i, 0)
+
+    ;     ; string ruleText = "Off"
+    ;     ; if ruleSetting == 1
+    ;     ;     ruleText = "On"
+    ;     ; endif
+    ;     ; if ruleOption == 1
+    ;     ;     ruleText += " - Blocked / Hard Limit"
+    ;     ; elseif ruleOption == 2
+    ;     ;     ruleText += " - Safe Areas"
+    ;     ; elseif ruleOption == 3
+    ;     ;     ruleText += " - Permanent"
+    ;     ; elseif ruleOption == 4
+    ;     ;     ruleText += " - Permanent Safe Areas"
+    ;     ; endif
+
+    ;     toggleBondageRules[i] = AddTextOption(bondageList[i], FormatRuleText(ruleSetting, ruleOption))
+
+    ;     i += 1
+
+    ; endwhile
+
+    ; If ((bondageList.Length as int) % 2) != 0.0
+    ;     AddTextOption("", "")
+    ; EndIf
+
+endfunction
 
 Function DisplayRules()
 
@@ -2101,8 +2193,8 @@ Function DisplayRules()
 
     sliderRulesMinBehavior = AddSliderOption("Behavior Rules - Min Rules", bind_GlobalRulesBehaviorMin.GetValue(), "{0}")
     sliderRulesMaxBehavior = AddSliderOption("Behavior Rules - Max Rules", bind_GlobalRulesBehaviorMax.GetValue(), "{0}")
-    ; sliderRulesMinBondage = AddSliderOption("Bondage Rules - Min Rules", bind_GlobalRulesBondageMin.GetValue(), "{0}")
-    ; sliderRulesMaxBondage = AddSliderOption("Bondage Rules - Max Rules", bind_GlobalRulesBondageMax.GetValue(), "{0}")
+    sliderRulesMinBondage = AddSliderOption("Bondage Rules - Min Rules", bind_GlobalRulesBondageMin.GetValue(), "{0}")
+    sliderRulesMaxBondage = AddSliderOption("Bondage Rules - Max Rules", bind_GlobalRulesBondageMax.GetValue(), "{0}")
 
 
 
@@ -2577,6 +2669,18 @@ Event OnOptionSelect(int option)
             SetToggleOptionValue(option, newValue)
         endif
 
+        if option == toggleBondageOutfitRulesBased
+            int useRulesBased = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", 0)
+            if useRulesBased == 0
+                useRulesBased = 1
+            else
+                useRulesBased = 0
+            endif
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", useRulesBased)
+            JsonUtil.Save(main.BindingGameOutfitFile)
+            SetToggleOptionValue(toggleBondageOutfitRulesBased, useRulesBased)
+        endif
+
         if option == toggleBondageOutfitUseRandomBondage
             int useRandomBondage = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", 0)
             if useRandomBondage == 0
@@ -2779,6 +2883,74 @@ Event OnOptionSelect(int option)
         endif
         SetTextOptionValue(option, sexFramework)
         completed = true
+    endif
+
+    if selectedPage == "Rules - Bondage"
+        i = 0
+        if !completed
+            while i < rman.GetBondageRulesCount()
+                if option == toggleBondageRuleOptions[i]
+                    int ruleOption = rman.GetBondageRuleOption(theSub, i)
+                    if bind_GlobalRulesControlledBy.GetValue() > 0
+                        ruleOption += 1
+                        if ruleOption > 6
+                            ruleOption = 0
+                        endif
+
+                    else
+                        ruleOption += 1
+                        if ruleOption < 2
+                            ruleOption = 2
+                        elseif ruleOption == 3
+                            ruleOption = 5
+                        elseif ruleOption == 6
+                            ruleOption = 0
+                        endif
+
+                    endif
+                    string displayText = ""
+                    if ruleOption == 1
+                        displayText = "Blocked / Hard Limit"
+                    elseif ruleOption == 2
+                        displayText = "Safe Areas"
+                    elseif ruleOption == 3
+                        displayText = "Permanent"
+                    elseif ruleOption == 4
+                        displayText = "Permanent Safe Areas"
+                    elseif ruleOption == 5
+                        displayText = "Unsafe Areas"
+                    elseif ruleOption == 6
+                        displayText = "Permanent Unsafe Areas"
+                    endif
+                    rman.SetBondageRuleOption(theSub, i, ruleOption)
+                    SetTextOptionValue(option, displayText)
+                    completed = true
+                endif
+                if option == toggleBondageRules[i]
+                    int ruleSetting = rman.GetBondageRule(theSub, i)
+
+                    if bind_GlobalRulesControlledBy.GetValue() > 0
+
+                    else
+                        ruleSetting += 1
+                        if ruleSetting > 1
+                            ruleSetting = 0
+                        endif
+                    endif
+
+                    string displayText = ""
+                    if ruleSetting == 1
+                        displayText = "On"
+                    endif
+
+                    rman.SetBondageRule(theSub, i, ruleSetting)
+  
+                    SetTextOptionValue(option, displayText)
+                    completed = true
+                endif
+                i += 1
+            endwhile
+        endif
     endif
 
     if selectedPage == "Rules - Behavior"

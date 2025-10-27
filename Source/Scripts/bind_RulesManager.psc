@@ -681,6 +681,14 @@ endfunction
 
 
 function SetBondageRule(Actor a, int rule, bool on) 
+
+    ; int setting = 0
+    ; if on
+    ;     setting = 1
+    ; endif
+
+    ; StorageUtil.SetIntValue(a, "bind_brule_setting_" + rule, setting)
+
     if on
         StorageUtil.SetIntValue(a, "bind_rule_setting_" + rule, 1)
     else
@@ -696,8 +704,7 @@ function SetBondageRule(Actor a, int rule, bool on)
 endfunction
 
 int function GetBondageRule(Actor a, int rule)
-    return 0
-    ;return StorageUtil.GetIntValue(a, "bind_rule_setting_" + rule, 0)
+    return StorageUtil.GetIntValue(a, "bind_rule_setting_" + rule, 0)
 endfunction
 
 function SetBondageRuleOption(Actor a, int rule, int option)
@@ -1571,8 +1578,8 @@ endfunction
 
 string function DomManagedRuleChange(Actor theSub, bool testChanges = false)
 
-    bind_GlobalRulesBondageMax.SetValue(0)
-    bind_GlobalRulesBondageMin.SetValue(0) ;note - disable bondage rules
+    ;bind_GlobalRulesBondageMax.SetValue(0)
+    ;bind_GlobalRulesBondageMin.SetValue(0) ;note - disable bondage rules
 
     string expiredBondageRules = FindExpiredBondageRules(theSub)
     string expiredBehaviorRules = FindExpiredBehaviorRules(theSub)

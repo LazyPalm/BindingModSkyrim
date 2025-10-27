@@ -540,27 +540,28 @@ endfunction
 
 function ShowSleepMenu()
 
-    float startTime = bind_Utility.GetTime()
-    bind_SkseFunctions.ShowSleepDialogue()
-    bind_Utility.DoSleep(2.0)
-    float sleepTime = bind_Utility.GetTime() - startTime
-    bind_Utility.WriteToConsole("sleep time: " + sleepTime)
-    if sleepTime > 0.01 ;one hour was .042 when testing
-        UnregisterForUpdate()
-        WakeDom()
-    endif
+    if mqs.SoftCheckGoToBed == 1
+        float startTime = bind_Utility.GetTime()
+        GTB_UIUtil.ShowSleepWaitMenu(true)
+        bind_Utility.DoSleep(2.0)
+        float sleepTime = bind_Utility.GetTime() - startTime
+        bind_Utility.WriteToConsole("sleep time: " + sleepTime)
+        if sleepTime > 0.01 ;one hour was .042 when testing
+            UnregisterForUpdate()
+            WakeDom()
+        endif
+    else
+        float startTime = bind_Utility.GetTime()
+        bind_SkseFunctions.ShowSleepDialogue()
+        bind_Utility.DoSleep(2.0)
+        float sleepTime = bind_Utility.GetTime() - startTime
+        bind_Utility.WriteToConsole("sleep time: " + sleepTime)
+        if sleepTime > 0.01 ;one hour was .042 when testing
+            UnregisterForUpdate()
+            WakeDom()
+        endif
 
-    ; if mqs.SoftCheckGoToBed == 1
-    ;     float startTime = bind_Utility.GetTime()
-    ;     GTB_UIUtil.ShowSleepWaitMenu(true)
-    ;     bind_Utility.DoSleep(2.0)
-    ;     float sleepTime = bind_Utility.GetTime() - startTime
-    ;     bind_Utility.WriteToConsole("sleep time: " + sleepTime)
-    ;     if sleepTime > 0.01 ;one hour was .042 when testing
-    ;         UnregisterForUpdate()
-    ;         WakeDom()
-    ;     endif
-    ; else
+    endif
 
     ;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 

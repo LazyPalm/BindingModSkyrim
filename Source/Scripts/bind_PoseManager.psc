@@ -981,10 +981,50 @@ endfunction
 
 Function ResumeStanding()    
 	string standingIdle 
+
     ;standingIdle = bman2.GetStandingIdle(0)
     ;If standingIdle == ""
-        standingIdle = "IdleForceDefaultState"
+        ;standingIdle = "IdleForceDefaultState"
     ;EndIf
+
+    if theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfWornDevice"))
+        zbfBondageShell zbs = Quest.GetQuest("zbf") as zbfBondageShell
+        standingIdle = zbs.GetAnimationIdle(theSubRef)
+
+        Int iBindWrists = 1
+        Int iBindArmbinder = 5
+        Int iBindYoke = 7
+        Int iBindUnbound = -1
+
+        int bindType = iBindUnbound
+
+        if theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsYoke"))
+            bindType = iBindYoke
+        elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsArmbinder"))
+            bindType = iBindArmbinder
+        elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsWrists"))
+            bindType = iBindWrists
+        endif
+
+        string[] list = zbs.GetPoseAnimList(0, bindType)
+        string[] list2 = StringUtil.Split(list[1], ",")
+        ;debug.MessageBox(list2)
+
+        if bindType >= 0
+            standingIdle = list2[Utility.RandomInt(0, list2.Length - 1)]
+        endif
+
+        if bindType >= 0
+            standingIdle = zbfBondageShell.GetApi().GetArmAnimFromWornKeywords(theSubRef)
+        endif
+
+        ;debug.MessageBox(standingIdle)
+    endif
+
+    If standingIdle == ""
+        standingIdle = "IdleForceDefaultState"
+    EndIf
+
     ;Debug.MessageBox("stand idle: " + standingIdle)
     ;main.SubDialogueInCorrectPose = 0
 	bind_Utility.LogOutput("Pose Manager - ResumeStanding() idle: " + standingIdle)
