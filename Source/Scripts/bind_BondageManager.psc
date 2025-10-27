@@ -24,6 +24,8 @@ string[] bondageTypes
 
 float sleepTime = 0.5
 
+bool bondageSafeAreaFlag = false
+
 bind_BondageManager function GetBondageManager() global 
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager
 endfunction
@@ -174,6 +176,8 @@ function EquipBondageOutfit(Actor a, int setId)
 
     EquippingBondageOutfit = true
 
+    int useRulesBased = JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_rules_based", 0)
+
     ;string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + setId + ".json"
 
     ;NOTE - there is probably no reason to clean this out
@@ -295,7 +299,7 @@ function EquipBondageOutfit(Actor a, int setId)
             int material = Utility.RandomInt(1, 4) ;change to 3
             string materialSearch = ""
 
-            material = 3 ;for testing
+            ;material = 3 ;for testing
 
             if material == 1
                 materialSearch = "rope"
@@ -328,6 +332,17 @@ function EquipBondageOutfit(Actor a, int setId)
             endif
 
             int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_random_bondage_chance")
+
+            if useRulesBased == 1
+                int ci = 0
+                while ci < chances.Length
+                    chances[ci] = 101
+                    ci += 1
+                endwhile
+            endif
+
+            ;debug.MessageBox(chances)
+
             bind_Utility.WriteToConsole("EquipBondageOutfit - chances:" + chances + " mat: " + material + " col: " + color)
 
             string searchString = ""
@@ -358,72 +373,132 @@ function EquipBondageOutfit(Actor a, int setId)
                 FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif      
             if Utility.RandomInt(0, 100) < chances[5] ;body - 5
-                if material == 1 || material == 2 || material == 3
-                    int bodyType = Utility.RandomInt(1, 3)
-                    if bodyType == 1
+                if useRulesBased == 1
+                    ;rules based sets will need all the body items
+                    if material == 1 || material == 2 || material == 3
                         searchString = "harness,-collar,-gag," + materialSearch + "," + colorSearch
-                    elseif bodyType == 2
+                        bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+
                         searchString = "corset," + materialSearch + "," + colorSearch
-                    elseif bodyType == 3
+                        bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+
                         searchString = "belt," + colorSearch
                         if material == 1
                             searchString = "crotch,-harness," + colorSearch
                         endif
-                    endif
-                elseif material == 4
-                    int bodyType = Utility.RandomInt(1, 2)
-                    if bodyType == 1
+                        bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+                    elseif material == 4
                         searchString = "belt,iron"
-                    elseif bodyType == 2 
-                        ;searchString = "iron chain harness,-("
+                        bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+
                         searchString = "iron chain harness,body"
+                        bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                     endif
+                else
+                    if material == 1 || material == 2 || material == 3
+                        int bodyType = Utility.RandomInt(1, 3)
+                        if bodyType == 1
+                            searchString = "harness,-collar,-gag," + materialSearch + "," + colorSearch
+                        elseif bodyType == 2
+                            searchString = "corset," + materialSearch + "," + colorSearch
+                        elseif bodyType == 3
+                            searchString = "belt," + colorSearch
+                            if material == 1
+                                searchString = "crotch,-harness," + colorSearch
+                            endif
+                        endif
+                    elseif material == 4
+                        int bodyType = Utility.RandomInt(1, 2)
+                        if bodyType == 1
+                            searchString = "belt,iron"
+                        elseif bodyType == 2 
+                            ;searchString = "iron chain harness,-("
+                            searchString = "iron chain harness,body"
+                        endif
+                    endif
+                    bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
-                bodyItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             ;arms - 4
             if Utility.RandomInt(0, 100) < chances[4]
-                if material == 1 || material == 2 || material == 3
-                    int armType = Utility.RandomInt(1, 2)
-                    if armType == 1
+                if useRulesBased == 1
+                    if material == 1 || material == 2 || material == 3
                         searchString = "binder,-strait," + materialSearch + "," + colorSearch
-                        armsBound = true
-                    elseif armType == 2
+                        armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                         searchString = "arm,cuff," + materialSearch + "," + colorSearch
-                    endif
-                elseif material == 4
-                    int bindArms = Utility.RandomInt(1, 2)
-                    ;bindArms = 1
-                    if bindArms == 1
-                        armsBound = true
-                        int armType = Utility.RandomInt(1, 3)
-                        if armType == 1
-                            searchString = "yoke"                        
-                        elseif armType == 2
+                        armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+                    elseif material == 4 
+                        int binderType = Utility.RandomInt(1, 3)
+                        if binderType == 1
+                            searchString = "yoke"  
+                            armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+                        elseif binderType == 2
                             searchString = "manacles"
-                        elseif armType == 3
+                            armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+                        elseif binderType == 3
                             searchString = "elbow shackles"
+                            armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                         endif
-                    elseif bindArms == 2
                         searchString = "steel,cuffs,(arms)"
+                        armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                     endif
-                    ;debug.MessageBox(searchString)
+                else
+                    if material == 1 || material == 2 || material == 3
+                        int armType = Utility.RandomInt(1, 2)
+                        if armType == 1
+                            searchString = "binder,-strait," + materialSearch + "," + colorSearch
+                            armsBound = true
+                        elseif armType == 2
+                            searchString = "arm,cuff," + materialSearch + "," + colorSearch
+                        endif
+                    elseif material == 4
+                        int bindArms = Utility.RandomInt(1, 2)
+                        ;bindArms = 1
+                        if bindArms == 1
+                            armsBound = true
+                            int armType = Utility.RandomInt(1, 3)
+                            if armType == 1
+                                searchString = "yoke"                        
+                            elseif armType == 2
+                                searchString = "manacles"
+                            elseif armType == 3
+                                searchString = "elbow shackles"
+                            endif
+                        elseif bindArms == 2
+                            searchString = "steel,cuffs,(arms)"
+                        endif
+                        ;debug.MessageBox(searchString)
+                    endif
+                    armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
-                armItem = FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[6] ;legs
-                int legType = Utility.RandomInt(1, 2)
-                if material == 1 || material == 2 || material == 3
-                    searchString = "leg,cuff," + materialSearch + "," + colorSearch
-                elseif material == 4
-                    int bindLegs = Utility.RandomInt(1,2)
-                    if bindLegs == 1
+                if useRulesBased == 1
+                    if material == 1 || material == 2 || material == 3
+                        searchString = "leg,cuff," + materialSearch + "," + colorSearch
+                        FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                         searchString = "fetters"
-                    else
+                        FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
+                    elseif material == 4
+                        searchString = "fetters"
+                        FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                         searchString = "steel,cuffs,(legs)"
+                        FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                     endif
+                else
+                    int legType = Utility.RandomInt(1, 2)
+                    if material == 1 || material == 2 || material == 3
+                        searchString = "leg,cuff," + materialSearch + "," + colorSearch
+                    elseif material == 4
+                        int bindLegs = Utility.RandomInt(1,2)
+                        if bindLegs == 1
+                            searchString = "fetters"
+                        else
+                            searchString = "steel,cuffs,(legs)"
+                        endif
+                    endif
+                    FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
                 endif
-                FindRandomItem(main.BindingGameOutfitFile, rf, searchString, setId)
             endif
             if Utility.RandomInt(0, 100) < chances[7] ;boots
                 if material == 2 || material == 3
@@ -510,8 +585,132 @@ function EquipBondageOutfit(Actor a, int setId)
         while i < setItems.Length
             Form dev = setItems[i]
             if dev
-                AddSpecificItem(a, dev as Armor)
-                bind_Utility.DoSleep(sleepWait)
+                bool addThisItem = false
+                int option = -1
+                if useRulesBased == 1                    
+                    ; int function RULE_OPTION_HARD_LIMIT()
+                    ;     return 1
+                    ; endfunction
+
+                    ; int function RULE_OPTION_SAFE_AREAS()
+                    ;     return 2
+                    ; endfunction
+
+                    ; int function RULE_OPTION_PERMANENT()
+                    ;     return 3
+                    ; endfunction
+
+                    ; int function RULE_OPTION_PERMANENT_SAFE_AREAS()
+                    ;     return 4
+                    ; endfunction
+
+                    ; int function RULE_OPTION_UNSAFE_AREAS()
+                    ;     return 5
+                    ; endfunction
+
+                    ; int function RULE_OPTION_PERMANENT_UNSAFE_AREAS()
+                    ;     return 6
+                    ; endfunction
+
+                    ; dRuleName[0] = "Ankle Shackles Rule"
+                    ; dRuleName[1] = "Arm Cuffs Rule"
+                    ; dRuleName[2] = "Blindfold Rule"
+                    ; dRuleName[3] = "Boots Rule"
+                    ; dRuleName[4] = "Belt Rule"
+                    ; dRuleName[5] = "Collar Rule"
+                    ; dRuleName[6] = "Corset Rule"
+                    ; dRuleName[7] = "Gag Rule"
+                    ; dRuleName[8] = "Gloves Rule"
+                    ; dRuleName[9] = "Harness Rule"
+                    ; dRuleName[10] = "Heavy Bondage Rule"
+                    ; dRuleName[11] = "Hood Rule"
+                    ; dRuleName[12] = "Leg Cuffs Rule"
+                    ; dRuleName[13] = "Nipple Piercing Rule"
+                    ; dRuleName[14] = "Vaginal Piercing Rule"
+                    ; dRuleName[15] = "Anal Plug Rule"
+                    ; dRuleName[16] = "Vaginal Plug Rule"
+                    ; dRuleName[17] = "Suit Rule"
+
+                    Form rendered = zlib.GetRenderedDevice(dev as Armor)
+
+                    ;bind_Utility.WriteToConsole("keyword : " + rendered.HasKeyWord(zlib.zad_DeviousSuit) + " rule: " + rms.GetBondageRule(a, 17))
+
+                    int foundItem = -1
+                    if rendered.HasKeyWord(zlib.zad_DeviousSuit) && (rms.GetBondageRule(a, 17) == 1)
+                        foundItem = 17
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousPlugVaginal) && (rms.GetBondageRule(a, 16) == 1)
+                        foundItem = 16
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousPlugAnal) && (rms.GetBondageRule(a, 15) == 1)
+                        foundItem = 15
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousPiercingsVaginal) && (rms.GetBondageRule(a, 14) == 1)
+                        foundItem = 14
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousPiercingsNipple) && (rms.GetBondageRule(a, 13) == 1)
+                        foundItem = 13
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousLegCuffs) && (!rendered.HasKeyWord(zlib.zad_DeviousAnkleShackles)) && (rms.GetBondageRule(a, 12) == 1)
+                        foundItem = 12
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousHood) && (rms.GetBondageRule(a, 11) == 1)
+                        foundItem = 11
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousHeavyBondage) && (rms.GetBondageRule(a, 10) == 1)
+                        foundItem = 10
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousHarness) && (rms.GetBondageRule(a, 9) == 1)
+                        foundItem = 9
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousGloves) && (rms.GetBondageRule(a, 8) == 1)
+                        foundItem = 8
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousGag) && (!rendered.HasKeyWord(zlib.zad_DeviousHood)) && (rms.GetBondageRule(a, 7) == 1)
+                        foundItem = 7
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousCorset) && (rms.GetBondageRule(a, 6) == 1)
+                        foundItem = 6
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousCollar) && (!rendered.HasKeyWord(zlib.zad_DeviousHarness)) && (rms.GetBondageRule(a, 5) == 1)
+                        foundItem = 5
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousBelt) && (rms.GetBondageRule(a, 4) == 1)
+                        foundItem = 4
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousBoots) && (rms.GetBondageRule(a, 3) == 1)
+                        foundItem = 3
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousBlindfold) && (rms.GetBondageRule(a, 2) == 1)
+                        foundItem = 2
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousArmCuffs) && (rms.GetBondageRule(a, 1) == 1)
+                        foundItem = 1
+                        addThisItem = true
+                    elseif rendered.HasKeyWord(zlib.zad_DeviousAnkleShackles) && (rms.GetBondageRule(a, 0) == 1)
+                        foundItem = 0
+                        addThisItem = true
+                    endif
+
+                    ;NOTE - this is controlled by sets, no need to do this
+                    ; if bondageSafeAreaFlag && (option == 2 || option == 4)
+                    ;     addThisItem = true
+                    ; elseif !bondageSafeAreaFlag && (option == 5 || option == 6)
+                    ;     addThisItem = true
+                    ; elseif option == 0
+                    ;     addThisItem = true ;no options set, rule is on
+                    ; endif
+
+                    bind_Utility.WriteToConsole("rules based - dev: " + dev.GetName() + " foundItem: " + foundItem + " add: " + addThisItem)
+
+                else
+                    addThisItem = true
+                endif
+                if addThisItem
+                    AddSpecificItem(a, dev as Armor)
+                    bind_Utility.DoSleep(sleepWait)
+                endif
+                
             endif
             i += 1
         endwhile
@@ -691,6 +890,8 @@ int function GetBondageSetForLocation(Location currentLocation, int currentBonda
     endif
 
     int[] list = StorageUtil.IntListToArray(theSubRef, "binding_found_outfit_id_list")
+
+    bondageSafeAreaFlag = isSafeArea
 
     return list[Utility.RandomInt(0, list.Length - 1)]
 
@@ -2587,6 +2788,8 @@ FormList property bind_BondageFactions auto
 FormList property bind_DDKeywords auto
 Formlist property bind_HogtiedItemsList auto
 Formlist property bind_BondageTypeKeywords auto
+
+Formlist property bind_zap_all auto
 
 ObjectReference property TheWardrobe auto
 
