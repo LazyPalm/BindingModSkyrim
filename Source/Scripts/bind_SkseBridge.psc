@@ -20,7 +20,13 @@ endfunction
 
 int function LockDevice(Actor act, Armor arm) global
     zadLibs zlib = Quest.GetQuest("zadQuest") as zadLibs
-    zlib.LockDevice(act, arm, true)
+    zlib.LockDevice(act, arm, false)
+    return 0
+endfunction
+
+int function UnlockDevice(Actor act, Armor arm) global
+    zadLibs zlib = Quest.GetQuest("zadQuest") as zadLibs
+    zlib.UnlockDevice(act, arm, none, none, true, true)
     return 0
 endfunction
 

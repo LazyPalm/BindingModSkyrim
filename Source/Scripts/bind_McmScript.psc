@@ -299,7 +299,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.24"
+    version = "0.4.25"
 
     theSub = fs.GetSubRef()
 
@@ -2445,6 +2445,9 @@ event OnOptionInputAccept(int option, string value)
 
         selectedFoundItemId = -1
         selectedFoundItem = ""
+
+        ; Form[] items = bind_SkseFunctions.SearchDeviousByKeywords(bmanage.bind_dd_all, value)
+        ; debug.MessageBox(items.Length)
 
         searchResults = bmanage.SearchDeviousItems(value)
         bind_Utility.WriteToConsole("searchResults: " + searchResults.Length)
