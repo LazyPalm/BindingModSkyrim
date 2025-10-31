@@ -73,6 +73,7 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("Direct Narration Test")
     listMenu.AddEntryItem("Skyrim Bondage Rule Test")
     listMenu.AddEntryItem("Server Test")
+    listMenu.AddEntryItem("SKSE - search test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -90,6 +91,14 @@ function ShowDebugMenu()
         if think.IsAiReady()
             bind_ThinkingDom.AddBondageRule_Execute(functions_script.GetDomRef(), "", "{\"rule\":\"Random Rule\"}")
         endif
+    elseif listReturn == 5
+        Form[] result = bind_SkseFunctions.CreateRandomDeviousSet(bondage_manager.bind_dd_all, 1, 4, none) ;, 0, Utility.RandomInt(1, 3))
+        debug.MessageBox(result)
+        int idx = 0
+        while idx < result.Length
+            bind_Utility.WriteToConsole(result[idx].GetName())
+            idx += 1
+        endwhile
     elseif listReturn == 4
 
 	; Initialize the Text Entry Menu

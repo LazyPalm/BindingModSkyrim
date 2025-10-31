@@ -242,18 +242,19 @@ function SetActiveState(Actor c, bool activeFlag)
         if think.IsAiReady()
             if Utility.RandomInt(1, 2) == 2 && chatCount < 3
                 chatCount += 1
-                if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
-                    bind_Utility.WriteToConsole("crowds quest - guard " + c.GetDisplayName() + " makes a comment")
-                    think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
+                ; if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
+                ;     bind_Utility.WriteToConsole("crowds quest - guard " + c.GetDisplayName() + " makes a comment")
+                ;     ;think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
+                ;     SkyrimNetApi.DirectNarration(c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.", c)
+                ; else
+                if Utility.RandomInt(1, 2) == 2 && c != fs.GetDomRef()
+                    bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " chats with dom")
+                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.", c, fs.GetDomRef())
                 else
-                    if Utility.RandomInt(1, 2) == 2 
-                        bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " chats with dom")
-                        think.UseDirectNarration(c, c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.")
-                    else
-                        bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
-                        think.UseDirectNarration(c, c.GetDisplayName() + " makes a comment {{ player.name }}'s current situation.")
-                    endif
+                    bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
+                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " makes a comment {{ player.name }}'s current situation.", c)
                 endif
+                ;endif
             endif
         endif
 
