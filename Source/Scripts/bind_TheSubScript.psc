@@ -58,36 +58,6 @@ Event OnPlayerLoadGame()
 
 EndEvent
 
-bool processHit
-
-Event OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, \
-	bool abBashAttack, bool abHitBlocked)
-
-	if !processHit
-		processHit = true
-		
-		if bind_GlobalModState.GetValue() == 1.0
-			If MQS.IsSub == 0 && MQS.DomStartupQuestsEnabled == 1
-				If fs.FutureDom != none
-					float baseHealthValue = fs.GetSubRef().GetBaseActorValue("Health")
-					float healthValue = fs.GetSubRef().GetActorValue("Health")		
-					If (healthValue < (baseHealthValue / 2.0)) && (healthValue > 0) 
-						;(healthValue < ((baseHealthValue / 3.0) * 2.0)) && (healthValue > 0) ;(healthValue < (baseHealthValue / 2.0)) && (healthValue > 0)
-						If !cheatDeath
-							cheatDeath = true
-							;TODO - make this a quest!!!
-							;MQS.TheDominantFollowerEvent()
-						EndIf
-					EndIf
-				EndIf
-			EndIf
-		endif
-
-		processHit = false
-	endif
-
-EndEvent
-
 Event OnEnterBleedout()
 
 	if bind_GlobalModState.GetValue() == 1.0
@@ -135,18 +105,6 @@ Event OnEnterBleedout()
 
 EndEvent
 
-Event OnMagicEffectApply(ObjectReference akCaster, MagicEffect akEffect)
-
-	if bind_GlobalModState.GetValue() == 1.0
-
-	endif
-
-	;Debug.MessageBox(akCaster + " applied the " + akEffect + " on us")
-
-	;NOTE - maybe look for activation pressed and this magic effect (within x seconds) to determine if shrine was used?
-	;MQS.ActivationTime
-
-EndEvent
 
 bool lookedAtFurniture
 
