@@ -1,17 +1,87 @@
 {% if render_mode == "full" or render_mode == "dialogue_target" or render_mode == "thoughts" or render_mode == "transform" %}
 {% set actor_name = decnpc(actorUUID).name %}
 {% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") %}
+
+{% if is_in_faction(actorUUID, "bind_SubmissiveFaction") %}
+
 {# gear #}
-{{ "### Collar State" }}
+{{ "## Collar State" }}
 {% if wearing_collar %}
 - {{ actor_name }} is collared.
-{% else %}
-- {{ actor_name }} is not wearing a collar.
 {% endif %}
 
 {# posing #}
 {% if is_in_faction(actorUUID, "bind_KneelingFaction") %} 
-{{ "### Pose" }}
+{{ "## Pose" }}
 - {{ actor_name }} is kneeling submissively.
 {% endif %}
+{% endif %}
+
+{# MME #}
+{% if is_in_faction(actorUUID, "MME_MilkMaidFaction") %}
+{{ "## Milk Maid" }}
+{% set milk_max = get_global_value("bind_GlobalMilkMaxLevel") %}
+{% set milk_current = get_global_value("bind_GlobalMilkLactacidLevel") %}
+{% set lactacid_current = get_global_value("bind_GlobalMilkCurrentLevel") %}
+{% if milk_max / milk_current >= 0.6 %}
+- {{ actor_name }}'s breasts are getting heavy from all the milk filling them. They can be milked.
+{% endif %}
+{% if milk_current >= milk_max %}
+- {{ actor_name }}'s breasts are full and leaking. They need to be milked.
+{% endif %}
+{% if lactacid_current == 0 %}
+- {{ actor_name }}'s lactacid level has reached zero. They need to be fed more to continue producing milk.
+{% endif %}
+{% endif %}
+
+{# Furniture #}
+{{ "## Furniture" }}
+{% set in_furniture = get_global_value("bind_GlobalInFurniture") %}
+{% if in_furniture == 1 %}
+- {{ actor_name }} is bound sitting on a bondage chair. Their ankles secured to each chair leg, hands bound securely behind it. Their legs are spread wide leaving their sex unprotected and on display.
+{% else if in_furniture == 2 %}
+- {{ actor_name }} is bound standing, legs spread wide, in a pillory. Their hands and neck locked between the wooden bars. Their body is bent forward, exposing their intimate area.
+{% else if in_furniture == 3 %}
+- {{ actor_name }} is bound to a wooden cross. Their ankles secured together on the post, their arms stretched perpendicular to their body, and wrists secured to the crossbar. A small metal hook supports their body weight, pressing painfully into their intimate areas.
+{% else if in_furniture == 4 %}
+- {{ actor_name }} has arms raised overhead, hands bound to a gallows post. They balance on tiptoes but cannot fully stand on the ground to relieve the strain in their stretched body.
+{% else if in_furniture == 5 %}
+- {{ actor_name }} has hands bound behind their back, pulled straight up to a gallows post, forcing them to bend forward. Their intimate areas are naturally visible due to the position.
+{% else if in_furniture == 6 %}
+- {{ actor_name }} is bound in a suspended hogtie, attached by vertical chain connected to a gallows post. Chains loop under their body, keeping them completely still and unable to move.
+{% else if in_furniture == 7 %}
+- {{ actor_name }} is bound upside down by their ankles to by vertical chain connected to a gallows post. Their wrists are locked behind their back.
+{% else if in_furniture == 8 %}
+- {{ actor_name }} is bound on a suspended wooden horse connected by chains to a gallows post. The horse’s V-shaped design presses against their intimate areas. Their hands are bound behind their back, and chains secure their position.
+{% else if in_furniture == 9 %}
+- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. They are forced to bend forward, feet spread wide, arms behind their back.
+{% else if in_furniture == 10 %}
+- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. They are forced to stand in an uncomfortable back bent and stomach arched out position.
+{% else if in_furniture == 11 %}
+- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. The frame keeps them suspended in the air with their body hanging upsupported.
+{% else if in_furniture == 12 %}
+- {{ actor_name }} is bound to a wooden horse. The horse’s V-shaped design supports their intimate areas. Their hands are bound behind their back, and restraints maintain their position.
+{% else if in_furniture == 13 %}
+- {{ actor_name }}  is bound to a wheel removed from a wagon. Their arms and legs are pulled through the spokes and secured, with their back pressed against the wheel.
+{% else if in_furniture == 14 %}
+- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them facing the post, their back and ass exposed.
+{% else if in_furniture == 15 %}
+- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them to stand with their back to the post.
+{% else if in_furniture == 16 %}
+- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement leaves them hanging by their wrists, back pressed into to the post.
+{% else if in_furniture == 17 %}
+- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them in a kneeling stance with their back to the post.
+{% else if in_furniture == 18 %}
+- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them in a sitting stance with their back to the post.
+{% else if in_furniture == 19 %}
+- {{ actor_name }} is secured in heavy iron restraints that are bolted to the wall. Their back is forced against the wall.
+{% else if in_furniture == 20 %}
+- {{ actor_name }} is bound face forward, back exposed, to an X-shaped cross. Their arms and legs spread wide from their body.
+{% else if in_furniture == 21 %}
+- {{ actor_name }} is bound with their back against an X-shaped cross. Their arms and legs spread wide from their body.
+{% else if in_furniture == 22 %}
+- {{ actor_name }} is bound standing in a wooden stockade. Their hands and neck locked between wooden bars. A strange magical machine fucks their ass from below.
+
+{% endif %}
+
 {% endif %}

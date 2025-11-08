@@ -40,6 +40,8 @@ int toggleBoundSexBlindfold
 int toggleBoundSexHood
 int toggleBoundSexAPlug
 int toggleBoundSexVPlug
+int toggleDomWantsPrivacy
+
 ;bound masturbation
 int toggleBoundMasturbationCuffs
 int toggleBoundMasturbationGag
@@ -273,6 +275,7 @@ int bondageSetRemoveExistingGearToggle
 int inputDeviousKeywordSearch
 string deviousKeywordSearch
 string[] searchResults
+Form[] searchResultsForms
 int menuSearchResults
 string selectedFoundItem
 int selectedFoundItemId
@@ -299,7 +302,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.25"
+    version = "0.4.26"
 
     theSub = fs.GetSubRef()
 
@@ -769,14 +772,14 @@ function DisplayBondageOutfits()
 
         ;else
 
-            AddHeaderOption("Add Item - Devious Devices")
+            AddHeaderOption("Add Item - Bondage Devices")
             AddHeaderOption("* Used when random bondage is DISABLED")
             inputDeviousKeywordSearch = AddInputOption("Keyword Search", deviousKeywordSearch)
             menuSearchResults = AddMenuOption("Items Found", selectedFoundItem)
-            clickedFoundItem = AddTextOption("Add Found DD Item To Fixed Items", "")
+            clickedFoundItem = AddTextOption("Add Found Item To Fixed Items", "")
             AddTextOption("", "")        
 
-            AddHeaderOption("Fixed Items - Devious Devices")
+            AddHeaderOption("Fixed Items - Bondage Devices")
             AddHeaderOption("* Used when random bondage is DISABLED")
             clickedLearnBondageOutfit = AddTextOption("Learn Worn DD Items", "")
             AddTextOption("", "")
@@ -1279,6 +1282,9 @@ Function DisplaySexSettings()
         sexFramework = "Devious Devices - SL"
     endif
     toggleSexUseFramework = AddTextOption("Use Framework For Sex", sexFramework)
+
+    toggleDomWantsPrivacy = AddToggleOption("Sex Requires Privacy", main.SexDomWantsPrivacy)
+    AddTextOption("", "")
 
     ;unties for sex
 
@@ -1854,7 +1860,7 @@ Function DisplayPreferences()
     toggleNoFreedom = AddToggleOption("Hide Free Me Dialog Option", main.DomWillNotOfferFreedom)
     toggleStartupQuests = AddToggleOption("Enable Pre-enslavement Events", main.DomStartupQuestsEnabled)
     toggleGameplayAnyNpcCanDom = AddToggleOption("Any NPC can be your Dominant", main.GameplayAnyNpcCanDom)
-    toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Non-Binding Items From Bags", main.CleanUpNonBindingItemsFromBags)
+    toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Unused Bondage Items From Inventory", main.CleanUpNonBindingItemsFromBags)
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
     ;AddTextOption("", "")
 
@@ -2441,7 +2447,11 @@ event OnOptionInputAccept(int option, string value)
     endif
 
     if option == inputDeviousKeywordSearch
-        SetInputOptionValue(inputDeviousKeywordSearch, "Running Search...")
+
+        searchResultsForms = bind_SkseFunctions.SearchFormListsByKeyword(value, bmanage.bind_zap_all, bmanage.bind_dd_all)
+        ;debug.MessageBox(list)
+
+        ;SetInputOptionValue(inputDeviousKeywordSearch, "Running Search...")
 
         selectedFoundItemId = -1
         selectedFoundItem = ""
@@ -2449,7 +2459,17 @@ event OnOptionInputAccept(int option, string value)
         ; Form[] items = bind_SkseFunctions.SearchDeviousByKeywords(bmanage.bind_dd_all, value)
         ; debug.MessageBox(items.Length)
 
-        searchResults = bmanage.SearchDeviousItems(value)
+        string buffer = ""
+        int idx = 0
+        while idx < searchResultsForms.Length
+            if buffer != "" 
+                buffer += "|"
+            endif
+            buffer += searchResultsForms[idx].GetName()
+            idx += 1
+        endwhile
+
+        searchResults = StringUtil.Split(buffer, "|") ;bmanage.SearchDeviousItems(value)
         bind_Utility.WriteToConsole("searchResults: " + searchResults.Length)
 
         SetInputOptionValue(inputDeviousKeywordSearch, "Found: " + searchResults.Length)        
@@ -2731,8 +2751,8 @@ Event OnOptionSelect(int option)
         if option == clickedFoundItem
             if selectedFoundItemId > -1
                 if ShowMessage("Add DD item " + selectedFoundItem + "?", true, "$Yes", "$No")
-                    string resultsFile = "binding/bind_dd_search_result.json"
-                    Form dev = JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
+                    ;string resultsFile = "binding/bind_dd_search_result.json"
+                    Form dev = searchResultsForms[selectedFoundItemId] ;JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
                     if dev
                         JsonUtil.FormListAdd(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", dev, false)
                     endif
@@ -2887,6 +2907,13 @@ Event OnOptionSelect(int option)
         SetTextOptionValue(option, sexFramework)
         completed = true
     endif
+
+    if option == toggleDomWantsPrivacy && !completed
+        int newValue = ToggleValue(main.SexDomWantsPrivacy)
+        main.SexDomWantsPrivacy = newValue
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif            
 
     if selectedPage == "Rules - Bondage"
         i = 0

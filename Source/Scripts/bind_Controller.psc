@@ -244,6 +244,25 @@ auto state RunningState
     function DoUpdate()
 
         if ReadyForStoryManager()
+
+            ; Keyword[] kw = new Keyword[2]
+            ; kw[0] = Keyword.GetKeyword("zadc_FurnitureDevice") 
+            ; kw[1] = Keyword.GetKeyword("zbfFurniture")
+            ; int fcount = bind_SkseFunctions.ScanForFurniture(fs.GetSubRef(), kw, 3000.0)
+
+            int crowdSize = bind_SkseFunctions.CalculateCrowd(fs.GetSubRef(), fs.GetDomRef(), 1000.0, 3000.0)
+            bind_CrowdSize.SetValue(crowdSize)
+
+            if main.SexDomWantsPrivacy == 1
+                if crowdSize == 0
+                    bind_CrowdSizeCheck.SetValue(1)
+                else
+                    bind_CrowdSizeCheck.SetValue(0)
+                endif
+            else
+                bind_CrowdSizeCheck.SetValue(1)
+            endif
+
             bind_Utility.WriteToConsole("SendStoryEvent current location: " + fs.GetCurrentLocation())
             bind_StoryManager.SendStoryEvent(fs.GetCurrentLocation(), fs.GetDomRef(), actorSub, 5555, 0)
         else
@@ -464,6 +483,8 @@ EndFunction
 
 GlobalVariable property bind_GlobalModState auto
 GlobalVariable property bind_GlobalActionKey auto
+GlobalVariable property bind_CrowdSize auto
+GlobalVariable property bind_CrowdSizeCheck auto
 
 ReferenceAlias property TheDom auto
 ReferenceAlias property TheSub auto

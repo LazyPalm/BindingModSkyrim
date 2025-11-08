@@ -514,6 +514,7 @@ bool function BindingSex_IsEligible(Actor akOriginator, string contextJson, stri
 
     bind_Functions f = bind_Functions.GetBindingFunctions()
     bind_ThinkingDom think = bind_ThinkingDom.GetThinkingDom()
+    bind_MainQuestScript m = bind_MainQuestScript.GetMainQuestScript()
 
     if think.EnableActionSex == 0
         return false
@@ -523,11 +524,23 @@ bool function BindingSex_IsEligible(Actor akOriginator, string contextJson, stri
         return false
     endif
 
-    if f.InSafeArea() == 0
-        return false ;needs to be safe area
+    ; if f.InSafeArea() == 0
+    ;     return false ;needs to be safe area
+    ; endif
+    
+    if m.SexDomWantsPrivacy == 1
+        int crowdSize = bind_SkseFunctions.CalculateCrowd(f.GetSubRef(), f.GetDomRef(), 1000.0, 3000.0)
+        if crowdSize > 0
+            bind_Utility.WriteToConsole("bind_ThinkingDom - SexDomWantsPrivacy crowd: " + crowdSize)
+            return false
+        endif
     endif
 
-    ;do arousal check
+    int domArousal = bind_SlaHelper.GetArousal(f.GetDomRef())			
+    if domArousal < m.SexDomArousalLevelToTrigger
+        bind_Utility.WriteToConsole("bind_ThinkingDom - SexDomArousalLevelToTrigger domArousal: " + domArousal)
+        return false;
+    endif
 
     result = true
 

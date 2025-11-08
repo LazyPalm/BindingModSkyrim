@@ -238,7 +238,7 @@ function EquipBondageOutfit(Actor a, int setId)
 
     bind_Utility.WriteToConsole("EquipBondageOutfit - items: " + setItems)
 
-    Form[] tempItems = new Form[25]
+    Form[] tempItems = new Form[25] ;form list copy was failing on this - maybe a papyrusutil issue?
     int idx = 0
 
     if setItems != none
@@ -272,6 +272,10 @@ function EquipBondageOutfit(Actor a, int setId)
     int handle = ModEvent.Create("bind_BondageOutfitEquipped")
     if handle
         ModEvent.Send(handle)
+    endif
+
+    if main.CleanUpNonBindingItemsFromBags == 1
+        bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(a)
     endif
 
     EquippingBondageOutfit = false
@@ -952,6 +956,12 @@ EndFunction
 
 bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
 
+    if nonBindingItems
+        bind_SkseFunctions.UnequipAllBondage(act)
+        return true
+    endif
+        
+
     Form[] wornItems = StorageUtil.FormListToArray(act, "binding_worn_bondage_items")
     ;debug.MessageBox(wornItems)
 
@@ -961,8 +971,12 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
         i = 0
         while i < wornItems.Length
             Armor dev = wornItems[i] as Armor
-            if zlib.UnlockDevice(act, dev, none, none, true)
-                bind_Utility.WriteToConsole("RemoveAllBondageItems - removing stored item: " + dev)                
+            if dev.HasKeyWordString("zbfWornDevice")
+                act.UnequipItemEx(dev)
+            else
+                if zlib.UnlockDevice(act, dev, none, none, true)
+                    bind_Utility.WriteToConsole("RemoveAllBondageItems - removing stored item: " + dev)                
+                endif
             endif
             bind_Utility.DoSleep(sleepTime)
             i += 1
@@ -975,57 +989,64 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
     
     StorageUtil.FormListClear(act, "binding_worn_bondage_items")
 
-    if nonBindingItems
-        if act.WornHasKeyWord(zlib.zad_Lockable)
-            i = 0
-            while i < bind_DDKeywords.GetSize()
-                Keyword kw = bind_DDKeywords.GetAt(i) as Keyword
-                if act.WornHasKeyword(kw)
-                    if zlib.UnlockDeviceByKeyword(act, kw, false)
-                        bind_Utility.WriteToConsole("RemoveAllBondageItems - removing by keyword: " + kw)
-                    endif
-                    bind_Utility.DoSleep(sleepTime)
-                endif
-                i += 1
-            endwhile
-        endif
-        ; if act.WornHasKeyWord(zlib.zad_Lockable)
-        ;     debug.MessageBox("fail safe removal")
-        ; 	Form[] inventory = act.GetContainerForms()
-        ;     i = 0
-        ;     while i < inventory.Length
-        ;         Form dev = inventory[i]
-        ;         if dev.HasKeyWord(zlib.zad_Lockable) && act.IsEquipped(dev)
-        ;             if !dev.HasKeyWord(zlib.zad_QuestItem) && !dev.HasKeyWord(zlib.zad_BlockGeneric)
-        ;                 zlib.UnlockDevice(act, dev as Armor, none, none, true)
-        ;                 bind_Utility.WriteToConsole("removing non-binding rendered item: " + dev.GetName())
-        ;             endif
-        ;         endif
-        ;         i += 1
-        ;     endwhile
-        ; endif
-    endif
+    ; if nonBindingItems
+    ;     if act.WornHasKeyWord(zlib.zad_Lockable)
+    ;         i = 0
+    ;         while i < bind_DDKeywords.GetSize()
+    ;             Keyword kw = bind_DDKeywords.GetAt(i) as Keyword
+    ;             if act.WornHasKeyword(kw)
+    ;                 if zlib.UnlockDeviceByKeyword(act, kw, false)
+    ;                     bind_Utility.WriteToConsole("RemoveAllBondageItems - removing by keyword: " + kw)
+    ;                 endif
+    ;                 bind_Utility.DoSleep(sleepTime)
+    ;             endif
+    ;             i += 1
+    ;         endwhile
+    ;     endif
+    ;     ; if act.WornHasKeyWord(zlib.zad_Lockable)
+    ;     ;     debug.MessageBox("fail safe removal")
+    ;     ; 	Form[] inventory = act.GetContainerForms()
+    ;     ;     i = 0
+    ;     ;     while i < inventory.Length
+    ;     ;         Form dev = inventory[i]
+    ;     ;         if dev.HasKeyWord(zlib.zad_Lockable) && act.IsEquipped(dev)
+    ;     ;             if !dev.HasKeyWord(zlib.zad_QuestItem) && !dev.HasKeyWord(zlib.zad_BlockGeneric)
+    ;     ;                 zlib.UnlockDevice(act, dev as Armor, none, none, true)
+    ;     ;                 bind_Utility.WriteToConsole("removing non-binding rendered item: " + dev.GetName())
+    ;     ;             endif
+    ;     ;         endif
+    ;     ;         i += 1
+    ;     ;     endwhile
+    ;     ; endif
+    ; endif
 
-	Form[] inventory = act.GetContainerForms()
-    i = 0
-    bind_Utility.WriteToConsole("clean up bags: " + inventory.Length)
+    ;Form[] wornItems = bind_SkseFunctions.GetWorn
 
-	while i < inventory.Length
-        Form dev = inventory[i]
+	; Form[] inventory = act.GetContainerForms()
+    ; i = 0
+    ; bind_Utility.WriteToConsole("clean up bags: " + inventory.Length)
+
+	; while i < inventory.Length
+    ;     Form dev = inventory[i]
         
-        ;TODO - figure out how to deal with failed render devices
+    ;     ;TODO - figure out how to deal with failed render devices
 
-        if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev) && !dev.HasKeyWord(zlib.zad_QuestItem)
-            int flag = GetBindingBondageItem(dev)
-            if flag == 1 || main.CleanUpNonBindingItemsFromBags == 1
-                bind_Utility.WriteToConsole("RemoveAllBondageItems - removing binding item: " + dev.GetName())
-                act.RemoveItem(dev, 100, true, none)
-            else
-                bind_Utility.WriteToConsole("RemoveAllBondageItems - leaving non-binding item: " + dev.GetName())
-            endif
-        endif
-        i += 1
-    endwhile
+    ;     if dev.HasKeyWord(zlib.zad_InventoryDevice) && !act.IsEquipped(dev) && !dev.HasKeyWord(zlib.zad_QuestItem)
+    ;         int flag = GetBindingBondageItem(dev)
+    ;         if flag == 1 || main.CleanUpNonBindingItemsFromBags == 1
+    ;             bind_Utility.WriteToConsole("RemoveAllBondageItems - removing binding item: " + dev.GetName())
+    ;             act.RemoveItem(dev, 100, true, none)
+    ;         else
+    ;             bind_Utility.WriteToConsole("RemoveAllBondageItems - leaving non-binding item: " + dev.GetName())
+    ;         endif
+    ;     endif
+
+    ;     if dev.HasKeyWordString("zbfWornDevice")
+    ;         act.UnequipItemEx(dev)
+    ;     endif
+
+    ;     i += 1
+    ; endwhile
 
 
 
@@ -1033,50 +1054,50 @@ bool Function RemoveAllBondageItems(Actor act, bool nonBindingItems = true)
 
 
 
-    bool result
+    ; bool result
 
-    i = 0
-    while i < bind_BondageList.GetSize()
+    ; i = 0
+    ; while i < bind_BondageList.GetSize()
 
-        Form dev = GetStoredItem(act, i)
+    ;     Form dev = GetStoredItem(act, i)
 
-        bind_Utility.WriteToConsole("RemoveAllBondageItems i: " + i + " found: " + dev)
+    ;     bind_Utility.WriteToConsole("RemoveAllBondageItems i: " + i + " found: " + dev)
 
-        if dev
+    ;     if dev
             
-            int flag = GetBindingBondageItem(dev)
+    ;         int flag = GetBindingBondageItem(dev)
 
-            bind_Utility.WriteToConsole("flag: " + flag)
+    ;         bind_Utility.WriteToConsole("flag: " + flag)
 
-            result = false
+    ;         result = false
 
-            if flag == 1
-                result = zlib.UnlockDevice(act, dev as Armor, none, bind_DDKeywords.GetAt(i) as Keyword, true)
+    ;         if flag == 1
+    ;             result = zlib.UnlockDevice(act, dev as Armor, none, bind_DDKeywords.GetAt(i) as Keyword, true)
 
-                bind_Utility.WriteToConsole("remove result: " + result)
-            endif
+    ;             bind_Utility.WriteToConsole("remove result: " + result)
+    ;         endif
 
-            if result
-                ClearStoredItem(act, i) 
-            endif
+    ;         if result
+    ;             ClearStoredItem(act, i) 
+    ;         endif
 
-        endif
+    ;     endif
 
-        i += 1
-    endwhile
+    ;     i += 1
+    ; endwhile
 
-    ;remove specific items
-    Form[] specificItems = StorageUtil.FormListToArray(act, "binding_bondage_specific_list")
-    if specificItems.Length > 0
-        i = 0
-        while i < specificItems.Length
-            result = zlib.UnlockDevice(act, specificItems[i] as Armor, none, none, true)
-            i += 1
-        endwhile
-        StorageUtil.FormListClear(act, "binding_bondage_specific_list")
-    endif
+    ; ;remove specific items
+    ; Form[] specificItems = StorageUtil.FormListToArray(act, "binding_bondage_specific_list")
+    ; if specificItems.Length > 0
+    ;     i = 0
+    ;     while i < specificItems.Length
+    ;         result = zlib.UnlockDevice(act, specificItems[i] as Armor, none, none, true)
+    ;         i += 1
+    ;     endwhile
+    ;     StorageUtil.FormListClear(act, "binding_bondage_specific_list")
+    ; endif
 
-    return true
+    ; return true
 
 EndFunction
 
@@ -2175,13 +2196,13 @@ function SaveWornDdItemsAsSet(Actor theSub)
     JsonUtil.FormListClear(bondageOutfitFile, "fixed_bondage_items")
     ;StorageUtil.FormListClear(TheWardrobe, "set_" + loadedSetName)
 
-	Form[] inventory = theSub.GetContainerForms()
+	Form[] inventory = bind_SkseFunctions.GetWornGear(theSub) ; theSub.GetContainerForms()
 	int i = 0
     int kwi = 0
 	while i < inventory.Length
         Form dev = inventory[i]
-        if dev.HasKeyWord(zlib.zad_inventoryDevice) && theSub.IsEquipped(dev)
-            bind_Utility.WriteToConsole("found zad_inventoryDevice: " + dev)
+        if (dev.HasKeyWord(zlib.zad_inventoryDevice) || dev.HasKeywordString("zbfWornDevice")) && theSub.IsEquipped(dev)
+            bind_Utility.WriteToConsole("found bondage item: " + dev)
             if dev.HasKeyWord(zlib.zad_QuestItem) || dev.HasKeyWord(zlib.zad_BlockGeneric)
                 bind_Utility.WriteToConsole("quest or blocking device")
             else
@@ -2235,89 +2256,89 @@ function SaveWornDdItemsAsSet(Actor theSub)
 
 endfunction
 
-string[] function SearchDeviousItems(string keywords)
+; string[] function SearchDeviousItems(string keywords)
 
-    string[] keywordArr = StringUtil.Split(keywords, ",")
+;     string[] keywordArr = StringUtil.Split(keywords, ",")
 
-    string f = "binding/bind_dd_db.json"
+;     string f = "binding/bind_dd_db.json"
 
-    int i = 0
+;     int i = 0
 
-    int counter = 0
-    int groupNmber = 1
+;     int counter = 0
+;     int groupNmber = 1
 
-    if !JsonUtil.JsonExists(f)
+;     if !JsonUtil.JsonExists(f)
 
-        bind_Utility.WriteToConsole("Creating DD database json")
+;         bind_Utility.WriteToConsole("Creating DD database json")
 
-        while i < bind_dd_all.GetSize()
-            Form dev =  bind_dd_all.GetAt(i)
-            if counter > 100
-                counter = 0
-                groupNmber += 1
-            Endif
-            JsonUtil.StringListAdd(f, "group_" + groupNmber + "_names", dev.GetName())
-            JsonUtil.FormListAdd(f, "group_" + groupNmber + "_items", dev)
-            i += 1
-            counter += 1
-        endwhile
+;         while i < bind_dd_all.GetSize()
+;             Form dev =  bind_dd_all.GetAt(i)
+;             if counter > 100
+;                 counter = 0
+;                 groupNmber += 1
+;             Endif
+;             JsonUtil.StringListAdd(f, "group_" + groupNmber + "_names", dev.GetName())
+;             JsonUtil.FormListAdd(f, "group_" + groupNmber + "_items", dev)
+;             i += 1
+;             counter += 1
+;         endwhile
 
-        JsonUtil.Save(f)
+;         JsonUtil.Save(f)
 
-    endif
+;     endif
 
-    string result = ""
-    int foundCount = 0
+;     string result = ""
+;     int foundCount = 0
 
-    string resultsFile = "binding/bind_dd_search_result.json"
-    JsonUtil.StringListClear(resultsFile, "found_names")
-    JsonUtil.FormListClear(resultsFile, "found_items")
+;     string resultsFile = "binding/bind_dd_search_result.json"
+;     JsonUtil.StringListClear(resultsFile, "found_names")
+;     JsonUtil.FormListClear(resultsFile, "found_items")
 
-    i = 1
-    while i < 20
-        int idx = 0
-        int idx2 = 0
-        string[] itemNames = JsonUtil.StringListToArray(f, "group_" + i + "_names")
-        Form[] items = JsonUtil.FormListToArray(f, "group_" + i + "_items")
-        if itemNames.Length == 0
-            i = 20 ;break if empty
-        endif
-        while idx < itemNames.Length
-            string itemName = itemNames[idx]
-            bool passedTests = true
-            idx2 = 0
-            while idx2 < keywordArr.Length
-                string searchFor = keywordArr[idx2]
-                if StringUtil.Find(searchFor, "-", 0) > -1
-                    searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
-                    if StringUtil.Find(itemName, searchFor, 0) > -1
-                        passedTests = false
-                    endif
-                else
-                    if StringUtil.Find(itemName, searchFor, 0) == -1
-                        passedTests = false
-                    endif
-                endif
-                idx2 += 1
-            endwhile
-            if passedTests
-                if result == ""
-                    result = itemName
-                else
-                    result += "|" + itemName
-                endif
-                JsonUtil.FormListAdd(resultsFile, "found_items", items[idx])
-                JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
-            endif
-            idx += 1
-        endwhile
-        i += 1
-    endwhile
-    JsonUtil.Save(resultsFile)
+;     i = 1
+;     while i < 20
+;         int idx = 0
+;         int idx2 = 0
+;         string[] itemNames = JsonUtil.StringListToArray(f, "group_" + i + "_names")
+;         Form[] items = JsonUtil.FormListToArray(f, "group_" + i + "_items")
+;         if itemNames.Length == 0
+;             i = 20 ;break if empty
+;         endif
+;         while idx < itemNames.Length
+;             string itemName = itemNames[idx]
+;             bool passedTests = true
+;             idx2 = 0
+;             while idx2 < keywordArr.Length
+;                 string searchFor = keywordArr[idx2]
+;                 if StringUtil.Find(searchFor, "-", 0) > -1
+;                     searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
+;                     if StringUtil.Find(itemName, searchFor, 0) > -1
+;                         passedTests = false
+;                     endif
+;                 else
+;                     if StringUtil.Find(itemName, searchFor, 0) == -1
+;                         passedTests = false
+;                     endif
+;                 endif
+;                 idx2 += 1
+;             endwhile
+;             if passedTests
+;                 if result == ""
+;                     result = itemName
+;                 else
+;                     result += "|" + itemName
+;                 endif
+;                 JsonUtil.FormListAdd(resultsFile, "found_items", items[idx])
+;                 JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
+;             endif
+;             idx += 1
+;         endwhile
+;         i += 1
+;     endwhile
+;     JsonUtil.Save(resultsFile)
 
-    return StringUtil.Split(result, "|")
+;     return StringUtil.Split(result, "|")
 
-endfunction
+; endfunction
 
 
 bind_BondageManager function GetBindingBondageManager() global
@@ -2331,6 +2352,7 @@ zadLibs property zlib auto
 
 FormList property bind_dd auto
 FormList property bind_dd_all auto
+FormList property bind_zap_all auto
 
 FormList property bind_BondageList auto
 FormList property bind_BondageFactions auto
@@ -2338,7 +2360,7 @@ FormList property bind_DDKeywords auto
 Formlist property bind_HogtiedItemsList auto
 Formlist property bind_BondageTypeKeywords auto
 
-Formlist property bind_zap_all auto
+;Formlist property bind_zap_all auto
 
 ObjectReference property TheWardrobe auto
 

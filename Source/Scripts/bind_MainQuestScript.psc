@@ -63,6 +63,7 @@ int property SexFreeUse auto conditional
 int property SexDomArousalLevelToTrigger auto conditional
 int property SexChanceOfChastityRemoval auto conditional
 int property SexUseFramework auto conditional
+int property SexDomWantsPrivacy auto conditional
 
 string property SubName auto conditional
 string property DominantName auto conditional

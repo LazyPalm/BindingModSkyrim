@@ -24,6 +24,10 @@ event OnUpdate()
 
     bind_Utility.WriteToConsole("kneeing quest is updating. door: " + TheNearestDoor.GetReference())
 
+    int crowdSize = bind_SkseFunctions.CalculateCrowd(fs.GetSubRef(), fs.GetDomRef(), 1000.0, 3000.0)
+    ;debug.MessageBox(crowdSize)
+    bind_CrowdSize.SetValue(crowdSize)
+
     If TheNearestDoor.GetReference() != none
         ObjectReference ref = TheNearestDoor.GetReference()       
         fs.SetBuildingDoor(ref)
@@ -149,3 +153,4 @@ bind_Functions property fs auto
 Quest property bind_WordWallQuest auto
 
 GlobalVariable property bind_GlobalLocationHasFurniture auto
+GlobalVariable property bind_CrowdSize auto

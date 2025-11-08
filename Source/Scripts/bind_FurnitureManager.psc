@@ -399,7 +399,7 @@ EndFunction
 ; EndFunction
 
 bool Function LockInFurniture(Actor a, ObjectReference furn, bool player = true)
-
+    
     StorageUtil.SetFormValue(a, "binding_locked_in_furniture", furn)
   
     if !ddcEventRegistered
@@ -496,6 +496,65 @@ bool Function LockInFurniture(Actor a, ObjectReference furn, bool player = true)
             result = 3
         EndIf
     EndIf
+
+    string furnitureName = furn.GetBaseObject().GetName()
+
+    if StringUtil.Find(furnitureName, "Chair", 0) > -1
+        bind_GlobalInFurniture.SetValue(1)
+    elseif StringUtil.Find(furnitureName, "Pillory", 0) > -1
+        bind_GlobalInFurniture.SetValue(2)
+
+    elseif StringUtil.Find(furnitureName, "Pole (Overhead)", 0) > -1
+        bind_GlobalInFurniture.SetValue(4)
+    elseif StringUtil.Find(furnitureName, "Pole (Strappado)", 0) > -1
+        bind_GlobalInFurniture.SetValue(5)
+    elseif StringUtil.Find(furnitureName, "Pole (Hogtie)", 0) > -1
+        bind_GlobalInFurniture.SetValue(6)
+    elseif StringUtil.Find(furnitureName, "Pole (Upside Down)", 0) > -1
+        bind_GlobalInFurniture.SetValue(7)
+    elseif StringUtil.Find(furnitureName, "Pole (Wooden Horse)", 0) > -1
+        bind_GlobalInFurniture.SetValue(8)
+    elseif StringUtil.Find(furnitureName, "Restraint Post (Chained)", 0) > -1
+        bind_GlobalInFurniture.SetValue(9)
+    elseif StringUtil.Find(furnitureName, "Restraint Post (Standing)", 0) > -1
+        bind_GlobalInFurniture.SetValue(10)
+    elseif StringUtil.Find(furnitureName, "Restraint Post (Hanging)", 0) > -1
+        bind_GlobalInFurniture.SetValue(11)
+
+    elseif StringUtil.Find(furnitureName, "X-Cross (Reversed)", 0) > -1
+        bind_GlobalInFurniture.SetValue(20)
+    elseif StringUtil.Find(furnitureName, "X-Cross", 0) > -1
+        bind_GlobalInFurniture.SetValue(21)
+
+    elseif StringUtil.Find(furnitureName, "Cross", 0) > -1
+        bind_GlobalInFurniture.SetValue(3)
+
+    elseif StringUtil.Find(furnitureName, "Horse", 0) > -1
+        bind_GlobalInFurniture.SetValue(12)    
+
+    elseif StringUtil.Find(furnitureName, "Wheel", 0) > -1
+        bind_GlobalInFurniture.SetValue(13)    
+
+    elseif StringUtil.Find(furnitureName, "Torture Pole (Standing Reversed)", 0) > -1
+        bind_GlobalInFurniture.SetValue(14)    
+    elseif StringUtil.Find(furnitureName, "Torture Pole (Standing)", 0) > -1
+        bind_GlobalInFurniture.SetValue(15)    
+    elseif StringUtil.Find(furnitureName, "Torture Pole (Hanging)", 0) > -1
+        bind_GlobalInFurniture.SetValue(16)    
+    elseif StringUtil.Find(furnitureName, "Torture Pole (Kneeling)", 0) > -1
+        bind_GlobalInFurniture.SetValue(17)    
+    elseif StringUtil.Find(furnitureName, "Torture Pole (Sitting)", 0) > -1
+        bind_GlobalInFurniture.SetValue(18)    
+
+    elseif (StringUtil.Find(furnitureName, "Wall", 0) > -1 && StringUtil.Find(furnitureName, "Shackle", 0) > -1)
+        bind_GlobalInFurniture.SetValue(19)    
+
+    elseif StringUtil.Find(furnitureName, "Stockade Fuck Machine", 0) > -1
+        bind_GlobalInFurniture.SetValue(22)  
+
+
+    endif
+
     StorageUtil.SetIntValue(a, "binding_furniture_status", result)
     If player
         ;mqs.SetFurnitureStatus(result)
@@ -505,6 +564,8 @@ bool Function LockInFurniture(Actor a, ObjectReference furn, bool player = true)
 EndFunction
 
 bool Function UnlockFromFurniture(Actor a, ObjectReference furn, bool player = true)
+
+    bind_GlobalInFurniture.SetValue(0)
 
     if !ddcEventRegistered
         ddcEventRegistered = true
@@ -723,3 +784,5 @@ Faction property bind_LockedInFurnitureFaction auto
 Keyword property bind_FurnitureItem auto
 
 FormList property bind_ZapFurnitureList auto
+
+GlobalVariable property bind_GlobalInFurniture auto

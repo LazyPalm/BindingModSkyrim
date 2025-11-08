@@ -60,14 +60,14 @@ EndEvent
 
 Event OnEnterBleedout()
 
-	if bind_GlobalModState.GetValue() == 1.0
+	;if bind_GlobalModState.GetValue() == 1.0
 
 		;MQS.GetSubRef().GetActorBase().SetEssential(true)
 		;MQS.GetSubRef().SetNoBleedoutRecovery(true)
 
 		;Debug.MessageBox("We entered bleedout...")
 
-		If MQS.IsSub == 0
+		;If MQS.IsSub == 0
 
 			;SendModEvent("dhlp-Suspend")
 
@@ -95,13 +95,13 @@ Event OnEnterBleedout()
 
 			;MQS.TheDominantFollowerEvent()
 		
-		ElseIf MQS.IsSub == 1
+		;ElseIf MQS.IsSub == 1
 			;internal bondage death alternative??
-		EndIf
+		;EndIf
 
 		;MQS.GetSubRef().ResetHealthAndLimbs()
 
-	endif
+	;endif
 
 EndEvent
 

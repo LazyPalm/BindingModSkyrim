@@ -332,6 +332,7 @@ endfunction
 
 string keywords
 string[] searchResults
+Form[] searchResultsForms
 string resultsFile = "binding/bind_dd_search_result.json"
 
 function BondageItemSearch()
@@ -362,11 +363,25 @@ function BondageItemSearch()
         string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
         if result != ""
             keywords = result
-            searchResults = bms.SearchDeviousItems(keywords)
+
+            searchResultsForms = bind_SkseFunctions.SearchFormListsByKeyword(keywords, bms.bind_zap_all, bms.bind_dd_all)
+            string buffer = ""
+            int idx = 0
+            while idx < searchResultsForms.Length
+                if buffer != "" 
+                    buffer += "|"
+                endif
+                buffer += searchResultsForms[idx].GetName()
+                idx += 1
+            endwhile
+
+            searchResults = StringUtil.Split(buffer, "|") ;bmanage.SearchDeviousItems(value)
+
+            ;searchResults = bms.SearchDeviousItems(keywords)
             BondageItemSearch()
         endif
     elseif listReturn > 2
-        Form dev = JsonUtil.FormListGet(resultsFile, "found_items", listReturn - 3)
+        Form dev = searchResultsForms[listReturn - 3] ;JsonUtil.FormListGet(resultsFile, "found_items", listReturn - 3)
         if dev
             bms.AddSpecificItem(theSub, dev as Armor)
         endif

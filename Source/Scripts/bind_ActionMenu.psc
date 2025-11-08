@@ -74,6 +74,7 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("Skyrim Bondage Rule Test")
     listMenu.AddEntryItem("Server Test")
     listMenu.AddEntryItem("SKSE - search test")
+    listMenu.AddEntryItem("SKSE - crowd size test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -99,6 +100,9 @@ function ShowDebugMenu()
             bind_Utility.WriteToConsole(result[idx].GetName())
             idx += 1
         endwhile
+    elseif listReturn == 6
+        int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
+        debug.MessageBox("crowd size: " + crowdSize)
     elseif listReturn == 4
 
 	; Initialize the Text Entry Menu
@@ -370,18 +374,32 @@ function ShowPoseMenu()
         SendKneelingEvent()
     elseif listReturn == 2
         pose_manager.DoSpreadKneel()
+        int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
+        bind_Utility.WriteToConsole("spread kneel (sex) - crowd: " + crowdSize)
         if think.IsAiReady()
+            bool start = false
             string prompt = "{{ player.name }} is kneeling with legs spead wide with a desire for sex."
-            if functions_script.GetRuleInfractions() > 0
-                prompt += " They have been bad and you will explain they must work off punishments first. You will not give them what they want."
+            if main.SexDomWantsPrivacy == 1 && crowdSize > 0
+                prompt += functions_script.GetDomRef().GetDisplayName() + " does not like fucking {{ player.name }} in public."
             else
-                prompt += " They have been good and probably deserve to be tied and given what they want."
+                if functions_script.GetRuleInfractions() > 0
+                    prompt += " {{ player.name }} has been bad and must recieve punishments first."
+                else
+                    start = true;
+                    ;prompt += " {{ player.name }} has been good and should be tied up and fucked."
+                endif
             endif
-            ;BETTER? OR BOTH?
-            ;add punishments due decorator at the prompt and display the lines above
-            think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+            if start
+                functions_script.PoseForSex(crowdSize)
+            else
+                bind_Utility.WriteToConsole("prompt: " + prompt)
+                ;BETTER? OR BOTH?
+                ;add punishments due decorator at the prompt and display the lines above
+                SkyrimNetApi.DirectNarration(prompt, functions_script.GetDomRef())
+                ;think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+            endif
         else
-            functions_script.PoseForSex()            
+            functions_script.PoseForSex(crowdSize)            
         endif
     elseif listReturn == 3     
         pose_manager.DoAttention()
@@ -393,9 +411,9 @@ function ShowPoseMenu()
         if think.IsAiReady()
             string prompt = "{{ player.name }} has entered a bent foward at the waist pose indicating a desire to be whipped."
             if functions_script.GetRuleInfractions() > 0
-                prompt += " They have been very bad lately."
+                prompt += " {{ player.name }} has been bad and deserves to be punished."
             else
-                prompt += " The have been good lately and must just desire the sting of a whip."
+                prompt += " {{ player.name }} has been good and is not due punishments but is feeling masochistic."
             endif
             ;BETTER? OR BOTH?
             ;add punishments due decorator at the prompt and display the lines above
@@ -758,6 +776,7 @@ bind_GearManager property gear_manager auto
 bind_RulesManager property rules_manager auto
 bind_Functions property functions_script auto
 bind_ThinkingDom property think auto
+bind_MainQuestScript property main auto
 
 Quest property bind_BoundMasturbationQuest auto
 Quest property bind_EntryExitQuest auto

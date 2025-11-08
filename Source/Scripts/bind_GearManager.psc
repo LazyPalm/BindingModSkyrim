@@ -1046,12 +1046,14 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
         Form dev = inventory[i]
 		if dev.IsPlayable()
 			if a.IsEquipped(dev)
-				if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
-					bind_Utility.WriteToConsole("LearnWornItemsForBondageOutfit - dev: " + dev.GetName())
-					;StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
-					JsonUtil.FormListAdd(m.BindingGameOutfitFile, outfitId + "_fixed_worn_items", dev, false)
-				else
+				if dev as Armor
+					if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+						bind_Utility.WriteToConsole("LearnWornItemsForBondageOutfit - dev: " + dev.GetName())
+						;StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
+						JsonUtil.FormListAdd(m.BindingGameOutfitFile, outfitId + "_fixed_worn_items", dev, false)
+					else
 
+					endif
 				endif
 			endif
 		endif

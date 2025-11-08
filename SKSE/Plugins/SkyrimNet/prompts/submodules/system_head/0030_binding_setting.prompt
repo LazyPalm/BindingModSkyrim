@@ -19,7 +19,8 @@
 
 {# Player is sub and mod is active #}
 {% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
-{{ "## "}} Skyrim Slavery
+
+    {{ "## "}} Skyrim Slavery
     {# slavery type #}
     {% if sub_type == 0 or sub_type == 1 %}
     {% endif %}
@@ -36,13 +37,13 @@
     {# ENTER CUSTOM HERE #}
     {% endif %}
 
-{% if is_in_faction(npc.UUID, "bind_AdventuringFaction") %}
-- {{ actor_name }} is currently adventuring, which could involve life and death situations, and should be a helpful party member and treat any slaves in the party as valued party members.
-{% endif %}
+    {% if is_in_faction(npc.UUID, "bind_AdventuringFaction") %}
+    - {{ actor_name }} is currently adventuring, which could involve life and death situations, and should be a helpful party member and treat any slaves in the party as valued party members.
+    {% endif %}
 
-{% if is_in_faction(npc.UUID, "bind_DominantFaction") and get_global_value("bind_GlobalSafeZone") != 2 %}
-- {{ actor_name }} is a member of a party in a dangerous area, which could involve life and death situations. {{ actor_name }} should be a helpful party member and treat any slaves in the party as valued party members.
-{% endif %}
+    {% if is_in_faction(npc.UUID, "bind_DominantFaction") and get_global_value("bind_GlobalSafeZone") != 2 %}
+    - {{ actor_name }} is a member of a party in a dangerous area, which could involve life and death situations. {{ actor_name }} should be a helpful party member and treat any slaves in the party as valued party members.
+    {% endif %}
 
     {# slavery in skyrim #}
     {% if has_slavery == 0 %}

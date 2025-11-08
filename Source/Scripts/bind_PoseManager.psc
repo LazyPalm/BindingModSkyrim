@@ -574,6 +574,7 @@ Function DoHighKneel()
         ;TODO - need an equip and store added to bondage manager for quick gag removal and replacing (then remove the bind_WearingLocationSpecificBondageFaction check)
         replaceGag = true
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is pull my gag out a bit to speak...")
+        bind_GlobalGagPulledOutToSpeak.SetValue(1)
         ;bman.RemoveItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         ; theSubRef.AddSpell(zadgag_SpeechDebuff)
         ; zadgag_SpeechDebuff.Cast(theSubRef, theSubRef)
@@ -905,6 +906,7 @@ Function DoConversationPose()
         ;theSubRef.AddSpell(zadgag_SpeechDebuff)
         ;bman.RemoveItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         zgqs.canTalk = true
+        bind_GlobalGagPulledOutToSpeak.SetValue(1)
     endif
 
     if rms.GetBehaviorRule(theSubRef, rms.BEHAVIOR_RULE_SPEECH_DOM()) == 1 ;.GetBehaviorRuleByName("Speech Rule:Dom Speaks") == 1
@@ -981,6 +983,7 @@ endfunction
 
 Function ResumeStanding()    
 	string standingIdle 
+    Idle zapIdle
 
     ;standingIdle = bman2.GetStandingIdle(0)
     ;If standingIdle == ""
@@ -989,34 +992,34 @@ Function ResumeStanding()
 
     if theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfWornDevice"))
         zbfBondageShell zbs = Quest.GetQuest("zbf") as zbfBondageShell
-        standingIdle = zbs.GetAnimationIdle(theSubRef)
+        zapIdle = zbs.GetAnimationIdle(theSubRef)
 
-        Int iBindWrists = 1
-        Int iBindArmbinder = 5
-        Int iBindYoke = 7
-        Int iBindUnbound = -1
+        ; Int iBindWrists = 1
+        ; Int iBindArmbinder = 5
+        ; Int iBindYoke = 7
+        ; Int iBindUnbound = -1
 
-        int bindType = iBindUnbound
+        ; int bindType = iBindUnbound
 
-        if theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsYoke"))
-            bindType = iBindYoke
-        elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsArmbinder"))
-            bindType = iBindArmbinder
-        elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsWrists"))
-            bindType = iBindWrists
-        endif
+        ; if theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsYoke"))
+        ;     bindType = iBindYoke
+        ; elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsArmbinder"))
+        ;     bindType = iBindArmbinder
+        ; elseif theSubRef.WornHasKeyword(Keyword.GetKeyword("zbfAnimHandsWrists"))
+        ;     bindType = iBindWrists
+        ; endif
 
-        string[] list = zbs.GetPoseAnimList(0, bindType)
-        string[] list2 = StringUtil.Split(list[1], ",")
-        ;debug.MessageBox(list2)
+        ; string[] list = zbs.GetPoseAnimList(0, bindType)
+        ; string[] list2 = StringUtil.Split(list[1], ",")
+        ; ;debug.MessageBox(list2)
 
-        if bindType >= 0
-            standingIdle = list2[Utility.RandomInt(0, list2.Length - 1)]
-        endif
+        ; if bindType >= 0
+        ;     standingIdle = list2[Utility.RandomInt(0, list2.Length - 1)]
+        ; endif
 
-        if bindType >= 0
-            standingIdle = zbfBondageShell.GetApi().GetArmAnimFromWornKeywords(theSubRef)
-        endif
+        ; if bindType >= 0
+        ;     standingIdle = zbfBondageShell.GetApi().GetArmAnimFromWornKeywords(theSubRef)
+        ; endif
 
         ;debug.MessageBox(standingIdle)
     endif
@@ -1029,7 +1032,13 @@ Function ResumeStanding()
     ;main.SubDialogueInCorrectPose = 0
 	bind_Utility.LogOutput("Pose Manager - ResumeStanding() idle: " + standingIdle)
     PoseIdleState = IDLE_STATE_NONE
-	Debug.SendAnimationEvent(theSubRef, standingIdle)
+
+    if zapIdle
+        theSubRef.PlayIdle(zapIdle)
+    else
+	    Debug.SendAnimationEvent(theSubRef, standingIdle)
+    endif
+    
     RemovePosingFactions()
     Game.EnablePlayerControls()
     EndQuests()
@@ -1073,6 +1082,7 @@ function RemovePosingFactions()
         ;theSubRef.RemoveSpell(zadgag_SpeechDebuff)
         ;bman.AddItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         zgqs.canTalk = false
+        bind_GlobalGagPulledOutToSpeak.SetValue(0)
         if theSubRef.IsInFaction(bind_KneelingFaction) ;should still be in this faction before standing
             bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is shoving my gag back in...")
         endif
@@ -1179,6 +1189,7 @@ Quest property bind_ConversationQuest auto
 
 GlobalVariable property bind_GlobalModState auto
 GlobalVariable property bind_GlobalKneelingOK auto
+GlobalVariable property bind_GlobalGagPulledOutToSpeak auto
 
 Faction property bind_InPoseFaction auto
 

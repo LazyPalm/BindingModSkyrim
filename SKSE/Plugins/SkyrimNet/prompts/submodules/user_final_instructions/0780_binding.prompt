@@ -1,27 +1,12 @@
 {% set actor_name = decnpc(npc.UUID).name %}
-{% set wearing_collar = is_in_faction(player.UUID, "bind_WearingCollarFaction") %}
-{% set wearing_gag = is_in_faction(player.UUID, "bind_WearingGagFaction") %}
-{% set is_kneeling = is_in_faction(player.UUID, "bind_KneelingFaction") %}
-
-{# Player is sub and mod is active #}
-{% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
-     {# NPC is the dominant #}
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") %}
-        {# sub is wearing a gag #}
-        {% if wearing_gag and is_kneeling == false %}
-        - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that {{ actor_name }} can't understand them. This is VERY important for immersion. 
-        - {{ actor_name }} will tell {{ player.name }} to be quiet if gagged in public.
-        {% endif %}
-        {% if wearing_gag and is_kneeling %}
-        - {{ actor_name }} loosened the gag in {{ player.name }}'s mouth so they might speak for a minute.
-        {% endif %}
+{% if is_in_faction(npc.UUID, "bind_SubmissiveFaction") == true %}
+    {# sub is wearing a gag #}
+    {% if get_global_value("bind_GlobalGagPulledOutToSpeak") == 1 %}
+    - {{ player.name }}'s gag has been pulled out a bit so they can speak to {{ actor_name }} while kneeling.
+    {% else %}
+    {% if is_in_faction(npc.UUID, "bind_WearingGagFaction") %}
+    - {{ player.name }} is gagged, their speech must be silenced. Delete all words/phrases from the {{ player.name }}'s dialogue. Generate short, visceral onomatopoeic sounds instead (e.g., mffh, gurgle, squelch, chuff, huff, gasp). Do not add new words—only sounds.
+    - Since the gag {{ player.name }} is wearing is locked, {{ actor_name }} can't offer help removing it.
     {% endif %}
-    {# normal NPC #}
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false %}
-        {# sub is wearing a gag #}
-        {% if wearing_gag %}
-        - {{ player.name }} has a gag in their mouth. {{ actor_name }} needs to pretend anything {{ player.name }} says is ONLY gagged grunts and mumbling, and that can't understand {{ player.name }}. This is VERY important for immersion.
-        - Since {{ player.name }}'s gag is locked on, {{ actor_name }} can't offer help. Sometimes they may suggest {{ player.name }} talk to their owner about having the gag removed.
-        {% endif %}
     {% endif %}
 {% endif %}

@@ -1944,6 +1944,10 @@ Function SafeWord()
 	bind_Utility.EnablePlayer()
 	;Debug.SendAnimationEvent(theSubRef, "IdleForceDefaultState")
 
+	if main.CleanUpNonBindingItemsFromBags == 1
+		bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(theSubRef)
+	endif
+
 	WindowOutput("Safeword: completed...")
 
 EndFunction
@@ -3229,12 +3233,18 @@ bool function LocationHasFurniture()
 	return (bind_GlobalLocationHasFurniture.GetValue() == 1)
 endfunction
 
-function PoseForSex()
+function PoseForSex(int crowdSize)
 	if ModInRunningState()
 		if theSubRef.GetDistance(theDomRef) > 1000.0
 			bind_Utility.WriteInternalMonologue(GetDomTitle() + " is not around to have sex with me...")
-		else
-			int domArousal = bind_SlaHelper.GetArousal(theDomRef)
+		else			
+			if main.SexDomWantsPrivacy == 1
+				if crowdSize > 0
+					bind_Utility.WriteInternalMonologue(GetDomTitle() + " does not like to fuck in public...")
+					return
+				endif
+			endif
+			int domArousal = bind_SlaHelper.GetArousal(theDomRef)			
 			bind_Utility.WriteToConsole("dom arousal: " + domArousal + " triggers at: " + main.SexDomArousalLevelToTrigger)
 			if domArousal >= main.SexDomArousalLevelToTrigger
 				if theSubRef.GetDistance(theDomRef) > 160.0
@@ -3248,6 +3258,7 @@ function PoseForSex()
 			else
 				bind_Utility.WriteInternalMonologue(GetDomTitle() + " does not seem to want to fuck me...")
 			endif
+		
 		endif
 	endif
 endfunction
