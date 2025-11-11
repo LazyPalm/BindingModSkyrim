@@ -1539,6 +1539,23 @@ string Function GetDomTitle()
 	return domTitle
 EndFunction
 
+string function GetDomPos(bool lower)
+	if !theDomRef
+		return ""
+	endif
+	string p = "His"
+	if lower
+		p = "his"
+	endif
+	if theDomRef.GetActorBase().GetSex() == 1
+		p = "Her"
+		if lower
+			p = "her"
+		endif
+	endif
+	return p
+endfunction
+
 string function GetDomPronoun(bool lower)
 	if !theDomRef
 		return ""

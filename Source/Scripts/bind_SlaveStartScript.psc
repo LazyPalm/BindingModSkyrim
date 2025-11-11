@@ -24,20 +24,24 @@ event OnInit()
         bcs.DoStartEvent()
         bcs.SetEventName(self.GetName())
 
-        ;if Game.IsPluginInstalled("Follower Slavery Mod.esp")
+        if Game.IsPluginInstalled("Follower Slavery Mod.esp")
             if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
                 ;if they are this close, they got sucked up by follower slavery
-                debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPronoun(true) + " possession.")          
+                debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPos(true) + " possession.")          
+                bcs.DoEndEvent()
+                self.Stop()
             endif
-
-
-        ;endif
+        endif
 
         MoveDomToPlayer()
 
-        GetSubReady()
-
-        ;self.Stop()
+        if mqs.IsSub == 1
+            debug.MessageBox("You have purchased by " + fs.GetDomRef().GetDisplayName())
+            bcs.DoEndEvent()
+            self.Stop()
+        else
+            GetSubReady()
+        endif
 
     endif
 
