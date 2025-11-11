@@ -306,7 +306,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.29"
+    version = "0.4.30"
 
     theSub = fs.GetSubRef()
 
@@ -2639,6 +2639,7 @@ Event OnOptionSelect(int option)
                 ;bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
                 int[] setIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
                 i = 0
+                debug.MessageBox(setIdList)
                 while i < setIdList.Length
 
                     int setId = setIdList[i]

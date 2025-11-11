@@ -1,0 +1,53 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"formList" : 
+	{
+		"fixed_bondage_items" : 
+		[
+			"0x3d2e8|Devious Devices - Expansion.esm",
+			"0x3d2e6|Devious Devices - Expansion.esm",
+			"0x1e687|Devious Devices - Expansion.esm",
+			"0xeb5d|Devious Devices - Integration.esm"
+		]
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 1,
+		"outfit_id" : 696081306,
+		"remove_existing_gear" : 1,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4,
+			16,
+			65536,
+			524288,
+			8388608,
+			134217728,
+			268435456,
+			536870912,
+			16777216,
+			4194304,
+			128,
+			67108864,
+			8
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "Simple Slavery Outcome Outfit"
+	},
+	"stringList" : 
+	{
+		"used_for" : 
+		[
+			"event_simple_slavery"
+		]
+	}
+}

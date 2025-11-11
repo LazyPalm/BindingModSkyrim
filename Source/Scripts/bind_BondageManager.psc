@@ -456,6 +456,8 @@ int function GetBondageOutfitForEvent(string eventName)
 
     int[] outfitIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
 
+    ;debug.MessageBox(outfitIdList)
+
     bool foundOutfits = false
     bool outfitValid = false
 

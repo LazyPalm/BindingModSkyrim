@@ -14,11 +14,15 @@ event OnInit()
         Quest q = Quest.GetQuest("bind_MainQuest")
         mqs = q as bind_MainQuestScript
         fs = q as bind_Functions
+        bcs = q as bind_Controller
 
         if !FindDom()
             debug.MessageBox("You never laid eyes on a worthy dominant.")
             self.Stop()
         endif
+
+        bcs.DoStartEvent()
+        bcs.SetEventName(self.GetName())
 
         ;if Game.IsPluginInstalled("Follower Slavery Mod.esp")
             if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
@@ -30,6 +34,8 @@ event OnInit()
         ;endif
 
         MoveDomToPlayer()
+
+        GetSubReady()
 
         ;self.Stop()
 
@@ -55,6 +61,10 @@ function MoveDomToPlayer()
    	;Game.EnableFastTravel()
 	;Game.FastTravel(theDom)
 
+endfunction
+
+function GetSubReady()
+    fs.EventGetSubReady(theSub, theDom, "event_simple_slavery")
 endfunction
 
 function MakeFollower()
@@ -126,8 +136,21 @@ bool function FindDom()
 
 endfunction
 
+function StartBinding()
+
+    MakeFollower()
+
+    fs.SetDom(theDom)
+
+    bcs.DoEndEvent()
+
+    self.Stop()
+
+endfunction
+
 bind_MainQuestScript mqs
 bind_Functions fs
+bind_Controller bcs
 
 ReferenceAlias property TheDomRef auto
 
