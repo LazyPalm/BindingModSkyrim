@@ -86,6 +86,10 @@ function LoadGame()
 		;NOTE - not sure if still using this for MCM saves
 		;saveGameUid = Utility.RandomInt(1000000, 5000000)
 		main.SaveGameUid = Utility.RandomInt(1000000, 5000000)
+
+		;using this for startup settings
+		main.SimpleSlaveryFemaleFallback = 1
+		main.SimpleSlaveryMaleFallback = 0
 	endif
 
 	main.GameSaveFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
@@ -1534,6 +1538,23 @@ EndFunction
 string Function GetDomTitle()
 	return domTitle
 EndFunction
+
+string function GetDomPronoun(bool lower)
+	if !theDomRef
+		return ""
+	endif
+	string p = "He"
+	if lower
+		p = "he"
+	endif
+	if theDomRef.GetActorBase().GetSex() == 1
+		p = "She"
+		if lower
+			p = "she"
+		endif
+	endif
+	return p
+endfunction
 
 Function CalculateDistanceAtAction()
 	main.SubDistanceFromDomAtAction = theSubRef.GetDistance(theDomRef)

@@ -194,6 +194,9 @@ int property LikesCityWinterhold auto conditional
 int property LikesCityRavenRock auto conditional
 int property LikesCityDawnstar auto conditional
 
+int property SimpleSlaveryFemaleFallback auto conditional
+int property SimpleSlaveryMaleFallback auto conditional
+
 ;*********************************************************
 ;skyrimnet variables
 int property SkryimNetSlaveryType auto conditional

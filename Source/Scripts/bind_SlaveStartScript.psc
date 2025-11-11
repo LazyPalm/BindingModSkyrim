@@ -3,6 +3,8 @@ Scriptname bind_SlaveStartScript extends Quest
 Actor theSub
 Actor theDom
 
+int usedHireling = 0
+
 event OnInit()
 
     if self.IsRunning()
@@ -18,18 +20,53 @@ event OnInit()
             self.Stop()
         endif
 
-        MovePlayerToDom()
+        ;if Game.IsPluginInstalled("Follower Slavery Mod.esp")
+            if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
+                ;if they are this close, they got sucked up by follower slavery
+                debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPronoun(true) + " possession.")          
+            endif
 
-        self.Stop()
+
+        ;endif
+
+        MoveDomToPlayer()
+
+        ;self.Stop()
 
     endif
 
 endevent
 
-function MovePlayerToDom()
+function MoveDomToPlayer()
 
-   	Game.EnableFastTravel()
-	Game.FastTravel(theDom)
+    theDom.MoveTo(theSub)
+    ;theDom.SetPosition(theDom.GetPositionX() + Utility.RandomFloat(-250.0, 250.0), theDom.GetPositionY() + Utility.RandomFloat(-250.0, 250.0), theDom.GetPositionZ() + 100.0) ;adding z in case elevation changes
+
+    ;bind_Utility.DoSleep(3.0)
+
+    ; if !theDom.IsInFaction(bind_ForceGreetFaction)
+    ;     theDom.AddToFaction(bind_ForceGreetFaction)
+    ; endif
+
+    if !theDom.IsEnabled()
+        theDom.Enable()
+    endif
+
+   	;Game.EnableFastTravel()
+	;Game.FastTravel(theDom)
+
+endfunction
+
+function MakeFollower()
+
+    if usedHireling == 1
+        HirelingQuest hq = Quest.GetQuest("HirelingQuest") as HirelingQuest
+	    hq.HasHirelingGV.Value=1
+    	theDom.AddToFaction(hq.CurrentHireling)
+    endif
+
+    DialogueFollowerScript dfs = Quest.GetQuest("DialogueFollower") as DialogueFollowerScript
+    dfs.SetFollower(theDom)
 
 endfunction
 
@@ -45,7 +82,32 @@ bool function FindDom()
         ;see if any future doms have been set
         Form[] list = StorageUtil.FormListToArray(theSub, "bind_future_doms")
         if list.Length == 0
-            ;get followers
+            ;use a hireling
+            if mqs.SimpleSlaveryFemaleFallback == 1 && mqs.SimpleSlaveryMaleFallback == 1
+                if Utility.RandomInt(1, 2) == 1
+                    theDom = MaleHireling.GetActorReference()
+                else
+                    theDom = FemaleHireling.GetActorReference()
+                endif
+                result = true
+            elseif mqs.SimpleSlaveryFemaleFallback == 1
+                theDom = FemaleHireling.GetActorReference()
+                result = true
+            elseif mqs.SimpleSlaveryMaleFallback == 1
+                theDom = MaleHireling.GetActorReference()
+                result = true
+            endif
+
+            if result
+                usedHireling = 1
+            endif
+
+            ;debug.MessageBox(f)
+
+            ; debug.MessageBox(mqs.SimpleSlaveryFemaleFallback)
+            ; debug.MessageBox(mqs.SimpleSlaveryMaleFallback)
+            ; debug.MessageBox(bind_HirelingsList.GetSize())
+            
 
 
         else 
@@ -75,3 +137,8 @@ Activator property zadc_RestraintPost auto
 Activator property zadc_BondagePole auto
 
 Faction property bind_ForceGreetFaction auto
+
+;FormList property bind_HirelingsList auto
+
+ReferenceAlias property FemaleHireling auto
+ReferenceAlias property MaleHireling auto

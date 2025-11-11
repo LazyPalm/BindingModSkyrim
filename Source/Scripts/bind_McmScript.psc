@@ -157,6 +157,10 @@ int toggleGameplayAnyNpcCanDom
 
 int toggleCleanUpNonBindingItemsFromBags
 
+int toggleSimpleSlaveryFemale
+int toggleSimpleSlaveryMale
+
+
 ;debug
 int toggleRunSafeword
 int toggleClearPunishments
@@ -302,7 +306,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.28"
+    version = "0.4.29"
 
     theSub = fs.GetSubRef()
 
@@ -661,6 +665,10 @@ event OnOptionHighlight(int option)
     elseif option == toggleBehaviorRules[21]
         SetInfoText("Player must wear Binki armor (slaArmorPrettyKeyword, eroticArmorKeyword, slaAmorSpendexKeyword, slaArmorHalfNakedKeyword).")
 
+    elseif option == toggleSimpleSlaveryFemale
+        SetInfoText("Simple slavery outcome will can use a female hireling if no potential doms have been selected.")
+    elseif option == toggleSimpleSlaveryMale
+        SetInfoText("Simple slavery outcome will can use a male hireling if no potential doms have been selected.")
     endif
 
 endevent
@@ -1860,7 +1868,11 @@ Function DisplayPreferences()
     toggleNoFreedom = AddToggleOption("Hide Free Me Dialog Option", main.DomWillNotOfferFreedom)
     toggleStartupQuests = AddToggleOption("Enable Pre-enslavement Events", main.DomStartupQuestsEnabled)
     toggleGameplayAnyNpcCanDom = AddToggleOption("Any NPC can be your Dominant", main.GameplayAnyNpcCanDom)
+    toggleSimpleSlaveryFemale = AddToggleOption("Simple Slavery - Female Hireling Fallbacks", main.SimpleSlaveryFemaleFallback)
+    toggleSimpleSlaveryMale = AddToggleOption("Simple Slavery - Male Hireling Fallbacks", main.SimpleSlaveryMaleFallback)
     toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Unused Bondage Items From Inventory", main.CleanUpNonBindingItemsFromBags)
+    
+
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
     ;AddTextOption("", "")
 
@@ -3472,6 +3484,24 @@ Event OnOptionSelect(int option)
     if option == toggleGameplayAnyNpcCanDom
         main.GameplayAnyNpcCanDom = ToggleValue(main.GameplayAnyNpcCanDom)
         SetToggleOptionValue(toggleGameplayAnyNpcCanDom, main.GameplayAnyNpcCanDom)
+    endif
+
+    if option == toggleSimpleSlaveryFemale
+        main.SimpleSlaveryFemaleFallback = ToggleValue(main.SimpleSlaveryFemaleFallback)
+        SetToggleOptionValue(option, main.SimpleSlaveryFemaleFallback)
+        ; if main.SimpleSlaveryFemaleFallback == 0 && main.SimpleSlaveryMaleFallback == 0
+        ;     main.SimpleSlaveryMaleFallback = 1
+        ;     SetToggleOptionValue(toggleSimpleSlaveryMale, main.SimpleSlaveryMaleFallback)
+        ; endif
+    endif
+
+    if option == toggleSimpleSlaveryMale
+        main.SimpleSlaveryMaleFallback = ToggleValue(main.SimpleSlaveryMaleFallback)
+        SetToggleOptionValue(option, main.SimpleSlaveryMaleFallback)
+        ; if main.SimpleSlaveryFemaleFallback == 0 && main.SimpleSlaveryMaleFallback == 0
+        ;     main.SimpleSlaveryFemaleFallback = 1
+        ;     SetToggleOptionValue(toggleSimpleSlaveryFemale, main.SimpleSlaveryFemaleFallback)
+        ; endif
     endif
 
     if option == toggleCleanUpNonBindingItemsFromBags
