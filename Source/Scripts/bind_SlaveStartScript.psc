@@ -16,10 +16,17 @@ event OnInit()
         fs = q as bind_Functions
         bcs = q as bind_Controller
 
+        FadeToBlackHoldImod.Apply()
+        MovePlayer()
+
         if !FindDom()
+            FadeToBlackHoldImod.Remove()
             debug.MessageBox("You never laid eyes on a worthy dominant.")
             self.Stop()
         endif
+
+        bind_Utility.WriteInternalMonologue("I was forced off stage, chained, blindfolded.")
+        bind_Utility.WriteInternalMonologue("What will happen to me next?")
 
         bcs.DoStartEvent()
         bcs.SetEventName(self.GetName())
@@ -27,6 +34,7 @@ event OnInit()
         if Game.IsPluginInstalled("Follower Slavery Mod.esp")
             if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
                 ;if they are this close, they got sucked up by follower slavery
+                FadeToBlackHoldImod.Remove()
                 debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPos(true) + " possession.")          
                 bcs.DoEndEvent()
                 self.Stop()
@@ -43,9 +51,19 @@ event OnInit()
             GetSubReady()
         endif
 
+        FadeToBlackHoldImod.Remove()
+
     endif
 
 endevent
+
+function MovePlayer()
+
+    theSub.MoveTo(bind_RiftenSlaveExit)
+   	Game.EnableFastTravel()
+	Game.FastTravel(bind_RiftenSlaveExit)
+
+endfunction
 
 function MoveDomToPlayer()
 
@@ -61,9 +79,6 @@ function MoveDomToPlayer()
     if !theDom.IsEnabled()
         theDom.Enable()
     endif
-
-   	;Game.EnableFastTravel()
-	;Game.FastTravel(theDom)
 
 endfunction
 
@@ -169,3 +184,7 @@ Faction property bind_ForceGreetFaction auto
 
 ReferenceAlias property FemaleHireling auto
 ReferenceAlias property MaleHireling auto
+
+ObjectReference property bind_RiftenSlaveExit auto
+
+ImageSpaceModifier property FadeToBlackHoldImod auto

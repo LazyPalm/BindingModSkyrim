@@ -573,7 +573,7 @@ Function DoHighKneel()
     if theSubRef.IsInFaction(bind_WearingGagFaction) ;&& !theSubRef.IsInFaction(bind_WearingLocationSpecificBondageFaction)
         ;TODO - need an equip and store added to bondage manager for quick gag removal and replacing (then remove the bind_WearingLocationSpecificBondageFaction check)
         replaceGag = true
-        bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is pull my gag out a bit to speak...")
+        bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " pulls my gag out a bit to speak...")
         bind_GlobalGagPulledOutToSpeak.SetValue(1)
         ;bman.RemoveItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         ; theSubRef.AddSpell(zadgag_SpeechDebuff)

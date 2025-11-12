@@ -154,6 +154,9 @@ function SaveThePlayer(bool addGag)
 
     FadeToBlackHoldImod.Apply()
 
+    bind_Utility.WriteInternalMonologue("I start to come around, still very groggy.")
+    bind_Utility.WriteInternalMonologue("Why am I blindfolded?")
+
     Game.DisablePlayerControls() ;NOTE - this will always make the player sheate the weapon
     bind_Utility.DisablePlayer()
     bind_Utility.DoSleep()
