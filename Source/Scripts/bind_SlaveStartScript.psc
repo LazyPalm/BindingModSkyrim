@@ -8,6 +8,8 @@ int usedHireling = 0
 event OnInit()
 
     if self.IsRunning()
+
+        bool foundDom = true
         
         theSub = Game.GetPlayer()
 
@@ -16,14 +18,22 @@ event OnInit()
         fs = q as bind_Functions
         bcs = q as bind_Controller
 
-        FadeToBlackHoldImod.Apply()
-        MovePlayer()
+        bool displayNoBuyer = false
+        bool displayDomMistake = false
 
         if !FindDom()
-            FadeToBlackHoldImod.Remove()
-            debug.MessageBox("You never laid eyes on a worthy dominant.")
-            self.Stop()
+            foundDom = false
+            displayNoBuyer = true
         endif
+
+        if Game.IsPluginInstalled("Follower Slavery Mod.esp")
+            if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
+                displayDomMistake = true
+            endif
+        endif
+
+        FadeToBlackHoldImod.Apply()
+        MovePlayer()
 
         bind_Utility.WriteInternalMonologue("I was forced off stage, chained, blindfolded.")
         bind_Utility.WriteInternalMonologue("What will happen to me next?")
@@ -31,27 +41,29 @@ event OnInit()
         bcs.DoStartEvent()
         bcs.SetEventName(self.GetName())
 
-        if Game.IsPluginInstalled("Follower Slavery Mod.esp")
-            if theSub.GetDistance(theDom) < 1000.0 && mqs.IsSub == 1
-                ;if they are this close, they got sucked up by follower slavery
-                FadeToBlackHoldImod.Remove()
-                debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPos(true) + " possession.")          
-                bcs.DoEndEvent()
-                self.Stop()
-            endif
+        if foundDom
+            MoveDomToPlayer()
         endif
 
-        MoveDomToPlayer()
+        GetSubReady()
 
-        if mqs.IsSub == 1
-            debug.MessageBox("You have purchased by " + fs.GetDomRef().GetDisplayName())
-            bcs.DoEndEvent()
-            self.Stop()
-        else
-            GetSubReady()
-        endif
+        ; if mqs.IsSub == 1
+        ;     debug.MessageBox("You have purchased by " + fs.GetDomRef().GetDisplayName())
+        ;     bcs.DoEndEvent()
+        ;     self.Stop()
+        ; else
+        ;     GetSubReady()
+        ; endif
 
         FadeToBlackHoldImod.Remove()
+
+        if displayNoBuyer
+            debug.MessageBox("Your buyer never showed up to claim you. Find a blacksmith to free you.")
+        endif
+
+        if displayDomMistake
+            debug.MessageBox("Representatives from the auction house realized your " + fs.GetDomTitle() + " was not supposed to be in the auction. " + fs.GetDomPronoun(false) + " has been freed and an apology issued for the misunderstanding. You have been rightfully returned to " + fs.GetDomPos(true) + " possession.")          
+        endif
 
     endif
 
@@ -160,6 +172,14 @@ function StartBinding()
     MakeFollower()
 
     fs.SetDom(theDom)
+
+    bcs.DoEndEvent()
+
+    self.Stop()
+
+endfunction
+
+function ResumeBinding()
 
     bcs.DoEndEvent()
 
