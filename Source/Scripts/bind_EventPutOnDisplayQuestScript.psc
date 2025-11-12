@@ -17,6 +17,14 @@ event OnInit()
 
     if self.IsRunning()
 
+        Quest q = Quest.GetQuest("bind_MainQuest")
+        mqs = q as bind_MainQuestScript
+        bcs = q as bind_Controller
+        bms = q as bind_BondageManager
+        gms = q as bind_GearManager
+        fs = q as bind_Functions
+        fman = q as bind_FurnitureManager
+
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
         RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
@@ -137,14 +145,21 @@ function EventStart()
     furnitureMarker = none
 
     bind_MovementQuestScript.PlayKneel(theSub)
+    ;fs.EventGetSubReady(theSub, theDom, "event_put_on_display");, true, true, true, false)
 
-    fs.EventGetSubReady(theSub, theDom, "event_put_on_display");, true, true, true, false)
-
+    bind_MovementQuestScript.WalkTo(theDom, theSub)
     bind_MovementQuestScript.PlayDoWork(theDom)
+
+    ;FadeToBlackHoldImod.Apply()
+    bind_Utility.FadeOutApply("I am being secured to the " + furn.GetBaseObject().GetName() + "...")
+
+    fs.EventGetSubReady(theSub, theDom, "event_put_on_display")
+
+    ;bind_Utility.WriteInternalMonologue("I am being secured to the " + furn.GetBaseObject().GetName() + "...")
 
     fman.LockInFurniture(theSub, furn, true)
 
-    bind_Utility.DoSleep(2.0)
+    ;bind_Utility.DoSleep(2.0)
 
     if !theSub.IsInFaction(bind_CrowdTriggerToWatch)
         theSub.AddToFaction(bind_CrowdTriggerToWatch)
@@ -160,6 +175,9 @@ function EventStart()
 
     GoToState("WaitingState")
     RegisterForSingleUpdate(1.0)
+
+    ;FadeToBlackHoldImod.Remove()
+    bind_Utility.FadeOutRemove("")
 
 endfunction
 
@@ -203,11 +221,15 @@ function EventEnd()
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 
+    ;FadeToBlackHoldImod.Apply()
+
+    bind_Utility.FadeOutApply("I am being released from the " + furn.GetBaseObject().GetName() + "...")
+
     fman.UnlockFromFurniture(theSub, furn, true)
 
     bind_Utility.DisablePlayer()
 
-    bind_Utility.DoSleep(1.0)
+    ;bind_Utility.DoSleep(1.0)
 
     fs.EventCleanUpSub(theSub, theDom, true)
 
@@ -245,6 +267,9 @@ function EventEnd()
 
     bcs.DoEndEvent()
 
+    bind_Utility.FadeOutRemove()
+    ;FadeToBlackHoldImod.Remove()
+
     self.Stop()
 
 endfunction
@@ -271,13 +296,12 @@ function ShowMenu()
 
 endfunction
 
-bind_MainQuestScript property mqs auto
-bind_Controller property bcs auto
-bind_BondageManager property bms auto
-bind_GearManager property gms auto
-bind_Functions property fs auto
-
-bind_FurnitureManager property fman auto
+bind_MainQuestScript mqs 
+bind_Controller bcs
+bind_BondageManager bms
+bind_GearManager gms
+bind_Functions fs
+bind_FurnitureManager fman
 
 GlobalVariable property bind_GlobalEventPutOnDisplayNextRun auto
 
@@ -289,3 +313,5 @@ FormList property bind_PutOnDisplayItemsList auto
 FormList property bind_DDCFurnitureList auto
 
 Keyword property bind_FurnitureItem auto
+
+ImageSpaceModifier property FadeToBlackHoldImod auto

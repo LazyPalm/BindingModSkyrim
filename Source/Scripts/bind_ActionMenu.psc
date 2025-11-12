@@ -75,6 +75,8 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("Server Test")
     listMenu.AddEntryItem("SKSE - search test")
     listMenu.AddEntryItem("SKSE - crowd size test")
+    listMenu.AddEntryItem("Fade to black")
+    listMenu.AddEntryItem("Fade to black - remove")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -103,6 +105,14 @@ function ShowDebugMenu()
     elseif listReturn == 6
         int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
         debug.MessageBox("crowd size: " + crowdSize)
+    elseif listReturn == 7
+        FadeToBlackImod.Apply()
+        Utility.Wait(2.75)
+        FadeToBlackHoldImod.Apply()
+
+    elseif listReturn == 8
+        FadeToBlackHoldImod.Remove()
+
     elseif listReturn == 4
 
 	; Initialize the Text Entry Menu
@@ -784,3 +794,7 @@ Quest property bind_EntryExitQuest auto
 GlobalVariable property bind_GlobalSafeZone auto
 
 Scene property DynamicScene auto
+
+ImageSpaceModifier property FadeToBlackImod auto
+ImageSpaceModifier property FadeToBlackHoldImod auto
+ImageSpaceModifier property FadeToBlackBackImod auto

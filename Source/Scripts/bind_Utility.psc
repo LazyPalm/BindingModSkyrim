@@ -372,3 +372,24 @@ bool function ConfirmBox(string msg, string yesText = "", string noText = "") gl
     endif
 
 endfunction
+
+function FadeOutApply(string msg = "") global
+    if msg != ""
+        bind_Utility.WriteInternalMonologue(msg)
+    endif
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+    u.FadeToBlackImod.Apply()
+    Utility.Wait(2.75)
+    u.FadeToBlackHoldImod.Apply()
+endfunction
+
+function FadeOutRemove(string msg = "") global
+    if msg != ""
+        bind_Utility.WriteInternalMonologue(msg)
+    endif
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+    u.FadeToBlackHoldImod.Remove()
+endfunction
+
+ImageSpaceModifier property FadeToBlackImod auto
+ImageSpaceModifier property FadeToBlackHoldImod auto
