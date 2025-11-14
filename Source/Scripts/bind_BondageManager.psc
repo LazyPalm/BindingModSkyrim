@@ -56,6 +56,8 @@ Function LoadGame(bool rebuildStorage = false)
 
     else
 
+        UpdateBondageFile()
+
         ; string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
         ; int i = 0
         ; while i < fList.Length
@@ -101,27 +103,60 @@ function CreateBondageOutfitFile()
 
         JsonUtil.IntListAdd(main.BindingGameOutfitFile, "outfit_id_list", outfitId)
         JsonUtil.StringListAdd(main.BindingGameOutfitFile, "outfit_name_list", outfitName)
-
         JsonUtil.SetFloatValue(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_expires", 0.0)
-
         JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "dynamic_bondage_items"))
         JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_fixed_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "fixed_bondage_items"))
-
         JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_outfit_enabled", JsonUtil.GetIntValue(templateFolderJson + fList[i], "outfit_enabled"))
         JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_remove_existing_gear", JsonUtil.GetIntValue(templateFolderJson + fList[i], "remove_existing_gear"))
         JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_use_random_bondage", JsonUtil.GetIntValue(templateFolderJson + fList[i], "use_random_bondage"))
-
         JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_block_slots", JsonUtil.IntListToArray(templateFolderJson + fList[i], "block_slots"))
         JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_random_bondage_chance", JsonUtil.IntListToArray(templateFolderJson + fList[i], "random_bondage_chance"))
-
         JsonUtil.StringListCopy(main.BindingGameOutfitFile, outfitId + "_used_for", JsonUtil.StringListToArray(templateFolderJson + fList[i], "used_for"))
-
         JsonUtil.SetStringValue(main.BindingGameOutfitFile, outfitId + "_bondage_outfit_name", JsonUtil.GetStringValue(templateFolderJson + fList[i], "bondage_outfit_name"))
 
         i += 1
     endwhile
 
     JsonUtil.Save(main.BindingGameOutfitFile)
+endfunction
+
+function UpdateBondageFile()
+
+    string templateFolder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+    string templateFolderJson = "binding/templates/outfits/"
+
+    string[] fList = MiscUtil.FilesInFolder(templateFolder)
+    int outfitCount = JsonUtil.IntListCount(main.BindingGameOutfitFile, "outfit_id_list")
+
+    if fList.Length > outfitCount ;add outfits
+        int i = 0
+        while i < fList.Length
+            int outfitId = JsonUtil.GetIntValue(templateFolderJson + fList[i], "outfit_id")
+            string outfitName = JsonUtil.GetStringValue(templateFolderJson + fList[i], "bondage_outfit_name")
+
+            if !JsonUtil.IntListHas(main.BindingGameOutfitFile, "outfit_id_list", outfitId)
+
+                Debug.Notification("Adding outfit " + outfitId)
+
+                JsonUtil.IntListAdd(main.BindingGameOutfitFile, "outfit_id_list", outfitId)
+                JsonUtil.StringListAdd(main.BindingGameOutfitFile, "outfit_name_list", outfitName)
+                JsonUtil.SetFloatValue(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_expires", 0.0)
+                JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_dynamic_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "dynamic_bondage_items"))
+                JsonUtil.FormListCopy(main.BindingGameOutfitFile, outfitId + "_fixed_bondage_items", JsonUtil.FormListToArray(templateFolderJson + fList[i], "fixed_bondage_items"))
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_outfit_enabled", JsonUtil.GetIntValue(templateFolderJson + fList[i], "outfit_enabled"))
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_remove_existing_gear", JsonUtil.GetIntValue(templateFolderJson + fList[i], "remove_existing_gear"))
+                JsonUtil.SetIntValue(main.BindingGameOutfitFile, outfitId + "_use_random_bondage", JsonUtil.GetIntValue(templateFolderJson + fList[i], "use_random_bondage"))
+                JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_block_slots", JsonUtil.IntListToArray(templateFolderJson + fList[i], "block_slots"))
+                JsonUtil.IntListCopy(main.BindingGameOutfitFile, outfitId + "_random_bondage_chance", JsonUtil.IntListToArray(templateFolderJson + fList[i], "random_bondage_chance"))
+                JsonUtil.StringListCopy(main.BindingGameOutfitFile, outfitId + "_used_for", JsonUtil.StringListToArray(templateFolderJson + fList[i], "used_for"))
+                JsonUtil.SetStringValue(main.BindingGameOutfitFile, outfitId + "_bondage_outfit_name", JsonUtil.GetStringValue(templateFolderJson + fList[i], "bondage_outfit_name"))
+
+            endif
+            
+            i += 1
+        endwhile
+    endif
+
 endfunction
 
 string function DDVersionString()
