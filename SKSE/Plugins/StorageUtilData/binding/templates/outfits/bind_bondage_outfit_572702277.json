@@ -7,16 +7,16 @@
 	{
 		"fixed_bondage_items" : 
 		[
-			"0x3d2e8|Devious Devices - Expansion.esm",
-			"0x3d2e6|Devious Devices - Expansion.esm",
 			"0x1e687|Devious Devices - Expansion.esm",
-			"0xeb5d|Devious Devices - Integration.esm"
+			"0x2dc8a|ZaZAnimationPack.esm",
+			"0x4004|ZaZAnimationPack.esm",
+			"0x5007|ZaZAnimationPack.esm"
 		]
 	},
 	"int" : 
 	{
 		"outfit_enabled" : 1,
-		"outfit_id" : 696081306,
+		"outfit_id" : 572702277,
 		"remove_existing_gear" : 1,
 		"use_random_bondage" : 0
 	},
@@ -34,20 +34,20 @@
 			536870912,
 			16777216,
 			4194304,
-			128,
 			67108864,
+			128,
 			8
 		]
 	},
 	"string" : 
 	{
-		"bondage_outfit_name" : "Simple Slavery Outcome"
+		"bondage_outfit_name" : "Hogtied Outfit"
 	},
 	"stringList" : 
 	{
 		"used_for" : 
 		[
-			"event_simple_slavery"
+			"event_hogtied"
 		]
 	}
 }
