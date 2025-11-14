@@ -474,14 +474,15 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 
 			int wearingSetId = StorageUtil.GetIntValue(theSub, "bind_wearing_outfit_id")
 			if wearingSetId > 0
+
 				Armor dev = akBaseObject as Armor
 				if dev != none
 					
 					int slotMask = dev.GetSlotMask()
 					
-					string f = "bind_bondage_outfit_" + wearingSetId + ".json"
+					;string f = "bind_bondage_outfit_" + wearingSetId + ".json"
 					
-					bool hasBlock = JsonUtil.IntListHas(f, "block_slots", slotMask)
+					bool hasBlock = JsonUtil.IntListHas(MQS.BindingGameOutfitFile, wearingSetId + "_block_slots", slotMask)
 					
 					if hasBlock || (nudeRule && slotMask != 128) ;allow shoes on nudity rule
 						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
@@ -492,7 +493,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 						endif
 					endif
 
-					bind_Utility.WriteToConsole("setId: " + wearingSetId + " f: " + f + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
+					bind_Utility.WriteToConsole("setId: " + wearingSetId + " f: " + MQS.BindingGameOutfitFile + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
 
 				endif
 			endif

@@ -159,97 +159,97 @@ function ShowDebugMenu()
 
 endfunction
 
-function ShowOutfitsMenu()
+; function ShowOutfitsMenu()
 
-    Actor a = functions_script.GetSubRef()
-    int kSlotMaskBody = 0x00000004  ;32
+;     Actor a = functions_script.GetSubRef()
+;     int kSlotMaskBody = 0x00000004  ;32
 
-    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
-    listMenu.AddEntryItem("<-- Return To Settings Menu")
-    listMenu.AddEntryItem("Learn nude outfit")
-    listMenu.AddEntryItem("Learn bikini outfit")
-    listMenu.AddEntryItem("Learn erotic armor outfit")
-    listMenu.AddEntryItem("Learn safe area outfit")
-    listMenu.AddEntryItem("Learn unsafe area outfit")
-    listMenu.AddEntryItem("Try on nude outfit")
-    listMenu.AddEntryItem("Try on bikini outfit")
-    listMenu.AddEntryItem("Try on erotic armor outfit")
-    listMenu.AddEntryItem("Try on safe area outfit")
-    listMenu.AddEntryItem("Try on unsafe area outfit")
-    listMenu.AddEntryItem("Add Bikini Keyword on Slot 32")
-    listMenu.AddEntryItem("Add Erotic Armor Keyword on Slot 32")
+;     listMenu.AddEntryItem("<-- Return To Settings Menu")
+;     listMenu.AddEntryItem("Learn nude outfit")
+;     listMenu.AddEntryItem("Learn bikini outfit")
+;     listMenu.AddEntryItem("Learn erotic armor outfit")
+;     listMenu.AddEntryItem("Learn safe area outfit")
+;     listMenu.AddEntryItem("Learn unsafe area outfit")
+;     listMenu.AddEntryItem("Try on nude outfit")
+;     listMenu.AddEntryItem("Try on bikini outfit")
+;     listMenu.AddEntryItem("Try on erotic armor outfit")
+;     listMenu.AddEntryItem("Try on safe area outfit")
+;     listMenu.AddEntryItem("Try on unsafe area outfit")
+;     listMenu.AddEntryItem("Add Bikini Keyword on Slot 32")
+;     listMenu.AddEntryItem("Add Erotic Armor Keyword on Slot 32")
 
-    listMenu.OpenMenu()
-    int listReturn = listMenu.GetResultInt()
+;     listMenu.OpenMenu()
+;     int listReturn = listMenu.GetResultInt()
 
-    if listReturn == 0
-        ShowSettingsMenu()
-    elseif listReturn == 1
-        gear_manager.LearnOutfit(a, "nude")
-        debug.MessageBox("Nude outfit learned")
-    elseif listReturn == 2
-        gear_manager.LearnOutfit(a, "bikini")
-        debug.MessageBox("Bikini outfit learned")
-    elseif listReturn == 3
-        gear_manager.LearnOutfit(a, "erotic")
-        debug.MessageBox("Erotic Armor outfit learned")
-    elseif listReturn == 4
-        gear_manager.LearnOutfit(a, "safe")
-        debug.MessageBox("Safe area outfit learned")
-    elseif listReturn == 5
-        gear_manager.LearnOutfit(a, "unsafe")
-        debug.MessageBox("Unsafe area outfit learned")
-    elseif listReturn == 6
-        gear_manager.WearOutfit(a, "nude")
-        debug.MessageBox("Nude outfit equipped")
-    elseif listReturn == 7
-        gear_manager.WearOutfit(a, "bikini")
-        debug.MessageBox("Bikini outfit equipped")
-    elseif listReturn == 8
-        gear_manager.WearOutfit(a, "erotic")
-        debug.MessageBox("Erotic Armor outfit equipped")
-    elseif listReturn == 9
-        gear_manager.WearOutfit(a, "safe")
-        debug.MessageBox("Safe area outfit equipped")
-    elseif listReturn == 10
-        gear_manager.WearOutfit(a, "unsafe")
-        debug.MessageBox("Unsafe area outfit equipped")
-    elseif listReturn == 11
-        Keyword kw = Keyword.GetKeyword("bind_ArmorBikini")
-        Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
-        if bodyItem != none
-            if !bodyItem.HasKeyWord(kw)
-                PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
-                if Keyword.GetKeyword("sla_armorhalfnakedbikini")
-                    PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("sla_armorhalfnakedbikini"))
-                endif
-                debug.MessageBox("Bikini keyword added")
-            else
-                debug.MessageBox("Already has bikini keyword")
-            endif
-        else
-            debug.MessageBox("No slot 32 item found")
-        endif
-    elseif listReturn == 12
-        Keyword kw = Keyword.GetKeyword("bind_ArmorErotic")
-        Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
-        if bodyItem != none
-            if !bodyItem.HasKeyWord(kw)
-                PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
-                if Keyword.GetKeyword("Eroticarmor") != none
-                    PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("Eroticarmor"))
-                endif
-                debug.MessageBox("Erotic armor keyword added")
-            else
-                debug.MessageBox("Already has erotic armor keyword")
-            endif
-        else
-            debug.MessageBox("No slot 32 item found")
-        endif
-    endif
+;     if listReturn == 0
+;         ShowSettingsMenu()
+;     elseif listReturn == 1
+;         gear_manager.LearnOutfit(a, "nude")
+;         debug.MessageBox("Nude outfit learned")
+;     elseif listReturn == 2
+;         gear_manager.LearnOutfit(a, "bikini")
+;         debug.MessageBox("Bikini outfit learned")
+;     elseif listReturn == 3
+;         gear_manager.LearnOutfit(a, "erotic")
+;         debug.MessageBox("Erotic Armor outfit learned")
+;     elseif listReturn == 4
+;         gear_manager.LearnOutfit(a, "safe")
+;         debug.MessageBox("Safe area outfit learned")
+;     elseif listReturn == 5
+;         gear_manager.LearnOutfit(a, "unsafe")
+;         debug.MessageBox("Unsafe area outfit learned")
+;     elseif listReturn == 6
+;         gear_manager.WearOutfit(a, "nude")
+;         debug.MessageBox("Nude outfit equipped")
+;     elseif listReturn == 7
+;         gear_manager.WearOutfit(a, "bikini")
+;         debug.MessageBox("Bikini outfit equipped")
+;     elseif listReturn == 8
+;         gear_manager.WearOutfit(a, "erotic")
+;         debug.MessageBox("Erotic Armor outfit equipped")
+;     elseif listReturn == 9
+;         gear_manager.WearOutfit(a, "safe")
+;         debug.MessageBox("Safe area outfit equipped")
+;     elseif listReturn == 10
+;         gear_manager.WearOutfit(a, "unsafe")
+;         debug.MessageBox("Unsafe area outfit equipped")
+;     elseif listReturn == 11
+;         Keyword kw = Keyword.GetKeyword("bind_ArmorBikini")
+;         Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+;         if bodyItem != none
+;             if !bodyItem.HasKeyWord(kw)
+;                 PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
+;                 if Keyword.GetKeyword("sla_armorhalfnakedbikini")
+;                     PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("sla_armorhalfnakedbikini"))
+;                 endif
+;                 debug.MessageBox("Bikini keyword added")
+;             else
+;                 debug.MessageBox("Already has bikini keyword")
+;             endif
+;         else
+;             debug.MessageBox("No slot 32 item found")
+;         endif
+;     elseif listReturn == 12
+;         Keyword kw = Keyword.GetKeyword("bind_ArmorErotic")
+;         Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+;         if bodyItem != none
+;             if !bodyItem.HasKeyWord(kw)
+;                 PO3_SKSEFunctions.AddKeywordToForm(bodyItem, kw)
+;                 if Keyword.GetKeyword("Eroticarmor") != none
+;                     PO3_SKSEFunctions.AddKeywordToForm(bodyItem, Keyword.GetKeyword("Eroticarmor"))
+;                 endif
+;                 debug.MessageBox("Erotic armor keyword added")
+;             else
+;                 debug.MessageBox("Already has erotic armor keyword")
+;             endif
+;         else
+;             debug.MessageBox("No slot 32 item found")
+;         endif
+;     endif
 
-endfunction
+; endfunction
 
 function ShowSettingsMenu()
 
@@ -677,7 +677,7 @@ function ShowActionMenuNested()
             endif
         endif
     elseif actionResult == 5
-        functions_script.ShowFurniturePlacementMenu()
+        bind_FurnitureManager.ShowFurniturePlacementMenu()
     elseif actionResult == 6
         ShowMoreMenu()
     elseif actionResult == 7
@@ -686,34 +686,34 @@ function ShowActionMenuNested()
 
 endfunction
 
-function ChooseOutfitMenu()
+; function ChooseOutfitMenu()
 
-    Actor a = functions_script.GetSubRef()
+;     Actor a = functions_script.GetSubRef()
 
-    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
-    listMenu.AddEntryItem("Safe Area Armor/Clothing")
-    listMenu.AddEntryItem("Unsafe Area Armor/Clothing")
-    listMenu.AddEntryItem("Erotic Armor")
-    listMenu.AddEntryItem("Bikini Armor")
-    listMenu.AddEntryItem("Nude with Jewelry")
+;     listMenu.AddEntryItem("Safe Area Armor/Clothing")
+;     listMenu.AddEntryItem("Unsafe Area Armor/Clothing")
+;     listMenu.AddEntryItem("Erotic Armor")
+;     listMenu.AddEntryItem("Bikini Armor")
+;     listMenu.AddEntryItem("Nude with Jewelry")
 
-    listMenu.OpenMenu()
-    int listReturn = listMenu.GetResultInt()
+;     listMenu.OpenMenu()
+;     int listReturn = listMenu.GetResultInt()
 
-    if listReturn == 0
-        gear_manager.WearOutfit(a, "safe")
-    elseif listReturn == 1
-        gear_manager.WearOutfit(a, "unsafe")
-    elseif listReturn == 2
-        gear_manager.WearOutfit(a, "erotic")
-    elseif listReturn == 3
-        gear_manager.WearOutfit(a, "bikini")
-    elseif listReturn == 4
-        gear_manager.WearOutfit(a, "nude")
-    endif
+;     if listReturn == 0
+;         gear_manager.WearOutfit(a, "safe")
+;     elseif listReturn == 1
+;         gear_manager.WearOutfit(a, "unsafe")
+;     elseif listReturn == 2
+;         gear_manager.WearOutfit(a, "erotic")
+;     elseif listReturn == 3
+;         gear_manager.WearOutfit(a, "bikini")
+;     elseif listReturn == 4
+;         gear_manager.WearOutfit(a, "nude")
+;     endif
 
-endfunction
+; endfunction
 
 state MenuOpenState
 

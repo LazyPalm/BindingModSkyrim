@@ -27,6 +27,8 @@ int sexEvent
 bool domStartedSex = false
 bool sexAnimationRan = false
 
+Form[] rItems
+
 ObjectReference startingMarker
 
 event OnInit()
@@ -598,7 +600,8 @@ function EventEnd()
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeGetDressedCommand())
         bind_MovementQuestScript.PlayDressUndress(theSub)
         ;gms.RestoreWornGear(theSub)
-        fs.GetSubDressed()
+        ;fs.GetSubDressed()
+        bind_SkseFunctions.DoDressActor(theSub, rItems)
         bind_Utility.DoSleep(1.0)
     endif
 
@@ -682,9 +685,11 @@ function ShowActionMenu()
             bind_MovementQuestScript.PlayDressUndress(theSub)
         endif
         if !gms.IsNude(theSub)
-            gms.WearOutfit(theSub, "nude")
+            rItems = bind_SkseFunctions.DoStripActor(theSub, removeDevious = false)
+            ;gms.WearOutfit(theSub, "nude")
         else
-            fs.GetSubDressed()
+            bind_SkseFunctions.DoDressActor(theSub, rItems)
+            ;fs.GetSubDressed()
         endif
     elseif actionResult == 1
     	theSub.PlayIdle(ResetIdle)

@@ -305,13 +305,17 @@ Function ClearDom()
 
 	;gmanage.RestoreWornGear(theSubRef)
 
-	gmanage.WearOutfit(theSubRef, "unsafe")
+	;gmanage.WearOutfit(theSubRef, "unsafe")
 
 	theDomRef = none
 
 	main.DominantName = ""
 
 	TheDom.Clear()
+
+	TheSecondSub.Clear()
+	TheThirdSub.Clear()
+	main.SubCount = 0
 
 	bind_GlobalInfractions.SetValue(0)
 
@@ -1757,78 +1761,6 @@ int Function MarkSubPunished()
 	EndIf
 EndFunction
 
-;TODO - 3/24/25 move furniture menu stuff over to the action menu script
-Function AddFurniture()
-
-	WindowOutput("Placing furniture item...")
-
-	fman.AddFurniture(theSubRef)
-
-	; float newZ = theSubRef.GetAngleZ()
-
-	; Form bfurn = Game.GetFormFromFile(0x07059B69, "zazanimationpack.esm")
-	; ObjectReference obj = theSubRef.PlaceAtMe(bfurn, 1, true, true)
-	; obj.SetAngle(0.0, 0.0, newZ)
-	; obj.Enable()
-
-EndFunction
-
-Function FindNearestFurniture()
-
-	If !fman.SelectFurniture(theSubRef)
-		WindowOutput("No ZAP furniture could be found...")
-	EndIf
-
-	HelperDisplayObjective(OBJECTIVE_SELECTED_FURNITURE)
-
-EndFunction
-
-Function DeleteFurniture()
-
-	If !fman.HasSelectedFurniture()
-		WindowOutput("No furniture selected...")
-		return
-	EndIf
-
-	fman.DeleteFurniture()
-
-EndFunction
-
-Function MoveFurniture()
-
-	If !fman.HasSelectedFurniture()
-		WindowOutput("No furniture selected...")
-		return
-	EndIf
-
-	WindowOutput("this should not happen???")
-
-	fman.MoveFurniture(theSubRef)
-
-EndFunction
-
-Function SetFurnitureAngleChange(float x, float y, float z)
-
-	If !fman.HasSelectedFurniture()
-		WindowOutput("No furniture selected...")
-		return
-	EndIf
-
-	fman.SetFurnitureAngle(x, y, z)
-
-EndFunction
-
-Function SetFuniturePositionChange(float x, float y, float z)
-
-	If !fman.HasSelectedFurniture()
-		WindowOutput("No furniture selected...")
-		return
-	EndIf
-
-	fman.SetFuniturePosition(x, y, z)
-
-EndFunction
-
 function SetBuildingDoor(ObjectReference d)
 	BuildingDoor.ForceRefTo(d)
 endfunction
@@ -1953,6 +1885,12 @@ Function SafeWord()
 			;debug.MessageBox("outfit id: " + outfitId)
 			;if outfitId > 0
 				bms.EquipBondageOutfit(theSubRef, outfitId)
+				if main.SubCount == 1
+					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+					;debug.MessageBox("this happen?")
+				elseif main.SubCount == 2
+					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+				endif
 				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
 			;endif
 
@@ -1996,396 +1934,7 @@ EndFunction
 ;#
 ;#--------------------------------------------------------------------------------------------------------------
 
-Function ShowFurnitureSelectionMenu()
 
-	;string[] furnitureTypes = StringUtil.Split(fman.FurnitureList(), ",")
-
-	string[] letters = bind_Utility.GetLetters()
-
-	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-	if listMenu
-		listMenu.AddEntryItem("Return to Furniture Menu")
-		listMenu.AddEntryItem("DDC Items")
-		listMenu.AddEntryItem("Search ZAP Items")
-		if main.SoftCheckDM3 == 1 && main.EnableModDM3 == 1
-			listMenu.AddEntryItem("DM3 (DSE)")
-		else
-			listMenu.AddEntryItem("DM3 (DSE) - Not found or not enabled")
-		endif
-	
-
-		; int i = 0
-		; while i < letters.Length
-		; 	listMenu.AddEntryItem("ZAP Items " + letters[i])
-		; 	i += 1
-		; endwhile
-
-		; int i = 0
-		; while i < furnitureTypes.Length
-		; 	listMenu.AddEntryItem(furnitureTypes[i])
-		; 	i += 1
-		; endwhile
-	EndIf
-
-	listMenu.OpenMenu()
-	int listReturn = listMenu.GetResultInt()
-
-	If listReturn == 0
-		ShowFurniturePlacementMenu()
-	elseif listReturn == 1
-		ShowDDCFurnitureItems()
-	elseif listReturn == 2
-		ShowZapFurnitureSearch()
-	elseif listReturn == 3
-		if main.SoftCheckDM3 == 1 && main.EnableModDM3 == 1
-			ShowDSEFurnitureItems()
-		else
-			Debug.MessageBox("DM3 (DSE) was not found or is not enabled")
-		endif
-	; elseif listReturn > 2
-	; 	ShowZAPFurnitureItems(letters[listReturn - 3])
-	; Else
-	; 	fman.SetSelectedFuniture(furnitureTypes[listReturn - 1])
-	; 	bind_Utility.DoSleep(1.0)
-	; 	AddFurniture()
-	EndIf
-
-EndFunction
-
-string zapKeywords
-string[] zapSearchResults
-Form[] zapSearchResultForms
-
-function ShowZapFurnitureSearch()
-
-	string zapFurnitureJson = "binding/bind_zap_furniture.json"
-	string resultsFile = "binding/bind_zap_search_result.json"
-
-	int i = 0
-
-	if !JsonUtil.JsonExists(zapFurnitureJson)
-		debug.MessageBox("Building ZAP DB - This may take several minutes")
-		i = 0
-		while i < bind_ZapFurnitureList.GetSize()
-			Form dev = bind_ZapFurnitureList.GetAt(i)
-			JsonUtil.StringListAdd(zapFurnitureJson, "zap_names", PO3_SKSEFunctions.GetFormEditorID(dev) + " - " + dev.GetName())
-			JsonUtil.FormlistAdd(zapFurnitureJson, "zap_items", dev)
-			i += 1
-		endwhile
-		JsonUtil.Save(zapFurnitureJson)
-		debug.MessageBox("Building ZAP DB - Completed")
-	endif
-
-	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-	if listMenu
-		listMenu.AddEntryItem("<-- Return to Furniture Menu")
-    	listMenu.AddEntryItem("Keywords: " + zapKeywords)
-	
-		if JsonUtil.JsonExists(resultsFile)
-			i = 0
-			while i < JsonUtil.StringListCount(resultsFile, "found_names")
-				listMenu.AddEntryItem(JsonUtil.StringListGet(resultsFile, "found_names", i))
-				i += 1
-			endwhile
-		endif
-
-	EndIf
-
-	listMenu.OpenMenu()
-	int listReturn = listMenu.GetResultInt()
-
-	If listReturn == 0
-		ShowFurnitureSelectionMenu()
-	elseif listReturn == 1
-        UIExtensions.InitMenu("UITextEntryMenu")
-        UIExtensions.OpenMenu("UITextEntryMenu")
-        string result = UIExtensions.GetMenuResultString("UITextEntryMenu")
-        if result != ""
-            zapKeywords = result
-			if zapKeywords != ""
-				ZapFurnitureSearch()
-			endif
-            ShowZapFurnitureSearch()
-        endif
-	elseif listReturn > 1
-		;int idx = listReturn - 1
-		;debug.MessageBox("add: " + idx)
-		Form dev = JsonUtil.FormListGet(resultsFile, "found_items", listReturn - 1)
-		if dev != none
-			bind_Utility.WriteToConsole("ZAP adding: " + dev.GetName() + " form: " + dev)
-			fman.AddFurnitureByForm(theSubRef, dev)
-		endif
-	endif
-
-endfunction
-
-function ZapFurnitureSearch()
-
-	string zapFurnitureJson = "binding/bind_zap_furniture.json"
-    string resultsFile = "binding/bind_zap_search_result.json"
-    JsonUtil.StringListClear(resultsFile, "found_names")
-    JsonUtil.FormListClear(resultsFile, "found_items")
-
-	string[] keywordArr = StringUtil.Split(zapKeywords, ",")
-
-	int i = 0
-	int i2 = 0
-
-	int count = JsonUtil.StringListCount(zapFurnitureJson, "zap_names")
-
-	;debug.MessageBox(count)
-
-	while i < count
-		string itemName = JsonUtil.StringListGet(zapFurnitureJson, "zap_names", i)
-		;bind_Utility.WriteToConsole("itemName: " + itemName)
-		bool passedTests = true
-		i2 = 0
-		while i2 < keywordArr.Length
-			string searchFor = keywordArr[i2]
-			if StringUtil.Find(searchFor, "-", 0) > -1
-				searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
-				if StringUtil.Find(itemName, searchFor, 0) > -1
-					passedTests = false
-				endif
-			else
-				if StringUtil.Find(itemName, searchFor, 0) == -1
-					passedTests = false
-				endif
-			endif
-			i2 += 1
-		endwhile
-		if passedTests
-			bind_Utility.WriteToConsole("found: " + itemName)
-			JsonUtil.FormListAdd(resultsFile, "found_items", JsonUtil.FormListGet(zapFurnitureJson, "zap_items", i))
-			JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
-		endif
-		i += 1
-	endwhile
-
-	JsonUtil.Save(resultsFile)
-
-    ; i = 1
-    ; while i < 20
-    ;     int idx = 0
-    ;     int idx2 = 0
-    ;     string[] itemNames = JsonUtil.StringListToArray(f, "group_" + i + "_names")
-    ;     Form[] items = JsonUtil.FormListToArray(f, "group_" + i + "_items")
-    ;     if itemNames.Length == 0
-    ;         i = 20 ;break if empty
-    ;     endif
-    ;     while idx < itemNames.Length
-    ;         string itemName = itemNames[idx]
-    ;         bool passedTests = true
-    ;         idx2 = 0
-    ;         while idx2 < keywordArr.Length
-    ;             string searchFor = keywordArr[idx2]
-    ;             if StringUtil.Find(searchFor, "-", 0) > -1
-    ;                 searchFor = StringUtil.SubString(searchFor, 1) ;not in string condition
-    ;                 if StringUtil.Find(itemName, searchFor, 0) > -1
-    ;                     passedTests = false
-    ;                 endif
-    ;             else
-    ;                 if StringUtil.Find(itemName, searchFor, 0) == -1
-    ;                     passedTests = false
-    ;                 endif
-    ;             endif
-    ;             idx2 += 1
-    ;         endwhile
-    ;         if passedTests
-    ;             if result == ""
-    ;                 result = itemName
-    ;             else
-    ;                 result += "|" + itemName
-    ;             endif
-    ;             JsonUtil.FormListAdd(resultsFile, "found_items", items[idx])
-    ;             JsonUtil.StringListAdd(resultsFile, "found_names", itemName)
-    ;         endif
-    ;         idx += 1
-    ;     endwhile
-    ;     i += 1
-    ; endwhile
-    ;JsonUtil.Save(resultsFile)
-
-endfunction
-
-function ShowDDCFurnitureItems()
-
-	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-	if listMenu
-		listMenu.AddEntryItem("<-- Return to Furniture Menu")
-		int i = 0
-		while i < bind_DDCFurnitureList.GetSize()
-			Form dev = bind_DDCFurnitureList.GetAt(i)
-			listMenu.AddEntryItem(dev.GetName())
-			i += 1
-		endwhile
-	EndIf
-
-	listMenu.OpenMenu()
-	int listReturn = listMenu.GetResultInt()
-
-	If listReturn == 0
-		ShowFurnitureSelectionMenu()
-	else
-		Form dev = bind_DDCFurnitureList.GetAt(listReturn - 1)
-		if dev
-			bind_Utility.WriteToConsole("DDC adding: " + dev.GetName() + " form: " + dev)
-			fman.AddFurnitureByForm(theSubRef, dev)
-		else
-			Debug.MessageBox("Could not get DDC furniture from list")
-		endif
-	endif
-
-endfunction
-
-function ShowDSEFurnitureItems()
-
-	if main.SoftCheckDM3 == 1
-
-		if bind_DSEFurnitureList.GetSize() == 0
-			bind_DM3Helper.BuildFormList(bind_DSEFurnitureList)
-		endif
-
-		UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-		if listMenu
-			listMenu.AddEntryItem("<-- Return to Furniture Menu")
-			int i = 0
-			while i < bind_DSEFurnitureList.GetSize()
-				Form dev = bind_DSEFurnitureList.GetAt(i)
-				listMenu.AddEntryItem(dev.GetName())
-				i += 1
-			endwhile
-		EndIf
-	
-		listMenu.OpenMenu()
-		int listReturn = listMenu.GetResultInt()
-	
-		If listReturn == 0
-			ShowFurnitureSelectionMenu()
-		else
-			Form dev = bind_DSEFurnitureList.GetAt(listReturn - 1)
-			if dev
-				bind_Utility.WriteToConsole("DM3 (DSE) adding: " + dev.GetName() + " form: " + dev)
-				fman.AddFurnitureByForm(theSubRef, dev)
-			else
-				Debug.MessageBox("Could not get DM3 (DSE) furniture from list")
-			endif
-		endif
-	
-
-	endif
-
-endfunction
-
-Function ShowZAPFurnitureItems(string letter)
-
-	string[] itemNames = new string[128]
-	Form[] items = new Form[128]
-	int itemNameIdx = 0
-
-	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-	if listMenu
-		listMenu.AddEntryItem("Return to Furniture Menu")
-		int i = 0
-		while i < bind_ZapFurnitureList.GetSize()
-			string item = bind_ZapFurnitureList.GetAt(i).GetName()
-			if StringUtil.SubString(item, 0, 1) == letter
-				Form dev = bind_ZapFurnitureList.GetAt(i)
-				itemNames[itemNameIdx] = dev.GetName()
-				items[itemNameIdx] = dev
-				itemNameIdx += 1
-				listMenu.AddEntryItem(PO3_SKSEFunctions.GetFormEditorID(dev) + " - " + dev.GetName()) ;PO3_SKSEFunctions.GetFormEditorID(dev)
-			endif
-			i += 1
-		endwhile
-	EndIf
-
-	listMenu.OpenMenu()
-	int listReturn = listMenu.GetResultInt()
-
-	If listReturn == 0
-		ShowFurnitureSelectionMenu()
-	Else
-		string selectedName = itemNames[listReturn - 1]
-		Form dev = items[listReturn - 1]
-		bind_Utility.WriteToConsole("ZAP adding: " + selectedName + " form: " + dev)
-		if selectedName != ""
-			if dev
-				fman.AddFurnitureByForm(theSubRef, dev)
-			else
-				Debug.MessageBox("Could not get ZAP furniture " + selectedName + " from list")
-			endif
-		endif
-	EndIf
-
-endfunction
-
-Function ShowFurniturePlacementMenu()
-
-	float distanceToMovePlus = 10.0
-	float distanceToMoveMinus = distanceToMovePlus * -1
-
-	UIListMenu furnMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
-
-	furnMenu.AddEntryItem("<-- Return to Menu") ;1
-	furnMenu.AddEntryItem("Add Item") ;2
-	furnMenu.AddEntryItem("Select Nearest") ;3
-	furnMenu.AddEntryItem("Move") ;4
-	furnMenu.AddEntryItem("Delete") ;5
-	furnMenu.AddEntryItem("Angle X + " + distanceToMovePlus) ;6
-	furnMenu.AddEntryItem("Angle X - " + distanceToMovePlus) ;7
-	furnMenu.AddEntryItem("Angle Y + " + distanceToMovePlus) ;8
-	furnMenu.AddEntryItem("Angle Y - " + distanceToMovePlus) ;9
-	furnMenu.AddEntryItem("Angle Z + " + distanceToMovePlus) ;10
-	furnMenu.AddEntryItem("Angle Z - " + distanceToMovePlus) ;11
-	furnMenu.AddEntryItem("Position X + " + distanceToMovePlus) ;12
-	furnMenu.AddEntryItem("Position X - " + distanceToMovePlus) ;13
-	furnMenu.AddEntryItem("Position Y + " + distanceToMovePlus) ;14
-	furnMenu.AddEntryItem("Position Y - " + distanceToMovePlus) ;15
-	furnMenu.AddEntryItem("Position Z + " + distanceToMovePlus) ;16
-	furnMenu.AddEntryItem("Position Z - " + distanceToMovePlus) ;17
-
-	furnMenu.OpenMenu()
-	int furnResult = furnMenu.GetResultInt()
-
-	If furnResult == 0
-		;ShowActionMenu()
-	ElseIf furnResult == 1
-		ShowFurnitureSelectionMenu()
-		;AddFurniture()
-	ElseIf furnResult == 2
-		FindNearestFurniture()
-	ElseIf furnResult == 3
-		MoveFurniture()
-	ElseIf furnResult == 4
-		DeleteFurniture()
-	ElseIf furnResult == 5
-		SetFurnitureAngleChange(distanceToMovePlus, 0.0, 0.0)
-	ElseIf furnResult == 6
-		SetFurnitureAngleChange(distanceToMoveMinus, 0.0, 0.0)
-	ElseIf furnResult == 7
-		SetFurnitureAngleChange(0.0, distanceToMovePlus, 0.0)
-	ElseIf furnResult == 8
-		SetFurnitureAngleChange(0.0, distanceToMoveMinus, 0.0)
-	ElseIf furnResult == 9
-		SetFurnitureAngleChange(0.0, 0.0, distanceToMovePlus)
-	ElseIf furnResult == 10
-		SetFurnitureAngleChange(0.0, 0.0, distanceToMoveMinus)
-	ElseIf furnResult == 11
-		SetFuniturePositionChange(distanceToMovePlus, 0.0, 0.0)
-	ElseIf furnResult == 12
-		SetFuniturePositionChange(distanceToMoveMinus, 0.0, 0.0)
-	ElseIf furnResult == 14
-		SetFuniturePositionChange(0.0, distanceToMovePlus, 0.0)
-	ElseIf furnResult == 15
-		SetFuniturePositionChange(0.0, distanceToMoveMinus, 0.0)
-	ElseIf furnResult == 16
-		SetFuniturePositionChange(0.0, 0.0, distanceToMovePlus)
-	ElseIf furnResult == 17
-		SetFuniturePositionChange(0.0, 0.0, distanceToMoveMinus)
-	EndIf
-
-EndFunction
 
 
 
@@ -2452,7 +2001,7 @@ event OnPauseStart()
 		bms.RemoveAllDetectedBondageItems(theSubRef)
 		removedBondage = 1
 	endif
-	gmanage.WearOutfit(theSubRef, "unsafe")
+	;gmanage.WearOutfit(theSubRef, "unsafe")
 	; if gmanage.IsNude(theSubRef)
 		
 	; 	;gmanage.RestoreWornGear(theSubRef)
@@ -2468,7 +2017,7 @@ endevent
 
 event OnPauseEnd()
 	if StorageUtil.GetIntValue(theSubRef, "binding_pause_restored_gear", 0) == 1
-		GetSubDressed()
+		;GetSubDressed()
 	endif
 	if StorageUtil.GetIntValue(theSubRef, "binding_pause_removed_bondage", 0) == 1
 		;bms.UpdateBondage(theSubRef)
@@ -2478,6 +2027,11 @@ event OnPauseEnd()
 		;debug.MessageBox("outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
+			if main.SubCount == 1
+				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+			elseif main.SubCount == 2
+				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+			endif
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
 		;endif
 
@@ -2599,6 +2153,18 @@ function SettingsSetDomTitle()
 
 endfunction
 
+function AddFollowerSub(Actor akSpeaker)
+	if TheSecondSub.GetReference() == none
+		main.SubCount += 1
+		TheSecondSub.ForceRefTo(akSpeaker)
+		debug.MessageBox(akSpeaker.GetDisplayName() + " added to the second sub slot")
+	elseif TheThirdSub.GetReference() == none
+		main.SubCount += 1
+		TheThirdSub.ForceRefTo(akSpeaker)
+		debug.MessageBox(akSpeaker.GetDisplayName() + " added to the third sub slot")
+	endif
+endfunction
+
 ObjectReference function EventGetNearbyBed()
 	return NearbyBed.GetReference()
 endfunction
@@ -2711,6 +2277,61 @@ endfunction
 
 bool eventRemovedClothing
 
+function EventGetPartyReady(string eventName = "")
+
+	eventRemovedClothing = false
+
+	Actor sub = theSubRef
+
+	;snapshot gear
+	Form[] inventory = sub.GetContainerForms()
+	StorageUtil.FormListClear(sub, "bind_event_worn_gear")
+	int i = 0
+	while i < inventory.Length
+		Form item = inventory[i]
+		If item.IsPlayable()
+			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+				StorageUtil.FormListAdd(sub, "bind_event_worn_gear", item)
+			endif
+		EndIf
+		i += 1
+	endwhile
+
+	;int[] outfitIds
+	int eventOutfitId = 0
+
+	string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+	StorageUtil.IntListClear(sub, "binding_found_outfit_id_list")
+
+	if eventName != ""
+		eventOutfitId = bms.GetBondageOutfitForEvent(eventName)
+		bind_Utility.WriteToConsole("EventGetPartyReady - eventName: " + eventName + " - outfit: " + eventOutfitId)
+	endif
+
+	if eventOutfitId == 0
+		eventOutfitId = bms.GetBondageOutfitForEvent("event_any_event")
+		bind_Utility.WriteToConsole("EventGetPartyReady - eventName: any event - outfit: " + eventOutfitId)
+	endif
+
+	if eventOutfitId > 0 
+		bms.EquipBondageOutfit(theSubRef, eventOutfitId)
+		if main.SubCount == 1
+			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
+		elseif main.SubCount == 2
+			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
+		endif
+
+		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + eventOutfitId + ".json"
+		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
+			eventRemovedClothing = true
+		endif
+
+	endif
+
+
+endfunction
+
 ;function EventGetSubReady(Actor sub, Actor dom, bool playAnimations = true, bool stripClothing = true, bool addGag = false, bool freeWrists = false, bool removeAll = false)
 function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
@@ -2792,6 +2413,11 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, eventOutfitId)
+			if main.SubCount == 1
+				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
+			elseif main.SubCount == 2
+				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
+			endif
 
 		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + eventOutfitId + ".json"
 		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
@@ -2833,6 +2459,42 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 	; 	bind_Utility.DoSleep(1.0)
 	; 	;endif
 	; endif
+
+endfunction
+
+function EventClearUpParty()
+
+	Actor sub = theSubRef
+
+	if eventRemovedClothing
+		Form[] wornGear = StorageUtil.FormListToArray(sub, "bind_event_worn_gear")
+		if wornGear.Length > 0
+			int i = 0
+			while i < wornGear.Length
+				Form item = wornGear[i]
+				if sub.GetItemCount(item) > 0
+					if !sub.IsEquipped(item)
+						sub.EquipItem(item, false, true)
+						bind_Utility.DoSleep(0.5)
+					endif
+				endif
+				i += 1
+			endwhile
+		endif
+	endif
+
+	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+	int outfitId = main.ActiveBondageSetId
+	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
+	bms.EquipBondageOutfit(sub, outfitId)
+	if main.SubCount == 1
+		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+	elseif main.SubCount == 2
+		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+	endif
+	StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId)
+
+	main.NeedsBondageSetChange = 0
 
 endfunction
 
@@ -2880,6 +2542,11 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	;if outfitId > 0
 		bms.EquipBondageOutfit(sub, outfitId)
+		if main.SubCount == 1
+			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+		elseif main.SubCount == 2
+			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+		endif
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
 		;debug.MessageBox(outfitId)
 	;endif
@@ -3063,94 +2730,94 @@ bind_Functions function GetBindingFunctions() global
 	return Quest.GetQuest("bind_MainQuest") as bind_Functions
 endfunction
 
-bool function GetSafeAreaBondageApplied()
-	;debug.MessageBox(main.AdventuringSafeBondageApplied)
-	return (main.AdventuringSafeBondageApplied > 0)
-endfunction
+; bool function GetSafeAreaBondageApplied()
+; 	;debug.MessageBox(main.AdventuringSafeBondageApplied)
+; 	return (main.AdventuringSafeBondageApplied > 0)
+; endfunction
 
-function ApplySafeAreaBondage()
+; function ApplySafeAreaBondage()
 
-	if theDomRef.GetAV("WaitingForPlayer") > 0
-		debug.MessageBox(GetDomTitle() + " is waiting for you...")
-		return
-	else
-		if theDomRef.GetDistance(theSubRef) > 1000.0
-			theDomRef.MoveTo(theSubRef)
-		endif
-		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
-		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
-		bind_MovementQuestScript.PlayDoWork(theDomRef)
-	endif
+; 	if theDomRef.GetAV("WaitingForPlayer") > 0
+; 		debug.MessageBox(GetDomTitle() + " is waiting for you...")
+; 		return
+; 	else
+; 		if theDomRef.GetDistance(theSubRef) > 1000.0
+; 			theDomRef.MoveTo(theSubRef)
+; 		endif
+; 		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+; 		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
+; 		bind_MovementQuestScript.PlayDoWork(theDomRef)
+; 	endif
 
-	main.AdventuringSafeBondageApplied = 1
+; 	main.AdventuringSafeBondageApplied = 1
 
-	; if rman.IsNudityRequired(theSubRef, true) && !gmanage.IsNude(theSubRef)
-	; 	gmanage.RemoveWornGear(theSubRef) ;should only store this if wearning something
-	; endif
+; 	; if rman.IsNudityRequired(theSubRef, true) && !gmanage.IsNude(theSubRef)
+; 	; 	gmanage.RemoveWornGear(theSubRef) ;should only store this if wearning something
+; 	; endif
 
-	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
-	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, true)
+; 	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, true) 
+; 	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, true)
 
-	if nudityRuleFlag
-		gmanage.WearOutfit(theSubRef, "nude")
-		bind_Utility.DoSleep(2.0)
-	elseif bikiniRuleFlag
-		gmanage.WearOutfit(theSubRef, "bikini")
-		bind_Utility.DoSleep(2.0)
-	else
-		gmanage.WearOutfit(theSubRef, "safe")
-		bind_Utility.DoSleep(2.0)
-	endif
+; 	if nudityRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "nude")
+; 		bind_Utility.DoSleep(2.0)
+; 	elseif bikiniRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "bikini")
+; 		bind_Utility.DoSleep(2.0)
+; 	else
+; 		gmanage.WearOutfit(theSubRef, "safe")
+; 		bind_Utility.DoSleep(2.0)
+; 	endif
 
-	;TODO - update this for bondage outfits
-	;bms.UpdateBondage(theSubRef, true)
+; 	;TODO - update this for bondage outfits
+; 	;bms.UpdateBondage(theSubRef, true)
 
-	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
+; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 2) ;set to completed
 
-endfunction
+; endfunction
 
-function ApplyDangerousAreaBondage()
+; function ApplyDangerousAreaBondage()
 
-	if theDomRef.GetAV("WaitingForPlayer") > 0
-		debug.MessageBox(GetDomTitle() + " is waiting for you...")
-		return
-	else
-		if theDomRef.GetDistance(theSubRef) > 1000.0
-			theDomRef.MoveTo(theSubRef)
-		endif
-		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
-		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
-		bind_MovementQuestScript.PlayDoWork(theDomRef)
-	endif
+; 	if theDomRef.GetAV("WaitingForPlayer") > 0
+; 		debug.MessageBox(GetDomTitle() + " is waiting for you...")
+; 		return
+; 	else
+; 		if theDomRef.GetDistance(theSubRef) > 1000.0
+; 			theDomRef.MoveTo(theSubRef)
+; 		endif
+; 		bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+; 		bind_MovementQuestScript.FaceTarget(theDomRef, theSubRef)
+; 		bind_MovementQuestScript.PlayDoWork(theDomRef)
+; 	endif
 
-	main.AdventuringSafeBondageApplied = 0 ;leave this on until the player removes safe area rules gear
+; 	main.AdventuringSafeBondageApplied = 0 ;leave this on until the player removes safe area rules gear
 
-	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
+; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area_interaction_check", 0) ;set to off
 
-	;bms.UpdateBondage(theSubRef, true)
+; 	;bms.UpdateBondage(theSubRef, true)
 
-	; if !rman.IsNudityRequired(theSubRef, false) && gmanage.IsNude(theSubRef)
-	; 	gmanage.RestoreWornGear(theSubRef) ;should only run this if nude
-	; endif
+; 	; if !rman.IsNudityRequired(theSubRef, false) && gmanage.IsNude(theSubRef)
+; 	; 	gmanage.RestoreWornGear(theSubRef) ;should only run this if nude
+; 	; endif
 
-	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
-	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, false)
+; 	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, false) 
+; 	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, false)
 
-	if nudityRuleFlag
-		gmanage.WearOutfit(theSubRef, "nude")
-		bind_Utility.DoSleep(2.0)
-	elseif bikiniRuleFlag
-		gmanage.WearOutfit(theSubRef, "bikini")
-		bind_Utility.DoSleep(2.0)
-	else
-		gmanage.WearOutfit(theSubRef, "unsafe")
-		bind_Utility.DoSleep(2.0)
-	endif
+; 	if nudityRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "nude")
+; 		bind_Utility.DoSleep(2.0)
+; 	elseif bikiniRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "bikini")
+; 		bind_Utility.DoSleep(2.0)
+; 	else
+; 		gmanage.WearOutfit(theSubRef, "unsafe")
+; 		bind_Utility.DoSleep(2.0)
+; 	endif
 
-	;TODO - update this for bondage outfits
+; 	;TODO - update this for bondage outfits
 
 
-endfunction
+; endfunction
 
 int function InSafeArea()
 	if bind_GlobalSafeZone.GetValue() == 2
@@ -3383,29 +3050,29 @@ function PoseForBondage()
 
 endfunction
 
-function GetSubDressed()
-	bool safeArea = false
-	if InSafeArea() == 1
-		safeArea = true
-	endif
-	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, safeArea) 
-	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, safeArea)
+; function GetSubDressed()
+; 	bool safeArea = false
+; 	if InSafeArea() == 1
+; 		safeArea = true
+; 	endif
+; 	bool nudityRuleFlag = rman.IsNudityRequired(theSubRef, safeArea) 
+; 	bool bikiniRuleFlag = rman.IsBikiniRequired(theSubRef, safeArea)
 
-	if nudityRuleFlag
-		gmanage.WearOutfit(theSubRef, "nude")
-		bind_Utility.DoSleep(2.0)
-	elseif bikiniRuleFlag
-		gmanage.WearOutfit(theSubRef, "bikini")
-		bind_Utility.DoSleep(2.0)
-	else
-		if safeArea
-			gmanage.WearOutfit(theSubRef, "safe")
-		else
-			gmanage.WearOutfit(theSubRef, "unsafe")
-		endif
-		bind_Utility.DoSleep(2.0)
-	endif
-endfunction
+; 	if nudityRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "nude")
+; 		bind_Utility.DoSleep(2.0)
+; 	elseif bikiniRuleFlag
+; 		gmanage.WearOutfit(theSubRef, "bikini")
+; 		bind_Utility.DoSleep(2.0)
+; 	else
+; 		if safeArea
+; 			gmanage.WearOutfit(theSubRef, "safe")
+; 		else
+; 			gmanage.WearOutfit(theSubRef, "unsafe")
+; 		endif
+; 		bind_Utility.DoSleep(2.0)
+; 	endif
+; endfunction
 
 
 bind_ThinkingDom property brain auto
@@ -3428,6 +3095,8 @@ ReferenceAlias property TheWordWall auto
 ReferenceAlias property ConversationTargetNpc auto
 ReferenceAlias property PublicSquareMarker auto
 ReferenceAlias property Furniture1Ref auto
+ReferenceAlias property TheSecondSub auto
+ReferenceAlias property TheThirdSub auto
 
 LocationAlias property TheSubCurrentLocation auto
 LocationAlias property TheSubCurrentOutdoorLocation auto

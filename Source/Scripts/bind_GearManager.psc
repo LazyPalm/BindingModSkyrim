@@ -912,73 +912,73 @@ bool Function IsWearingNoShoes(Actor a)
 	EndIf
 EndFunction
 
-bool wearOutfitRunning
+; bool wearOutfitRunning
 
-function AddItemToOutfit(Actor a, Armor item)
+; function AddItemToOutfit(Actor a, Armor item)
 
-	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
+; 	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
 
-		debug.Notification("adding item: " + item.GetName() + " to set: " + CurrentOutfit)
+; 		debug.Notification("adding item: " + item.GetName() + " to set: " + CurrentOutfit)
 
-		StorageUtil.FormListAdd(a, "binding_outfit_set_" + CurrentOutfit, item, false)
+; 		StorageUtil.FormListAdd(a, "binding_outfit_set_" + CurrentOutfit, item, false)
 
-	endif
+; 	endif
 
-endfunction
+; endfunction
 
-function RemoveItemFromOutfit(Actor a, Armor item)
+; function RemoveItemFromOutfit(Actor a, Armor item)
 
-	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
+; 	if !wearOutfitRunning && CurrentOutfit != "" && OutfitsLearn == 1
 
-		debug.Notification("removing item: " + item.GetName() + " to set: " + CurrentOutfit)
+; 		debug.Notification("removing item: " + item.GetName() + " to set: " + CurrentOutfit)
 
-		StorageUtil.FormListRemove(a, "binding_outfit_set_" + CurrentOutfit, item, true)
+; 		StorageUtil.FormListRemove(a, "binding_outfit_set_" + CurrentOutfit, item, true)
 
-	endif
+; 	endif
 
-endfunction
+; endfunction
 
-function WearOutfit(Actor a, string setName)
+; function WearOutfit(Actor a, string setName)
 
-	bind_Utility.WriteToConsole("wear outfit: " + setName)
-	;debug.MessageBox("something called this...")
+; 	bind_Utility.WriteToConsole("wear outfit: " + setName)
+; 	;debug.MessageBox("something called this...")
 
-	wearOutfitRunning = true
+; 	wearOutfitRunning = true
 
-	if RemoveWornGear(a)
+; 	if RemoveWornGear(a)
 
-		Form[] items = StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
+; 		Form[] items = StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
 
-		if items.Length > 0
-			int idx = 0
-			while idx < items.Length
-				Form item = items[idx]
-				if item
-					bind_Utility.WriteToConsole("WearOutfit - adding item: " + item)
-					if a.GetItemCount(item) > 0
-						if !a.IsEquipped(item)
-							a.EquipItem(item, false, true)
-						endif
-					else
-						bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
-					endif
-				endif
-				idx += 1
-			endwhile
-		endif
+; 		if items.Length > 0
+; 			int idx = 0
+; 			while idx < items.Length
+; 				Form item = items[idx]
+; 				if item
+; 					bind_Utility.WriteToConsole("WearOutfit - adding item: " + item)
+; 					if a.GetItemCount(item) > 0
+; 						if !a.IsEquipped(item)
+; 							a.EquipItem(item, false, true)
+; 						endif
+; 					else
+; 						bind_Utility.WriteNotification(item.GetName() + " is no longer in your bag", bind_Utility.TextColorRed())
+; 					endif
+; 				endif
+; 				idx += 1
+; 			endwhile
+; 		endif
 
-	endif
+; 	endif
 	
-	RegisterForSingleUpdate(5.0)
+; 	RegisterForSingleUpdate(5.0)
 
-	CurrentOutfit = setName
+; 	CurrentOutfit = setName
 
-endfunction
+; endfunction
 
-event OnUpdate()
-	bind_Utility.WriteToConsole("wear outfit running flag off")
-	wearOutfitRunning = false
-endevent
+; event OnUpdate()
+; 	bind_Utility.WriteToConsole("wear outfit running flag off")
+; 	wearOutfitRunning = false
+; endevent
 
 ; function WearEroticOutfit(Actor a, string setName)
 
@@ -1066,113 +1066,113 @@ function LearnWornItemsForBondageOutfit(Actor a, int outfitId)
 
 endfunction
 
-function LearnOutfit(Actor a, string setName) 
+; function LearnOutfit(Actor a, string setName) 
 
-	;sets - safe/unsafe/bikini/erotic/nude
+; 	;sets - safe/unsafe/bikini/erotic/nude
 
-    ;     gear_manager.LearnEroticOutfit(a, "nude")
-    ;     debug.MessageBox("Nude outfit learned")
-    ; elseif listReturn == 2
-    ;     gear_manager.LearnEroticOutfit(a, "bikini", "", true, "bikini")
-    ;     debug.MessageBox("Bikini outfit learned")
-    ; elseif listReturn == 3
-    ;     gear_manager.LearnEroticOutfit(a, "erotic", "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini", true)
-    ;     debug.MessageBox("Erotic Armor outfit learned")
-    ; elseif listReturn == 4
-    ;     gear_manager.LearnOutfit(a, "safe")
-    ;     debug.MessageBox("Safe area outfit learned")
-    ; elseif listReturn == 5
-    ;     gear_manager.LearnOutfit(a, "unsafe")
+;     ;     gear_manager.LearnEroticOutfit(a, "nude")
+;     ;     debug.MessageBox("Nude outfit learned")
+;     ; elseif listReturn == 2
+;     ;     gear_manager.LearnEroticOutfit(a, "bikini", "", true, "bikini")
+;     ;     debug.MessageBox("Bikini outfit learned")
+;     ; elseif listReturn == 3
+;     ;     gear_manager.LearnEroticOutfit(a, "erotic", "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini", true)
+;     ;     debug.MessageBox("Erotic Armor outfit learned")
+;     ; elseif listReturn == 4
+;     ;     gear_manager.LearnOutfit(a, "safe")
+;     ;     debug.MessageBox("Safe area outfit learned")
+;     ; elseif listReturn == 5
+;     ;     gear_manager.LearnOutfit(a, "unsafe")
 
-	string allowedKeyword = ""
-	bool allowNonBodyArmor = false
-	bool allowBodyArmor = false
-	string nameKeyword = ""
+; 	string allowedKeyword = ""
+; 	bool allowNonBodyArmor = false
+; 	bool allowBodyArmor = false
+; 	string nameKeyword = ""
 
-	if setName == "nude"
+; 	if setName == "nude"
 
-	elseif setName == "bikini"
-		allowedKeyword = "sla_armorhalfnakedbikini|bind_ArmorBikini"
-		nameKeyword = "bikini"
-		allowNonBodyArmor = true
-	elseif setName == "erotic"
-		allowedKeyword = "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini|bind_ArmorErotic"
-		allowNonBodyArmor = true
-	elseif setName == "safe"
-		allowNonBodyArmor = true
-		allowBodyArmor = true
-	elseif setName == "unsafe"
-		allowNonBodyArmor = true
-		allowBodyArmor = true
-	endif
+; 	elseif setName == "bikini"
+; 		allowedKeyword = "sla_armorhalfnakedbikini|bind_ArmorBikini"
+; 		nameKeyword = "bikini"
+; 		allowNonBodyArmor = true
+; 	elseif setName == "erotic"
+; 		allowedKeyword = "sla_armorpretty|Eroticarmor|sla_armorspendex|sla_armorhalfnaked|sla_armorhalfnakedbikini|bind_ArmorErotic"
+; 		allowNonBodyArmor = true
+; 	elseif setName == "safe"
+; 		allowNonBodyArmor = true
+; 		allowBodyArmor = true
+; 	elseif setName == "unsafe"
+; 		allowNonBodyArmor = true
+; 		allowBodyArmor = true
+; 	endif
 
-    StorageUtil.FormListClear(a, "binding_outfit_set_" + setName)
+;     StorageUtil.FormListClear(a, "binding_outfit_set_" + setName)
 
-	Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
-	; Armor pelvis2 = a.GetWornForm(kSlotMaskPelvisSecondary) as Armor
-	; debug.MessageBox("p2: " + pelvis2.GetName())
+; 	Armor bodyItem = a.GetWornForm(kSlotMaskBody) as Armor
+; 	; Armor pelvis2 = a.GetWornForm(kSlotMaskPelvisSecondary) as Armor
+; 	; debug.MessageBox("p2: " + pelvis2.GetName())
 
-	Form[] inventory = a.GetContainerForms()
-	int i = 0
-    int kwi = 0
-	while i < inventory.Length
-        Form dev = inventory[i]
-		if a.IsEquipped(dev)
-			if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
+; 	Form[] inventory = a.GetContainerForms()
+; 	int i = 0
+;     int kwi = 0
+; 	while i < inventory.Length
+;         Form dev = inventory[i]
+; 		if a.IsEquipped(dev)
+; 			if !bman.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("SexLabNoStrip") ;no dd devices
 
-				bool storeThis = true
-				if bodyItem != none && !allowBodyArmor
-					;debug.MessageBox(bodyItem)
-					if bodyItem == dev
-						storeThis = false
-						if nameKeyword != ""
-							if StringUtil.Find(dev.GetName(), nameKeyword, 0) > -1
-								storeThis = true
-							endif
-						endif
-						if allowedKeyword != ""
-							string[] arr = StringUtil.Split(allowedKeyword, "|")
-							;debug.MessageBox(arr)
-							if arr.Length > 0
-								int idx = 0
-								while idx < arr.Length
-									if dev.HasKeyWordString(arr[idx])
-										;debug.MessageBox("found keyword??")
-										storeThis = true
-									endif
-									idx += 1
-								endwhile
-							endif
-						endif
-					endif
-				endif
+; 				bool storeThis = true
+; 				if bodyItem != none && !allowBodyArmor
+; 					;debug.MessageBox(bodyItem)
+; 					if bodyItem == dev
+; 						storeThis = false
+; 						if nameKeyword != ""
+; 							if StringUtil.Find(dev.GetName(), nameKeyword, 0) > -1
+; 								storeThis = true
+; 							endif
+; 						endif
+; 						if allowedKeyword != ""
+; 							string[] arr = StringUtil.Split(allowedKeyword, "|")
+; 							;debug.MessageBox(arr)
+; 							if arr.Length > 0
+; 								int idx = 0
+; 								while idx < arr.Length
+; 									if dev.HasKeyWordString(arr[idx])
+; 										;debug.MessageBox("found keyword??")
+; 										storeThis = true
+; 									endif
+; 									idx += 1
+; 								endwhile
+; 							endif
+; 						endif
+; 					endif
+; 				endif
 
-				if !allowNonBodyArmor && (bodyItem != dev)
-					debug.MessageBox("make it in here???")
-					if dev.HasKeywordString("ArmorJewelry") 
-						;always allow jewelry
-					elseif dev.HasKeyWordString("ClothingFeet") 
-						;always allow shoes
-					else
-						storethis = false
-					endif
-				endif
+; 				if !allowNonBodyArmor && (bodyItem != dev)
+; 					debug.MessageBox("make it in here???")
+; 					if dev.HasKeywordString("ArmorJewelry") 
+; 						;always allow jewelry
+; 					elseif dev.HasKeyWordString("ClothingFeet") 
+; 						;always allow shoes
+; 					else
+; 						storethis = false
+; 					endif
+; 				endif
 
-				if storeThis
-					bind_Utility.WriteToConsole("dev: " + dev.GetName())
-					StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
-				endif
+; 				if storeThis
+; 					bind_Utility.WriteToConsole("dev: " + dev.GetName())
+; 					StorageUtil.FormListAdd(a, "binding_outfit_set_" + setName, dev, false)
+; 				endif
 
-			else
+; 			else
 
-				;bind_Utility.WriteToConsole("ignoring item - dev: " + dev.GetName() + " idx: " + i)
+; 				;bind_Utility.WriteToConsole("ignoring item - dev: " + dev.GetName() + " idx: " + i)
 
-			endif
-		endif
-        i += 1
-    endwhile
+; 			endif
+; 		endif
+;         i += 1
+;     endwhile
 
-endfunction
+; endfunction
 
 Form[] wornItems 
 Form[] inBag

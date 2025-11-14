@@ -19,5 +19,6 @@ Form[] function GetWornDevious(Actor act) global native
 Form[] function GetWornGear(Actor act) global native
 int function CalculateCrowd(Actor searchByActor, actor ignoreActor = none, float soundDistance = 1000.0, float visualDistance = 3000.0) global native ;returns count of npcs with line of sight
 int function ScanForFurniture(Actor searchByActor, Keyword[] keywordList, float distance = 3000.0) global native
+ObjectReference[] function GetFurniture(Actor searchByActor, Keyword[] keywordList, float distance = 3000.0) global native
 function CleanUnusedBondageItemsFromInventory(Actor act) global native
 function UnequipAllBondage(Actor act) global native

@@ -22,6 +22,12 @@ event OnInit()
 
         bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
 
+        if mqs.SubCount == 1
+            bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
+        elseif mqs.SubCount == 2
+            bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+        endif
+
         bcs.DoEndEvent(false)
 
         self.Stop()

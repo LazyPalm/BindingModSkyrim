@@ -23,12 +23,12 @@ EndFunction
 ;     ; return Game.GetFormFromFile(0x0800A17C, assetsFile) as Keyword
 ; EndFunction
 
-; Keyword Function GetFurnitureKeyword() Global
-;     ;zbfFurniture
-;     return Keyword.GetKeyword("zbfFurniture")
-;     ; string assetsFile = "ZaZAnimationPack.esm"
-;     ; return Game.GetFormFromFile(0x0800762B, assetsFile) as Keyword
-; EndFunction
+Keyword Function GetFurnitureKeyword() Global
+    ;zbfFurniture
+    return Keyword.GetKeyword("zbfFurniture")
+    ; string assetsFile = "ZaZAnimationPack.esm"
+    ; return Game.GetFormFromFile(0x0800762B, assetsFile) as Keyword
+EndFunction
 
 ; Keyword Function GetFurnitureWaterWheelKeyword() Global
 ;     ;zbfFurnitureWaterWheelMini

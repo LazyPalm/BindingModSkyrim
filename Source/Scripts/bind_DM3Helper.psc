@@ -165,6 +165,12 @@ Activator Function GetFurnitureItem(string itemName) Global
 
 EndFunction
 
+int Function MaxActors(ObjectReference item) global
+    dse_dm_QuestController dm3Quest = GetMainQuest()
+    dse_dm_ActiPlaceableBase dm3Device = item as dse_dm_ActiPlaceableBase
+    return dm3Quest.Devices.GetDeviceActorCount(dm3Device.File)
+endfunction
+
 int Function LockInFurniture(ObjectReference item, Actor act) Global
 
     dse_dm_QuestController dm3Quest = GetMainQuest()
@@ -172,15 +178,26 @@ int Function LockInFurniture(ObjectReference item, Actor act) Global
 
     ;NOTE: our scan has already indicated that there is an open slot on this furniture
 
-    int slot = 0
+    int slot = dm3Device.GetNextSlot()
 
-    if (!dm3Device.IsEmptySlot(slot))
-        ;if slot 0 is occupied, this will drop the actor into the 2nd slot
-        ;NOTE - need to check and see if there are dm3 furnitures with more than 2 slots
-        slot = dm3Device.GetNextSlot()
+    ; Int DeviceActorMax = dm3Quest.Devices.GetDeviceActorCount(dm3Device.File)
+    ; debug.MessageBox(DeviceActorMax)
+
+    ; if (!dm3Device.IsEmptySlot(0))
+    ;     ;if slot 0 is occupied, this will drop the actor into the 2nd slot
+    ;     ;NOTE - need to check and see if there are dm3 furnitures with more than 2 slots
+    ;     slot = dm3Device.GetNextSlot()
+    ; endif
+
+    ; if slot == -1
+    ;     if (!dm3Device.IsEmptySlot(1))
+    ;         slot = dm3Device.GetNextSlot()
+    ;     endif
+    ; endif
+
+    if slot > -1
+        dm3Device.ActivateByActor(act, slot)
     endif
-
-    dm3Device.ActivateByActor(act, slot)
 
     return slot
 
@@ -205,6 +222,7 @@ bool Function FurnitureHasFreeSlots(ObjectReference item) Global
     dse_dm_ActiPlaceableBase dm3Device = item as dse_dm_ActiPlaceableBase
     String dm3File = dm3Quest.Devices.GetFileByID(dm3Device.DeviceID)
     int slotCount = dm3Quest.Devices.GetDeviceActorSlotCount(dm3File)
+    ;debug.MessageBox("Slot count: " + slotCount)
     int actorCount = dm3Device.GetMountedActorCount()
     If slotCount > actorCount
         return true

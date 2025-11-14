@@ -176,6 +176,7 @@ int actionKeyModifierOption
 int toggleFurnitureMenu
 int menuFurnitureType
 int toggleDisplayLocationChange
+int toggleExperimentalFeaturesFlag
 
 ;dependencies
 int toggleEnableDD
@@ -2303,6 +2304,7 @@ Function DisplayDebug()
     toggleWriteLogs = AddToggleOption("Write Detailed Logs", main.WriteLogs)
     toggleDisplayLocationChange = AddToggleOption("Show Location Change", main.DisplayLocationChange)
     AddTextOption("Binding Version", version)
+    toggleExperimentalFeaturesFlag = AddToggleOption("Experimental Features", main.ExperimentalFeaturesFlag)
 
 EndFunction
 
@@ -3521,6 +3523,18 @@ Event OnOptionSelect(int option)
         main.DisplayLocationChange = ToggleValue(main.DisplayLocationChange)
         SetToggleOptionValue(toggleDisplayLocationChange, main.DisplayLocationChange)
     EndIf
+
+    if option == toggleExperimentalFeaturesFlag
+        if main.ExperimentalFeaturesFlag == 0
+            if ShowMessage("Enable experimental/beta features? WARNING - These could damage your game save.", true, "$Yes", "$No")
+                main.ExperimentalFeaturesFlag = 1
+                SetToggleOptionValue(toggleExperimentalFeaturesFlag, main.ExperimentalFeaturesFlag)
+            endif
+        else
+            main.ExperimentalFeaturesFlag = 0
+            SetToggleOptionValue(toggleExperimentalFeaturesFlag, main.ExperimentalFeaturesFlag)
+        endif
+    endif
 
     ;diagnostics
     If option == toggleEnableZAP
@@ -4943,7 +4957,8 @@ function MakeArrays()
         string temp = "location_all_areas|location_any_city|location_dawnstar|location_falkreath|location_windhelm|location_markarth|location_morthal|location_riften|"
         temp += "location_solitude|location_high_hrothgar|location_whiterun|location_winterhold|location_raven Rock|location_towns|location_player_home|location_safe_area|"
         temp += "location_unsafe_area|location_inn|event_any_event|event_harsh_bondage|event_bound_masturbation|event_bound_sex|event_dairy|event_bound_sleep|event_camping|"
-        temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuring|event_free_for_work"
+        temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuring|event_free_for_work|"
+        temp += "event_hogtied|event_simple_slavery"
         bondageOutfitUsageKey = StringUtil.Split(temp, "|")
         
         ;bondageOutfitUsageList = new string[32]
@@ -4951,7 +4966,7 @@ function MakeArrays()
         temp += "|Location - Solitude|Location - High Hrothgar|Location - Whiterun|Location - Winterhold|Location - Raven Rock |Location - Towns|Location - Player Home|Location - Safe Areas"
         temp += "|Location - Unsafe Areas|Location - Inn|Event - Any Event|Event - Harsh Bondage|Event - Bound Masturbation|Event - Bound Sex|Event - Dairy|Event - Bound Sleep|Event - Camping"
         temp += "|Event - Put On Display|Event - Public Humliation|Event - Whipping|Event - Souls From Bones|Event - Word Wall|Event - Gagged For Punishment|Event - Go Adventuring"
-        temp += "|Event - Free For Work"
+        temp += "|Event - Free For Work|Event - Hogtied|Event - Simple Slavery"
         bondageOutfitUsageList = StringUtil.Split(temp, "|")
 
         bondageOutfitBlocks = new string[13]

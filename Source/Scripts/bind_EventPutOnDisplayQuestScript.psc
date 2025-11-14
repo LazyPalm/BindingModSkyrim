@@ -5,6 +5,13 @@ float eventEndTime = 0.0
 bool menuActive = false
 bool keyPressed = false
 
+bind_MainQuestScript mqs 
+bind_Controller bcs
+bind_BondageManager bms
+bind_GearManager gms
+bind_Functions fs
+bind_FurnitureManager fman
+
 Actor theSub
 Actor theDom
 ObjectReference furn
@@ -12,6 +19,10 @@ ObjectReference furn
 ObjectReference furnitureMarker
 
 bool addFurniture = false
+
+ObjectReference[] foundFurniture
+ObjectReference[] foundMarkers
+int[] usedFurniture
 
 event OnInit()
 
@@ -37,7 +48,7 @@ event OnInit()
         menuActive = false
         keyPressed = false
 
-        furn = TheFurniture.GetReference()
+        ;furn = TheFurniture.GetReference()
         theSub = fs.GetSubRef()
         theDom = fs.GetDomRef()
 
@@ -46,40 +57,28 @@ event OnInit()
 
         SetObjectiveDisplayed(10, true)
 
-        if furn == none
+        ScanForFurniture()
+        if foundFurniture.Length == 0
             addFurniture = true
-        else
-            if furn.GetDistance(theSub) > 1000.0
-                addFurniture = true
-            endif
+            addFurniture()
         endif
 
-        if addFurniture
-            ;debug.MessageBox("adding furniture...")
-            float z = theDom.GetAngleZ()
-            bind_MovementQuestScript.PlayDoWork(theDom)
+        MarkFurniture()
 
-            Form dev
-            if mqs.SoftCheckDM3 == 1 && mqs.EnableModDM3 == 1 && Utility.RandomInt(1, 2) == 1
-                dev = bind_DM3Helper.GetRandomItem()
-            else
-                dev = bind_DDCFurnitureList.GetAt(Utility.RandomInt(0, bind_DDCFurnitureList.GetSize() - 1))
-            endif
+        ; if furn == none
+        ;     addFurniture = true
+        ; else
+        ;     if furn.GetDistance(theSub) > 1000.0
+        ;         addFurniture = true
+        ;     endif
+        ; endif
 
-            bind_Utility.WriteToConsole("adding furniture: " + dev.GetName())
-            PO3_SKSEFunctions.AddKeywordToForm(dev, bind_FurnitureItem)
-            ObjectReference obj = theDom.PlaceAtMe(dev, 1, true, true)
-            obj.MoveTo(theDom, 120.0 * Math.Sin(theDom.GetAngleZ()), 120.0 * Math.Cos(theDom.GetAngleZ()), 0)
-            obj.SetAngle(0.0, 0.0, z)
-            obj.Enable()
-            obj.SetActorOwner(theSub.GetActorBase())
-            furn = obj
-            TheFurniture.ForceRefTo(obj)
-            bind_Utility.DoSleep(2.0)
-        endif
+        ; if addFurniture
+        ;     addFurniture()
+        ; endif
 
-        furnitureMarker = furn.PlaceAtMe(bind_PutOnDisplayItemsList.GetAt(0))
-        furnitureMarker.Enable()
+        ; furnitureMarker = furn.PlaceAtMe(bind_PutOnDisplayItemsList.GetAt(0))
+        ; furnitureMarker.Enable()
 
         GoToState("KneelByFurnitureState")
 
@@ -115,7 +114,7 @@ state KneelByFurnitureState
 
             bind_Utility.WriteToConsole("distance to furn: " + theSub.GetDistance(furn))
 
-            if theSub.GetDistance(furn) <= 200.0
+            if FindNearest(theSub, 200.0, false) > -1 ; theSub.GetDistance(furn) <= 200.0                
                 GoToState("")
                 EventStart()
             else
@@ -137,12 +136,131 @@ event PressedAction(bool longPress)
 
 endevent
 
+function ScanForFurniture()
+
+    Keyword[] kw
+    
+    if mqs.SoftCheckDM3 == 1 && mqs.EnableModDM3 == 1
+        kw = new Keyword[3]
+        kw[0] = bind_DDHelper.GetFurnitureKeyword()
+        kw[1] = bind_ZAPHelper.GetFurnitureKeyword()
+        kw[2] = bind_Dm3Helper.GetFurnitureKeyword()
+    else 
+        kw = new Keyword[2]
+        kw[0] = bind_DDHelper.GetFurnitureKeyword()
+        kw[1] = bind_ZAPHelper.GetFurnitureKeyword()
+    endif
+
+    ;Debug.MessageBox(kw)
+
+    foundFurniture = bind_SkseFunctions.GetFurniture(theSub, kw, 2000.0)
+
+    ;debug.MessageBox(foundFurniture)
+
+endfunction
+
+function AddFurniture()
+
+    ;TODO - let player add markers and add as many furniture items as player + slavecount
+
+    ;debug.MessageBox("adding furniture...")
+
+    float x = theDom.GetAngleX()
+    float y = theDom.GetAngleY()
+    float z = theDom.GetAngleZ()
+    
+    bind_MovementQuestScript.PlayDoWork(theDom)
+
+    Form dev
+    if mqs.SoftCheckDM3 == 1 && mqs.EnableModDM3 == 1 && Utility.RandomInt(1, 2) == 1
+        dev = bind_DM3Helper.GetRandomItem()
+    else
+        dev = bind_DDCFurnitureList.GetAt(Utility.RandomInt(0, bind_DDCFurnitureList.GetSize() - 1))
+    endif
+
+    bind_Utility.WriteToConsole("adding furniture: " + dev.GetName())
+    PO3_SKSEFunctions.AddKeywordToForm(dev, bind_FurnitureItem)
+    ObjectReference obj = theDom.PlaceAtMe(dev, 1, true, true)
+    obj.MoveTo(theDom, 120.0 * Math.Sin(z), 120.0 * Math.Cos(z), 0)
+    obj.SetAngle(0.0, 0.0, z + 180)
+
+    obj.Enable()
+    obj.SetActorOwner(theSub.GetActorBase())
+    ;furn = obj
+    ;TheFurniture.ForceRefTo(obj)
+    
+    foundFurniture = new ObjectReference[1]
+    foundFurniture[0] = obj
+    
+    bind_Utility.DoSleep(2.0)
+
+endfunction
+
+function MarkFurniture()
+
+    foundMarkers = new ObjectReference[25]
+    usedFurniture = new int[25]
+
+    int i = 0
+    while i < foundFurniture.Length
+        foundMarkers[i] = foundFurniture[i].PlaceAtMe(bind_PutOnDisplayItemsList.GetAt(0))
+        foundMarkers[i].Enable()
+        usedFurniture[i] = 1
+        i += 1
+    endwhile
+
+    ; furnitureMarker = furn.PlaceAtMe(bind_PutOnDisplayItemsList.GetAt(0))
+    ; furnitureMarker.Enable()
+
+endfunction
+
+function DeleteMarkers()
+
+    int i = 0
+    while i < foundFurniture.Length
+        foundMarkers[i].Delete()
+        foundMarkers[i] = none
+        i += 1
+    endwhile
+
+endfunction
+
+int function FindNearest(ObjectReference a, float maxDistance = 200.0, bool unusedOnly = false) 
+    int nearest = -1
+    int i = 0
+    float dist = 0.0
+    while i < foundFurniture.Length
+        float d = a.GetDistance(foundFurniture[i])
+        bind_Utility.WriteToConsole("d: " + d + " dist: " + dist + " used: " + usedFurniture[i])
+        if d <= maxDistance && (dist == 0.0 || d < dist) && (unusedOnly == false || (unusedOnly && usedFurniture[i] == 1))
+            nearest = i
+        endif
+        i += 1
+    endwhile
+    return nearest
+endfunction
+
+int dm3Slot = -1
+int dm3SecondSubSlot = -1
+int dm3ThirdSubSlot = -1
+
+ObjectReference furn2
+ObjectReference furn3
+
 function EventStart()
+
+    int nearest = FindNearest(theSub, 200.0, false)
+    furn = foundFurniture[nearest]
+    usedFurniture[nearest] = 2 ;mark in use
+
+    ;debug.MessageBox("usedFurniture: " + usedFurniture)
 
     bind_Utility.DisablePlayer()
 
-    furnitureMarker.Delete()
-    furnitureMarker = none
+    ; furnitureMarker.Delete()
+    ; furnitureMarker = none
+
+    DeleteMarkers()
 
     bind_MovementQuestScript.PlayKneel(theSub)
     ;fs.EventGetSubReady(theSub, theDom, "event_put_on_display");, true, true, true, false)
@@ -153,11 +271,54 @@ function EventStart()
     ;FadeToBlackHoldImod.Apply()
     bind_Utility.FadeOutApply("I am being secured to the " + furn.GetBaseObject().GetName() + "...")
 
-    fs.EventGetSubReady(theSub, theDom, "event_put_on_display")
+    ;fs.EventGetSubReady(theSub, theDom, "event_put_on_display")
+
+    fs.EventGetPartyReady("event_put_on_display")
 
     ;bind_Utility.WriteInternalMonologue("I am being secured to the " + furn.GetBaseObject().GetName() + "...")
 
-    fman.LockInFurniture(theSub, furn, true)
+    ; Keyword kwDM3 = bind_DM3Helper.GetFurnitureKeyword()
+    ; if furn.HasKeyword(kwDM3)
+    ;     dm3Slot = bind_DM3Helper.LockInFurniture(furn, theSub)
+    ; else
+    ;     fman.LockInFurniture(theSub, furn, true)
+    ; endif
+
+    ;fman.LockInFurniture(theSub, furn, true)
+    bind_FurnitureManager.LockInFurniture2(theSub, furn)
+    StorageUtil.SetFormValue(theSub, "binding_in_furniture", furn)
+
+    string doubleName = "Double Dollstand Variant 1"
+    if mqs.SubCount > 0 && furn.GetBaseObject().GetName() == doubleName
+        ;debug.MessageBox("max: " + bind_DM3Helper.MaxActors(furn))
+        if mqs.SubCount > 0
+            if bind_DM3Helper.FurnitureHasFreeSlots(furn)
+                Actor secsub = fs.TheSecondSub.GetActorReference()
+                bind_FurnitureManager.LockInFurniture2(secsub, furn)
+            endif
+        endif
+        if mqs.SubCount == 2
+            if bind_DM3Helper.FurnitureHasFreeSlots(furn)
+                dm3ThirdSubSlot = bind_DM3Helper.LockInFurniture(furn, fs.TheThirdSub.GetActorReference())
+            endif
+        endif
+    elseif mqs.SubCount > 0
+        nearest = FindNearest(furn, 2000.0, true)
+        if nearest > -1
+            furn2 = foundFurniture[nearest]
+            Actor secsub = fs.TheSecondSub.GetActorReference()
+            bind_FurnitureManager.LockInFurniture2(secsub, furn2, 2)
+            usedFurniture[nearest] = 2 ;mark in use
+        else 
+            Actor secsub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.HogtieActor(secsub)
+            if secsub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+                secsub.RemoveFromFaction(fman.bind_LockedInFurnitureFaction)
+            endif
+        endif
+    endif
+
+    ;debug.MessageBox("dm3 - dm3Slot: " + dm3Slot + " dm3SecondSubSlot: " + dm3SecondSubSlot + " dm3ThirdSubSlot: " + dm3ThirdSubSlot)
 
     ;bind_Utility.DoSleep(2.0)
 
@@ -169,8 +330,6 @@ function EventStart()
     SetObjectiveDisplayed(10, false)
     SetObjectiveDisplayed(20, true)
 
-    bind_MovementQuestScript.StartSandbox(theDom, theSub)
-
     eventEndTime = bind_Utility.AddTimeToCurrentTime(0, Utility.RandomInt(mqs.PutOnDisplayMinMinutes, mqs.PutOnDisplayMaxMinutes)) 
 
     GoToState("WaitingState")
@@ -178,6 +337,8 @@ function EventStart()
 
     ;FadeToBlackHoldImod.Remove()
     bind_Utility.FadeOutRemove("")
+
+    bind_MovementQuestScript.StartSandbox(theDom, theSub)
 
 endfunction
 
@@ -225,15 +386,30 @@ function EventEnd()
 
     bind_Utility.FadeOutApply("I am being released from the " + furn.GetBaseObject().GetName() + "...")
 
-    fman.UnlockFromFurniture(theSub, furn, true)
+    ;fman.UnlockFromFurniture(theSub, furn, true)
+    bind_FurnitureManager.UnlockFromFurniture2(theSub)
 
-    bind_Utility.DisablePlayer()
+    if mqs.SubCount > 0
+        Actor secsub = fs.TheSecondSub.GetActorReference()
+        if secsub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+            bind_FurnitureManager.UnlockFromFurniture2(secsub)
+        else
+            bind_BondageManager.FreeActorFromHogtie(secsub)
+        endif
+    endif 
+    if mqs.SubCount == 2
+        if dm3ThirdSubSlot > -1
+            bind_DM3Helper.UnlockFromFurniture(furn, dm3ThirdSubSlot)
+        endif
+    endif
+
+    ;bind_Utility.DisablePlayer()
 
     ;bind_Utility.DoSleep(1.0)
 
-    fs.EventCleanUpSub(theSub, theDom, true)
+    fs.EventClearUpParty()
 
-    bind_Utility.EnablePlayer()
+    ;bind_Utility.EnablePlayer()
 
     if theSub.IsInFaction(bind_CrowdTriggerToWatch)
         theSub.RemoveFromFaction(bind_CrowdTriggerToWatch)
@@ -256,6 +432,8 @@ function EventEnd()
 
     bind_GlobalEventPutOnDisplayNextRun.SetValue(bind_Utility.AddTimeToCurrentTime(mqs.PutOnDisplayHoursBetweenUse, 0))
 
+    bind_Utility.FadeOutRemove()
+
     if addFurniture
         if !bind_Utility.ConfirmBox("Keep this bondage furniture?")
             TheFurniture.Clear()
@@ -267,7 +445,6 @@ function EventEnd()
 
     bcs.DoEndEvent()
 
-    bind_Utility.FadeOutRemove()
     ;FadeToBlackHoldImod.Remove()
 
     self.Stop()
@@ -296,12 +473,7 @@ function ShowMenu()
 
 endfunction
 
-bind_MainQuestScript mqs 
-bind_Controller bcs
-bind_BondageManager bms
-bind_GearManager gms
-bind_Functions fs
-bind_FurnitureManager fman
+
 
 GlobalVariable property bind_GlobalEventPutOnDisplayNextRun auto
 

@@ -381,6 +381,7 @@ function FadeOutApply(string msg = "") global
     u.FadeToBlackImod.Apply()
     Utility.Wait(2.75)
     u.FadeToBlackHoldImod.Apply()
+    bind_Utility.DisablePlayer()
 endfunction
 
 function FadeOutRemove(string msg = "") global
@@ -389,6 +390,7 @@ function FadeOutRemove(string msg = "") global
     endif
     bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
     u.FadeToBlackHoldImod.Remove()
+    bind_Utility.EnablePlayer()
 endfunction
 
 ImageSpaceModifier property FadeToBlackImod auto

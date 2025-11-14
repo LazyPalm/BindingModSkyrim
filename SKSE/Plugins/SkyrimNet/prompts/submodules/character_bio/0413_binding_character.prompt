@@ -36,7 +36,7 @@
 
 {# Furniture #}
 {{ "## Furniture" }}
-{% set in_furniture = get_global_value("bind_GlobalInFurniture") %}
+{% set in_furniture = get_faction_rank("bind_LockedInFurnitureFaction") %}
 {% if in_furniture == 1 %}
 - {{ actor_name }} is bound sitting on a bondage chair. Their ankles secured to each chair leg, hands bound securely behind it. Their legs are spread wide leaving their sex unprotected and on display.
 {% else if in_furniture == 2 %}

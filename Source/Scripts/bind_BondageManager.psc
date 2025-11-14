@@ -148,7 +148,8 @@ bool function ZadKeywordsCheck(Form item)
     bool inventory = item.HasKeyWordString("zad_InventoryDevice")
     bool questItem = item.HasKeywordString("zad_QuestItem")
     bool blockGeneric = item.HasKeyWordString("zad_BlockGeneric")
-    return (lockable || inventory || questItem || blockGeneric)
+    bool blockZap = item.HasKeywordString("zbfWornDevice")
+    return (lockable || inventory || questItem || blockGeneric || blockZap)
 endfunction
 
 function EquipBondageOutfit(Actor a, int setId)
@@ -167,6 +168,9 @@ function EquipBondageOutfit(Actor a, int setId)
         return
 
     endif
+
+    StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+    StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
 
     int i
 
@@ -262,10 +266,13 @@ function EquipBondageOutfit(Actor a, int setId)
         endwhile
     endif
 
+    bind_Utility.WriteToConsole("equipbondageoutfit - actor: " + a.GetDisplayName())
+    bind_Utility.WriteToConsole("equipbondageoutfit - tempitems: " + tempItems)
+
     bind_SkseFunctions.EquipBondageOutfit(a, tempItems)
 
-    StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
-    StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
+    ; StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+    ; StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
 
     bind_Utility.DoSleep(2.0)
 
@@ -1476,6 +1483,38 @@ function StoreFavoriteItem(Actor act, int typeNumber, Form dev)
     endif
 endfunction
 
+function HogtieActor(Actor a) global
+
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_BondageManager bmanager = q as bind_BondageManager
+    bind_Functions fun = q as bind_Functions
+
+    ActorUtil.AddPackageOverride(a, bmanager.bind_Package_NPC_Hogtied, 80, 0)
+    a.EvaluatePackage()
+
+    int eventOutfitId = bmanager.GetBondageOutfitForEvent("event_hogtied")
+    ;debug.MessageBox("eventOutfitId: " + eventOutfitId)
+	if eventOutfitId > 0 
+		bmanager.EquipBondageOutfit(a, eventOutfitId)
+	endif
+
+endfunction
+
+function FreeActorFromHogtie(Actor a) global
+
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_BondageManager bmanager = q as bind_BondageManager
+    bind_Functions fun = q as bind_Functions
+
+    ;debug.MessageBox("this happen??")
+
+    ActorUtil.ClearPackageOverride(a)
+    a.EvaluatePackage()
+
+    debug.SendAnimationEvent(a, "IdleForceDefaultState")
+
+endfunction
+
 function AddHogtieBindings(Actor act, bool useBlindfold = false, bool useHood = false)
     int i = 0
     while i < bind_HogtiedItemsList.GetSize()
@@ -2374,3 +2413,5 @@ FormList property bind_BondageRulesFactionList auto
 LeveledItem property zad_dev_all auto
 
 zadDeviceLists property ddLists auto
+
+Package property bind_Package_NPC_Hogtied auto
