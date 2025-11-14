@@ -258,6 +258,7 @@ string[] materials
 ;string bondageOutfitFile
 
 int toggleUseOutfit
+int inputNewOutfit
 int inputBondageSetName
 int clickedNewOutfit
 int menuBondageOutfitsList
@@ -702,7 +703,9 @@ function DisplayBondageOutfits()
     AddHeaderOption("Manage Outfits")
     AddHeaderOption("")
 
-    clickedNewOutfit = AddTextOption("Create New Outfit", "")
+    ;clickedNewOutfit = AddTextOption("Create New Outfit", "")
+
+    inputNewOutfit = AddInputOption("New Bondage Outfit", "")
 
     menuBondageOutfitsList = AddMenuOption("Bondage Outfits", selectedBondageOutfit)
 
@@ -2366,6 +2369,10 @@ event OnOptionInputOpen(int option)
         i += 1
     endwhile
 
+    if option == inputNewOutfit
+        SetInputDialogStartText("")
+    endif
+
     if option == inputBondageSetName
         SetInputDialogStartText(selectedBondageOutfit)
     endif
@@ -2443,6 +2450,28 @@ event OnOptionInputAccept(int option, string value)
             fs.SettingsSetDomTitleByString(value)
             SetInputOptionValue(option, value)
         endif
+    endif
+
+    if option == inputNewOutfit
+
+        if value != ""
+
+            if ShowMessage("Create new outfit - " + value + "?", true, "$Yes", "$No")
+                int uid = Utility.RandomInt(100000000,999999999)
+                JsonUtil.StringListAdd(main.BindingGameOutfitFile, "outfit_name_list", value)
+                JsonUtil.IntListAdd(main.BindingGameOutfitFile, "outfit_id_list", uid)
+                JsonUtil.Save(main.BindingGameOutfitFile)
+
+                bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
+                bondageSetIds = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
+                SetMenuDialogOptions(bondageSetNames)
+                SetMenuDialogStartIndex(bondageSetNames.Find(value))
+
+                ShowMessage(value + " - bondage outfit created.", false)
+            endif
+
+        endif
+
     endif
 
     if option == inputBondageSetName
