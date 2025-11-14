@@ -1885,10 +1885,11 @@ Function SafeWord()
 			;debug.MessageBox("outfit id: " + outfitId)
 			;if outfitId > 0
 				bms.EquipBondageOutfit(theSubRef, outfitId)
-				if main.SubCount == 1
+				if main.SubCount > 0
 					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
 					;debug.MessageBox("this happen?")
-				elseif main.SubCount == 2
+				endif
+				if main.SubCount == 2
 					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 				endif
 				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
@@ -2027,9 +2028,10 @@ event OnPauseEnd()
 		;debug.MessageBox("outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
-			if main.SubCount == 1
+			if main.SubCount > 0
 				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-			elseif main.SubCount == 2
+			endif
+			if main.SubCount == 2
 				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 			endif
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
@@ -2316,9 +2318,10 @@ function EventGetPartyReady(string eventName = "")
 
 	if eventOutfitId > 0 
 		bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-		if main.SubCount == 1
+		if main.SubCount > 0
 			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
-		elseif main.SubCount == 2
+		endif
+		if main.SubCount == 2
 			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
 		endif
 
@@ -2413,9 +2416,10 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-			if main.SubCount == 1
+			if main.SubCount > 0
 				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
-			elseif main.SubCount == 2
+			endif
+			if main.SubCount == 2
 				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
 			endif
 
@@ -2487,9 +2491,10 @@ function EventClearUpParty()
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	bms.EquipBondageOutfit(sub, outfitId)
-	if main.SubCount == 1
+	if main.SubCount > 0
 		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-	elseif main.SubCount == 2
+	endif
+	if main.SubCount == 2
 		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 	endif
 	StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId)
@@ -2542,9 +2547,10 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	;if outfitId > 0
 		bms.EquipBondageOutfit(sub, outfitId)
-		if main.SubCount == 1
+		if main.SubCount > 0
 			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-		elseif main.SubCount == 2
+		endif
+		if main.SubCount == 2
 			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 		endif
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
