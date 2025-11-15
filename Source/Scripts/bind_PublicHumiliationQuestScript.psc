@@ -214,8 +214,8 @@ function FreeSub()
 
     endif
 
-    bms.RemoveAllDetectedBondageItems(theSub)
-    bind_Utility.DoSleep(2.0)
+    ; bms.RemoveAllDetectedBondageItems(theSub)
+    ; bind_Utility.DoSleep(2.0)
 
     fs.EventCleanUpSub(theSub, theDom, true)
 

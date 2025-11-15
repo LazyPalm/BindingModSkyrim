@@ -1,6 +1,6 @@
 {% if render_mode == "full" or render_mode == "dialogue_target" or render_mode == "thoughts" or render_mode == "transform" %}
 {% set actor_name = decnpc(actorUUID).name %}
-{% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") %}
+{% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") or worn_has_keyword(actorUUID, "zbfWornCollar") %}
 
 {% if is_in_faction(actorUUID, "bind_SubmissiveFaction") %}
 

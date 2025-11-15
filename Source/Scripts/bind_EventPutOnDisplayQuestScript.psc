@@ -288,34 +288,70 @@ function EventStart()
     bind_FurnitureManager.LockInFurniture2(theSub, furn)
     StorageUtil.SetFormValue(theSub, "binding_in_furniture", furn)
 
+    bool sub1Used = false
+    bool sub2Used = false
+
     string doubleName = "Double Dollstand Variant 1"
     if mqs.SubCount > 0 && furn.GetBaseObject().GetName() == doubleName
         ;debug.MessageBox("max: " + bind_DM3Helper.MaxActors(furn))
-        if mqs.SubCount > 0
+
+        int useSub = 0
+        if mqs.SubCount == 1
+            if fs.TheSecondSub.GetActorReference() != none
+                useSub = 1
+            else 
+                useSub = 2
+            endif
+        elseif mqs.SubCount == 2
+            useSub = Utility.RandomInt(1, 2)
+        endif
+
+        if useSub == 1
             if bind_DM3Helper.FurnitureHasFreeSlots(furn)
-                Actor secsub = fs.TheSecondSub.GetActorReference()
-                bind_FurnitureManager.LockInFurniture2(secsub, furn)
+                bind_FurnitureManager.LockInFurniture2(fs.TheSecondSub.GetActorReference(), furn)
+                sub1Used = true
             endif
-        endif
-        if mqs.SubCount == 2
+        elseif useSub == 2
             if bind_DM3Helper.FurnitureHasFreeSlots(furn)
-                dm3ThirdSubSlot = bind_DM3Helper.LockInFurniture(furn, fs.TheThirdSub.GetActorReference())
+                bind_FurnitureManager.LockInFurniture2(fs.TheThirdSub.GetActorReference(), furn)
+                sub2Used = true
             endif
         endif
-    elseif mqs.SubCount > 0
-        nearest = FindNearest(furn, 2000.0, true)
-        if nearest > -1
-            furn2 = foundFurniture[nearest]
-            Actor secsub = fs.TheSecondSub.GetActorReference()
-            bind_FurnitureManager.LockInFurniture2(secsub, furn2, 2)
-            usedFurniture[nearest] = 2 ;mark in use
-        else 
-            Actor secsub = fs.TheSecondSub.GetActorReference()
-            bind_BondageManager.HogtieActor(secsub)
-            if secsub.IsInFaction(fman.bind_LockedInFurnitureFaction)
-                secsub.RemoveFromFaction(fman.bind_LockedInFurnitureFaction)
+
+    endif
+
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none && !sub1Used
+            nearest = FindNearest(furn, 2000.0, true)
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            if nearest > -1
+                furn2 = foundFurniture[nearest]
+                bind_FurnitureManager.LockInFurniture2(secondSub, furn2, 2)
+                usedFurniture[nearest] = 2 ;mark in use
+            else 
+                bind_BondageManager.HogtieActor(secondSub)
+                if secondSub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+                    secondSub.RemoveFromFaction(fman.bind_LockedInFurnitureFaction)
+                endif
             endif
         endif
+
+        if fs.TheThirdSub.GetReference() != none && !sub2Used
+            nearest = FindNearest(furn, 2000.0, true)
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            if nearest > -1
+                furn2 = foundFurniture[nearest]
+                bind_FurnitureManager.LockInFurniture2(thirdSub, furn2, 2)
+                usedFurniture[nearest] = 2 ;mark in use
+            else 
+                bind_BondageManager.HogtieActor(thirdSub)
+                if thirdSub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+                    thirdSub.RemoveFromFaction(fman.bind_LockedInFurnitureFaction)
+                endif
+            endif
+        endif
+
     endif
 
     ;debug.MessageBox("dm3 - dm3Slot: " + dm3Slot + " dm3SecondSubSlot: " + dm3SecondSubSlot + " dm3ThirdSubSlot: " + dm3ThirdSubSlot)
@@ -389,17 +425,20 @@ function EventEnd()
     ;fman.UnlockFromFurniture(theSub, furn, true)
     bind_FurnitureManager.UnlockFromFurniture2(theSub)
 
-    if mqs.SubCount > 0
-        Actor secsub = fs.TheSecondSub.GetActorReference()
-        if secsub.IsInFaction(fman.bind_LockedInFurnitureFaction)
-            bind_FurnitureManager.UnlockFromFurniture2(secsub)
+    if fs.TheSecondSub.GetReference() != none
+        Actor secondSub = fs.TheSecondSub.GetActorReference()
+        if secondSub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+            bind_FurnitureManager.UnlockFromFurniture2(secondSub)
         else
-            bind_BondageManager.FreeActorFromHogtie(secsub)
+            bind_BondageManager.FreeActorFromHogtie(secondSub)
         endif
     endif 
-    if mqs.SubCount == 2
-        if dm3ThirdSubSlot > -1
-            bind_DM3Helper.UnlockFromFurniture(furn, dm3ThirdSubSlot)
+    if fs.TheThirdSub.GetReference() != none
+        Actor thirdSub = fs.TheThirdSub.GetActorReference()
+        if thirdSub.IsInFaction(fman.bind_LockedInFurnitureFaction)
+            bind_FurnitureManager.UnlockFromFurniture2(thirdSub)
+        else
+            bind_BondageManager.FreeActorFromHogtie(thirdSub)
         endif
     endif
 

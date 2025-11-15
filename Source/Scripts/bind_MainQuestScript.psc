@@ -54,6 +54,9 @@ int property EnableModSkyrimNet auto conditional
 
 int property IsSub auto conditional
 int property SubCount auto conditional
+int property HasSecondSub auto conditional
+int property HasThirdSub auto conditional
+
 int property DomDoorDiscovery auto conditional
 int property PreferenceFreeWhenDismissedDisabled auto conditional
 int property SubIdleState auto conditional 
@@ -199,6 +202,7 @@ int property SimpleSlaveryFemaleFallback auto conditional
 int property SimpleSlaveryMaleFallback auto conditional
 
 int property ExperimentalFeaturesFlag auto conditional
+int property ProtectSltr auto conditional
 
 ;*********************************************************
 ;skyrimnet variables

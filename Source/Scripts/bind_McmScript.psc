@@ -159,6 +159,7 @@ int toggleCleanUpNonBindingItemsFromBags
 
 int toggleSimpleSlaveryFemale
 int toggleSimpleSlaveryMale
+int toggleSltrProtection
 
 
 ;debug
@@ -671,6 +672,11 @@ event OnOptionHighlight(int option)
         SetInfoText("Simple slavery outcome will can use a female hireling if no potential doms have been selected.")
     elseif option == toggleSimpleSlaveryMale
         SetInfoText("Simple slavery outcome will can use a male hireling if no potential doms have been selected.")
+
+    elseif option == toggleSltrProtection
+        SetInfoText("Toggling this on will attempt to leave items (only the collar currently) added by Submissive Lola: The Resubmission in place during outfit changes and block Binding items in outfits already added by SLTR.")
+
+
     endif
 
 endevent
@@ -1875,6 +1881,7 @@ Function DisplayPreferences()
     toggleSimpleSlaveryFemale = AddToggleOption("Simple Slavery - Female Hireling Fallbacks", main.SimpleSlaveryFemaleFallback)
     toggleSimpleSlaveryMale = AddToggleOption("Simple Slavery - Male Hireling Fallbacks", main.SimpleSlaveryMaleFallback)
     toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Unused Bondage Items From Inventory", main.CleanUpNonBindingItemsFromBags)
+    toggleSltrProtection = AddToggleOption("SLTR - Item Protection", main.ProtectSltr)
     
 
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
@@ -3541,6 +3548,11 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleCleanUpNonBindingItemsFromBags, main.CleanUpNonBindingItemsFromBags)
     endif
 
+    if option == toggleSltrProtection
+        main.ProtectSltr = ToggleValue(main.ProtectSltr)
+        SetToggleOptionValue(toggleSltrProtection, main.ProtectSltr)
+    endif
+
 
     ;debug
     If option == toggleWriteLogs
@@ -4310,6 +4322,14 @@ Event OnOptionMenuOpen(int option)
 
         bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
         bondageSetIds = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
+
+        int i = 0
+        while i < bondageSetNames.Length
+            if bondageSetNames[i] == ""
+                bondageSetNames[i] = "Missing name - " + bondageSetIds[i]
+            endif
+            i += 1
+        endwhile
 
         ; StorageUtil.StringListClear(theSub, "bind_bondage_outfits_list")
         ; StorageUtil.StringListClear(theSub, "bind_bondage_files_list")

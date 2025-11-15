@@ -304,7 +304,9 @@ function EquipBondageOutfit(Actor a, int setId)
     bind_Utility.WriteToConsole("equipbondageoutfit - actor: " + a.GetDisplayName())
     bind_Utility.WriteToConsole("equipbondageoutfit - tempitems: " + tempItems)
 
-    bind_SkseFunctions.EquipBondageOutfit(a, tempItems)
+    ;main.ProtectSltr = 1 ;for testing - add to mcm
+
+    bind_SkseFunctions.EquipBondageOutfit(a, tempItems, (main.ProtectSltr == 1 && a == Game.GetPlayer()))
 
     ; StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
     ; StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
@@ -1524,7 +1526,8 @@ function HogtieActor(Actor a) global
     bind_BondageManager bmanager = q as bind_BondageManager
     bind_Functions fun = q as bind_Functions
 
-    ActorUtil.AddPackageOverride(a, bmanager.bind_Package_NPC_Hogtied, 80, 0)
+    Package p = Game.GetFormFromFile(0x0A000828, "binding.esl") as Package
+    ActorUtil.AddPackageOverride(a, p, 80, 0)
     a.EvaluatePackage()
 
     int eventOutfitId = bmanager.GetBondageOutfitForEvent("event_hogtied")
@@ -2449,4 +2452,4 @@ LeveledItem property zad_dev_all auto
 
 zadDeviceLists property ddLists auto
 
-Package property bind_Package_NPC_Hogtied auto
+;Package property bind_Package_NPC_Hogtied auto

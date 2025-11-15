@@ -1885,11 +1885,11 @@ Function SafeWord()
 			;debug.MessageBox("outfit id: " + outfitId)
 			;if outfitId > 0
 				bms.EquipBondageOutfit(theSubRef, outfitId)
-				if main.SubCount > 0
+				if TheSecondSub.GetReference() != none
 					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
 					;debug.MessageBox("this happen?")
 				endif
-				if main.SubCount == 2
+				if TheThirdSub.GetReference() != none
 					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 				endif
 				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
@@ -1999,7 +1999,8 @@ event OnPauseStart()
 	int removedBondage = 0
 	if bms.IsInBondage(theSubRef)
 		;bms.SnapshotCurrentBondage(theSubRef)
-		bms.RemoveAllDetectedBondageItems(theSubRef)
+		;bms.RemoveAllDetectedBondageItems(theSubRef)
+		bms.RemoveAllBondageItems(theSubRef, true)
 		removedBondage = 1
 	endif
 	;gmanage.WearOutfit(theSubRef, "unsafe")
@@ -2028,10 +2029,10 @@ event OnPauseEnd()
 		;debug.MessageBox("outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, outfitId)
-			if main.SubCount > 0
+			if TheSecondSub.GetReference() != none
 				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
 			endif
-			if main.SubCount == 2
+			if TheThirdSub.GetReference() != none
 				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 			endif
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
@@ -2167,6 +2168,47 @@ function AddFollowerSub(Actor akSpeaker)
 	endif
 endfunction
 
+function RemoveFollowerSub(Actor akSpeaker)
+
+	; UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+	; if listMenu
+	; 	;listMenu.AddEntryItem("Remove Binding Bondage")
+	; 	listMenu.AddEntryItem("Remove this follower as a sub?")
+	; 	listMenu.AddEntryItem("Yes")
+	; 	listMenu.AddEntryItem("Cancel")
+	; EndIf
+
+	; listMenu.OpenMenu()
+	; int listReturn = listMenu.GetResultInt()
+	; if listReturn == 1
+
+	if bind_Utility.ConfirmBox("Remove " + akSpeaker.GetDisplayName() + " as a sub?")
+
+		bind_SkseFunctions.UnequipAllBondage(akSpeaker)
+		bind_Utility.DoSleep(1.0)
+
+		bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(akSpeaker)
+		bind_Utility.DoSleep(1.0)
+
+		if akSpeaker == TheThirdSub.GetActorReference()
+			TheThirdSub.Clear()
+			debug.MessageBox(akSpeaker.GetDisplayName() + " was removed from the third sub slot")
+		elseif akSpeaker == TheSecondSub.GetActorReference()
+			TheSecondSub.Clear()
+			debug.MessageBox(akSpeaker.GetDisplayName() + " was removed from the second sub slot")		
+		endif
+
+		if main.SubCount == 2
+			main.SubCount = 1
+		elseif main.SubCount == 1
+			main.SubCount = 0
+		endif
+
+
+	endif
+
+endfunction
+
 ObjectReference function EventGetNearbyBed()
 	return NearbyBed.GetReference()
 endfunction
@@ -2292,7 +2334,7 @@ function EventGetPartyReady(string eventName = "")
 	while i < inventory.Length
 		Form item = inventory[i]
 		If item.IsPlayable()
-			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip") && !item.HasKeyWordString("zbfWornDevice")
 				StorageUtil.FormListAdd(sub, "bind_event_worn_gear", item)
 			endif
 		EndIf
@@ -2318,10 +2360,10 @@ function EventGetPartyReady(string eventName = "")
 
 	if eventOutfitId > 0 
 		bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-		if main.SubCount > 0
+		if TheSecondSub.GetReference() != none
 			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
 		endif
-		if main.SubCount == 2
+		if TheThirdSub.GetReference() != none
 			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
 		endif
 
@@ -2347,7 +2389,7 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 	while i < inventory.Length
 		Form item = inventory[i]
 		If item.IsPlayable()
-			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip")
+			if sub.IsEquipped(item) && !item.HasKeyWordString("zad_Lockable") && !item.HasKeyWordString("zad_InventoryDevice") && !item.HasKeyWordString("sexlabnostrip") && !item.HasKeyWordString("zbfWornDevice")
 				StorageUtil.FormListAdd(sub, "bind_event_worn_gear", item)
 			endif
 		EndIf
@@ -2416,10 +2458,10 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
 		;if outfitId > 0
 			bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-			if main.SubCount > 0
+			if TheSecondSub.GetReference() != none
 				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
 			endif
-			if main.SubCount == 2
+			if TheThirdSub.GetReference() != none
 				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
 			endif
 
@@ -2491,10 +2533,10 @@ function EventClearUpParty()
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	bms.EquipBondageOutfit(sub, outfitId)
-	if main.SubCount > 0
+	if TheSecondSub.GetReference() != none
 		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
 	endif
-	if main.SubCount == 2
+	if TheThirdSub.GetReference() != none
 		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 	endif
 	StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId)
@@ -2514,9 +2556,9 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
     	bind_MovementQuestScript.PlayDoWork(dom)
 	endif
 
-    if bms.RemoveAllDetectedBondageItems(sub)
-        bind_Utility.DoSleep(1.0)
-    endif
+    ; if bms.RemoveAllDetectedBondageItems(sub)
+    ;     bind_Utility.DoSleep(1.0)
+    ; endif
 
 	;TODO - put back on clothing? not sure if outfit manager is going to be a thing in here. need to store?
 	;TODO - put back on correct bondage outfit
@@ -2547,10 +2589,10 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
 	;if outfitId > 0
 		bms.EquipBondageOutfit(sub, outfitId)
-		if main.SubCount > 0
+		if TheSecondSub.GetReference() != none
 			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
 		endif
-		if main.SubCount == 2
+		if TheThirdSub.GetReference() != none
 			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
 		endif
 		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this

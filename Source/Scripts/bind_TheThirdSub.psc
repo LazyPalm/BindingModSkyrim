@@ -51,7 +51,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
                     endif
                 endif
 
-                bind_Utility.WriteToConsole("second sub - setId: " + wearingSetId + " f: " + main.BindingGameOutfitFile + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
+                bind_Utility.WriteToConsole("third sub - setId: " + wearingSetId + " f: " + main.BindingGameOutfitFile + " dev: " + dev + " slot: " + slotMask + " hasBlock: " + hasBlock)
 
             endif
         endif

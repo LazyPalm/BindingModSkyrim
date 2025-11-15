@@ -229,7 +229,7 @@ event OnInit()
         ;fs.EventGetSubReady(theSub, theDom) ;, playAnimations = true, stripClothing = true, addGag = false, freeWrists = false, removeAll = true)
         
         if bind_Utility.ConfirmBox("Remove worn bondage items?")
-            bms.RemoveAllDetectedBondageItems(theSub)
+            bms.RemoveAllBondageItems(theSub, true) ;bms.RemoveAllDetectedBondageItems(theSub)
             bind_Utility.DoSleep(1.0)
         endif
 
@@ -546,7 +546,8 @@ function ClearItemsMenu()
 
     endif
 
-    bms.RemoveAllDetectedBondageItems(theSub)
+    bms.RemoveAllBondageItems(theSub, true)
+    ;bms.RemoveAllDetectedBondageItems(theSub)
 
     gms.RemoveWornGear(theSub)
 
@@ -813,7 +814,9 @@ function LoadSet()
 
     GoToState("WorkingState")
 
-    bms.RemoveAllDetectedBondageItems(theSub)
+    bms.RemoveAllBondageItems(theSub, true)
+
+    ;bms.RemoveAllDetectedBondageItems(theSub)
 
     ;Form[] setItems = StorageUtil.FormListToArray(TheWardrobe, "set_" + loadedSetName)
 
