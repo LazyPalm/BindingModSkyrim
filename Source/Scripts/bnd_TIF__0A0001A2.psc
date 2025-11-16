@@ -9,10 +9,25 @@ Actor akSpeaker = akSpeakerRef as Actor
 ;ask exit building
 ;(GetOwningQuest() as bind_MainQuestScript).GrantEntryExitPermission(false)
 
-ObjectReference ref = BuildingDoor.GetReference()
-if ref
-    StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
-    StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
+; ObjectReference ref = BuildingDoor.GetReference()
+; if ref
+;     StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
+;     StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
+; endif
+
+Quest q = Quest.GetQuest("bind_MainQuest")
+bind_RulesManager rm = q as bind_RulesManager
+
+rm.BehaviorEnterExitRuleInnPermission = 0
+rm.BehaviorEnterExitRuleCastlePermission = 0
+rm.BehaviorEnterExitRulePlayerHomePermission = 0
+
+if rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
+    rm.BehaviorEnterExitRuleInnPermission = 1
+elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
+    rm.BehaviorEnterExitRuleCastlePermission = 1
+elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
+    rm.BehaviorEnterExitRulePlayerHomePermission = 1
 endif
 
 bind_Utility.WriteInternalMonologue("I have permission to leave...")

@@ -2,22 +2,22 @@ Scriptname bind_BuildingDoor extends ReferenceAlias
 
 Event OnActivate(ObjectReference akActionRef)
     
-    ;Debug.MessageBox("Activated by " + akActionRef + " locked: " + self.GetReference().IsLocked())
+    ; ;Debug.MessageBox("Activated by " + akActionRef + " locked: " + self.GetReference().IsLocked())
         
-    If akActionRef == fs.GetSubRef()
+    ; If akActionRef == fs.GetSubRef()
 
-        fs.CalculateDistanceAtAction()
+    ;     fs.CalculateDistanceAtAction()
     
-        ; if main.DomDoorDiscovery == 1
+    ;     ; if main.DomDoorDiscovery == 1
 
-        ;     debug.MessageBox(self.GetReference().GetFactionOwner())
+    ;     ;     debug.MessageBox(self.GetReference().GetFactionOwner())
 
-        ; endif
+    ;     ; endif
     
     
-        ;Debug.MessageBox("You used a door...")
-        fs.SubUsedDoor(self.GetReference())
-    EndIf
+    ;     ;Debug.MessageBox("You used a door...")
+    ;     fs.SubUsedDoor(self.GetReference())
+    ; EndIf
 
 EndEvent
 

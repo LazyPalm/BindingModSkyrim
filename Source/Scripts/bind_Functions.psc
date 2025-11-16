@@ -689,10 +689,46 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 	bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
 	lastLocation = oldLocation
 	currentLocation = newLocation
+	
+	bool isIndoors = theSubRef.IsInInterior()
 
 	TheSubCurrentLocation.ForceLocationTo(newLocation)
-
-	bool isIndoors = theSubRef.IsInInterior()
+	rman.BehaviorEnterExitRuleCurrentLocationType == 0
+	if newLocation != none && isIndoors && rman.BehaviorEnterExitRule == 1
+		;entered a building
+		if (newLocation.HasKeywordString("LocTypeInn") && rman.BehaviorEnterExitRuleInn == 1) 
+			rman.BehaviorEnterExitRuleCurrentLocationType = rman.DESTINATION_TYPE_INN
+			if !rman.BehaviorEnterExitRuleInnPermission == 1
+				rman.BrokeEntryRule()
+			endif
+		elseif (newLocation.HasKeywordString("LocTypeCastle") && rman.BehaviorEnterExitRuleCastle == 1) 
+			rman.BehaviorEnterExitRuleCurrentLocationType = rman.DESTINATION_TYPE_CASTLE
+			if !rman.BehaviorEnterExitRuleCastlePermission == 1
+				rman.BrokeEntryRule()
+			endif
+		elseif (newLocation.HasKeywordString("LocTypePlayerHouse") && rman.BehaviorEnterExitRulePlayerHome == 1) 
+			rman.BehaviorEnterExitRuleCurrentLocationType = rman.DESTINATION_TYPE_PLAYERHOME
+			if !rman.BehaviorEnterExitRulePlayerHomePermission == 1
+				rman.BrokeEntryRule()
+			endif
+		endif
+	endif
+	if oldLocation != none && !isIndoors && rman.BehaviorEnterExitRule == 1
+		;left a building (or changing zones)
+		if (oldLocation.HasKeywordString("LocTypeInn") && rman.BehaviorEnterExitRuleInn == 1) 
+			if !rman.BehaviorEnterExitRuleInnPermission == 1
+				rman.BrokeExitRule()
+			endif
+		elseif (oldLocation.HasKeywordString("LocTypeCastle") && rman.BehaviorEnterExitRuleCastle == 1) 
+			if !rman.BehaviorEnterExitRuleCastlePermission == 1
+				rman.BrokeExitRule()
+			endif
+		elseif (oldLocation.HasKeywordString("LocTypePlayerHouse") && rman.BehaviorEnterExitRulePlayerHome == 1) 
+			if !rman.BehaviorEnterExitRulePlayerHomePermission == 1
+				rman.BrokeExitRule()
+			endif
+		endif
+	endif
 
 	if isIndoors
 		main.SubIndoors = 1
@@ -814,7 +850,7 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 
 	;clear stuff
 
-	rman.ClearLocationPermissions(theSubRef)
+	rman.ClearLocationPermissions(theSubRef) ;TODO - should the entry/exit quest do this???
 
 	bind_GlobalLocationHasFurniture.SetValue(0)
 	main.bind_GlobalLocationHasBed.SetValue(0)
@@ -3035,10 +3071,10 @@ endfunction
 
 function PoseForSleep()
 	if ModInRunningState()
-		if !bind_KneelingQuest.IsRunning()
-			bind_KneelingQuest.Start()
-			bind_Utility.DoSleep(2.0)
-		endif
+		; if !bind_KneelingQuest.IsRunning()
+		; 	bind_KneelingQuest.Start()
+		; 	bind_Utility.DoSleep(2.0)
+		; endif
 		ObjectReference bed = EventGetNearbyBed()
 		;debug.MessageBox("bed: " + bed)
 		if bed

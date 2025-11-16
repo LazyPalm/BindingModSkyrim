@@ -22,6 +22,8 @@ endevent
 
 event OnUpdate()
 
+    debug.MessageBox("is this still happening?")
+
     bind_Utility.WriteToConsole("kneeing quest is updating. door: " + TheNearestDoor.GetReference())
 
     int crowdSize = bind_SkseFunctions.CalculateCrowd(fs.GetSubRef(), fs.GetDomRef(), 1000.0, 3000.0)

@@ -31,6 +31,12 @@ int property BehaviorEnterExitRuleCastle auto conditional
 int property BehaviorEnterExitRuleInn auto conditional
 int property BehaviorEnterExitRulePlayerHome auto conditional
 int property BehaviorEnterExitRule auto conditional
+int property BehaviorEnterExitRuleCurrentDoorType auto conditional
+int property BehaviorEnterExitRuleCurrentLocationType auto conditional
+
+int property DESTINATION_TYPE_INN = 1 autoReadOnly
+int property DESTINATION_TYPE_CASTLE = 2 autoReadOnly
+int property DESTINATION_TYPE_PLAYERHOME = 3 autoReadOnly
 
 int property BehaviorStudiesAskToTrainMustAsk auto conditional
 int property BehaviorStudiesAskToTrainPermission auto conditional
@@ -595,6 +601,34 @@ function UpdateTimePermissions()
 
 endfunction
 
+function BrokeEntryRule()
+    UnregisterForUpdate()
+    GotoState("BrokeEntryRuleState")
+    RegisterForSingleUpdate(5.0)
+endfunction
+
+function BrokeExitRule()
+    UnregisterForUpdate()
+    GotoState("BrokeExitRuleState")
+    RegisterForSingleUpdate(5.0)
+endfunction
+
+event OnUpdate()
+endevent
+
+state BrokeEntryRuleState
+    event OnUpdate()       
+        bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
+        fs.MarkSubBrokeRule("I did not have permission to enter...", true)
+    endevent
+endstate
+
+state BrokeExitRuleState
+    event OnUpdate()       
+        bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
+        fs.MarkSubBrokeRule("I did not have permission to exit...", true)
+    endevent
+endstate
 
 ;******************************************************************************************************************************
 

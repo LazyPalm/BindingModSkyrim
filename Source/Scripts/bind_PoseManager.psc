@@ -1141,9 +1141,9 @@ function RemovePosingFactions()
 endfunction
 
 function EndQuests()
-    if bind_KneelingQuest.IsRunning()
-        ;bind_KneelingQuest.Stop()
-    endif
+    ; if bind_KneelingQuest.IsRunning()
+    ;     ;bind_KneelingQuest.Stop()
+    ; endif
 
     ; if bind_ConversationQuest.IsRunning()
     ;     (bind_ConversationQuest as bind_ConversationQuestScript).EndQuest()

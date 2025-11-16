@@ -110,249 +110,249 @@ bool lookedAtFurniture
 
 Event OnCrosshairRefChange(ObjectReference ref)
 
-	if ref != currentConversationTarget
-		fs.ClearConversationTargetNpc()
-	endif
+	; if ref != currentConversationTarget
+	; 	fs.ClearConversationTargetNpc()
+	; endif
 
-	if ref as Actor
-		currentConversationTarget = ref
-		fs.SetConversationTargetNpc(ref as Actor)
-	endif
+	; if ref as Actor
+	; 	currentConversationTarget = ref
+	; 	fs.SetConversationTargetNpc(ref as Actor)
+	; endif
 
-	;TODO - not sure about this only working while running state
-	;this is to keep it from ditching targets while an event is running, but targeting in the event might be needed?? 3/8/25
-	if bind_GlobalModState.GetValue() == 1.0
+	; ;TODO - not sure about this only working while running state
+	; ;this is to keep it from ditching targets while an event is running, but targeting in the event might be needed?? 3/8/25
+	; if bind_GlobalModState.GetValue() == 1.0
 
-		;Maybe only run checks if the activation key has been pressed?
+	; 	;Maybe only run checks if the activation key has been pressed?
 
-		If MQS.IsSub == 1
-			If ref ;Used to determine if it's none or not.
-				;Debug.Notification("Crosshair had " + ref.GetDisplayName() + " type " + ref.GetType() + " id " + ref + " targeted.")
-				int foundType = ref.GetType()
-				If foundType == 62
-					If MQS.DomUseDragonSoulRitual == 1
-						; If MQS.SubNearDeadDragon == 0
-						; 	If ref as MGRitual05DragonScript
-						; 		;Debug.MessageBox("found dead dragon...")
-						; 		DeadDragon.ForceRefTo(ref)
-						; 		MQS.SubNearDeadDragon = 1
-						; 		MQS.WindowOutput("I should talk to " + MQS.GetDomTitle() + " about this dragon...")
-						; 		;MQS.SoulsFromBones()
-						; 	EndIf
-						; EndIf
-					EndIf
-					if ref as Actor
-						;MQS.SetConversationTarget(ref as Actor)
-						;currentConversationTarget = ref
-						;fs.SetConversationTargetNpc(ref as Actor)
-						;if RulesManager.BehaviorStudiesAskToTrainMustAsk == 1 && RulesManager.BehaviorStudiesAskToTrainPermission == 0
-						if ref == fs.GetDomRef()
+	; 	If MQS.IsSub == 1
+	; 		If ref ;Used to determine if it's none or not.
+	; 			;Debug.Notification("Crosshair had " + ref.GetDisplayName() + " type " + ref.GetType() + " id " + ref + " targeted.")
+	; 			int foundType = ref.GetType()
+	; 			If foundType == 62
+	; 				If MQS.DomUseDragonSoulRitual == 1
+	; 					; If MQS.SubNearDeadDragon == 0
+	; 					; 	If ref as MGRitual05DragonScript
+	; 					; 		;Debug.MessageBox("found dead dragon...")
+	; 					; 		DeadDragon.ForceRefTo(ref)
+	; 					; 		MQS.SubNearDeadDragon = 1
+	; 					; 		MQS.WindowOutput("I should talk to " + MQS.GetDomTitle() + " about this dragon...")
+	; 					; 		;MQS.SoulsFromBones()
+	; 					; 	EndIf
+	; 					; EndIf
+	; 				EndIf
+	; 				if ref as Actor
+	; 					;MQS.SetConversationTarget(ref as Actor)
+	; 					;currentConversationTarget = ref
+	; 					;fs.SetConversationTargetNpc(ref as Actor)
+	; 					;if RulesManager.BehaviorStudiesAskToTrainMustAsk == 1 && RulesManager.BehaviorStudiesAskToTrainPermission == 0
+	; 					if ref == fs.GetDomRef()
 
-							if fs.ModInRunningState()
-								if StorageUtil.GetIntValue(self.GetReference(), "bind_safe_area_interaction_check", 0) == 3
-									;debug.MessageBox("start rules check quest")
-									if !bind_RulesCheckQuest.IsRunning()
-										bind_RulesCheckQuest.Start()
-									endif
-									StorageUtil.SetIntValue(self.GetReference(), "bind_safe_area_interaction_check", 4) ;set to completed
-								endif
-							endif
+	; 						if fs.ModInRunningState()
+	; 							if StorageUtil.GetIntValue(self.GetReference(), "bind_safe_area_interaction_check", 0) == 3
+	; 								;debug.MessageBox("start rules check quest")
+	; 								if !bind_RulesCheckQuest.IsRunning()
+	; 									bind_RulesCheckQuest.Start()
+	; 								endif
+	; 								StorageUtil.SetIntValue(self.GetReference(), "bind_safe_area_interaction_check", 4) ;set to completed
+	; 							endif
+	; 						endif
 
-						elseif RulesManager.GetBehaviorRule(fs.GetSubRef(), RulesManager.BEHAVIOR_RULE_ASK_TO_TRAIN())  == 1 && RulesManager.BehaviorStudiesAskToTrainPermission == 0
-							Actor trainer = ref as Actor
-							if trainer.IsInFaction(JobTrainerFaction)
-								bind_Utility.WriteInternalMonologue("I must ask permission before speaking to a trainer...")
-							endif
-						endif
-					endif
-				ElseIf foundType == 61 ;kReference - 61
-					string displayName = ref.GetDisplayName()
+	; 					elseif RulesManager.GetBehaviorRule(fs.GetSubRef(), RulesManager.BEHAVIOR_RULE_ASK_TO_TRAIN())  == 1 && RulesManager.BehaviorStudiesAskToTrainPermission == 0
+	; 						Actor trainer = ref as Actor
+	; 						if trainer.IsInFaction(JobTrainerFaction)
+	; 							bind_Utility.WriteInternalMonologue("I must ask permission before speaking to a trainer...")
+	; 						endif
+	; 					endif
+	; 				endif
+	; 			ElseIf foundType == 61 ;kReference - 61
+	; 				string displayName = ref.GetDisplayName()
 
-					bool foundShrine = false
-					bool foundDoor = false
-					If ref.GetBaseObject() as Door
-						; ;found door
-						; ;Debug.MessageBox("it was a door...")
-						BuildingDoor.ForceRefTo(ref)
-						; MQS.CalculateDistanceAtAction()
+	; 				bool foundShrine = false
+	; 				bool foundDoor = false
+	; 				If ref.GetBaseObject() as Door
+	; 					; ;found door
+	; 					; ;Debug.MessageBox("it was a door...")
+	; 					BuildingDoor.ForceRefTo(ref)
+	; 					; MQS.CalculateDistanceAtAction()
 
-						;debug.MessageBox("locked: " + ref.IsLocked())
+	; 					;debug.MessageBox("locked: " + ref.IsLocked())
 
-						if MQS.DomDoorDiscovery == 1 && ref.IsLocked()
-							;NOTE - NPC doms will give the player a copy of the key, this code will "learn" the building faction the first time the player unlocks the door
-							;this will keep the trespassing messages away
-							ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
-							if destination.GetBaseObject() as Door
-								Location doorLoc = destination.GetCurrentLocation()
-								Faction buildingFaction = destination.GetFactionOwner()
+	; 					if MQS.DomDoorDiscovery == 1 && ref.IsLocked()
+	; 						;NOTE - NPC doms will give the player a copy of the key, this code will "learn" the building faction the first time the player unlocks the door
+	; 						;this will keep the trespassing messages away
+	; 						ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
+	; 						if destination.GetBaseObject() as Door
+	; 							Location doorLoc = destination.GetCurrentLocation()
+	; 							Faction buildingFaction = destination.GetFactionOwner()
 
-								Faction[] factions = fs.GetDomRef().GetFactions(-128, 127)
-								int i = 0
-								while i < factions.Length
-									if factions[i] == buildingFaction
-										debug.MessageBox(fs.GetDomTitle() + " lives here...")
-										if !fs.GetSubRef().IsInFaction(factions[i])
-											fs.GetSubRef().AddToFaction(factions[i])
-											StorageUtil.SetFormValue(fs.GetSubRef(), "bind_dom_house_faction", factions[i])
-											MQS.DomDoorDiscovery = 0
-										endif
-									endif
-									i += 1
-								endwhile
+	; 							Faction[] factions = fs.GetDomRef().GetFactions(-128, 127)
+	; 							int i = 0
+	; 							while i < factions.Length
+	; 								if factions[i] == buildingFaction
+	; 									debug.MessageBox(fs.GetDomTitle() + " lives here...")
+	; 									if !fs.GetSubRef().IsInFaction(factions[i])
+	; 										fs.GetSubRef().AddToFaction(factions[i])
+	; 										StorageUtil.SetFormValue(fs.GetSubRef(), "bind_dom_house_faction", factions[i])
+	; 										MQS.DomDoorDiscovery = 0
+	; 									endif
+	; 								endif
+	; 								i += 1
+	; 							endwhile
 
-								;debug.MessageBox(doorLoc.GetName() + " faction: " + destination.GetFactionOwner())
-							endif
-						endif
+	; 							;debug.MessageBox(doorLoc.GetName() + " faction: " + destination.GetFactionOwner())
+	; 						endif
+	; 					endif
 
-						; int doorType = StorageUtil.GetIntValue(ref, "binding_door_type", 0)
-						; string doorName = StorageUtil.GetStringValue(ref, "binding_door_name", "")
+	; 					; int doorType = StorageUtil.GetIntValue(ref, "binding_door_type", 0)
+	; 					; string doorName = StorageUtil.GetStringValue(ref, "binding_door_name", "")
 
-						; if doorType == 0
-						; 	ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
-						; 	if mqs.SubIndoors == 0							
-						; 		;debug.messageBox(destination.GetName())
-						; 		if destination.GetBaseObject() as Door
-						; 			Location doorLoc = destination.GetCurrentLocation()
-						; 			doorName = doorLoc.GetName()
-						; 			BuildingDoorDestination.ForceLocationTo(doorLoc)
-						; 			if doorLoc.HasKeywordString("LocTypeInn")
-						; 				doorType = 10
-						; 			elseif doorLoc.HasKeywordString("LocTypeCastle")
-						; 				doorType = 20
-						; 			elseif doorLoc.HasKeywordString("LocTypePlayerHouse")
-						; 				doorType = 30
-						; 			endif
-						; 			bind_Utility.WriteToConsole("This door leads to: " + doorName)
+	; 					; if doorType == 0
+	; 					; 	ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
+	; 					; 	if mqs.SubIndoors == 0							
+	; 					; 		;debug.messageBox(destination.GetName())
+	; 					; 		if destination.GetBaseObject() as Door
+	; 					; 			Location doorLoc = destination.GetCurrentLocation()
+	; 					; 			doorName = doorLoc.GetName()
+	; 					; 			BuildingDoorDestination.ForceLocationTo(doorLoc)
+	; 					; 			if doorLoc.HasKeywordString("LocTypeInn")
+	; 					; 				doorType = 10
+	; 					; 			elseif doorLoc.HasKeywordString("LocTypeCastle")
+	; 					; 				doorType = 20
+	; 					; 			elseif doorLoc.HasKeywordString("LocTypePlayerHouse")
+	; 					; 				doorType = 30
+	; 					; 			endif
+	; 					; 			bind_Utility.WriteToConsole("This door leads to: " + doorName)
 									
-						; 		endif
-						; 	elseif mqs.SubIndoors == 1
-						; 		if destination.GetBaseObject() as Door
-						; 			Location doorLoc = destination.GetCurrentLocation()
-						; 			Location subLoc = self.GetReference().GetCurrentLocation()
-						; 			BuildingDoorDestination.ForceLocationTo(doorLoc)
-						; 			doorName = subLoc.GetName()
-						; 			if doorLoc.HasKeywordString("LocTypeCity") || doorLoc.HasKeywordString("LocTypeTown")
-						; 				if subLoc.HasKeywordString("LocTypeInn")
-						; 					doorType = 11
-						; 				elseif subLoc.HasKeywordString("LocTypeCastle")
-						; 					doorType = 21
-						; 				elseif subLoc.HasKeywordString("LocTypePlayerHouse")
-						; 					doorType = 31
-						; 				endif
-						; 			endif
-						; 			bind_Utility.WriteToConsole("This door leads to: " + doorLoc.GetName())
-						; 		endif
-						; 	endif
-						; 	if doorType > 0
-						; 		StorageUtil.SetStringValue(ref, "binding_door_name", doorName)
-						; 		StorageUtil.SetIntValue(ref, "binding_door_type", doorType)
-						; 	endif
-						; else
-						; 	bind_Utility.WriteToConsole("stored door - type: " + doorType + " name: " + doorName)
-						; endif
+	; 					; 		endif
+	; 					; 	elseif mqs.SubIndoors == 1
+	; 					; 		if destination.GetBaseObject() as Door
+	; 					; 			Location doorLoc = destination.GetCurrentLocation()
+	; 					; 			Location subLoc = self.GetReference().GetCurrentLocation()
+	; 					; 			BuildingDoorDestination.ForceLocationTo(doorLoc)
+	; 					; 			doorName = subLoc.GetName()
+	; 					; 			if doorLoc.HasKeywordString("LocTypeCity") || doorLoc.HasKeywordString("LocTypeTown")
+	; 					; 				if subLoc.HasKeywordString("LocTypeInn")
+	; 					; 					doorType = 11
+	; 					; 				elseif subLoc.HasKeywordString("LocTypeCastle")
+	; 					; 					doorType = 21
+	; 					; 				elseif subLoc.HasKeywordString("LocTypePlayerHouse")
+	; 					; 					doorType = 31
+	; 					; 				endif
+	; 					; 			endif
+	; 					; 			bind_Utility.WriteToConsole("This door leads to: " + doorLoc.GetName())
+	; 					; 		endif
+	; 					; 	endif
+	; 					; 	if doorType > 0
+	; 					; 		StorageUtil.SetStringValue(ref, "binding_door_name", doorName)
+	; 					; 		StorageUtil.SetIntValue(ref, "binding_door_type", doorType)
+	; 					; 	endif
+	; 					; else
+	; 					; 	bind_Utility.WriteToConsole("stored door - type: " + doorType + " name: " + doorName)
+	; 					; endif
 
-						; if doorType == 10
-						; 	if RulesManager.BehaviorEnterExitRuleInn == 1 && RulesManager.BehaviorEnterExitRuleInnPermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
-						; 	endif
-						; elseif doorType == 11
-						; 	if RulesManager.BehaviorEnterExitRuleInn == 1 && RulesManager.BehaviorEnterExitRuleInnPermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
-						; 	endif
-						; elseif doorType == 20
-						; 	if RulesManager.BehaviorEnterExitRuleCastle == 1 && RulesManager.BehaviorEnterExitRuleCastlePermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
-						; 	endif
-						; elseif doorType == 21
-						; 	if RulesManager.BehaviorEnterExitRuleCastle == 1 && RulesManager.BehaviorEnterExitRuleCastlePermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
-						; 	endif
-						; elseif doorType == 30
-						; 	if RulesManager.BehaviorEnterExitRulePlayerHome == 1 && RulesManager.BehaviorEnterExitRulePlayerHomePermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
-						; 	endif
-						; elseif doorType == 31
-						; 	if RulesManager.BehaviorEnterExitRulePlayerHome == 1 && RulesManager.BehaviorEnterExitRulePlayerHomePermission == 0
-						; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
-						; 	endif
-						; endif
+	; 					; if doorType == 10
+	; 					; 	if RulesManager.BehaviorEnterExitRuleInn == 1 && RulesManager.BehaviorEnterExitRuleInnPermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
+	; 					; 	endif
+	; 					; elseif doorType == 11
+	; 					; 	if RulesManager.BehaviorEnterExitRuleInn == 1 && RulesManager.BehaviorEnterExitRuleInnPermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
+	; 					; 	endif
+	; 					; elseif doorType == 20
+	; 					; 	if RulesManager.BehaviorEnterExitRuleCastle == 1 && RulesManager.BehaviorEnterExitRuleCastlePermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
+	; 					; 	endif
+	; 					; elseif doorType == 21
+	; 					; 	if RulesManager.BehaviorEnterExitRuleCastle == 1 && RulesManager.BehaviorEnterExitRuleCastlePermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
+	; 					; 	endif
+	; 					; elseif doorType == 30
+	; 					; 	if RulesManager.BehaviorEnterExitRulePlayerHome == 1 && RulesManager.BehaviorEnterExitRulePlayerHomePermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to enter " + doorName + "...")
+	; 					; 	endif
+	; 					; elseif doorType == 31
+	; 					; 	if RulesManager.BehaviorEnterExitRulePlayerHome == 1 && RulesManager.BehaviorEnterExitRulePlayerHomePermission == 0
+	; 					; 		bind_Utility.WriteInternalMonologue("I need permission to leave " + doorName + "...")
+	; 					; 	endif
+	; 					; endif
 
-					ElseIf ref as TempleBlessingScript
-						string shrineName = ref.GetDisplayName()
-						;Debug.MessageBox("it was a shrine...")
-						PrayerShrine.ForceRefTo(ref)
-						fs.CalculateDistanceAtAction()
+	; 				ElseIf ref as TempleBlessingScript
+	; 					string shrineName = ref.GetDisplayName()
+	; 					;Debug.MessageBox("it was a shrine...")
+	; 					PrayerShrine.ForceRefTo(ref)
+	; 					fs.CalculateDistanceAtAction()
 
-					elseif ref.HasKeywordString("zadc_FurnitureDevice") || ref.HasKeywordString("dse_dm_KeywordFurniture")
-						;bind_Utility.WriteInternalMonologue("This furniture looks like fun...")
-						;MQS.Furniture1Ref.ForceRefTo(ref)
-						fs.EventSetFurniture(ref)
-						bind_GlobalLocationHasFurniture.SetValue(1)
-						if !lookedAtFurniture
-							lookedAtFurniture = true
-							bind_Utility.SendSimpleModEvent("bind_SubLookedAtFurnitureEvent")
-						endif
+	; 				; elseif ref.HasKeywordString("zadc_FurnitureDevice") || ref.HasKeywordString("dse_dm_KeywordFurniture") || ref.HasKeywordString("zbfFurniture")
+	; 				; 	;bind_Utility.WriteInternalMonologue("This furniture looks like fun...")
+	; 				; 	;MQS.Furniture1Ref.ForceRefTo(ref)
+	; 				; 	fs.EventSetFurniture(ref)
+	; 				; 	bind_GlobalLocationHasFurniture.SetValue(1)
+	; 				; 	if !lookedAtFurniture
+	; 				; 		lookedAtFurniture = true
+	; 				; 		bind_Utility.SendSimpleModEvent("bind_SubLookedAtFurnitureEvent")
+	; 				; 	endif
 
-					elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
-						bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
-						fs.SetNearbyBed(ref)
-						MQS.bind_GlobalLocationHasBed.SetValue(1)
+	; 				; elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
+	; 				; 	bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
+	; 				; 	fs.SetNearbyBed(ref)
+	; 				; 	MQS.bind_GlobalLocationHasBed.SetValue(1)
 
-					; ElseIf displayName == "Door"
-					; 	;float dist = ref.GetDistance(MQS.GetSubRef())
-					; 	;Debug.MessageBox(dist)
-					; 	foundDoor = true
-					; ElseIf displayName == "Wooden  Door"
-					; 	foundDoor = true
-					; ElseIf displayName == "Large Wooden Door"
-					; 	foundDoor = true
-					; ElseIf displayName == "Shrine Of Talos"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Akatosh"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Arkay"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Dibella"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Julianos"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Kynareth"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Mara"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Stendarr"
-					; 	foundShrine = true
-					; ElseIf displayName == "Shrine Of Zenithar"
-					; 	foundShrine = true
-						;either attach an on activate script to a alias
-						;or apply this to a variable in main that could be examined when activator is pressed (would save the forcerefto step)
-						;NOTE - went with the forceref for now - will test performance
-					EndIf
+	; 				; ElseIf displayName == "Door"
+	; 				; 	;float dist = ref.GetDistance(MQS.GetSubRef())
+	; 				; 	;Debug.MessageBox(dist)
+	; 				; 	foundDoor = true
+	; 				; ElseIf displayName == "Wooden  Door"
+	; 				; 	foundDoor = true
+	; 				; ElseIf displayName == "Large Wooden Door"
+	; 				; 	foundDoor = true
+	; 				; ElseIf displayName == "Shrine Of Talos"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Akatosh"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Arkay"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Dibella"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Julianos"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Kynareth"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Mara"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Stendarr"
+	; 				; 	foundShrine = true
+	; 				; ElseIf displayName == "Shrine Of Zenithar"
+	; 				; 	foundShrine = true
+	; 					;either attach an on activate script to a alias
+	; 					;or apply this to a variable in main that could be examined when activator is pressed (would save the forcerefto step)
+	; 					;NOTE - went with the forceref for now - will test performance
+	; 				EndIf
 
-					; If foundDoor
-					; 	BuildingDoor.ForceRefTo(ref)
-					; EndIf
+	; 				; If foundDoor
+	; 				; 	BuildingDoor.ForceRefTo(ref)
+	; 				; EndIf
 
-					; If foundShrine
-					; 	MQS.WindowOutput("Found " + displayName + "...")
-					; 	PrayerShrine.ForceRefTo(ref)
-					; EndIf
-				EndIf
+	; 				; If foundShrine
+	; 				; 	MQS.WindowOutput("Found " + displayName + "...")
+	; 				; 	PrayerShrine.ForceRefTo(ref)
+	; 				; EndIf
+	; 			EndIf
 
-				;kCharacter = 62
-				;TODO - replace cell scan in conversation manager with an NPC set here, should not have the outdoor cell change issues
-				;and should work bettter in crowds
+	; 			;kCharacter = 62
+	; 			;TODO - replace cell scan in conversation manager with an NPC set here, should not have the outdoor cell change issues
+	; 			;and should work bettter in crowds
 
-				;NOTE - maybe this would be better for furniture also?
-				;kActivator = 24
-				;kFurniture = 40
+	; 			;NOTE - maybe this would be better for furniture also?
+	; 			;kActivator = 24
+	; 			;kFurniture = 40
 
-				;NOTE - this should work for doors. when asking to enter or exit a location.
+	; 			;NOTE - this should work for doors. when asking to enter or exit a location.
 
-			EndIf
-		EndIf
+	; 		EndIf
+	; 	EndIf
 
-	endif
+	; endif
 
 EndEvent
 
