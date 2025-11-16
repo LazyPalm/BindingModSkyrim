@@ -46,7 +46,7 @@ int function CrosshairNpc(Actor act) global
     fs.ConversationTargetNpc.ForceRefTo(act)
 
     ;NOTE - when using conversation target (posing) check distance and clear if player has moved away too far
-    
+    return 0
 endfunction
 
 int function CrosshairDoor(Form d, ObjectReference o) global
@@ -85,11 +85,40 @@ int function CrosshairDoor(Form d, ObjectReference o) global
         endif
     endif
 
+    return 0
+
 endfunction
 
 int function CrosshairBed(ObjectReference o) global
-
     bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
     fs.NearbyBed.ForceRefTo(o) 
+    return 0
+endfunction
+
+int function ActivatedShrine(string shrineName, string shrineGod) global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    fs.SubPrayedAtShrine(shrineGod)
+    return 0
+endfunction
+
+int function ActivatedDragon(ObjectReference o) global
+
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_Functions fs = q as bind_Functions
+    bind_MainQuestScript main = q as bind_MainQuestScript
+
+    if !StorageUtil.FormListHas(fs.GetSubRef(), "binding_dragons_list", o)
+        ;debug.MessageBox("activated dragon: " + o)
+        StorageUtil.FormListAdd(fs.GetSubRef(), "binding_dragons_list", o)
+        ;Debug.MessageBox("start: " + main.DomStartupQuestsEnabled)
+        if fs.ModInRunningState() && main.DomStartupQuestsEnabled == 1
+            Quest souls = Quest.GetQuest("bind_SoulsFromBonesQuest")
+            souls.Start()
+        endif
+    else
+        ;debug.MessageBox("re-activated dragon: " + o)
+    endif
+
+    return 0
 
 endfunction

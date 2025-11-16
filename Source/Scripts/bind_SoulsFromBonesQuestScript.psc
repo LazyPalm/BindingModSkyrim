@@ -113,7 +113,10 @@ function StartEvent()
     endif
 
     bind_MovementQuestScript.PlayDoWork(theDom)
-    bind_Utility.DoSleep(2.0)
+
+    bind_Utility.FadeOutApply("What is " + fs.GetDomTitle() + " going to do with me next?...")
+
+    ;bind_Utility.DoSleep(2.0)
     float z = theDom.GetAngleZ()
     obj = theDom.PlaceAtMe(bind_SexFurniture.GetAt(Utility.RandomInt(0, bind_SexFurniture.GetSize() - 1)), 1, true, true)
     obj.MoveTo(theDom, 120.0 * Math.Sin(theDom.GetAngleZ()), 120.0 * Math.Cos(theDom.GetAngleZ()), 0)
@@ -126,7 +129,22 @@ function StartEvent()
         (obj as zadcFurnitureScript).ScriptedDevice = true
     endif
 
-    fs.EventGetSubReady(theSub, theDom, "event_souls_from_bones") ;, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = true)
+    fs.EventGetPartyReady("event_souls_from_bones")
+    ;fs.EventGetSubReady(theSub, theDom, "event_souls_from_bones") ;, playAnimations = true, stripClothing = true, addGag = true, freeWrists = true, removeAll = true)
+
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.HogtieActor(secondSub)
+        endif
+
+        if fs.TheThirdSub.GetReference() != none
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            bind_BondageManager.HogtieActor(thirdSub)
+        endif
+
+    endif
 
     ;TODO: add a soulstone plug or two??
 
@@ -136,6 +154,8 @@ function StartEvent()
     if zclib.LockActor(theSub, obj)
         bind_Utility.DoSleep(2.0)
     endif
+
+    bind_Utility.FadeOutRemove("")
 
     zclib.PlaySexScene(theSub, theDom)
 
@@ -182,13 +202,27 @@ function StopEvent()
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 
+    bind_Utility.FadeOutApply("My burning inside from the dragon soul stops...")
+
     zclib.UnlockActor(theSub)
 
     bind_Utility.DisablePlayer()
 
     bind_Utility.DoSleep(1.0)
 
-    fs.EventCleanUpSub(theSub, theDom, true)
+    if fs.TheSecondSub.GetReference() != none
+        Actor secondSub = fs.TheSecondSub.GetActorReference()
+        bind_BondageManager.FreeActorFromHogtie(secondSub)
+    endif 
+    if fs.TheThirdSub.GetReference() != none
+        Actor thirdSub = fs.TheThirdSub.GetActorReference()
+        bind_BondageManager.FreeActorFromHogtie(thirdSub)
+    endif
+
+    fs.EventClearUpParty()
+    ;fs.EventCleanUpSub(theSub, theDom, true)
+
+    bind_Utility.FadeOutRemove()
 
     bind_Utility.EnablePlayer()
 

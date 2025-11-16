@@ -1173,7 +1173,7 @@ ObjectReference function GetSubInFurnitureItem()
 	return subInFurnitureItemRef
 endfunction
 
-Function SubPrayedAtShrine()
+Function SubPrayedAtShrine(string shrineGod)
 	LogOutput("In SubPrayedAtShrine()")
 
 	if main.IsSub == 0
@@ -1245,7 +1245,7 @@ Function SubPrayedAtShrine()
 	endif
 
 	If result
-		bind_Utility.WriteInternalMonologue("Hopefully the Divines will be pleased with my respect...")
+		bind_Utility.WriteInternalMonologue("Hopefully " + shrineGod + " will be pleased with my respect...")
 		;TODO - tailor these to shrine
 	else
 		MarkSubBrokeRule(msg, true)
@@ -1258,119 +1258,119 @@ Function SubPrayedAtShrine()
 
 EndFunction
 
-Function SubUsedDoor(ObjectReference doorRef)
-	LogOutput("SubUsedDoor()")
+; Function SubUsedDoor(ObjectReference doorRef)
+; 	LogOutput("SubUsedDoor()")
 
-	if main.IsSub == 0
-		return
-	endif
+; 	if main.IsSub == 0
+; 		return
+; 	endif
 
-	bool isIndoors = theSubRef.IsInInterior()
+; 	bool isIndoors = theSubRef.IsInInterior()
 
-	ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(doorRef)
-	if !destination
-		bind_Utility.WriteToConsole("door " + doorRef + " has no destination")
-		return
-	endif
+; 	ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(doorRef)
+; 	if !destination
+; 		bind_Utility.WriteToConsole("door " + doorRef + " has no destination")
+; 		return
+; 	endif
 
-	Location doorLoc = destination.GetCurrentLocation()
+; 	Location doorLoc = destination.GetCurrentLocation()
 
-	if !isIndoors
-		;outdoor checks
-		if doorLoc.HasKeywordString("LocTypeInn") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_INN())  == 1 ; rman.BehaviorEnterExitRuleInn == 1
-		elseif doorLoc.HasKeywordString("LocTypeCastle") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_CASTLE())  == 1 ;rman.BehaviorEnterExitRuleCastle == 1
-		elseif doorLoc.HasKeywordString("LocTypePlayerHouse") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_PLAYER_HOME())  == 1 ;rman.BehaviorEnterExitRulePlayerHome == 1
-		else
-			return ;permission not needed
-		endif
-	else
-		;indoor checks
-		if currentLocation.HasKeywordString("LocTypeInn") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_INN())  == 1 ;rman.BehaviorEnterExitRuleInn == 1
-		elseif currentLocation.HasKeywordString("LocTypeCastle") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_CASTLE())  == 1 ;rman.BehaviorEnterExitRuleCastle == 1
-		elseif currentLocation.HasKeywordString("LocTypePlayerHouse") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_PLAYER_HOME())  == 1 ;rman.BehaviorEnterExitRulePlayerHome == 1
-		else
-			return ;permission not needed
-		endif
-	endif
+; 	if !isIndoors
+; 		;outdoor checks
+; 		if doorLoc.HasKeywordString("LocTypeInn") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_INN())  == 1 ; rman.BehaviorEnterExitRuleInn == 1
+; 		elseif doorLoc.HasKeywordString("LocTypeCastle") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_CASTLE())  == 1 ;rman.BehaviorEnterExitRuleCastle == 1
+; 		elseif doorLoc.HasKeywordString("LocTypePlayerHouse") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_PLAYER_HOME())  == 1 ;rman.BehaviorEnterExitRulePlayerHome == 1
+; 		else
+; 			return ;permission not needed
+; 		endif
+; 	else
+; 		;indoor checks
+; 		if currentLocation.HasKeywordString("LocTypeInn") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_INN())  == 1 ;rman.BehaviorEnterExitRuleInn == 1
+; 		elseif currentLocation.HasKeywordString("LocTypeCastle") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_CASTLE())  == 1 ;rman.BehaviorEnterExitRuleCastle == 1
+; 		elseif currentLocation.HasKeywordString("LocTypePlayerHouse") && rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ENTRY_PLAYER_HOME())  == 1 ;rman.BehaviorEnterExitRulePlayerHome == 1
+; 		else
+; 			return ;permission not needed
+; 		endif
+; 	endif
 
-	bind_Utility.DoSleep(5.0) ;wait a few seconds for dom to arrive
-	;CalculateDistanceAtAction()
+; 	bind_Utility.DoSleep(5.0) ;wait a few seconds for dom to arrive
+; 	;CalculateDistanceAtAction()
 
-	;int hasPermission = StorageUtil.GetIntValue(doorRef, "binding_door_permission", 0)
-	;debug.MessageBox("permission: " + hasPermission)
+; 	;int hasPermission = StorageUtil.GetIntValue(doorRef, "binding_door_permission", 0)
+; 	;debug.MessageBox("permission: " + hasPermission)
 
-    int permission = StorageUtil.GetIntValue(doorRef, "bind_door_sub_permission", 0)
-    float permissionEndDate = StorageUtil.GetFloatValue(doorRef, "bind_door_sub_permission_end_date")
+;     int permission = StorageUtil.GetIntValue(doorRef, "bind_door_sub_permission", 0)
+;     float permissionEndDate = StorageUtil.GetFloatValue(doorRef, "bind_door_sub_permission_end_date")
 
-	bind_Utility.WriteToConsole("door permission: " + permission + " end date: " + permissionEndDate)
+; 	bind_Utility.WriteToConsole("door permission: " + permission + " end date: " + permissionEndDate)
 
-	string enterExitMsg = "enter"
-	if isIndoors
-		enterExitMsg = "leave"
-	endif
+; 	string enterExitMsg = "enter"
+; 	if isIndoors
+; 		enterExitMsg = "leave"
+; 	endif
 
-	if permission == 1 && bind_Utility.GetTime() > permissionEndDate
-		MarkSubBrokeRule("My permission to " + enterExitMsg + " expired", true)
-	elseif permission == 1
-		bind_Utility.WriteInternalMonologue("I had permssion to " + enterExitMsg + "...")
-	else
-		MarkSubBrokeRule("I did not have permission to " + enterExitMsg, true)
-	endif
+; 	if permission == 1 && bind_Utility.GetTime() > permissionEndDate
+; 		MarkSubBrokeRule("My permission to " + enterExitMsg + " expired", true)
+; 	elseif permission == 1
+; 		bind_Utility.WriteInternalMonologue("I had permssion to " + enterExitMsg + "...")
+; 	else
+; 		MarkSubBrokeRule("I did not have permission to " + enterExitMsg, true)
+; 	endif
 
-	StorageUtil.SetIntValue(doorRef, "bind_door_sub_permission", 0)
+; 	StorageUtil.SetIntValue(doorRef, "bind_door_sub_permission", 0)
 
-	; int doorType = StorageUtil.GetIntValue(doorRef, "binding_door_type", 0)
-	; string doorName = StorageUtil.GetStringValue(doorRef, "binding_door_name", "")
+; 	; int doorType = StorageUtil.GetIntValue(doorRef, "binding_door_type", 0)
+; 	; string doorName = StorageUtil.GetStringValue(doorRef, "binding_door_name", "")
 
-	; bool brokeRule = false
-	; if doorType == 10 || doorType == 20 || doorType == 30
-	; 	if doorType == 10
-	; 		if rman.BehaviorEnterExitRuleInnPermission != 1 && rman.BehaviorEnterExitRuleInn == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	elseif doorType == 20
-	; 		if rman.BehaviorEnterExitRuleCastlePermission != 1 && rman.BehaviorEnterExitRuleCastle == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	elseif doorType == 30
-	; 		if rman.BehaviorEnterExitRuleInnPermission != 1 && rman.BehaviorEnterExitRuleInn == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	endif
-	; 	if brokeRule
-	; 		CalculateDistanceAtAction()
-	; 		bind_Utility.DoSleep(5.0)
-	; 		MarkSubBrokeRule("I did not have permission to enter " + doorName)
-	; 	endif
+; 	; bool brokeRule = false
+; 	; if doorType == 10 || doorType == 20 || doorType == 30
+; 	; 	if doorType == 10
+; 	; 		if rman.BehaviorEnterExitRuleInnPermission != 1 && rman.BehaviorEnterExitRuleInn == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	elseif doorType == 20
+; 	; 		if rman.BehaviorEnterExitRuleCastlePermission != 1 && rman.BehaviorEnterExitRuleCastle == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	elseif doorType == 30
+; 	; 		if rman.BehaviorEnterExitRuleInnPermission != 1 && rman.BehaviorEnterExitRuleInn == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	endif
+; 	; 	if brokeRule
+; 	; 		CalculateDistanceAtAction()
+; 	; 		bind_Utility.DoSleep(5.0)
+; 	; 		MarkSubBrokeRule("I did not have permission to enter " + doorName)
+; 	; 	endif
 
-	; elseif doorType == 11 || doorType == 21 || doorType == 31
-	; 	if doorType == 11
-	; 		if rman.BehaviorEnterExitRuleInnPermission != 2 && rman.BehaviorEnterExitRuleInn == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	elseif doorType == 21
-	; 		if rman.BehaviorEnterExitRuleCastlePermission != 2 && rman.BehaviorEnterExitRuleCastle == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	elseif doorType == 31
-	; 		if rman.BehaviorEnterExitRuleInnPermission != 2 && rman.BehaviorEnterExitRuleInn == 1
-	; 			brokeRule = true
-	; 		endif
-	; 	endif
-	; 	if brokeRule
-	; 		CalculateDistanceAtAction()
-	; 		bind_Utility.DoSleep(5.0)
-	; 		MarkSubBrokeRule("I did not have permission to leave " + doorName)
-	; 	endif
+; 	; elseif doorType == 11 || doorType == 21 || doorType == 31
+; 	; 	if doorType == 11
+; 	; 		if rman.BehaviorEnterExitRuleInnPermission != 2 && rman.BehaviorEnterExitRuleInn == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	elseif doorType == 21
+; 	; 		if rman.BehaviorEnterExitRuleCastlePermission != 2 && rman.BehaviorEnterExitRuleCastle == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	elseif doorType == 31
+; 	; 		if rman.BehaviorEnterExitRuleInnPermission != 2 && rman.BehaviorEnterExitRuleInn == 1
+; 	; 			brokeRule = true
+; 	; 		endif
+; 	; 	endif
+; 	; 	if brokeRule
+; 	; 		CalculateDistanceAtAction()
+; 	; 		bind_Utility.DoSleep(5.0)
+; 	; 		MarkSubBrokeRule("I did not have permission to leave " + doorName)
+; 	; 	endif
 
-	; endif
+; 	; endif
 
-	; rman.BehaviorEnterExitRuleInnPermission = 3
-	; rman.BehaviorEnterExitRuleCastlePermission = 3
-	; rman.BehaviorEnterExitRuleInnPermission = 3
+; 	; rman.BehaviorEnterExitRuleInnPermission = 3
+; 	; rman.BehaviorEnterExitRuleCastlePermission = 3
+; 	; rman.BehaviorEnterExitRuleInnPermission = 3
 
 
-EndFunction
+; EndFunction
 
 Function BedtimeCheck()
 
