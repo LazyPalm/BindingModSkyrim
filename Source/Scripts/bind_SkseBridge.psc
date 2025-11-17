@@ -54,36 +54,40 @@ int function CrosshairDoor(Form d, ObjectReference o) global
     ; debug.MessageBox(o)
     ; debug.MessageBox(d.GetName())
 
-    ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(o)
-    if destination.GetBaseObject() as Door
-        Location doorLoc = destination.GetCurrentLocation()
-        Quest q = Quest.GetQuest("bind_MainQuest")
-        bind_Functions fs = q as bind_Functions
-        bind_RulesManager rm = q as bind_RulesManager
-        rm.BehaviorEnterExitRuleCurrentDoorType = 0
-        fs.BuildingDoor.ForceRefTo(o)
-        if doorLoc != none
-            fs.BuildingDoorDestination.ForceLocationTo(doorLoc)
-            if (doorLoc.HasKeywordString("LocTypeInn") && rm.BehaviorEnterExitRuleInn == 1) 
-                rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_INN
-                if rm.BehaviorEnterExitRuleInnPermission == 0
-                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
-                endif
-            elseif (doorLoc.HasKeywordString("LocTypeCastle") && rm.BehaviorEnterExitRuleCastle == 1) 
-                rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_CASTLE
-                if rm.BehaviorEnterExitRuleCastlePermission == 0
-                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
-                endif
-            elseif (doorLoc.HasKeywordString("LocTypePlayerHouse") && rm.BehaviorEnterExitRulePlayerHome == 1) 
-                rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_PLAYERHOME
-                if rm.BehaviorEnterExitRulePlayerHomePermission == 0
-                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
-                endif
-            endif
-        else
-            fs.BuildingDoorDestination.Clear()
-        endif
-    endif
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_Functions fs = q as bind_Functions
+    fs.SubLookedAtDoor(o)
+
+    ; ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(o)
+    ; if destination.GetBaseObject() as Door
+    ;     Location doorLoc = destination.GetCurrentLocation()
+    ;     Quest q = Quest.GetQuest("bind_MainQuest")
+    ;     bind_Functions fs = q as bind_Functions
+    ;     bind_RulesManager rm = q as bind_RulesManager
+    ;     rm.BehaviorEnterExitRuleCurrentDoorType = 0
+    ;     fs.BuildingDoor.ForceRefTo(o)
+    ;     if doorLoc != none
+    ;         fs.BuildingDoorDestination.ForceLocationTo(doorLoc)
+    ;         if (doorLoc.HasKeywordString("LocTypeInn") && rm.BehaviorEnterExitRuleInn == 1) 
+    ;             rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_INN
+    ;             if rm.BehaviorEnterExitRuleInnPermission == 0
+    ;                 bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+    ;             endif
+    ;         elseif (doorLoc.HasKeywordString("LocTypeCastle") && rm.BehaviorEnterExitRuleCastle == 1) 
+    ;             rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_CASTLE
+    ;             if rm.BehaviorEnterExitRuleCastlePermission == 0
+    ;                 bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+    ;             endif
+    ;         elseif (doorLoc.HasKeywordString("LocTypePlayerHouse") && rm.BehaviorEnterExitRulePlayerHome == 1) 
+    ;             rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_PLAYERHOME
+    ;             if rm.BehaviorEnterExitRulePlayerHomePermission == 0
+    ;                 bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+    ;             endif
+    ;         endif
+    ;     else
+    ;         fs.BuildingDoorDestination.Clear()
+    ;     endif
+    ; endif
 
     return 0
 

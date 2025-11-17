@@ -251,6 +251,37 @@ endfunction
 
 ; endfunction
 
+; function SelectFutureDom()
+
+;     Actor theSub = Game.GetPlayer()
+
+;     ;Actor[] function ScanCellNPCsByFaction(Faction FindFaction, ObjectReference CenterOn, float radius = 0.0, int minRank = 0, int maxRank = 127, bool IgnoreDead = true) global native
+
+;     Actor selectedActor
+;     Actor[] theActors = MiscUtil.ScanCellNPCsByFaction(functions_script.bind_FutureDomFaction, theSub, 2000.0)
+
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+;     int i = 0
+;     while i < theActors.Length
+;         listMenu.AddEntryItem(theActors[i].GetDisplayName())
+;         i += 1
+;     endwhile
+
+;     listMenu.OpenMenu()
+;     int r = listMenu.GetResultInt()
+;     if r >= 0
+;         selectedActor = theActors[r]
+;     endif
+
+
+
+;     if selectedActor != none
+
+;     endif
+
+; endfunction
+
 function ShowSettingsMenu()
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
@@ -264,6 +295,7 @@ function ShowSettingsMenu()
     ;listMenu.AddEntryItem("Learn Worn DD Items as Set")    
     listMenu.AddEntryItem("Debug Tests")
     listMenu.AddEntryItem("Clear Future Doms List")
+    listMenu.AddEntryItem("Add Future Dom")
     listMenu.AddEntryItem("Run Dressing Room Quest")
     listMenu.AddEntryItem("Whitelist Items")
     ;listMenu.AddEntryItem("Manage Outfits")
@@ -312,8 +344,10 @@ function ShowSettingsMenu()
         if q.IsRunning()
             q.Stop()
         endif
-        debug.MessageBox("Future doms list has been cleared. Defeat quest has been reset.")
+        debug.MessageBox("Future doms list has been cleared. Defeat quest has been reset (if enabled).")
     elseif listReturn == 5
+        bind_Utility.SelectFollowersList(2000.0, "bind_future_doms")
+    elseif listReturn == 6
         Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
         bind_Functions f = bind_Functions.GetBindingFunctions()
         if f.ModInRunningState()
@@ -322,7 +356,7 @@ function ShowSettingsMenu()
                 q.Start()
             endif
         endif
-    elseif listReturn == 6
+    elseif listReturn == 7
         gear_manager.WhitelistItems(Game.GetPlayer())
     ; elseif listReturn == 7
     ;     ShowOutfitsMenu()

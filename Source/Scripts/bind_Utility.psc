@@ -378,9 +378,10 @@ function FadeOutApply(string msg = "") global
         bind_Utility.WriteInternalMonologue(msg)
     endif
     bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
-    u.FadeToBlackImod.Apply()
-    Utility.Wait(2.75)
-    u.FadeToBlackHoldImod.Apply()
+    ;u.FadeToBlackImod.Apply()
+    ;Utility.Wait(2.75)
+    u.FadeToBlackHoldImod.ApplyCrossFade(1.5)
+    Utility.Wait(1.5)
     bind_Utility.DisablePlayer()
 endfunction
 
@@ -393,5 +394,98 @@ function FadeOutRemove(string msg = "") global
     bind_Utility.EnablePlayer()
 endfunction
 
+
+bool function PriApiRunningState() global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    return fs.ModInRunningState()
+endfunction
+
+Actor function PriApiGetDom() global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    return fs.GetDomRef()
+endfunction
+
+string function PriApiGetDomTitle() global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    return fs.GetDomTitle()
+endfunction
+
+bool function PriApiEventStart(string eventName, bool sendDhlp = true) global
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_Controller bc = q as bind_Controller
+    bind_Functions fs = q as bind_Functions
+    if !fs.ModInRunningState()
+        return false
+    else
+        bc.DoStartEvent(sendDhlp)
+        bc.SetEventName(eventName)
+        return true
+    endif
+endfunction
+
+bool function PriApiEventEnd(bool sendDhlp = true) global
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_Controller bc = q as bind_Controller
+    bind_Functions fs = q as bind_Functions
+    if fs.ModInRunningState()
+        ;no quest is running
+        return false
+    else
+        bc.DoEndEvent(sendDhlp)
+        return true
+    endif
+endfunction
+
+function SelectFollowersList(float scanDistance = 2000.0, string storageKey = "") global
+
+    Form[] inList
+    Actor theSub = Game.GetPlayer()
+
+    ; if storageKey != ""
+    ;     inList = StorageUtil.FormListToArray(theSub, storageKey)
+    ; endif
+
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+
+    ;Actor[] function ScanCellNPCsByFaction(Faction FindFaction, ObjectReference CenterOn, float radius = 0.0, int minRank = 0, int maxRank = 127, bool IgnoreDead = true) global native
+
+    Actor selectedActor
+    Actor[] theActors = MiscUtil.ScanCellNPCsByFaction(u.PotentialFollowerFaction, theSub, 2000.0)
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    int i = 0
+    while i < theActors.Length
+        string selected = "" 
+        if storageKey != ""
+            if StorageUtil.FormListHas(theSub, storageKey, theActors[i])
+                selected = " - ACTIVE"
+            endif
+        endif
+        listMenu.AddEntryItem(theActors[i].GetDisplayName() + selected)
+        i += 1
+    endwhile
+
+    listMenu.OpenMenu()
+    int r = listMenu.GetResultInt()
+    if r >= 0
+        selectedActor = theActors[r]
+    endif
+
+    if selectedActor != none
+        if storageKey != ""
+            if StorageUtil.FormListHas(theSub, storageKey, selectedActor)
+                StorageUtil.FormListRemove(theSub, storageKey, selectedActor)
+            else
+                StorageUtil.FormListAdd(theSub, storageKey, selectedActor, false)
+            endif
+        endif
+        bind_Utility.SelectFollowersList(scanDistance, storageKey) ;re-display list
+    endif
+
+endfunction
+
 ImageSpaceModifier property FadeToBlackImod auto
 ImageSpaceModifier property FadeToBlackHoldImod auto
+
+Faction property PotentialFollowerFaction auto

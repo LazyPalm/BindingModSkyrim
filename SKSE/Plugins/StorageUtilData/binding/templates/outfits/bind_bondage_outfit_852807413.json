@@ -1,0 +1,24 @@
+{
+	"float" : 
+	{
+		"dynamic_bondage_expires" : 0.0
+	},
+	"int" : 
+	{
+		"outfit_enabled" : 0,
+		"outfit_id" : 852807413,
+		"remove_existing_gear" : 0,
+		"use_random_bondage" : 0
+	},
+	"intList" : 
+	{
+		"block_slots" : 
+		[
+			4
+		]
+	},
+	"string" : 
+	{
+		"bondage_outfit_name" : "hogtied 2"
+	}
+}

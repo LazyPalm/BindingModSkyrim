@@ -225,28 +225,13 @@ Event OnTrackedStatsEvent(string asStatFilter, int aiStatValue)
 		; StorageUtil.SetIntValue(theSub, "bind_known_words", aiStatValue) ;the check quest will compare this to the current stat for words - to check for infractions
 		;NOTE - left this in as an example - this seems a better place to do rules checks vs. querying stats during removal events on thesub alias script
 		;NOTE - could run detection quest to fill aliases like word walls - since word power story manager game node does not share events
+
+
+
 	endif
 
 	if (asStatFilter == "Skill Increases")
 		rman.TrainingRuleCheck()		
-        ; ;training check
-        ; int trainingCount = Game.QueryStat("Training Sessions")
-        ; int storedTrainingCount = StorageUtil.GetIntValue(theSubRef, "binding_training_sessions", 0)
-        ; ;debug.MessageBox("training: " + trainingCount + " stored: " + storedTrainingCount)
-        ; if trainingCount != storedTrainingCount
-        ;     ;check permission
-        ;     if storedTrainingCount == 0
-        ;         ;do a warning first time?
-        ;         WarnSubForBrokenRule("I was supposed to ask before training", true)
-        ;     else
-        ;         if rman.BehaviorStudiesAskToTrainMustAsk == 1 && rman.BehaviorStudiesAskToTrainPermission == 0
-        ;             MarkSubBrokeRule("I was supposed to ask before training", true)
-        ;         endif
-        ;     endif
-        ;     ;todo - make sure rules manager times this out??
-        ;     StorageUtil.SetIntValue(theSubRef, "binding_training_sessions", trainingCount)
-        ; endif
-
 	endif
 
 endEvent
@@ -1192,6 +1177,66 @@ EndFunction
 ObjectReference function GetSubInFurnitureItem()
 	return subInFurnitureItemRef
 endfunction
+
+
+function SubLookedAtDoor(ObjectReference ref) 
+
+    ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
+    if destination.GetBaseObject() as Door
+        Location doorLoc = destination.GetCurrentLocation()
+        rman.BehaviorEnterExitRuleCurrentDoorType = 0
+        BuildingDoor.ForceRefTo(ref)
+        if doorLoc != none
+            BuildingDoorDestination.ForceLocationTo(doorLoc)
+            if (doorLoc.HasKeywordString("LocTypeInn") && rman.BehaviorEnterExitRuleInn == 1) 
+                rman.BehaviorEnterExitRuleCurrentDoorType = rman.DESTINATION_TYPE_INN
+                if rman.BehaviorEnterExitRuleInnPermission == 0
+                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+                endif
+            elseif (doorLoc.HasKeywordString("LocTypeCastle") && rman.BehaviorEnterExitRuleCastle == 1) 
+                rman.BehaviorEnterExitRuleCurrentDoorType = rman.DESTINATION_TYPE_CASTLE
+                if rman.BehaviorEnterExitRuleCastlePermission == 0
+                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+                endif
+            elseif (doorLoc.HasKeywordString("LocTypePlayerHouse") && rman.BehaviorEnterExitRulePlayerHome == 1) 
+                rman.BehaviorEnterExitRuleCurrentDoorType = rman.DESTINATION_TYPE_PLAYERHOME
+                if rman.BehaviorEnterExitRulePlayerHomePermission == 0
+                    bind_Utility.WriteInternalMonologue("I need permission to enter " + doorLoc.GetName() + "...")
+                endif
+            endif
+        else
+            BuildingDoorDestination.Clear()
+        endif
+    endif
+
+	if main.DomDoorDiscovery == 1 && ref.IsLocked()
+		;NOTE - NPC doms will give the player a copy of the key, this code will "learn" the building faction the first time the player unlocks the door
+		;this will keep the trespassing messages away
+		;ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
+		if destination.GetBaseObject() as Door
+			Location doorLoc = destination.GetCurrentLocation()
+			Faction buildingFaction = destination.GetFactionOwner()
+
+			Faction[] factions = GetDomRef().GetFactions(-128, 127)
+			int i = 0
+			while i < factions.Length
+				if factions[i] == buildingFaction
+					debug.MessageBox(GetDomTitle() + " lives here...")
+					if !GetSubRef().IsInFaction(factions[i])
+						GetSubRef().AddToFaction(factions[i])
+						StorageUtil.SetFormValue(GetSubRef(), "bind_dom_house_faction", factions[i])
+						main.DomDoorDiscovery = 0
+					endif
+				endif
+				i += 1
+			endwhile
+
+			;debug.MessageBox(doorLoc.GetName() + " faction: " + destination.GetFactionOwner())
+		endif
+	endif
+
+endfunction
+
 
 Function SubPrayedAtShrine(string shrineGod)
 	LogOutput("In SubPrayedAtShrine()")

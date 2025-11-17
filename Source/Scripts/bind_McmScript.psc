@@ -995,7 +995,7 @@ function DisplayControlPanel()
     elseif bind_GlobalModState.GetValue() == bind_Controller.GetModStateDhlp()
         runState = "DHLP Suspended"
     elseif bind_GlobalModState.GetValue() == bind_Controller.GetModStateEvent()
-        runState = "In Event - " + main.ActiveQuestName
+        runState = "In - " + main.ActiveQuestName
     endif
 
     if bind_GlobalModState.GetValue() == bind_Controller.GetModStateRunning()
@@ -1006,7 +1006,9 @@ function DisplayControlPanel()
         AddTextOption("", "")
     endif
 
-    AddTextOption("Binding Run State", runState)
+    AddTextOption("Binding Run State", "")
+    AddTextOption("", "")
+    AddTextOption("", runState)
 
     AddHeaderOption("Diagnostic Information")
     AddHeaderOption("")
@@ -3498,18 +3500,19 @@ Event OnOptionSelect(int option)
         main.DomStartupQuestsEnabled = ToggleValue(main.DomStartupQuestsEnabled)
         SetToggleOptionValue(toggleStartupQuests, main.DomStartupQuestsEnabled)
         if main.DomStartupQuestsEnabled == 0
-            Form[] futureDoms = StorageUtil.FormListToArray(fs.GetSubRef(), "bind_future_doms")
-            if futureDoms.Length > 0
-                int fdi = 0
-                while fdi < futureDoms.Length
-                    Actor fd = futureDoms[fdi] as Actor
-                    if fd.IsInFaction(fs.bind_FutureDomFaction)
-                        fd.RemoveFromFaction(fs.bind_FutureDomFaction)
-                    endif
-                    fdi += 1
-                endwhile
-                StorageUtil.FormListClear(fs.GetSubRef(), "bind_future_doms")
-            endif
+            ;NOTE - removed this clear since the list can be used by Simple Slavery now - can still clear in action menu
+            ; Form[] futureDoms = StorageUtil.FormListToArray(fs.GetSubRef(), "bind_future_doms")
+            ; if futureDoms.Length > 0
+            ;     int fdi = 0
+            ;     while fdi < futureDoms.Length
+            ;         Actor fd = futureDoms[fdi] as Actor
+            ;         if fd.IsInFaction(fs.bind_FutureDomFaction)
+            ;             fd.RemoveFromFaction(fs.bind_FutureDomFaction)
+            ;         endif
+            ;         fdi += 1
+            ;     endwhile
+            ;     StorageUtil.FormListClear(fs.GetSubRef(), "bind_future_doms")
+            ; endif
             Quest q = Quest.GetQuest("bind_DefeatedQuest")
             if q.IsRunning()
                 q.Stop()

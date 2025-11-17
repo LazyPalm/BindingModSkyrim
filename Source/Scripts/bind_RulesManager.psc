@@ -625,7 +625,7 @@ endevent
 state BrokeEntryRuleState
     event OnUpdate()       
         bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
-        fs.MarkSubBrokeRule("I did not have permission to enter...", true)
+        fs.MarkSubBrokeRule("I did not have permission to enter", true)
         GoToState("")
     endevent
 endstate
@@ -633,7 +633,7 @@ endstate
 state BrokeExitRuleState
     event OnUpdate()       
         bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
-        fs.MarkSubBrokeRule("I did not have permission to exit...", true)
+        fs.MarkSubBrokeRule("I did not have permission to exit", true)
         GoToState("")
     endevent
 endstate
