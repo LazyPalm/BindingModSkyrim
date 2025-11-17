@@ -439,18 +439,12 @@ endfunction
 function SelectFollowersList(float scanDistance = 2000.0, string storageKey = "") global
 
     Form[] inList
-    Actor theSub = Game.GetPlayer()
-
-    ; if storageKey != ""
-    ;     inList = StorageUtil.FormListToArray(theSub, storageKey)
-    ; endif
+    Actor act = Game.GetPlayer()
 
     bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
 
-    ;Actor[] function ScanCellNPCsByFaction(Faction FindFaction, ObjectReference CenterOn, float radius = 0.0, int minRank = 0, int maxRank = 127, bool IgnoreDead = true) global native
-
     Actor selectedActor
-    Actor[] theActors = MiscUtil.ScanCellNPCsByFaction(u.PotentialFollowerFaction, theSub, 2000.0)
+    Actor[] theActors = MiscUtil.ScanCellNPCsByFaction(u.PotentialFollowerFaction, act, scanDistance)
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
@@ -458,7 +452,7 @@ function SelectFollowersList(float scanDistance = 2000.0, string storageKey = ""
     while i < theActors.Length
         string selected = "" 
         if storageKey != ""
-            if StorageUtil.FormListHas(theSub, storageKey, theActors[i])
+            if StorageUtil.FormListHas(act, storageKey, theActors[i])
                 selected = " - ACTIVE"
             endif
         endif
@@ -474,10 +468,10 @@ function SelectFollowersList(float scanDistance = 2000.0, string storageKey = ""
 
     if selectedActor != none
         if storageKey != ""
-            if StorageUtil.FormListHas(theSub, storageKey, selectedActor)
-                StorageUtil.FormListRemove(theSub, storageKey, selectedActor)
+            if StorageUtil.FormListHas(act, storageKey, selectedActor)
+                StorageUtil.FormListRemove(act, storageKey, selectedActor)
             else
-                StorageUtil.FormListAdd(theSub, storageKey, selectedActor, false)
+                StorageUtil.FormListAdd(act, storageKey, selectedActor, false)
             endif
         endif
         bind_Utility.SelectFollowersList(scanDistance, storageKey) ;re-display list
