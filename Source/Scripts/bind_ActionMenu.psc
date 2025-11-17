@@ -294,7 +294,7 @@ function ShowSettingsMenu()
     ;listMenu.AddEntryItem("Manage Rules")
     ;listMenu.AddEntryItem("Learn Worn DD Items as Set")    
     listMenu.AddEntryItem("Debug Tests")
-    listMenu.AddEntryItem("Clear Future Doms List")
+    listMenu.AddEntryItem("Manage Future Doms List")
     listMenu.AddEntryItem("Add Future Dom")
     listMenu.AddEntryItem("Run Dressing Room Quest")
     listMenu.AddEntryItem("Whitelist Items")
@@ -330,23 +330,24 @@ function ShowSettingsMenu()
     elseif listReturn == 3
         ShowDebugMenu()
     elseif listReturn == 4
-        Form[] futureDoms = StorageUtil.FormListToArray(functions_script.GetSubRef(), "bind_future_doms")
-        int fdi = 0
-        while fdi < futureDoms.Length
-            Actor fd = futureDoms[fdi] as Actor
-            if fd.IsInFaction(functions_script.bind_FutureDomFaction)
-                fd.RemoveFromFaction(functions_script.bind_FutureDomFaction)
-            endif
-            fdi += 1
-        endwhile
-        StorageUtil.FormListClear(functions_script.GetSubRef(), "bind_future_doms")
-        Quest q = Quest.GetQuest("bind_DefeatedQuest")
-        if q.IsRunning()
-            q.Stop()
-        endif
-        debug.MessageBox("Future doms list has been cleared. Defeat quest has been reset (if enabled).")
+        bind_Utility.ManageSelectedFollowersList("bind_future_doms", functions_script.bind_FutureDomFaction)
+        ; Form[] futureDoms = StorageUtil.FormListToArray(functions_script.GetSubRef(), "bind_future_doms")
+        ; int fdi = 0
+        ; while fdi < futureDoms.Length
+        ;     Actor fd = futureDoms[fdi] as Actor
+        ;     if fd.IsInFaction(functions_script.bind_FutureDomFaction)
+        ;         fd.RemoveFromFaction(functions_script.bind_FutureDomFaction)
+        ;     endif
+        ;     fdi += 1
+        ; endwhile
+        ; StorageUtil.FormListClear(functions_script.GetSubRef(), "bind_future_doms")
+        ; Quest q = Quest.GetQuest("bind_DefeatedQuest")
+        ; if q.IsRunning()
+        ;     q.Stop()
+        ; endif
+        ; debug.MessageBox("Future doms list has been cleared. Defeat quest has been reset (if enabled).")
     elseif listReturn == 5
-        bind_Utility.SelectFollowersList(2000.0, "bind_future_doms")
+        bind_Utility.SelectFollowersList(2000.0, "bind_future_doms", functions_script.bind_FutureDomFaction)
     elseif listReturn == 6
         Quest q = Quest.GetQuest("bind_TheDressingRoomQuest")
         bind_Functions f = bind_Functions.GetBindingFunctions()

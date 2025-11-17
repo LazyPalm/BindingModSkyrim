@@ -436,7 +436,64 @@ bool function PriApiEventEnd(bool sendDhlp = true) global
     endif
 endfunction
 
-function SelectFollowersList(float scanDistance = 2000.0, string storageKey = "") global
+function ManageSelectedFollowersList(string storageKey, Faction addToFaction = none) global
+
+    Form[] inList
+    Actor act = Game.GetPlayer()
+
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+
+    Form selectedActor
+    Form[] theActors = storageutil.FormListToArray(act, storageKey)
+
+    if theActors.Length == 0
+        debug.MessageBox("No future doms found")
+        return
+    endif
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    int i = 0
+    while i < theActors.Length
+        Actor a = theActors[i] as Actor
+        listMenu.AddEntryItem(a.GetDisplayName())
+        i += 1
+    endwhile
+
+    listMenu.OpenMenu()
+    int r = listMenu.GetResultInt()
+    if r >= 0
+        selectedActor = theActors[r]
+    endif
+
+    if selectedActor != none
+
+        listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+        listMenu.AddEntryItem("Remove " + (selectedActor as Actor).GetDisplayName())
+        listMenu.AddEntryItem("Yes")
+        listMenu.AddEntryItem("No") 
+        listMenu.OpenMenu()
+        r = listMenu.GetResultInt()
+        if r == 1
+            if storageKey != ""
+                if StorageUtil.FormListHas(act, storageKey, selectedActor)
+                    StorageUtil.FormListRemove(act, storageKey, selectedActor)
+                    if addToFaction != none
+                        if act.IsInFaction(addToFaction)
+                            act.RemoveFromFaction(addToFaction)
+                        endif
+                    endif
+                endif
+            endif
+        elseif r == 0 || r == 2
+            bind_Utility.ManageSelectedFollowersList(storageKey, addToFaction)
+        endif
+
+    endif
+
+endfunction
+
+function SelectFollowersList(float scanDistance = 2000.0, string storageKey, Faction addToFaction = none) global
 
     Form[] inList
     Actor act = Game.GetPlayer()
@@ -470,11 +527,21 @@ function SelectFollowersList(float scanDistance = 2000.0, string storageKey = ""
         if storageKey != ""
             if StorageUtil.FormListHas(act, storageKey, selectedActor)
                 StorageUtil.FormListRemove(act, storageKey, selectedActor)
+                if addToFaction != none
+                    if act.IsInFaction(addToFaction)
+                        act.RemoveFromFaction(addToFaction)
+                    endif
+                endif
             else
                 StorageUtil.FormListAdd(act, storageKey, selectedActor, false)
+                if addToFaction != none
+                    if !act.IsInFaction(addToFaction)
+                        act.addToFaction(addToFaction)
+                    endif
+                endif
             endif
         endif
-        bind_Utility.SelectFollowersList(scanDistance, storageKey) ;re-display list
+        bind_Utility.SelectFollowersList(scanDistance, storageKey, addToFaction) ;re-display list
     endif
 
 endfunction
