@@ -14,6 +14,24 @@ event OnInit()
 
         ;condition this to inside of cities and towns?
 
+        ; ;training check
+        ; int trainingCount = Game.QueryStat("Training Sessions")
+        ; int storedTrainingCount = StorageUtil.GetIntValue(theSub, "binding_training_sessions", 0)
+        ; ;debug.MessageBox("training: " + trainingCount + " stored: " + storedTrainingCount)
+        ; if trainingCount != storedTrainingCount
+        ;     ;check permission
+        ;     if storedTrainingCount == 0
+        ;         ;do a warning first time?
+        ;         fs.WarnSubForBrokenRule("I was supposed to ask before training", true)
+        ;     else
+        ;         if rms.BehaviorStudiesAskToTrainMustAsk == 1 && rms.BehaviorStudiesAskToTrainPermission == 0
+        ;             fs.MarkSubBrokeRule("I was supposed to ask before training", true)
+        ;         endif
+        ;     endif
+        ;     ;todo - make sure rules manager times this out??
+        ;     StorageUtil.SetIntValue(theSub, "binding_training_sessions", trainingCount)
+        ; endif
+
         ;scan for furniture
         if NearbyFurniture.GetReference() != none
             bind_Utility.WriteToConsole("update stats quest - found furniture")

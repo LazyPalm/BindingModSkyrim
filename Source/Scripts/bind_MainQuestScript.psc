@@ -203,6 +203,7 @@ int property SimpleSlaveryMaleFallback auto conditional
 
 int property ExperimentalFeaturesFlag auto conditional
 int property ProtectSltr auto conditional
+int property DisplayInfractionsInMessageBox auto conditional
 
 ;*********************************************************
 ;skyrimnet variables

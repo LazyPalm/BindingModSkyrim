@@ -613,6 +613,12 @@ function BrokeExitRule()
     RegisterForSingleUpdate(5.0)
 endfunction
 
+function TrainingRuleCheck()
+    UnregisterForUpdate()
+    GotoState("TrainingRuleCheckState")
+    RegisterForSingleUpdate(5.0)
+endfunction
+
 event OnUpdate()
 endevent
 
@@ -620,6 +626,7 @@ state BrokeEntryRuleState
     event OnUpdate()       
         bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
         fs.MarkSubBrokeRule("I did not have permission to enter...", true)
+        GoToState("")
     endevent
 endstate
 
@@ -627,8 +634,36 @@ state BrokeExitRuleState
     event OnUpdate()       
         bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions 
         fs.MarkSubBrokeRule("I did not have permission to exit...", true)
+        GoToState("")
     endevent
 endstate
+
+state TrainingRuleCheckState
+    event OnUpdate()       
+        ;training check
+        bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+        int trainingCount = Game.QueryStat("Training Sessions")
+        int storedTrainingCount = StorageUtil.GetIntValue(fs.GetSubRef(), "binding_training_sessions", 0)
+        bind_Utility.WriteToConsole("TrainingRuleCheckState - training: " + trainingCount + " stored: " + storedTrainingCount + " perm: " + BehaviorStudiesAskToTrainPermission)
+        if trainingCount != storedTrainingCount
+            ;check permission
+            if storedTrainingCount == 0
+                ;do a warning first time?
+                if BehaviorStudiesAskToTrainMustAsk == 1 && BehaviorStudiesAskToTrainPermission == 0
+                    fs.WarnSubForBrokenRule("I was supposed to ask before training", true)
+                endif
+            else
+                if BehaviorStudiesAskToTrainMustAsk == 1 && BehaviorStudiesAskToTrainPermission == 0
+                    fs.MarkSubBrokeRule("I was supposed to ask before training", true)
+                endif
+            endif
+            ;todo - make sure rules manager times this out??
+            StorageUtil.SetIntValue(fs.GetSubRef(), "binding_training_sessions", trainingCount)
+        endif
+        GoToState("")
+    endevent
+endstate
+
 
 ;******************************************************************************************************************************
 

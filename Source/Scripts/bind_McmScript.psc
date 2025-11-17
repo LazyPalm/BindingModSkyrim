@@ -160,6 +160,7 @@ int toggleCleanUpNonBindingItemsFromBags
 int toggleSimpleSlaveryFemale
 int toggleSimpleSlaveryMale
 int toggleSltrProtection
+int toggleDisplayInfractionsInMessageBox
 
 
 ;debug
@@ -1882,6 +1883,7 @@ Function DisplayPreferences()
     toggleSimpleSlaveryMale = AddToggleOption("Simple Slavery - Male Hireling Fallbacks", main.SimpleSlaveryMaleFallback)
     toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Unused Bondage Items From Inventory", main.CleanUpNonBindingItemsFromBags)
     toggleSltrProtection = AddToggleOption("SLTR - Item Protection", main.ProtectSltr)
+    toggleDisplayInfractionsInMessageBox = AddToggleOption("Display Infractions In Message Box", main.DisplayInfractionsInMessageBox)
     
 
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
@@ -3553,6 +3555,10 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(toggleSltrProtection, main.ProtectSltr)
     endif
 
+    if option == toggleDisplayInfractionsInMessageBox
+        main.DisplayInfractionsInMessageBox = ToggleValue(main.DisplayInfractionsInMessageBox)
+        SetToggleOptionValue(toggleDisplayInfractionsInMessageBox, main.DisplayInfractionsInMessageBox)
+    endif
 
     ;debug
     If option == toggleWriteLogs

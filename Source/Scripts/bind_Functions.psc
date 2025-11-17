@@ -220,16 +220,35 @@ Event OnTrackedStatsEvent(string asStatFilter, int aiStatValue)
 
 	;https://ck.uesp.net/wiki/ListOfTrackedStats
 
-	;NOTE - could used Days Passed vs process in updatestats quest for daily updates - been good checks
-	;NOTE - wondering if Hours Slept is the missing stat I need for survival mods when skipping time in sleep - maybe adjust it to match
-	;NOTE - Training Sessions vs. not talking to trainer for training rules check
-
     if (asStatFilter == "Words Of Power Learned")
 		;debug.MessageBox("word of power learned..."
 		; StorageUtil.SetIntValue(theSub, "bind_known_words", aiStatValue) ;the check quest will compare this to the current stat for words - to check for infractions
 		;NOTE - left this in as an example - this seems a better place to do rules checks vs. querying stats during removal events on thesub alias script
 		;NOTE - could run detection quest to fill aliases like word walls - since word power story manager game node does not share events
 	endif
+
+	if (asStatFilter == "Skill Increases")
+		rman.TrainingRuleCheck()		
+        ; ;training check
+        ; int trainingCount = Game.QueryStat("Training Sessions")
+        ; int storedTrainingCount = StorageUtil.GetIntValue(theSubRef, "binding_training_sessions", 0)
+        ; ;debug.MessageBox("training: " + trainingCount + " stored: " + storedTrainingCount)
+        ; if trainingCount != storedTrainingCount
+        ;     ;check permission
+        ;     if storedTrainingCount == 0
+        ;         ;do a warning first time?
+        ;         WarnSubForBrokenRule("I was supposed to ask before training", true)
+        ;     else
+        ;         if rman.BehaviorStudiesAskToTrainMustAsk == 1 && rman.BehaviorStudiesAskToTrainPermission == 0
+        ;             MarkSubBrokeRule("I was supposed to ask before training", true)
+        ;         endif
+        ;     endif
+        ;     ;todo - make sure rules manager times this out??
+        ;     StorageUtil.SetIntValue(theSubRef, "binding_training_sessions", trainingCount)
+        ; endif
+
+	endif
+
 endEvent
 
 Function SetFutureDom(Actor dom)
@@ -1124,14 +1143,15 @@ Function ProcessConversation()
 				MarkSubBrokeRule("Oh dear, I was not posed properly", true)
 			endif
 
-		elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ASK_TO_TRAIN()) == 1 ;rman.BehaviorStudiesAskToTrainMustAsk == 1
-			Actor trainer = ConversationTargetNpc.GetReference() as Actor
-			if trainer.IsInFaction(JobTrainerFaction)
-				if rman.BehaviorStudiesAskToTrainPermission == 1
-				else
-					MarkSubBrokeRule("I can't speak to a trainer without asking first", true)
-				endif
-			endif
+		;NOTE - this was replaced by a stat check 11/16
+		; elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ASK_TO_TRAIN()) == 1 ;rman.BehaviorStudiesAskToTrainMustAsk == 1
+		; 	Actor trainer = ConversationTargetNpc.GetReference() as Actor
+		; 	if trainer.IsInFaction(JobTrainerFaction)
+		; 		if rman.BehaviorStudiesAskToTrainPermission == 1
+		; 		else
+		; 			MarkSubBrokeRule("I can't speak to a trainer without asking first", true)
+		; 		endif
+		; 	endif
 
 		endif
 
@@ -1727,6 +1747,22 @@ Function LogOutput(string msg, bool critical = false)
 	; EndIf
 EndFunction
 
+function WarnSubForBrokenRule(string msg = "", bool runDistanceCheck = false)
+
+	if main.IsSub == 0
+		return
+	endif
+
+	If (main.SubDistanceFromDomAtAction > 1500.0 && runDistanceCheck)
+		bind_Utility.WriteNotification(msg + "...", bind_Utility.TextColorRed())
+		bind_Utility.WriteNotification(domTitle + " is not here to notice...", bind_Utility.TextColorRed())
+	else
+		bind_Utility.WriteNotification(msg + "...", bind_Utility.TextColorRed())
+		bind_Utility.WriteNotification(GetDomTitle() + " warns me to not do it again...", bind_Utility.TextColorRed())
+	endif
+
+endfunction
+
 ;TODO - 3/24/25 move all of the rules functions to the rules manager
 int Function MarkSubBrokeRule(string msg = "", bool runDistanceCheck = false)
 	if main.IsSub == 0
@@ -1739,10 +1775,18 @@ int Function MarkSubBrokeRule(string msg = "", bool runDistanceCheck = false)
 	;DialogChanceRoll = modifiedRoll
 	If (main.SubDistanceFromDomAtAction > 1500.0 && runDistanceCheck)
 		If msg != ""
-			bind_Utility.WriteInternalMonologue(msg + "...")
-			bind_Utility.WriteInternalMonologue(domTitle + " is not here to notice...")
+			if main.DisplayInfractionsInMessageBox == 1
+				debug.MessageBox(msg + ". " + domTitle + " is not here to notice...")
+			else
+				bind_Utility.WriteNotification(msg + "...", bind_Utility.TextColorRed())
+				bind_Utility.WriteNotification(domTitle + " is not here to notice...", bind_Utility.TextColorRed())
+			endif
 		Else
-			bind_Utility.WriteInternalMonologue(domTitle + " is not here to notice I broke a rule...")
+			if main.DisplayInfractionsInMessageBox == 1
+				debug.MessageBox(domTitle + " is not here to notice I broke a rule...")
+			else
+				bind_Utility.WriteNotification(domTitle + " is not here to notice I broke a rule...", bind_Utility.TextColorRed())
+			endif
 		EndIf
 		;RuleInfractionsNotNoticedByDomUnconfessed += 1
 		bind_GlobalTimesInfractionsNotNoticed.SetValue(bind_GlobalTimesInfractionsNotNoticed.GetValue() + 1)		
@@ -1766,10 +1810,18 @@ int Function MarkSubBrokeRule(string msg = "", bool runDistanceCheck = false)
 
 		Else
 			If msg != ""
-				bind_Utility.WriteInternalMonologue(msg + "... +1 infraction")
+				if main.DisplayInfractionsInMessageBox == 1
+					debug.MessageBox(msg + "... +1 infraction")
+				else
+					bind_Utility.WriteNotification(msg + "... +1 infraction", bind_Utility.TextColorRed())
+				endif
 			Else
 				msg = "[rule infraction had no message]"
-				bind_Utility.WriteInternalMonologue("Oh no, I broke a rule... +1 infraction") ;this should never happen??
+				if main.DisplayInfractionsInMessageBox == 1
+					debug.MessageBox("Oh no, I broke a rule... +1 infraction")
+				else
+					bind_Utility.WriteNotification("Oh no, I broke a rule... +1 infraction", bind_Utility.TextColorRed()) ;this should never happen??
+				endif
 			EndIf
 			;brain.MarkInfraction()
 			AdjustRuleInfractions(1)
