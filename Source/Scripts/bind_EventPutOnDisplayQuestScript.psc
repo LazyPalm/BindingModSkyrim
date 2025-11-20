@@ -230,10 +230,12 @@ int function FindNearest(ObjectReference a, float maxDistance = 200.0, bool unus
     int i = 0
     float dist = 0.0
     while i < foundFurniture.Length
-        float d = a.GetDistance(foundFurniture[i])
-        bind_Utility.WriteToConsole("d: " + d + " dist: " + dist + " used: " + usedFurniture[i])
-        if d <= maxDistance && (dist == 0.0 || d < dist) && (unusedOnly == false || (unusedOnly && usedFurniture[i] == 1))
-            nearest = i
+        if foundFurniture[i] != a
+            float d = a.GetDistance(foundFurniture[i])
+            bind_Utility.WriteToConsole("d: " + d + " dist: " + dist + " used: " + usedFurniture[i])
+            if d <= maxDistance && (dist == 0.0 || d < dist) && (unusedOnly == false || (unusedOnly && usedFurniture[i] == 1))
+                nearest = i
+            endif
         endif
         i += 1
     endwhile
@@ -341,8 +343,8 @@ function EventStart()
             nearest = FindNearest(furn, 2000.0, true)
             Actor thirdSub = fs.TheThirdSub.GetActorReference()
             if nearest > -1
-                furn2 = foundFurniture[nearest]
-                bind_FurnitureManager.LockInFurniture2(thirdSub, furn2, 2)
+                furn3 = foundFurniture[nearest]
+                bind_FurnitureManager.LockInFurniture2(thirdSub, furn3, 3)
                 usedFurniture[nearest] = 2 ;mark in use
             else 
                 bind_BondageManager.HogtieActor(thirdSub)

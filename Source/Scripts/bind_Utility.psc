@@ -485,6 +485,7 @@ function ManageSelectedFollowersList(string storageKey, Faction addToFaction = n
                     endif
                 endif
             endif
+            bind_Utility.ManageSelectedFollowersList(storageKey, addToFaction)
         elseif r == 0 || r == 2
             bind_Utility.ManageSelectedFollowersList(storageKey, addToFaction)
         endif

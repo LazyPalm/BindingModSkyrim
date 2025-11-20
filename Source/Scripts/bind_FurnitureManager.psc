@@ -523,15 +523,18 @@ bool function UnlockFromFurniture2(Actor a) global
     endif
     if StorageUtil.GetIntValue(a, "binding_in_furniture_zap", 0) == 1
         if player
+            StorageUtil.SetIntValue(a, "binding_in_furniture_zap", 0)
             zbfSlot playerSlot = zbfBondageShell.GetApi().FindPlayer()
             playerSlot.SetFurniture(none)
         else
-            ActorUtil.ClearPackageOverride(a)
-            a.EvaluatePackage()
-            int zapSlot = StorageUtil.GetIntValue(a, "binding_in_furniture_zap", 0)
-            if zapSlot == 2
-                fm.Furniture2.Clear()
-            endif
+            zbfSlot slot = zbfBondageShell.GetApi().SlotActor(a)
+            slot.SetFurniture(none)
+            ; ActorUtil.ClearPackageOverride(a)
+            ; a.EvaluatePackage()
+            ; int zapSlot = StorageUtil.GetIntValue(a, "binding_in_furniture_zap", 0)
+            ; if zapSlot == 2
+            ;     fm.Furniture2.Clear()
+            ; endif
             StorageUtil.SetIntValue(a, "binding_in_furniture_zap", 0)
             a.MoveTo(fun.GetDomRef())
             debug.SendAnimationEvent(a, "IdleForceDefaultState")
@@ -567,13 +570,20 @@ bool function LockInFurniture2(Actor a, ObjectReference furn, int zapSlot = 0) g
             if player
                 zbfSlot playerSlot = zbfBondageShell.GetApi().FindPlayer()
                 playerSlot.SetFurniture(furn)
+                ;debug.MessageBox("player in zap?")
+                StorageUtil.SetIntValue(a, "binding_in_furniture_zap", 1)
             else
-                if zapSlot == 2
-                    fm.Furniture2.ForceRefTo(furn)
-                    ActorUtil.AddPackageOverride(a, fm.bind_Package_NPC_Use_Furniture2, 80, 0)
-                endif
-                StorageUtil.SetIntValue(a, "binding_in_furniture_zap", zapSlot)
-                a.EvaluatePackage()    
+                zbfSlot slot = zbfBondageShell.GetApi().SlotActor(a)
+                slot.SetFurniture(furn)
+                ; if zapSlot == 2
+                ;     fm.Furniture2.ForceRefTo(furn)
+                ;     bind_Utility.DoSleep(1.0)
+                ;     ActorUtil.AddPackageOverride(a, fm.bind_Package_NPC_Use_Furniture2, 90, 0)         
+                ;     debug.MessageBox("sub 2 in zap slot 2")           
+                ; endif
+                ; StorageUtil.SetIntValue(a, "binding_in_furniture_zap", zapSlot)
+                ; a.EvaluatePackage()    
+                StorageUtil.SetIntValue(a, "binding_in_furniture_zap", 1)
             endif
         endif
         if !a.IsInFaction(fm.bind_LockedInFurnitureFaction)
