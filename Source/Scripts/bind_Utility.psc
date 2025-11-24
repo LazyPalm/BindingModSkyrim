@@ -394,6 +394,67 @@ function FadeOutRemove(string msg = "") global
     bind_Utility.EnablePlayer()
 endfunction
 
+function FadeOutApplyNoDisable(string msg = "") global
+    if msg != ""
+        bind_Utility.WriteInternalMonologue(msg)
+    endif
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+    ;u.FadeToBlackImod.Apply()
+    ;Utility.Wait(2.75)
+    u.FadeToBlackHoldImod.ApplyCrossFade(1.5)
+    Utility.Wait(1.5)
+endfunction
+
+function FadeOutRemoveNoDisable(string msg = "") global
+    if msg != ""
+        bind_Utility.WriteInternalMonologue(msg)
+    endif
+    bind_Utility u = Quest.GetQuest("bind_MainQuest") as bind_Utility
+    u.FadeToBlackHoldImod.Remove()
+endfunction
+
+;***************************************************************
+;start private api
+;***************************************************************
+
+int function PriApiVariable(string varName) global
+    bind_MainQuestScript main = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+    if varName == "SexDomWantsPrivacy"
+        return main.SexDomWantsPrivacy
+    elseif varName == "NeedsBondageSetChange"
+        return main.NeedsBondageSetChange
+    elseif varName == "ActionKeyModifier"
+        return main.ActionKeyModifier
+    elseif varName == "SimpleSlaveryFemaleFallback"
+        return main.SimpleSlaveryFemaleFallback
+    elseif varName == "SimpleSlaveryMaleFallback"
+        return main.SimpleSlaveryMaleFallback
+    else
+        return -1
+    endif
+
+endfunction
+
+; string function PriApiVariableStr(string varName) global
+;     bind_MainQuestScript main = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+;     if varName == ""
+
+;     else
+;         return ""
+;     endif
+; endfunction
+
+; function PriApiSetVariableStr(string varName, string value) global
+;     bind_MainQuestScript main = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+;     if varName == "ActiveQuestName"
+;         main.ActiveQuestName = value
+;     endif
+; endfunction
+
+Faction function PriApiSubFaction() global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    return fs.bind_SubmissiveFaction
+endfunction
 
 bool function PriApiRunningState() global
     bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
@@ -409,6 +470,20 @@ string function PriApiGetDomTitle() global
     bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
     return fs.GetDomTitle()
 endfunction
+
+bool function PriApiPlayerIsSub() global
+    bind_MainQuestScript main = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+    if main.IsSub == 1
+        return true
+    else 
+        return false
+    endif
+endfunction
+
+Location Function PriApiGetCurrentLocation() global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    return fs.GetCurrentLocation()
+EndFunction
 
 bool function PriApiEventStart(string eventName, bool sendDhlp = true) global
     Quest q = Quest.GetQuest("bind_MainQuest")
@@ -435,6 +510,42 @@ bool function PriApiEventEnd(bool sendDhlp = true) global
         return true
     endif
 endfunction
+
+int function PriApiGetBondageOutfitId(string eventName) global
+    
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_MainQuestScript main = q as bind_MainQuestScript
+    bind_BondageManager bms = q as bind_BondageManager
+
+	int eventOutfitId = 0
+
+	string[] fList = MiscUtil.FilesInFolder(main.GameSaveFolder)
+
+	if eventName != ""
+		eventOutfitId = bms.GetBondageOutfitForEvent(eventName)
+		bind_Utility.WriteToConsole("PriApiGetBondageOutfitId - eventName: " + eventName + " - outfit: " + eventOutfitId)
+	endif
+
+	if eventOutfitId == 0
+		eventOutfitId = bms.GetBondageOutfitForEvent("event_any_event")
+		bind_Utility.WriteToConsole("PriApiGetBondageOutfitId - eventName: any event - outfit: " + eventOutfitId)
+	endif
+
+	return eventOutfitId
+
+endfunction
+
+function PriApiEquipBondageOutfit(Actor akActor, int outfitId) global
+
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_BondageManager bms = q as bind_BondageManager
+    bms.EquipBondageOutfit(akActor, outfitId)
+
+endfunction
+
+;***************************************************************
+;end private api
+;***************************************************************
 
 function ManageSelectedFollowersList(string storageKey, Faction addToFaction = none) global
 

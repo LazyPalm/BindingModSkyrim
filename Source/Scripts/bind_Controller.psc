@@ -28,9 +28,9 @@ event OnInit()
 
     if self.IsRunning()
 
-        bind_Utility.WriteToConsole("started...")
+        ;bind_Utility.WriteToConsole("started...")
         
-        DoInitTasks()
+        ;;DoInitTasks()
 
         LoadGame()
 
@@ -39,6 +39,10 @@ event OnInit()
 endEvent
 
 function LoadGame()
+
+    UnregisterForUpdate()
+
+    DoInitTasks()
 
     ; Quest mq = Quest.GetQuest("bind_MovementQuest")
     ; if !mq.IsRunning()
@@ -53,8 +57,8 @@ function LoadGame()
     ;     RegisterForModEvent("ZapSlaveSexLabDone", "OnSlaveSexLabDone")
     ; endif
 
-    RegisterForControl("Activate")
-    RegisterForKey(bind_GlobalActionKey.GetValue() as int)
+    ; RegisterForControl("Activate")
+    ; RegisterForKey(bind_GlobalActionKey.GetValue() as int)
 
     if !bind_MovementQuest.IsRunning()
         bind_MovementQuest.Start()
@@ -89,6 +93,9 @@ endfunction
 function DoInitTasks()
 
     actorSub = Game.GetPlayer()
+
+    RegisterForControl("Activate")
+    RegisterForKey(bind_GlobalActionKey.GetValue() as int)
     
     ;RegisterForKey(bind_GlobalActionKey.GetValue() as int)
 
@@ -242,6 +249,8 @@ auto state RunningState
     endfunction
 
     function DoUpdate()
+
+        ;debug.MessageBox("in controller??")
 
         if ReadyForStoryManager()
 

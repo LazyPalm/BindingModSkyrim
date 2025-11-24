@@ -666,6 +666,15 @@ bool Function LockInFurniture(ObjectReference item, Actor a) Global
     return zclib.LockActor(a, item)
 EndFunction
 
+bool function LockInFurnitureScripted(ObjectReference item, Actor a) global
+    (item as zadcFurnitureScript).SendDeviceModEvents = true
+    (item as zadcFurnitureScript).ScriptedDevice = true
+    (item as zadcFurnitureScript).PreventWaitandSleep = false 
+    (item as zadcFurnitureScript).ForceStripActor = true 
+    zadcLibs zclib = GetZadcLibs()
+    return zclib.LockActor(a, item)
+endfunction
+
 bool Function UnlockFromFurniture(Actor a) Global
     zadcLibs zclib = GetZadcLibs()
     return zclib.UnlockActor(a)

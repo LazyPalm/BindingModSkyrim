@@ -58,6 +58,7 @@ event OnInit()
         FadeToBlackHoldImod.Remove()
 
         if displayNoBuyer
+            
             debug.MessageBox("Your buyer never showed up to claim you. Find a blacksmith to free you.")
         endif
 

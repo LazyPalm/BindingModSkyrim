@@ -280,6 +280,8 @@ function EquipBondageOutfit(Actor a, int setId)
     Form[] tempItems = new Form[25] ;form list copy was failing on this - maybe a papyrusutil issue?
     int idx = 0
 
+    ;debug.MessageBox(setItems)
+
     if setItems != none
         i = 0
         while i < setItems.Length
@@ -300,6 +302,8 @@ function EquipBondageOutfit(Actor a, int setId)
             i += 1
         endwhile
     endif
+
+    ;debug.MessageBox(tempItems)
 
     bind_Utility.WriteToConsole("equipbondageoutfit - actor: " + a.GetDisplayName())
     bind_Utility.WriteToConsole("equipbondageoutfit - tempitems: " + tempItems)
