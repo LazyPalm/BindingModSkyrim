@@ -417,6 +417,11 @@ endfunction
 ;start private api
 ;***************************************************************
 
+function PriApiSetDom(Actor akActor) global
+    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    fs.SetDom(akActor)
+endfunction
+
 int function PriApiVariable(string varName) global
     bind_MainQuestScript main = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
     if varName == "SexDomWantsPrivacy"

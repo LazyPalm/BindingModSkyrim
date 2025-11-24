@@ -6,19 +6,24 @@ Actor dom
 ObjectReference[] foundFurniture
 Actor[] partyList
 
-int usedHireling = 0
-
-bool noBuyer = false
-bool domMistake = false
-bool readyToEnd = false
+bool usedHireling
+bool addAsDom
+bool noBuyer
 
 event OnInit()
 
     if self.IsRunning()
 
+        usedHireling = false
+        addAsDom = false
+        noBuyer = false
+
         bind_Utility.FadeOutApplyNoDisable("I am being moved to a new location...")
 
         SetStage(10)
+
+        bindc_GlobalPlaySceneVar.SetValue(1)
+        HoldingCellDoor.SetOpen(false)
 
         bool foundDom = true
         sub = Game.GetPlayer()
@@ -28,6 +33,7 @@ event OnInit()
         if !FindDom()
             foundDom = false
             noBuyer = true
+            bindc_GlobalPlaySceneVar.SetValue(2)
         endif
 
         Game.SetPlayerAIDriven(true)
@@ -173,6 +179,8 @@ bool function FindDom()
             int femaleFallback = bind_Utility.PriApiVariable("SimpleSlaveryFemaleFallback")
             int maleFallback = bind_Utility.PriApiVariable("SimpleSlaveryMaleFallback")
 
+            ;debug.MessageBox("femaleFallback: " + femaleFallback + " maleFallback: " + maleFallback)
+
             if femaleFallback == 1 && maleFallback == 1
                 if Utility.RandomInt(1, 2) == 1
                     dom = MaleHireling.GetActorReference()
@@ -180,16 +188,20 @@ bool function FindDom()
                     dom = FemaleHireling.GetActorReference()
                 endif
                 result = true
-            elseif femaleFallback == 1
+            elseif femaleFallback == 1 && maleFallback == 0
+                ;debug.MessageBox("in here??")
                 dom = FemaleHireling.GetActorReference()
                 result = true
-            elseif maleFallback == 1
+            elseif maleFallback == 1 && femaleFallback == 0
                 dom = MaleHireling.GetActorReference()
                 result = true
             endif
 
+            ;debug.MessageBox(dom)
+
             if result
-                usedHireling = 1
+                addAsDom = true
+                usedHireling = true
             endif
 
         else 
@@ -259,12 +271,18 @@ function PaymentSceneEnded()
 
     bind_Utility.DoSleep(2.0)
 
-    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery")
-    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
-
     FreeSubs()
 
     DressSubs()
+
+    if addAsDom
+        MakeFollower()
+        bind_Utility.DoSleep(1.0)
+        bind_Utility.PriApiSetDom(dom)
+    endif
+
+    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery")
+    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
 
     bind_Utility.FadeOutRemoveNoDisable()
 
@@ -272,7 +290,7 @@ function PaymentSceneEnded()
 
     Game.SetPlayerAIDriven(false)
 
-    readyToEnd = true
+    bind_Utility.WriteInternalMonologue("I can leave this place, but will I be free again?")
 
 endfunction
 
@@ -367,7 +385,24 @@ event OnUpdate()
     EndQuest()
 endevent
 
+function MakeFollower()
+
+    if usedHireling == true
+        HirelingQuest hq = Quest.GetQuest("HirelingQuest") as HirelingQuest
+	    hq.HasHirelingGV.Value=1
+    	dom.AddToFaction(hq.CurrentHireling)
+    endif
+
+    DialogueFollowerScript dfs = Quest.GetQuest("DialogueFollower") as DialogueFollowerScript
+    dfs.SetFollower(dom)
+
+endfunction
+
 function EndQuest()
+
+    if noBuyer
+        debug.MessageBox("Your missing buyer has provided you with a chance at freedom. Find a blacksmith to remove these chains.")
+    endif
 
     SetStage(20)
 
@@ -395,6 +430,10 @@ ReferenceAlias property Follower1 auto
 ReferenceAlias property Follower2 auto
 ReferenceAlias property Follower3 auto
 
+ObjectReference property HoldingCellDoor auto
+
 Scene property bindc_SimpleSlaveryGetSlaveScene auto
 Scene property bindc_SimpleSlaveryWalkToOfficeScene auto
 Scene property bindc_SimpleSlaveryPaymentScene auto
+
+GlobalVariable property bindc_GlobalPlaySceneVar auto
