@@ -114,8 +114,8 @@ string[] slotFriendlyName
 
 Keyword slaArmorPrettyKeyword
 Keyword eroticArmorKeyword
-Keyword slaAmorSpendexKeyword
-Keyword slaArmorHalfNakedBikniKeyword
+Keyword slaAmorSpandexKeyword
+Keyword slaArmorHalfNakedBikiniKeyword
 Keyword slaArmorHalfNakedKeyword
 
 Function LoadGame(bool rebuildStorage = false)	
@@ -126,8 +126,8 @@ Function SetupStorage(bool rebuildStorage)
 
 	slaArmorPrettyKeyword = Keyword.GetKeyword("sla_armorpretty")
 	eroticArmorKeyword = Keyword.GetKeyword("Eroticarmor")
-	slaAmorSpendexKeyword = Keyword.GetKeyword("sla_armorspendex")
-	slaArmorHalfNakedBikniKeyword = Keyword.GetKeyword("sla_armorhalfnakedbikini")
+	slaAmorSpandexKeyword = Keyword.GetKeyword("sla_armorspandex")
+	slaArmorHalfNakedBikiniKeyword = Keyword.GetKeyword("sla_armorhalfnakedbikini")
 	slaArmorHalfNakedKeyword = Keyword.GetKeyword("sla_armorhalfnaked")
 
 	if slotProtectionArray.Length != 27
@@ -250,8 +250,31 @@ Function SetupStorage(bool rebuildStorage)
 
 EndFunction
 
+bool function IsProperFemaleArmor(Armor a)
+	;Body Rule:Proper Female Armor
+	if a.HasKeyWord(eroticArmorKeyword) || a.HasKeyWord(slaAmorSpandexKeyword) || a.HasKeyWord(slaArmorHalfNakedKeyword) || a.HasKeyWord(slaArmorHalfNakedBikiniKeyword)
+		return true
+	else
+		;do a fallback check
+		string fileName = ""
+		if Game.IsPluginInstalled("TheAmazingWorldOfBikiniArmor.esp")
+        	fileName = "TheAmazingWorldOfBikiniArmor.esp"
+		elseif Game.IsPluginInstalled("The Amazing World Of Bikini Armors REMASTERED.esp")
+			fileName = "The Amazing World Of Bikini Armors REMASTERED.esp"
+		endif
+		if fileName != ""
+			Form gf = Game.GetFormFromFile(a.GetFormID(), fileName)
+			if gf != none
+				return true
+			endif
+		endif
+
+		return false
+	endif
+endfunction
+
 bool function IsBinkiArmor(Armor a)
-	if a.HasKeyWord(slaArmorHalfNakedBikniKeyword) ||  a.HasKeyWord(slaArmorHalfNakedKeyword)
+	if a.HasKeyWord(slaArmorHalfNakedBikiniKeyword) ||  a.HasKeyWord(slaArmorHalfNakedKeyword)
 		return true
 	else
 		return false
@@ -259,7 +282,7 @@ bool function IsBinkiArmor(Armor a)
 endfunction
 
 bool function IsEroticArmor(Armor a)
-	if a.HasKeyWord(slaArmorPrettyKeyword) || a.HasKeyWord(eroticArmorKeyword) || a.HasKeyWord(slaAmorSpendexKeyword) || a.HasKeyWord(slaArmorHalfNakedKeyword)
+	if a.HasKeyWord(slaArmorPrettyKeyword) || a.HasKeyWord(eroticArmorKeyword) || a.HasKeyWord(slaAmorSpandexKeyword) || a.HasKeyWord(slaArmorHalfNakedKeyword)
 		return true
 	else
 		return false
@@ -1207,12 +1230,12 @@ function WhitelistItemsLoaded(Actor a)
 	while i < wornItems.Length
 		Form dev = wornItems[i]
 		string inWhiteList = ""
-		if StorageUtil.FormListHas(a, "bind_bikini_white_list", dev)
-			inWhiteList = "BIKINI - "
+		if StorageUtil.FormListHas(a, "bind_proper_female_armor_white_list", dev)
+			inWhiteList = "Prop F Armor - "
 		endif
-		if StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
-			inWhiteList = "EROTIC - "
-		endif
+		; if StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
+		; 	inWhiteList = "EROTIC - "
+		; endif
 		listMenu.AddEntryItem(inWhiteList + dev.GetName())
 		i += 1
 	endwhile
@@ -1242,13 +1265,13 @@ function WhitelistItemsLoaded(Actor a)
 	if listReturn >= 0
 		Form dev = wornItems[listReturn]
 		;debug.MessageBox(dev)
-		if StorageUtil.FormListHas(a, "bind_bikini_white_list", dev)
-			StorageUtil.FormListRemove(a, "bind_bikini_white_list", dev)
-			StorageUtil.FormListAdd(a, "bind_erotic_white_list", dev)
-		elseif StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
-			StorageUtil.FormListRemove(a, "bind_erotic_white_list", dev)
+		if StorageUtil.FormListHas(a, "bind_proper_female_armor_white_list", dev)
+			StorageUtil.FormListRemove(a, "bind_proper_female_armor_white_list", dev)
+			;StorageUtil.FormListAdd(a, "bind_erotic_white_list", dev)
+		; elseif StorageUtil.FormListHas(a, "bind_erotic_white_list", dev)
+		; 	StorageUtil.FormListRemove(a, "bind_erotic_white_list", dev)
 		else
-			StorageUtil.FormListAdd(a, "bind_bikini_white_list", dev)
+			StorageUtil.FormListAdd(a, "bind_proper_female_armor_white_list", dev)
 		endif
 		WhitelistItemsLoaded(a)
 	endif

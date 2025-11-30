@@ -49,8 +49,9 @@ int property BehaviorRuleLearnSpellPermission auto conditional
 
 int property BehaviorRulePrayer auto conditional
 
-int property BehaviorRuleBikiniArmor auto conditional
-int property BehaviorRuleEroticArmor auto conditional
+; int property BehaviorRuleBikiniArmor auto conditional
+; int property BehaviorRuleEroticArmor auto conditional
+int property BehaviorRuleProperFemaleArmor auto conditional
 
 int property BehaviorRuleSpeechAsk auto conditional
 
@@ -508,17 +509,17 @@ bool function IsNudityRequired(Actor a, bool safeArea)
 
 endfunction
 
-bool function IsBikiniRequired(Actor a, bool safeArea)
+bool function IsProperFemaleArmorRequired(Actor a, bool safeArea)
 
-    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_BIKINI_ARMOR())
-    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_BIKINI_ARMOR())
+    int rule = GetBehaviorRule(a, BEHAVIOR_RULE_PROPER_FEMALE_ARMOR())
+    int ruleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_PROPER_FEMALE_ARMOR())
 
     bool onlySafeAreas = false
-    if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
+    if ruleOption == RULE_OPTION_SAFE_AREAS() || ruleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
         onlySafeAreas = true
     endif
         
-    if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
+    if (rule == 1 && !onlySafeAreas) || (rule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
         return true
     else
         return false
@@ -526,23 +527,41 @@ bool function IsBikiniRequired(Actor a, bool safeArea)
 
 endfunction
 
-bool function IsEroticArmorRequired(Actor a, bool safeArea)
+; bool function IsBikiniRequired(Actor a, bool safeArea)
 
-    int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_EROTIC_ARMOR())
-    int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_EROTIC_ARMOR())
+;     int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_BIKINI_ARMOR())
+;     int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_BIKINI_ARMOR())
 
-    bool onlySafeAreas = false
-    if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
-        onlySafeAreas = true
-    endif
+;     bool onlySafeAreas = false
+;     if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
+;         onlySafeAreas = true
+;     endif
         
-    if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
-        return true
-    else
-        return false
-    endif
+;     if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
+;         return true
+;     else
+;         return false
+;     endif
 
-endfunction
+; endfunction
+
+; bool function IsEroticArmorRequired(Actor a, bool safeArea)
+
+;     int nudityRule = GetBehaviorRule(a, BEHAVIOR_RULE_EROTIC_ARMOR())
+;     int nudityRuleOption = GetBehaviorRuleOption(a, BEHAVIOR_RULE_EROTIC_ARMOR())
+
+;     bool onlySafeAreas = false
+;     if nudityRuleOption == RULE_OPTION_SAFE_AREAS() || nudityRuleOption == RULE_OPTION_PERMANENT_SAFE_AREAS()
+;         onlySafeAreas = true
+;     endif
+        
+;     if (nudityRule == 1 && !onlySafeAreas) || (nudityRule == 1 && safeArea && onlySafeAreas) ;GetBehaviorRuleByName("Body Rule:Nudity") == 1
+;         return true
+;     else
+;         return false
+;     endif
+
+; endfunction
 
 bool function IsHeavyBondageRequired(Actor a, bool safeArea)
 
@@ -830,9 +849,9 @@ string[] bRuleName
 int bRuleCount
 
 function _BuildBRulesArray()
-    bRuleCount = 22
+    bRuleCount = 21
     if bRuleName.Length != bRuleCount
-        bRuleName = new String[22]
+        bRuleName = new String[21]
         bRuleName[0] = "Body Rule:Nudity"
         bRuleName[1] = "Indoors Rule:No Beds"
         bRuleName[2] = "Indoors Rule:Dismissed"
@@ -853,8 +872,8 @@ function _BuildBRulesArray()
         bRuleName[17] = "Sex Rule:Give Thanks"
         bRuleName[18] = "Studies:Ask To Read Scroll"
         bRuleName[19] = "Studies:Ask To Train"
-        bRuleName[20] = "Body Rule:Bikini Armor"
-        bRuleName[21] = "Body Rule:Erotic Armor"
+        bRuleName[20] = "Body Rule:Proper Female Armor"
+        ;bRuleName[21] = "Body Rule:Erotic Armor"
     endif
 endfunction
 
@@ -951,6 +970,10 @@ endfunction
 
 int function BEHAVIOR_RULE_ASK_TO_TRAIN()
     return 19
+endfunction
+
+int function BEHAVIOR_RULE_PROPER_FEMALE_ARMOR()
+    return 20
 endfunction
 
 int function BEHAVIOR_RULE_BIKINI_ARMOR()
@@ -1198,15 +1221,19 @@ function SetBehaviorRule(Actor a, int rule, bool on)
     elseif rule == BEHAVIOR_RULE_ENTRY_PLAYER_HOME()
         BehaviorEnterExitRulePlayerHome = setting
 
-    elseif rule == BEHAVIOR_RULE_BIKINI_ARMOR()
-        BehaviorRuleBikiniArmor = setting
-        BehaviorRuleEroticArmor = 0
-        StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_EROTIC_ARMOR(), 0)
-    elseif rule == BEHAVIOR_RULE_EROTIC_ARMOR()
-        BehaviorRuleEroticArmor = setting
-        BehaviorRuleBikiniArmor = 0
-        StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_BIKINI_ARMOR(), 0)
-    
+    ; elseif rule == BEHAVIOR_RULE_BIKINI_ARMOR()
+    ;     BehaviorRuleBikiniArmor = setting
+    ;     BehaviorRuleEroticArmor = 0
+    ;     StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_EROTIC_ARMOR(), 0)
+    ; elseif rule == BEHAVIOR_RULE_EROTIC_ARMOR()
+    ;     BehaviorRuleEroticArmor = setting
+    ;     BehaviorRuleBikiniArmor = 0
+    ;     StorageUtil.SetIntValue(a, "bind_brule_setting_" + BEHAVIOR_RULE_BIKINI_ARMOR(), 0)
+
+    elseif rule == BEHAVIOR_RULE_PROPER_FEMALE_ARMOR()
+        BehaviorRuleProperFemaleArmor = setting
+        
+
     elseif rule == BEHAVIOR_RULE_SPEECH_ASK()
         BehaviorRuleSpeechAsk = setting
         

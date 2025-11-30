@@ -110,7 +110,7 @@ function CheckBehaviorRules(bool safeArea)
 
     ; endif
 
-    fs.GetSubDressed()
+    ;fs.GetSubDressed()
 
     ;TODO - need a location to make this work right
     ;story manager will probably be OK to keep to towns and cities but dialogue should probably be location aware also

@@ -13,6 +13,7 @@ ObjectReference theFurniture
 ObjectReference theFirePit
 ObjectReference theBedroll
 ObjectReference theClearedSpot
+ObjectReference theFurnitureMarker
 
 bool foundFurnitureFlag
 bool subInFurnitureFlag
@@ -38,12 +39,12 @@ event OnInit()
 
         ;debug.MessageBox("CampingEventMinHours: " + mqs.CampingEventMinHours + " CampingEventMaxHours: " + mqs.CampingEventMaxHours)
 
-        if FoundFurniture.GetReference()
-            foundFurnitureFlag = true
-            theFurniture = FoundFurniture.GetReference()
-        else
+        ; if FoundFurniture.GetReference()
+        ;     foundFurnitureFlag = true
+        ;     theFurniture = FoundFurniture.GetReference()
+        ; else
             foundFurnitureFlag = false
-        endif
+        ;endif
         
         ; if mqs.DomPreferenceBoundSleepMinHours == 0 && mqs.DomPreferenceBoundSleepMaxHours == 0
         ;     ;give them defaults
@@ -154,7 +155,9 @@ state PlaceFurnitureState
     event PressedAction(bool longPress)
 
         GoToState("")
-        AddCampsiteObject(0)
+        theFurniture = AddCampsiteObject(3)
+        theFurnitureMarker = AddCampsiteObject(4)
+        foundFurnitureFlag = true
         SetObjectiveCompleted(20)
         SetObjectiveDisplayed(20, false)
         SetObjectiveDisplayed(30, true)
@@ -174,7 +177,7 @@ state BuildFireState
             bind_Utility.WriteInternalMonologue("I need to move closer to the furniture...")
         else
             GoToState("")
-            AddCampsiteObject(1)
+            theFirePit = AddCampsiteObject(1)
             SetObjectiveCompleted(30)
             SetObjectiveDisplayed(30, false)
             SetObjectiveDisplayed(40, true)
@@ -195,7 +198,7 @@ state PlaceBedrollState
             bind_Utility.WriteInternalMonologue("I need to move closer to the furniture...")
         else
             GoToState("")
-            AddCampsiteObject(2)
+            theBedroll = AddCampsiteObject(2)
             SetObjectiveCompleted(40)
             SetObjectiveDisplayed(40, false)
             SetObjectiveDisplayed(50, true)
@@ -216,7 +219,7 @@ state ClearSpotState
             bind_Utility.WriteInternalMonologue("I need to move closer to the furniture...")
         else
             GoToState("")
-            AddCampsiteObject(3)
+            theClearedSpot = AddCampsiteObject(3)
             SetObjectiveCompleted(50)
             SetObjectiveDisplayed(50, false)
             SetObjectiveDisplayed(60, true)
@@ -256,6 +259,10 @@ state KneelAndWaitState
 endstate
 
 function CampReady()
+
+    theFurnitureMarker.Delete()
+    bind_Utility.DoSleep(1.0)
+    theFurnitureMarker = none
 
     bind_MovementQuestScript.WalkTo(theDom, theClearedSpot)
 
@@ -302,7 +309,15 @@ function SecureSub()
     bind_MovementQuestScript.PlayDoWork(theDom)
     bind_Utility.DoSleep(2.0)
 
-    fms.LockInFurniture(theSub, theFurniture)
+    ;fms.LockInFurniture(theSub, theFurniture)
+
+    bind_Utility.FadeOutApply()
+    bind_Utility.DoSleep(2.0)
+
+    Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
+    bind_Utility.DoSleep(1.0)
+
+    bind_Utility.FadeOutRemove()
 
     bind_MovementQuestScript.WalkTo(theDom, theClearedSpot)
 
@@ -436,7 +451,14 @@ function FreeSub()
     bind_MovementQuestScript.PlayDoWork(theDom)
     bind_Utility.DoSleep(2.0)
 
-    fms.UnlockFromFurniture(theSub, theFurniture)
+    bind_Utility.FadeOutApply()
+    bind_Utility.DoSleep(2.0)
+
+    ;fms.UnlockFromFurniture(theSub, theFurniture)
+    debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+    bind_Utility.DoSleep(1.0)
+
+    bind_Utility.FadeOutRemove()
 
     if td.IsAiReady()
         td.UseDirectNarration(theDom, thedom.GetDisplayName() + " orders {{ player.name }} to get the camp site packed and cleaned.")
@@ -445,10 +467,12 @@ function FreeSub()
     endif
 
 
+    theFurniture.Delete()
     theClearedSpot.Delete()
     bind_Utility.DoSleep()
+    theFurniture = none
     theClearedSpot = none
-
+    
     bind_Utility.EnablePlayer() ;NOTE - some dd furniture does not do this automatically??
 
     SetObjectiveDisplayed(60, false)
@@ -598,7 +622,7 @@ function ShowSleepMenu()
 
 endfunction
 
-function AddCampsiteObject(int idx)
+ObjectReference function AddCampsiteObject(int idx)
 
     bind_MovementQuestScript.PlayDoWork(theSub)
     bind_Utility.DoSleep(taskPauseTime)
@@ -625,15 +649,17 @@ function AddCampsiteObject(int idx)
         obj.SetPosition(x, y, z)
     endif
 
-    if idx == 0
-        theFurniture = obj
-    elseif idx == 1
-        theFirePit = obj
-    elseif idx == 2
-        theBedroll = obj
-    elseif idx == 3
-        theClearedSpot = obj
-    endif
+    return obj
+
+    ; if idx == 0
+    ;     theFurniture = obj
+    ; elseif idx == 1
+    ;     theFirePit = obj
+    ; elseif idx == 2
+    ;     theBedroll = obj
+    ; elseif idx == 3
+    ;     theClearedSpot = obj
+    ; endif
 
 endfunction
 
@@ -651,3 +677,4 @@ bind_ThinkingDom property td auto
 Spell Property Rested auto
 
 FormList property bind_CampsiteList auto
+

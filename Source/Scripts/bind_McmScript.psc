@@ -665,9 +665,9 @@ event OnOptionHighlight(int option)
     elseif option == toggleBehaviorRules[19]
         SetInfoText("Player must ask the Dom before speaking to a trainer.")
     elseif option == toggleBehaviorRules[20]
-        SetInfoText("Player must wear Binki armor (slaArmorHalfNakedBikniKeyword, slaArmorHalfNakedKeyword).")
-    elseif option == toggleBehaviorRules[21]
-        SetInfoText("Player must wear Binki armor (slaArmorPrettyKeyword, eroticArmorKeyword, slaAmorSpendexKeyword, slaArmorHalfNakedKeyword).")
+        SetInfoText("Player must wear proper female fantasy armor (slaArmorHalfNakedBikniKeyword, slaArmorHalfNakedKeyword, eroticArmorKeyword, slaAmorSpendexKeyword).")
+    ; elseif option == toggleBehaviorRules[21]
+    ;     SetInfoText("Player must wear Binki armor (slaArmorPrettyKeyword, eroticArmorKeyword, slaAmorSpendexKeyword, slaArmorHalfNakedKeyword).")
 
     elseif option == toggleSimpleSlaveryFemale
         SetInfoText("Simple slavery outcome will can use a female hireling if no potential doms have been selected.")

@@ -488,6 +488,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
+							bind_Utility.WriteNotification("Nudity rule or bondage set block found", bind_Utility.TextColorRed())
 							theSub.UnequipItem(dev, false, true)
 							removed = true
 						endif
@@ -519,25 +520,29 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 			Armor item = akBaseObject as Armor
 			if item != none
 				if !item.IsJewelry() && !item.HasKeywordString("zad_InventoryDevice") && !item.HasKeywordString("zad_Lockable") && !item.HasKeywordString("sexlabnostrip")
-					if RulesManager.IsBikiniRequired(theSub, safeZone)
-						if GearManager.IsBinkiArmor(item) || StorageUtil.FormListHas(theSub, "bind_bikini_white_list", item)
+					
+					int slotMask = item.GetSlotMask()
+
+					if RulesManager.IsProperFemaleArmorRequired(theSub, safeZone) && theSub.GetActorBase().GetSex() == 1 && slotMask == kSlotMaskBody
+						if GearManager.IsProperFemaleArmor(item) || StorageUtil.FormListHas(theSub, "bind_proper_female_armor_white_list", item)
 							;debug.Notification("bikini armor - YES")
 						else
 							;debug.Notification("bikini armor - NO")
-							bind_Utility.WriteInternalMonologue("I am only allowed to wear bikini armor...")
+							bind_Utility.WriteInternalMonologue("I am only allowed to wear proper female armor...")
 							theSub.UnequipItem(item, false, true)	
 							removed = true					
 						endif
-					elseif RulesManager.IsEroticArmorRequired(theSub, safeZone)
-						if GearManager.IsEroticArmor(item) || StorageUtil.FormListHas(theSub, "bind_erotic_white_list", item)
-							;debug.Notification("erotic armor - YES")
-						else
-							;debug.Notification("erotic armor - NO")
-							bind_Utility.WriteInternalMonologue("I am only allowed to wear erotic armor...")
-							theSub.UnequipItem(item, false, true)	
-							removed = true
-						endif
+					; elseif RulesManager.IsEroticArmorRequired(theSub, safeZone)
+					; 	if GearManager.IsEroticArmor(item) || StorageUtil.FormListHas(theSub, "bind_erotic_white_list", item)
+					; 		;debug.Notification("erotic armor - YES")
+					; 	else
+					; 		;debug.Notification("erotic armor - NO")
+					; 		bind_Utility.WriteInternalMonologue("I am only allowed to wear erotic armor...")
+					; 		theSub.UnequipItem(item, false, true)	
+					; 		removed = true
+					; 	endif
 					endif
+
 				endif
 			endif
 

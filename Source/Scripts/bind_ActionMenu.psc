@@ -297,7 +297,8 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Manage Future Doms List")
     listMenu.AddEntryItem("Add Future Dom")
     listMenu.AddEntryItem("Run Dressing Room Quest")
-    listMenu.AddEntryItem("Whitelist Items")
+    listMenu.AddEntryItem("Whitelist Proper Female Armor")
+    ;listMenu.AddEntryItem("Bikini Test")
     ;listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
     ; listMenu.AddEntryItem("Dom Follow 30s")
@@ -359,6 +360,18 @@ function ShowSettingsMenu()
         endif
     elseif listReturn == 7
         gear_manager.WhitelistItems(Game.GetPlayer())
+
+    ; elseif listReturn == 8
+    ;     int kSlotMaskBody = 0x00000004  ;32
+    ;     string fileName = "TheAmazingWorldOfBikiniArmor.esp"
+    ;     Form f = Game.GetPlayer().GetWornForm(kSlotMaskBody)
+    ;     Form gf = Game.GetFormFromFile(f.GetFormID(), fileName)
+    ;     if gf != none
+    ;         debug.MessageBox("Found bikini: " + gf.GetName())
+    ;     else
+    ;         debug.MessageBox("Not found")
+    ;     endif
+
     ; elseif listReturn == 7
     ;     ShowOutfitsMenu()
         ;     bind_MovementQuestScript.WalkTo(mqs.GetDomRef(), mqs.GetSubRef(), 128.0, 60)
