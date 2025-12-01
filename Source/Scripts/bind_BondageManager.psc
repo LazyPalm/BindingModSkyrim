@@ -322,6 +322,9 @@ function EquipBondageOutfit(Actor a, int setId)
         ModEvent.Send(handle)
     endif
 
+    StorageUtil.FormListClear(a, "binding_worn_bondage_items")
+    StorageUtil.FormListCopy(a, "binding_worn_bondage_items", tempItems)
+
     if main.CleanUpNonBindingItemsFromBags == 1
         bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(a)
     endif

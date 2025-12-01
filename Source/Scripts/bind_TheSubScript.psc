@@ -520,29 +520,16 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 			Armor item = akBaseObject as Armor
 			if item != none
 				if !item.IsJewelry() && !item.HasKeywordString("zad_InventoryDevice") && !item.HasKeywordString("zad_Lockable") && !item.HasKeywordString("sexlabnostrip")
-					
 					int slotMask = item.GetSlotMask()
-
 					if RulesManager.IsProperFemaleArmorRequired(theSub, safeZone) && theSub.GetActorBase().GetSex() == 1 && slotMask == kSlotMaskBody
 						if GearManager.IsProperFemaleArmor(item) || StorageUtil.FormListHas(theSub, "bind_proper_female_armor_white_list", item)
-							;debug.Notification("bikini armor - YES")
+							;item OK
 						else
-							;debug.Notification("bikini armor - NO")
 							bind_Utility.WriteInternalMonologue("I am only allowed to wear proper female armor...")
 							theSub.UnequipItem(item, false, true)	
 							removed = true					
 						endif
-					; elseif RulesManager.IsEroticArmorRequired(theSub, safeZone)
-					; 	if GearManager.IsEroticArmor(item) || StorageUtil.FormListHas(theSub, "bind_erotic_white_list", item)
-					; 		;debug.Notification("erotic armor - YES")
-					; 	else
-					; 		;debug.Notification("erotic armor - NO")
-					; 		bind_Utility.WriteInternalMonologue("I am only allowed to wear erotic armor...")
-					; 		theSub.UnequipItem(item, false, true)	
-					; 		removed = true
-					; 	endif
 					endif
-
 				endif
 			endif
 
