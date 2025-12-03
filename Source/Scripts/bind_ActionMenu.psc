@@ -77,6 +77,7 @@ function ShowDebugMenu()
     listMenu.AddEntryItem("SKSE - crowd size test")
     listMenu.AddEntryItem("Fade to black")
     listMenu.AddEntryItem("Fade to black - remove")
+    listMenu.AddEntryItem("Get Dom current package")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -88,7 +89,9 @@ function ShowDebugMenu()
         rules_manager.DomManagedRuleChange(functions_script.GetSubRef(), true)
     elseif listReturn == 2
         if think.IsAiReady()
-            think.UseDirectNarration(functions_script.GetDomRef(), "You have defeated {{ player.name }} in battle, who is now tied kneeling at your feet. Talk to them about their fate. When the conversation is over you will untie and free them or fuck them based on their answers and your mood.")
+            SkyrimNetApi.DirectNarration(functions_script.GetDomRef().GetDisplayName() + " orders {{ player.name }} to their knees.", functions_script.GetDomRef(), functions_script.GetSubRef())
+            debug.Notification("Direct narration function called")
+            ;think.UseDirectNarration(functions_script.GetDomRef(), functions_script.GetDomRef().GetDisplayName() + " praises {{ player.name }} for being a good slave.")
         endif
     elseif listReturn == 3
         if think.IsAiReady()
@@ -112,6 +115,14 @@ function ShowDebugMenu()
 
     elseif listReturn == 8
         FadeToBlackHoldImod.Remove()
+
+    elseif listReturn == 9
+        Package newPackage = functions_script.GetDomRef().GetCurrentPackage()
+        if newPackage != none
+            debug.MessageBox("Package id: " + newPackage)
+        else 
+            debug.MessageBox("No package found")
+        endif
 
     elseif listReturn == 4
 
