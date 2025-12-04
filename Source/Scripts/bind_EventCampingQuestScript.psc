@@ -317,7 +317,8 @@ function SecureSub()
 
     Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
     bind_Utility.DoSleep(1.0)
-    (theSub as ObjectReference).SetMotionType(4)
+    theSub.SetVehicle(theFurniture)
+    ;(theSub as ObjectReference).SetMotionType(4)
 
     bind_Utility.FadeOutRemove()
 
@@ -459,7 +460,8 @@ function FreeSub()
     ;fms.UnlockFromFurniture(theSub, theFurniture)
     debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
     bind_Utility.DoSleep(1.0)
-    (theSub as ObjectReference).SetMotionType(0)
+    theSub.SetVehicle(none)
+    ;(theSub as ObjectReference).SetMotionType(0)
 
     bind_Utility.FadeOutRemove()
 
