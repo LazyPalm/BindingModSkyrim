@@ -427,7 +427,7 @@ state DomWakingState
 
     event PressedAction(bool longPress)
 
-        bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is waking. When we I be freed?")
+        bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is waking. When will I be freed?")
     
         ; if td.IsAiReady()
         ;     td.UseDirectNarration(theDom, thedom.GetDisplayName() + " is enjoying the view of {{ player.name }} all tied up.")
