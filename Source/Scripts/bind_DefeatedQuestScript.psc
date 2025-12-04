@@ -134,6 +134,8 @@ function UntiePlayer()
 
     debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
     bind_Utility.DoSleep(1.0)
+    ;theSub.SetDontMove(false)
+    (theSub as ObjectReference).SetMotionType(0)
 
     ;bind_Utility.DisablePlayer()
 
@@ -216,6 +218,8 @@ function SaveThePlayer(bool addGag)
 
     Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
     bind_Utility.DoSleep(1.0)
+    ;theSub.SetDontMove(true)
+    (theSub as ObjectReference).SetMotionType(4)
 
     ;Game.EnablePlayerControls()
 
