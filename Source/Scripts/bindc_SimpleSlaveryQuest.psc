@@ -208,6 +208,7 @@ bool function FindDom()
             ;selected a future dom
             dom = list[Utility.RandomInt(0, list.Length - 1)] as Actor
             result = true
+            addAsDom = true
         endif
 
     endif

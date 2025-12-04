@@ -157,6 +157,7 @@ state PlaceFurnitureState
         GoToState("")
         theFurniture = AddCampsiteObject(3)
         theFurnitureMarker = AddCampsiteObject(4)
+        theFurnitureMarker.MoveTo(theFurniture)
         foundFurnitureFlag = true
         SetObjectiveCompleted(20)
         SetObjectiveDisplayed(20, false)
