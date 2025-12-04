@@ -18,7 +18,9 @@ event OnInit()
         addAsDom = false
         noBuyer = false
 
-        bind_Utility.FadeOutApplyNoDisable("I am being moved to a new location...")
+        ;bind_Utility.WriteInternalMonologue("I am being moved to a new location...")
+
+        ;bind_Utility.FadeOutApplyNoDisable("I am being moved to a new location...")
 
         SetStage(10)
 
@@ -50,7 +52,7 @@ event OnInit()
 
         SecureSubs()
 
-        bind_Utility.FadeOutRemoveNoDisable()
+        ;bind_Utility.FadeOutRemoveNoDisable()
 
         bindc_SimpleSlaveryGetSlaveScene.Start()
 
