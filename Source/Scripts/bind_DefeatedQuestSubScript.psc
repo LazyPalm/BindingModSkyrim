@@ -30,5 +30,11 @@ Event OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile,
 EndEvent
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
+    
+    bool isIndoors = self.GetActorReference().IsInInterior()
+    if !isIndoors
+        StorageUtil.SetFormValue(self.GetActorReference(), "bind_defeat_last_loc", akNewLoc)
+    endif
+
     cheatDeath = false
 endevent

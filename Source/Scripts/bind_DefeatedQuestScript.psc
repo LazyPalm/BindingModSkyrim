@@ -27,7 +27,12 @@ endEvent
 
 function PlayerIsDown()
 
+    bind_Controller con = Quest.GetQuest("bind_MainQuest") as bind_Controller
+    con.DoStartEvent(true)
+
     if GetStage() == 0
+
+        con.SetEventName("Defeated - First Time")
         
         SetStage(10)
         
@@ -38,6 +43,8 @@ function PlayerIsDown()
         SetObjectiveDisplayed(10, true)
 
     elseif GetStage() == 20
+
+        con.SetEventName("Defeated - Second Time")
 
         SetObjectiveCompleted(20)
         SetObjectiveDisplayed(30, true)
@@ -70,6 +77,9 @@ function AskForSecondChance()
     SetObjectiveCompleted(10)
     SetObjectiveDisplayed(20, true)
 
+    bind_Controller con = Quest.GetQuest("bind_MainQuest") as bind_Controller
+    con.DoEndEvent(true)
+
 endfunction
 
 function AcceptEnslavement()
@@ -90,9 +100,15 @@ function AcceptEnslavement()
 
     UntiePlayer()
 
-    TheFutureDom.Clear() ;should walk away if not a follower
+    DialogueFollowerScript dfs = Quest.GetQuest("DialogueFollower") as DialogueFollowerScript
+    dfs.SetFollower(futureDom)
+
+    TheFutureDom.Clear() 
 
     fs.SetDom(futureDom)
+
+    bind_Controller con = Quest.GetQuest("bind_MainQuest") as bind_Controller
+    con.DoEndEvent(true)
 
     ;SetDom function will terminate this quest
 
@@ -107,13 +123,19 @@ function PickFutureDom()
 
 endfunction
 
+Form[] playerGear
+
 function UntiePlayer()
 
     bind_MovementQuestScript.PlayDoWork(futureDom)
     bind_Utility.DoSleep(1.0)
-    fms.UnlockFromFurniture(theSub, bondagePole, true)
+    ;fms.UnlockFromFurniture(theSub, bondagePole, true)
+    bind_Utility.FadeOutApply()
 
-    bind_Utility.DisablePlayer()
+    debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+    bind_Utility.DoSleep(1.0)
+
+    ;bind_Utility.DisablePlayer()
 
     if eventAddedGag
         if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_GAG())
@@ -124,27 +146,41 @@ function UntiePlayer()
     bind_MovementQuestScript.PlayDressUndress(theSub)
     ;gms.RestoreWornGear(theSub)
     ;fs.GetSubDressed()
+    if eventRemovedClothing
+        bind_SkseFunctions.DoDressActor(theSub, playerGear)
+    endif
     bind_Utility.DoSleep(1.0)
 
+    bind_Utility.FadeOutRemove()
+
+    ;bind_Utility.DoSleep(1.0)
     bind_Utility.EnablePlayer()
+    Game.EnablePlayerControls()
 
 endfunction
 
 function SaveThePlayer(bool addGag)
 
-	ObjectReference safeLoc
-	float lastDistance = 0.0
-	int idx = 0
-	bind_Utility.WriteToConsole("bind_SafeLocationsList len: " + bind_SafeLocationsList.GetSize())
-	while idx < bind_SafeLocationsList.GetSize()
-		ObjectReference sl = bind_SafeLocationsList.GetAt(idx) as ObjectReference
-		float distance = theSub.GetDistance(sl); theSubRef.GetDistance(sl)
-		if distance < lastDistance || lastDistance == 0.0
-			lastDistance = distance
-			safeLoc = sl
-		endif
-		idx += 1
-	endwhile
+    ObjectReference safeLoc
+
+    Location lastLoc = StorageUtil.GetFormValue(theSub, "bind_defeat_last_loc", none) as Location
+    if lastLoc == none
+        debug.MessageBox("No last location found. Using Riverwood.")
+        safeLoc = bind_SafeLocationsList.GetAt(0) as ObjectReference
+    else
+        float lastDistance = 0.0
+        int idx = 0
+        bind_Utility.WriteToConsole("bind_SafeLocationsList len: " + bind_SafeLocationsList.GetSize())
+        while idx < bind_SafeLocationsList.GetSize()
+            ObjectReference sl = bind_SafeLocationsList.GetAt(idx) as ObjectReference
+            float distance = theSub.GetDistance(sl); theSubRef.GetDistance(sl)
+            if distance < lastDistance || lastDistance == 0.0
+                lastDistance = distance
+                safeLoc = sl
+            endif
+            idx += 1
+        endwhile
+    endif
 
     ;debug.MessageBox(safeLoc)
 
@@ -154,8 +190,8 @@ function SaveThePlayer(bool addGag)
 
     FadeToBlackHoldImod.Apply()
 
-    bind_Utility.WriteInternalMonologue("I start to come around, still very groggy.")
-    bind_Utility.WriteInternalMonologue("Why am I blindfolded?")
+    bind_Utility.WriteInternalMonologue("Where am I? Why can't I move?")
+    ;bind_Utility.WriteInternalMonologue("Why am I blindfolded?")
 
     Game.DisablePlayerControls() ;NOTE - this will always make the player sheate the weapon
     bind_Utility.DisablePlayer()
@@ -166,29 +202,38 @@ function SaveThePlayer(bool addGag)
 	theSub.StopCombat()
 	bind_Utility.DoSleep()
 
-    eventRemovedClothing = false
-	if !gms.IsNude(theSub)
-		if gms.RemoveWornGear(theSub)
-			eventRemovedClothing = true
-			bind_Utility.DoSleep(1.0)
-		endif
-	endif
+    ; eventRemovedClothing = false
+	; if !gms.IsNude(theSub)
+	; 	if gms.RemoveWornGear(theSub)
+	; 		eventRemovedClothing = true
+	; 		bind_Utility.DoSleep(1.0)
+	; 	endif
+	; endif
 
-    Game.EnablePlayerControls()
+    playerGear = bind_SkseFunctions.DoStripActor(theSub, false)
+    bind_Utility.DoSleep(1.0)
+    eventRemovedClothing = true
 
-    bondagePole = StorageUtil.GetFormValue(safeLoc, "bind_safe_loc_furniture", none) as ObjectReference
-    if bondagePole
-        ;furniture in this location
-    else
-        float z = theSub.GetAngleZ()
-        bondagePole = theSub.PlaceAtMe(zadc_BondagePole, 1, true, true)
-        bondagePole.SetAngle(0.0, 0.0, z)
-        bondagePole.Enable()
-        bondagePole.SetActorOwner(theSub.GetActorBase())
-        StorageUtil.SetFormValue(safeLoc, "bind_safe_loc_furniture", bondagePole)
-    endif
+    Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
+    bind_Utility.DoSleep(1.0)
 
-    fms.LockInFurniture(theSub, bondagePole, true)
+    ;Game.EnablePlayerControls()
+
+    ; bondagePole = StorageUtil.GetFormValue(safeLoc, "bind_safe_loc_furniture", none) as ObjectReference
+    ; if bondagePole
+    ;     ;furniture in this location
+    ; else
+    ;     float z = theSub.GetAngleZ()
+    ;     bondagePole = theSub.PlaceAtMe(zadc_BondagePole, 1, true, true)
+    ;     bondagePole.SetAngle(0.0, 0.0, z)
+    ;     bondagePole.Enable()
+    ;     bondagePole.SetActorOwner(theSub.GetActorBase())
+    ;     StorageUtil.SetFormValue(safeLoc, "bind_safe_loc_furniture", bondagePole)
+    ; endif
+
+    ; fms.LockInFurniture(theSub, bondagePole, true)
+
+
 
     eventAddedGag = false
     if addGag
@@ -203,16 +248,23 @@ function SaveThePlayer(bool addGag)
     ; bind_MovementQuestScript.StartHogtied(theSub)
 
     futureDom.MoveTo(theSub)
-    futureDom.SetPosition(futureDom.GetPositionX() + Utility.RandomFloat(-250.0, 250.0), futureDom.GetPositionY() + Utility.RandomFloat(-250.0, 250.0), futureDom.GetPositionZ() + 100.0) ;adding z in case elevation changes
+    futureDom.SetPosition(futureDom.GetPositionX() + Utility.RandomFloat(-128.0, 128.0), futureDom.GetPositionY() + Utility.RandomFloat(-128.0, 128.0), futureDom.GetPositionZ() + 100.0) ;adding z in case elevation changes
+    ;futureDom.MoveTo(theSub)
 
+    float zOffset = futureDom.GetHeadingAngle(theSub)
+    futureDom.SetAngle(futureDom.GetAngleX(), futureDom.GetAngleY(), futureDom.GetAngleZ() + zOffset)
+
+    bind_Utility.DoSleep(3.0)
 
     FadeToBlackHoldImod.Remove()
 
-    bind_Utility.DoSleep(5.0)
+    bind_Utility.DoSleep(1.0)
 
     if !futureDom.IsInFaction(bind_ForceGreetFaction)
         futureDom.AddToFaction(bind_ForceGreetFaction)
     endif
+
+    ;debug.MessageBox(playerGear)
 
     ;TODO:
     ;
