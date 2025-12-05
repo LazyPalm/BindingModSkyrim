@@ -18,6 +18,8 @@ ObjectReference theFurnitureMarker
 bool foundFurnitureFlag
 bool subInFurnitureFlag
 
+bool changedPos = false
+
 event OnInit()
 
     if self.IsRunning()
@@ -318,6 +320,8 @@ function SecureSub()
     Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
     bind_Utility.DoSleep(1.0)
     theSub.SetVehicle(theFurniture)
+    mqs.PlayerTiedInAnimation = 1
+    ;theSub.SetRestrained(true) ;.SetDontMove(true)
     ;(theSub as ObjectReference).SetMotionType(4)
 
     bind_Utility.FadeOutRemove()
@@ -393,6 +397,10 @@ state WaitingState
 
         if !keyPressed
             keyPressed = true
+            ; if !changedPos
+            ;     changedPos = true
+            ;     ChangeSubPosition()
+            ; endif
             ShowSleepMenu()
             keyPressed = false
         endif
@@ -404,6 +412,8 @@ state WaitingState
 endstate
 
 function WakeDom()
+
+    ;ChangeSubPosition()
 
     bind_MovementQuestScript.EndSleep()
 
@@ -441,6 +451,29 @@ state DomWakingState
 
 endstate
 
+function ChangeSubPosition()
+
+    bind_Utility.FadeOutApply()
+
+    debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+    bind_Utility.DoSleep(1.0)
+
+    int eventOutfitId = bms.GetBondageOutfitForEvent("event_hogtied")
+    ;debug.MessageBox("eventOutfitId: " + eventOutfitId)
+	if eventOutfitId > 0 
+		bms.EquipBondageOutfit(theSub, eventOutfitId)
+	endif
+
+    debug.SendAnimationEvent(theSub, "ZazAPCAO052")
+
+    bind_Utility.DisablePlayer()
+
+    bind_Utility.FadeOutRemove()
+
+    ;Debug.SendAnimationEvent(theSubRef, "ZazAPCAO052")
+
+endfunction
+
 function FreeSub()
 
     bind_MovementQuestScript.PlayReset(theDom)
@@ -457,10 +490,22 @@ function FreeSub()
     bind_Utility.FadeOutApply()
     bind_Utility.DoSleep(2.0)
 
-    ;fms.UnlockFromFurniture(theSub, theFurniture)
     debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
-    bind_Utility.DoSleep(1.0)
     theSub.SetVehicle(none)
+    mqs.PlayerTiedInAnimation = 0
+
+    ; int eventOutfitId = bms.GetBondageOutfitForEvent("event_camping")
+    ; debug.MessageBox("eventOutfitId: " + eventOutfitId)
+	; if eventOutfitId > 0 
+	; 	bms.EquipBondageOutfit(theSub, eventOutfitId)
+	; endif
+
+    ;theSub.SetRestrained(false)
+
+    ;fms.UnlockFromFurniture(theSub, theFurniture)
+    ; debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+    ; bind_Utility.DoSleep(1.0)
+    ; theSub.SetVehicle(none)
     ;(theSub as ObjectReference).SetMotionType(0)
 
     bind_Utility.FadeOutRemove()

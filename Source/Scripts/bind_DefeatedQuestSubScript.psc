@@ -3,6 +3,11 @@ Scriptname bind_DefeatedQuestSubScript extends ReferenceAlias
 bool cheatDeath
 bool testHealth
 
+event OnPlayerLoadGame()
+    bind_DefeatedQuestScript dq = GetOwningQuest() as bind_DefeatedQuestScript
+    dq.GameLoaded()
+endevent
+
 Event OnHit(ObjectReference akAggressor, Form akSource, Projectile akProjectile, bool abPowerAttack, bool abSneakAttack, \
 	bool abBashAttack, bool abHitBlocked)
 

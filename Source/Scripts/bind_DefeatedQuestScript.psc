@@ -9,13 +9,19 @@ bool eventRemovedClothing
 bool eventAddedGag
 bool fadeToBlackActive
 
+bool tiedToPole
+
 ObjectReference bondagePole
 
 event OnInit()
 
     if self.IsRunning()
 
+        RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
+        RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+
         theSub = Game.GetPlayer()
+        tiedToPole = false
 
         bind_Utility.WriteToConsole("defeated quest running")
 
@@ -24,6 +30,44 @@ event OnInit()
     endif
 
 endEvent
+
+function GameLoaded()
+    if tiedToPole
+        bind_Utility.DisablePlayer()
+    endif
+endfunction
+
+event SafewordEvent()
+    
+    bind_Utility.WriteToConsole("defeated quest safeword reset")
+
+    SetStage(0)
+
+    debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+    bind_Utility.DoSleep(1.0)
+    theSub.SetVehicle(none)
+    tiedToPole = false
+
+    if futureDom.IsInFaction(bind_ForceGreetFaction)
+        futureDom.RemoveFromFaction(bind_ForceGreetFaction)
+    endif
+
+    bind_MainQuestScript m = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+    m.ResetDefeatedQuest = 1
+
+    ;self.Stop()
+
+endevent
+
+event PressedAction(bool longPress)
+
+    ;bind_Utility.WriteInternalMonologue("There is nothing I can do...")
+
+    futureDom.Activate(theSub)
+
+    bind_Utility.WriteToConsole("pressed action in defeated quest - no state")
+
+endevent
 
 function PlayerIsDown()
 
@@ -136,6 +180,7 @@ function UntiePlayer()
     bind_Utility.DoSleep(1.0)
     ;theSub.SetDontMove(false)
     theSub.SetVehicle(none)
+    tiedToPole = false
     ;(theSub as ObjectReference).SetMotionType(0)
 
     ;bind_Utility.DisablePlayer()
@@ -221,6 +266,7 @@ function SaveThePlayer(bool addGag)
     bind_Utility.DoSleep(1.0)
     ;theSub.SetDontMove(true)
     theSub.SetVehicle(safeLoc)
+    tiedToPole = true
     ;(theSub as ObjectReference).SetMotionType(4)
 
     ;Game.EnablePlayerControls()

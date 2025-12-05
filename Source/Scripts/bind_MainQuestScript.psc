@@ -13,6 +13,7 @@ string property ActiveQuestName auto conditional
 int property ActiveBondageSetId auto conditional
 string property ActiveBondageSetName auto conditional
 int property NeedsBondageSetChange auto conditional
+int property PlayerTiedInAnimation auto conditional
 
 int property LogOutputToScreen auto conditional
 int property ActionKeyMappedKeyCode auto conditional
@@ -204,6 +205,8 @@ int property SimpleSlaveryMaleFallback auto conditional
 int property ExperimentalFeaturesFlag auto conditional
 int property ProtectSltr auto conditional
 int property DisplayInfractionsInMessageBox auto conditional
+
+int property ResetDefeatedQuest auto conditional
 
 ;*********************************************************
 ;skyrimnet variables

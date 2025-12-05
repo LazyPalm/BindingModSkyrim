@@ -162,7 +162,10 @@ function LoadGame()
 		bind_GlobalKneelingOK.SetValue(1.0) ;if not required, always make this OK
 	endif
 
-
+	if main.PlayerTiedInAnimation == 1
+		bind_Utility.WriteToConsole("disabling player in animation")
+		bind_Utility.DisablePlayer()
+	endif
 
 endfunction
 
@@ -1938,6 +1941,8 @@ Function SafeWord()
 
 	LogOutput("SafeWord()")
 
+	main.PlayerTiedInAnimation = 0
+
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
 		;listMenu.AddEntryItem("Remove Binding Bondage")
@@ -2056,6 +2061,18 @@ Function SafeWord()
 
 	if main.CleanUpNonBindingItemsFromBags == 1
 		bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(theSubRef)
+	endif
+
+	if main.ResetDefeatedQuest == 1
+		;debug.MessageBox("Resetting Binding: Only the Strong quest")
+		main.ResetDefeatedQuest = 0
+		Quest q = Quest.GetQuest("bind_DefeatedQuest")
+		if q.IsRunning()
+			q.Stop()
+			bind_Utility.DoSleep(2.0)
+			debug.MessageBox("Restarting Binding: Only the Strong quest")
+			q.Start()
+		endif
 	endif
 
 	WindowOutput("Safeword: completed...")
