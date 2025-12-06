@@ -310,7 +310,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.31"
+    version = "0.4.32"
 
     theSub = fs.GetSubRef()
 
