@@ -222,7 +222,7 @@ endfunction
 
 function DisablePlayer(bool disableControls = false) global
     if disableControls
-    
+        Game.DisablePlayerControls(abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = true, abMenu = false, abActivate = false, abJournalTabs = false, aiDisablePOVType = 0)
     else
     
     endif
@@ -232,7 +232,7 @@ endfunction
 function EnablePlayer(bool enableControls = true) global    
     Game.SetPlayerAIDriven(false)
     if enableControls
-
+        Game.EnablePlayerControls()
     else
 
     endif

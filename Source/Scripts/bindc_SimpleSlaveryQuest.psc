@@ -38,7 +38,8 @@ event OnInit()
             bindc_GlobalPlaySceneVar.SetValue(2)
         endif
 
-        Game.SetPlayerAIDriven(true)
+        ;Game.SetPlayerAIDriven(true)
+        bind_Utility.DisablePlayer(true)
 
         MoveSubs()
 
@@ -51,6 +52,8 @@ event OnInit()
         UndressParty()
 
         SecureSubs()
+
+        bind_Utility.DisablePlayer(true)
 
         bind_Utility.FadeOutRemoveNoDisable()
 
@@ -291,7 +294,8 @@ function PaymentSceneEnded()
 
     bind_Utility.DoSleep(3.0)
 
-    Game.SetPlayerAIDriven(false)
+    ;Game.SetPlayerAIDriven(false)
+    bind_Utility.EnablePlayer(true)
 
     bind_Utility.WriteInternalMonologue("I can leave this place, but will I be free again?")
 
