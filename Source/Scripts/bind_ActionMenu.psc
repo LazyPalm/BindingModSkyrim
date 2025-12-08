@@ -309,6 +309,7 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Add Future Dom")
     listMenu.AddEntryItem("Run Dressing Room Quest")
     listMenu.AddEntryItem("Whitelist Proper Female Armor")
+    listMenu.AddEntryItem("Flag test")
     ;listMenu.AddEntryItem("Bikini Test")
     ;listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
@@ -371,6 +372,15 @@ function ShowSettingsMenu()
         endif
     elseif listReturn == 7
         gear_manager.WhitelistItems(Game.GetPlayer())
+    
+    elseif listReturn == 8
+        Form[] items = bind_SkseFunctions.GetWornDevious(Game.GetPlayer())
+        int i = 0
+        while i < items.Length
+            Form item = items[i]
+            debug.MessageBox("item: " + item.GetName() + " flag: " + StorageUtil.GetIntValue(item, "binding_item_flag", -1))
+            i += 1
+        endwhile
 
     ; elseif listReturn == 8
     ;     int kSlotMaskBody = 0x00000004  ;32

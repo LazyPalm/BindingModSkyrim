@@ -20,6 +20,7 @@ endfunction
 
 int function LockDevice(Actor act, Armor arm) global
     zadLibs zlib = Quest.GetQuest("zadQuest") as zadLibs
+    StorageUtil.SetIntValue(arm, "binding_item_flag", 1)
     zlib.LockDevice(act, arm, false)
     Utility.Wait(1.0)
     return 0
