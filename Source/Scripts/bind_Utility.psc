@@ -234,6 +234,7 @@ function EnablePlayer(bool enableControls = true) global
     if enableControls
         Game.EnablePlayerControls()
     else
+        
 
     endif
 endfunction

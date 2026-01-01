@@ -14,52 +14,65 @@ event OnInit()
 
     if self.IsRunning()
 
-        usedHireling = false
-        addAsDom = false
-        noBuyer = false
+        Quest qold = Quest.GetQuest("bind_MainQuest")
+        if qold == none
 
-        ;bind_Utility.WriteInternalMonologue("I am being moved to a new location...")
+            ;normal start of this quest
 
-        bind_Utility.FadeOutApplyNoDisable("I am being moved to a new location...")
+            usedHireling = false
+            addAsDom = false
+            noBuyer = false
 
-        SetStage(10)
+            bindc_Util.FadeOutApplyNoDisable("I am being moved to a new location...")
 
-        bindc_GlobalPlaySceneVar.SetValue(1)
-        HoldingCellDoor.SetOpen(false)
+            SetStage(10)
 
-        bool foundDom = true
-        sub = Game.GetPlayer()
-        ;scan for npcs followers around sub when this starts
-        ;partyList = MiscUtil.ScanCellNPCsByFaction(PotentialFollowerFaction, sub, 2000.0)
+            bindc_GlobalPlaySceneVar.SetValue(1)
+            HoldingCellDoor.SetOpen(false)
 
-        if !FindDom()
-            foundDom = false
-            noBuyer = true
-            bindc_GlobalPlaySceneVar.SetValue(2)
+            bool foundDom = true
+            sub = Game.GetPlayer()
+            ;scan for npcs followers around sub when this starts
+            ;partyList = MiscUtil.ScanCellNPCsByFaction(PotentialFollowerFaction, sub, 2000.0)
+
+            if !FindDom()
+                foundDom = false
+                noBuyer = true
+                bindc_GlobalPlaySceneVar.SetValue(2)
+            endif
+
+            ;Game.SetPlayerAIDriven(true)
+            bindc_Util.DisablePlayer(true)
+
+            MoveSubs()
+
+            if foundDom
+                dom.MoveTo(dancer)
+            endif
+
+            Utility.Wait(2.0)
+
+            UndressParty()
+
+            SecureSubs()
+
+            bindc_Util.DisablePlayer(true)
+
+            bindc_Util.FadeOutRemoveNoDisable()
+
+            bindc_SimpleSlaveryGetSlaveScene.Start()
+
+            ;Game.SetPlayerAIDriven(false)
+
+        else
+
+            ;using the esl
+            Quest qs = Quest.GetQuest("BindingSlaveStart")
+            qs.Start()
+
+            self.Stop()
+
         endif
-
-        ;Game.SetPlayerAIDriven(true)
-        bind_Utility.DisablePlayer(true)
-
-        MoveSubs()
-
-        if foundDom
-            dom.MoveTo(dancer)
-        endif
-
-        Utility.Wait(2.0)
-
-        UndressParty()
-
-        SecureSubs()
-
-        bind_Utility.DisablePlayer(true)
-
-        bind_Utility.FadeOutRemoveNoDisable()
-
-        bindc_SimpleSlaveryGetSlaveScene.Start()
-
-        ;Game.SetPlayerAIDriven(false)
 
     endif
 
@@ -76,6 +89,7 @@ function MoveSubs()
     if Follower2.GetActorReference() != none
         Follower2.GetActorReference().MoveTo(bindc_SimpleSlaveryRoomHeadingMarker)
     endif
+    
 
     if Follower3.GetActorReference() != none
         Follower3.GetActorReference().MoveTo(bindc_SimpleSlaveryRoomHeadingMarker)
@@ -85,7 +99,7 @@ endfunction
 
 function UndressParty()
 
-    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery_in_furniture")
+    
     ;debug.MessageBox(bondageOutfitId)
 
     if Follower1.GetActorReference() != none
@@ -106,8 +120,10 @@ function UndressParty()
         endif
     endif
 
-    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
-    ;bind_SkseFunctions.DoStripActor(sub, false)
+    int bondageOutfitId = data_script.BondageScript.GetBondageOutfitForEvent(sub, "event_simple_slavery_in_furniture") 
+    if bondageOutfitId > -1
+        data_script.BondageScript.EquipBondageOutfit(sub, bondageOutfitId)
+    endif
 
 endfunction
 
@@ -139,7 +155,7 @@ endfunction
 
 function SecureSubs()
 
-    int[] randomList = bind_SkseFunctions.GetRandomNumbers(1, 4, 4)
+    int[] randomList = bindc_SKSE.GetRandomNumbers(1, 4, 4)
 
     if Follower1.GetActorReference() != none
         if Follower1.GetActorReference() != dom
@@ -159,7 +175,7 @@ function SecureSubs()
         endif
     endif
 
-    bind_SkseFunctions.DoStripActor(sub, false)
+    bindc_SKSE.DoStripActor(sub, false)
     LockInFurniture(sub, randomList[3])
 
 endfunction
@@ -168,21 +184,17 @@ bool function FindDom()
 
     bool result = false
 
-    ; Quest q = Quest.GetQuest("bind_MainQuest")
-    ; bind_MainQuestScript mqs = q as bind_MainQuestScript
-    ; bind_Functions fs = q as bind_Functions
-
-    if bind_Utility.PriApiPlayerIsSub()
+    if sub.IsInFaction(data_script.MainScript.bindc_SubFaction)
         ;already a binding sub
-        dom = bind_Utility.PriApiGetDom()
+        dom = StorageUtil.GetFormValue(none, "bindc_dom") as Actor
         result = true
     else
         ;see if any future doms have been set
-        Form[] list = StorageUtil.FormListToArray(sub, "bind_future_doms")
+        Form[] list = StorageUtil.FormListToArray(none, "bindc_future_doms")
         if list.Length == 0
             ;use a hireling
-            int femaleFallback = bind_Utility.PriApiVariable("SimpleSlaveryFemaleFallback")
-            int maleFallback = bind_Utility.PriApiVariable("SimpleSlaveryMaleFallback")
+            int femaleFallback = StorageUtil.GetIntValue(none, "bindc_simple_female_fallback", 0)
+            int maleFallback = StorageUtil.GetIntValue(none, "bindc_simple_male_fallback", 0)
 
             ;debug.MessageBox("femaleFallback: " + femaleFallback + " maleFallback: " + maleFallback)
 
@@ -229,17 +241,19 @@ endfunction
 function GetSubSceneEnded()
     ;debug.MessageBox("ended...")
 
-    bind_Utility.FadeOutApplyNoDisable()
+    bindc_Util.FadeOutApplyNoDisable()
 
     zbfSlot slot = zbfBondageShell.GetApi().FindPlayer()
     slot.SetFurniture(none)
 
-    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery")
-    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
+    int bondageOutfitId = data_script.BondageScript.GetBondageOutfitForEvent(sub, "event_simple_slavery") 
+    if bondageOutfitId > -1
+        data_script.BondageScript.EquipBondageOutfit(sub, bondageOutfitId)
+    endif
 
-    bind_Utility.FadeOutRemoveNoDisable()
+    bindc_Util.FadeOutRemoveNoDisable()
 
-    bind_Utility.DoSleep(3.0)
+    bindc_Util.DoSleep(3.0)
     
     ;start move to office scene
     bindc_SimpleSlaveryWalkToOfficeScene.Start()
@@ -250,19 +264,21 @@ function WalkToOfficeSceneEnded()
 
     ;debug.MessageBox("it ended...")
 
-    bind_Utility.FadeOutApplyNoDisable()
+    bindc_Util.FadeOutApplyNoDisable()
 
-    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery_in_furniture")
-    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
+    int bondageOutfitId = data_script.BondageScript.GetBondageOutfitForEvent(sub, "event_simple_slavery_in_furniture") 
+    if bondageOutfitId > -1
+        data_script.BondageScript.EquipBondageOutfit(sub, bondageOutfitId)
+    endif
 
-    bind_Utility.DoSleep(2.0)
+    bindc_Util.DoSleep(2.0)
 
     zbfSlot slot = zbfBondageShell.GetApi().FindPlayer()
     slot.SetFurniture(dancer)
 
-    bind_Utility.FadeOutRemoveNoDisable()
+    bindc_Util.FadeOutRemoveNoDisable()
 
-    bind_Utility.DoSleep(3.0)
+    bindc_Util.DoSleep(3.0)
 
     bindc_SimpleSlaveryPaymentScene.Start()
 
@@ -270,12 +286,12 @@ endfunction
 
 function PaymentSceneEnded()
 
-    bind_Utility.FadeOutApplyNoDisable()
+    bindc_Util.FadeOutApplyNoDisable()
 
     zbfSlot slot = zbfBondageShell.GetApi().FindPlayer()
     slot.SetFurniture(none)
 
-    bind_Utility.DoSleep(2.0)
+    bindc_Util.DoSleep(2.0)
 
     FreeSubs()
 
@@ -283,21 +299,24 @@ function PaymentSceneEnded()
 
     if addAsDom
         MakeFollower()
-        bind_Utility.DoSleep(1.0)
-        bind_Utility.PriApiSetDom(dom)
+        bindc_Util.DoSleep(1.0)
+        SetDom(dom)
+
     endif
 
-    int bondageOutfitId = bind_Utility.PriApiGetBondageOutfitId("event_simple_slavery")
-    bind_Utility.PriApiEquipBondageOutfit(sub, bondageOutfitId)
+    int bondageOutfitId = data_script.BondageScript.GetBondageOutfitForEvent(sub, "event_simple_slavery") 
+    if bondageOutfitId > -1
+        data_script.BondageScript.EquipBondageOutfit(sub, bondageOutfitId)
+    endif
 
-    bind_Utility.FadeOutRemoveNoDisable()
+    bindc_Util.FadeOutRemoveNoDisable()
 
-    bind_Utility.DoSleep(3.0)
+    bindc_Util.DoSleep(3.0)
 
     ;Game.SetPlayerAIDriven(false)
-    bind_Utility.EnablePlayer(true)
+    bindc_Util.EnablePlayer(true)
 
-    bind_Utility.WriteInternalMonologue("I can leave this place, but will I be free again?")
+    bindc_Util.WriteInternalMonologue("I can leave this place, but will I be free again?")
 
 endfunction
 
@@ -307,7 +326,7 @@ function FreeSubs()
         if Follower1.GetActorReference() != dom
             zbfSlot slot = zbfBondageShell.GetApi().SlotActor(Follower1.GetActorReference())
             slot.SetFurniture(none)
-            bind_Utility.DoSleep(1.0)
+            bindc_Util.DoSleep(1.0)
             Follower1.GetActorReference().MoveTo(bindc_SimpleSlaveryRoomHeadingMarker)
         endif
     endif
@@ -316,7 +335,7 @@ function FreeSubs()
         if Follower2.GetActorReference() != dom
             zbfSlot slot = zbfBondageShell.GetApi().SlotActor(Follower2.GetActorReference())
             slot.SetFurniture(none)
-            bind_Utility.DoSleep(1.0)
+            bindc_Util.DoSleep(1.0)
             Follower2.GetActorReference().MoveTo(bindc_SimpleSlaveryRoomHeadingMarker)
         endif
     endif
@@ -325,7 +344,7 @@ function FreeSubs()
         if Follower3.GetActorReference() != dom
             zbfSlot slot = zbfBondageShell.GetApi().SlotActor(Follower3.GetActorReference())
             slot.SetFurniture(none)
-            bind_Utility.DoSleep(1.0)
+            bindc_Util.DoSleep(1.0)
             Follower3.GetActorReference().MoveTo(bindc_SimpleSlaveryRoomHeadingMarker)
         endif
     endif
@@ -419,6 +438,40 @@ function EndQuest()
 
 endfunction
 
+function SetDom(Actor d)
+
+    ;TODO - move this to utility??
+  
+    StorageUtil.SetFormValue(none, "bindc_dom", d)
+    StorageUtil.SetFormValue(none, "bindc_future_dom", none)
+
+	ActorBase domActorBase = d.GetActorBase()
+
+    StorageUtil.SetStringValue(none, "bindc_dom_name", domActorBase.GetName())
+    
+    int sex = domActorBase.GetSex()
+    StorageUtil.SetStringValue(none, "bindc_dom_sex", sex)
+
+    string existingTitle = StorageUtil.GetStringValue(none, "bindc_dom_title", "")
+
+	if existingTitle == "Mistress" || existingTitle == "Master" || existingTitle == "" ;NOTE - only toggle this if the user has not set a custom title
+		If sex == 1
+			StorageUtil.SetStringValue(none, "bindc_dom_title", "Mistress")
+		Else
+			StorageUtil.SetStringValue(none, "bindc_dom_title", "Master")
+		EndIf
+	endif
+
+	if !sub.IsInFaction(bindc_SubFaction)
+		sub.AddToFaction(bindc_SubFaction)
+	endif
+
+    if !dom.IsInFaction(bindc_DomFaction)
+        dom.addToFaction(bindc_DomFaction)
+    endif
+
+endfunction
+
 ObjectReference property bindc_SimpleSlaveryRoomHeadingMarker auto
 
 ReferenceAlias property MaleHireling auto
@@ -426,6 +479,8 @@ ReferenceAlias property FemaleHireling auto
 ReferenceAlias property TheDom auto
 
 Faction property PotentialFollowerFaction auto
+Faction property bindc_SubFaction auto
+Faction property bindc_DomFaction auto
 
 ObjectReference property pole1 auto
 ObjectReference property pole2 auto
@@ -444,3 +499,5 @@ Scene property bindc_SimpleSlaveryWalkToOfficeScene auto
 Scene property bindc_SimpleSlaveryPaymentScene auto
 
 GlobalVariable property bindc_GlobalPlaySceneVar auto
+
+bindc_Data property data_script auto

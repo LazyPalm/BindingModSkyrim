@@ -12,7 +12,7 @@ event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
         
             Armor dev = akBaseObject as Armor
 
-            bind_Utility.WriteToConsole("follower script - dev: " + dev + " actor: " + a.GetDisplayName())
+            bindc_Util.WriteInformation("follower script - dev: " + dev + " actor: " + a.GetDisplayName())
 
             if dev != none
                 
@@ -20,7 +20,7 @@ event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
                     a.UnequipItem(dev, false, true)
                 endif
 
-                bind_Utility.WriteToConsole("follower script REMOVED - dev: " + dev + " actor: " + a.GetDisplayName())
+                bindc_Util.WriteInformation("follower script REMOVED - dev: " + dev + " actor: " + a.GetDisplayName())
 
             endif
 
@@ -43,8 +43,8 @@ function StripMe(bool animation = false)
     SexLabFramework sfx = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
     Form[] items = sfx.StripActor(a, none, animation)
 
-    ; Form[] items = bind_SkseFunctions.DoStripActor(a, false)
-    StorageUtil.FormListCopy(a, "binding_strip_storage", items)
+    ; Form[] items = bindc_SKSE.DoStripActor(a, false)
+    StorageUtil.FormListCopy(a, "bindc_strip_storage", items)
 
 endfunction
 
@@ -58,7 +58,7 @@ function DressMe()
         a.RemoveFromFaction(bindc_NudityFaction)
     endif
 
-    Form[] items = StorageUtil.FormListToArray(a, "binding_strip_storage")
+    Form[] items = StorageUtil.FormListToArray(a, "bindc_strip_storage")
     SexLabFramework sfx = Quest.GetQuest("SexLabQuestFramework") as SexLabFramework
     sfx.UnstripActor(a, items, false)
 

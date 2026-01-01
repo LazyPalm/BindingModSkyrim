@@ -290,10 +290,21 @@ function EquipBondageOutfit(Actor a, int setId)
                 bool addThisItem = false
                 int option = -1
                 if useRulesBased == 1
-                    if (rms.GetBondageRule(a, i) == 1)
-                        tempItems[idx] = dev as Form
-                        idx += 1
+                    Armor renderedItem = zlib.GetRenderedDevice(dev as Armor)
+                    if renderedItem != none
+                        int brule = bindc_SKSE.FindRule(renderedItem)                     
+                        ;debug.MessageBox(brule)
+                        if brule > -1
+                            if (rms.GetBondageRule(a, brule) == 1)
+                                tempItems[idx] = dev as Form
+                                idx += 1
+                            endif
+                        endif
                     endif
+                    ; if (rms.GetBondageRule(a, i) == 1)
+                    ;     tempItems[idx] = dev as Form
+                    ;     idx += 1
+                    ; endif
                 else
                     tempItems[idx] = dev as Form
                     idx += 1

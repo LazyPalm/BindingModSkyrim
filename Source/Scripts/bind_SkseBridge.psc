@@ -21,8 +21,9 @@ endfunction
 int function LockDevice(Actor act, Armor arm) global
     zadLibs zlib = Quest.GetQuest("zadQuest") as zadLibs
     StorageUtil.SetIntValue(arm, "binding_item_flag", 1)
+    StorageUtil.SetIntValue(arm, "bindc_item_flag", 1)
     zlib.LockDevice(act, arm, false)
-    Utility.Wait(1.0)
+    Utility.Wait(2.0)
     return 0
 endfunction
 
@@ -58,6 +59,12 @@ int function CrosshairDoor(Form d, ObjectReference o) global
     Quest q = Quest.GetQuest("bind_MainQuest")
     bind_Functions fs = q as bind_Functions
     fs.SubLookedAtDoor(o)
+
+    ; Quest sq = Quest.GetQuest("bindc_SlaveryQuest")
+    ; if sq.IsRunning()
+    ;     bindc_Slavery sqs = sq as bindc_Slavery
+    ;     sqs.SubLookedAtDoor(o)
+    ; endif
 
     ; ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(o)
     ; if destination.GetBaseObject() as Door
@@ -103,6 +110,13 @@ endfunction
 int function ActivatedShrine(string shrineName, string shrineGod) global
     bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
     fs.SubPrayedAtShrine(shrineGod)
+
+    ; Quest sq = Quest.GetQuest("bindc_SlaveryQuest")
+    ; if sq.IsRunning()
+    ;     bindc_Slavery sqs = sq as bindc_Slavery
+    ;     sqs.SubPrayedAtShrine(shrineGod)
+    ; endif
+
     return 0
 endfunction
 
