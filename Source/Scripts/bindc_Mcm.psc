@@ -1021,7 +1021,7 @@ state SubmissiveSettingsState
         AddHeaderOption("Other")
         AddHeaderOption("")
         controlGroup3[0] = AddToggleOption("Auto Outfit Changes", StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
-        controlGroup3[1] = AddToggleOption("Present Hands Outfit Change", StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
+        controlGroup3[1] = AddToggleOption("Must Present Hands For Outfit Change", StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
         ;toggleCleanSub = AddToggleOption("Dirt - Clean Sub Required", main.DomPreferenceCleanSub)
 
 
@@ -1048,7 +1048,7 @@ state SubmissiveSettingsState
             StorageUtil.SetIntValue(none, "bindc_auto_changes", autoChanges)
             SetToggleOptionValue(option, autoChanges)
 
-        elseif option == controlGroup3[0]
+        elseif option == controlGroup3[1]
             int presentHands = ToggleInt(StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
             StorageUtil.SetIntValue(none, "bindc_present_hands", presentHands)
             SetToggleOptionValue(option, presentHands)

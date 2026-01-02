@@ -236,7 +236,7 @@ function PoseMenu()
         p.AttentionPose(sub1)
     elseif listReturn == 4
         p.PresentHandsPose(sub1)
-        MoveDomToSub()
+        SubPresentedHands()
     elseif listReturn == 5
         p.WhippingPose(sub1)
     elseif listReturn == 6
@@ -275,6 +275,8 @@ function Kneel(bool cancelKneel = false)
         ; ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 80)
         ; dom.EvaluatePackage()
     elseif kneelingFlag || cancelKneel
+        kneelingFlag = false
+        posingFlag = false
         if domOnTheMove
             ActorUtil.ClearPackageOverride(dom)
             domOnTheMove = false
@@ -284,9 +286,9 @@ function Kneel(bool cancelKneel = false)
         PushInGag()
         p.ClearPose(sub1)
         bindc_Util.EnablePlayer()
-        kneelingFlag = false
-        posingFlag = false
     elseif posingFlag
+        posingFlag = false
+        kneelingFlag = false
         if domOnTheMove
             ActorUtil.ClearPackageOverride(dom)
             domOnTheMove = false
@@ -298,8 +300,6 @@ function Kneel(bool cancelKneel = false)
         ; GoToState("")
         p.ClearPose(sub1)
         bindc_Util.EnablePlayer()
-        posingFlag = false
-        kneelingFlag = false
     endif
 
 endfunction
@@ -398,6 +398,18 @@ float function GetDistanceToSub()
     return dom.GetDistance(sub1)
 endfunction
 
+function SubPresentedHands()
+    float d = dom.GetDistance(sub1)
+    bindc_Util.WriteInformation("MoveDomToSub distance: " + d)
+    if d > bindc_Util.MaxCheckRange()
+        bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
+    elseif d < 128.0
+        DomArrived()
+    else
+        MoveDomToSub()
+    endif
+endfunction
+
 function AskedForHarshBondage()
     Kneel(true)
     bindc_Util.DoSleep(1.0)
@@ -433,7 +445,7 @@ event OnTrackedStatsEvent(string asStatFilter, int aiStatValue)
 endevent
 
 function EquipOutfit()
-    Kneel(true)
+    bindc_Util.DoSleep(1.0)
     bindc_Util.PlayTyingAnimation(dom, sub1)
     bindc_Util.WriteNotification("close enough...")
     if targetOutfitId > 0
@@ -445,6 +457,9 @@ function EquipOutfit()
     endif
     StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", StorageUtil.GetIntValue(none, "bindc_safe_area", 1))
     bindc_Util.StopAnimations(dom)
+    if posingFlag
+        Kneel(false)
+    endif
 endfunction
 
 

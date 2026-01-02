@@ -6,33 +6,49 @@ event OnLocationChange(Location akOldLoc, Location akNewLoc)
 
     slv.DomChangedLocations(akOldLoc, akNewLoc)
 
-    if slv.GetDistanceToSub() <= bindc_Util.MaxCheckRange()
+    ;if slv.GetDistanceToSub() <= bindc_Util.MaxCheckRange()
         int flag = slv.GetNeedOutfitChangeFlag()
         if flag == 2
-            StartOutfitTimer() 
+            StartOutfitTimer1() 
         elseif flag == 1
-            GoToState("MoveDomToSubState")
-            UnregisterForUpdate()
-            RegisterForSingleUpdate(5.0)
+            StartDomChangeOutfit()
         endif
-    else
-        debug.MessageBox("dom distance: " + slv.GetDistanceToSub())
-    endif
+    ;else
+    ;    debug.MessageBox("dom distance: " + slv.GetDistanceToSub())
+    ;endif
 
 endevent
 
-function StartOutfitTimer()
-    bindc_Util.WriteInternalMonologue("I must ask to have my bondage changed...")
-    GoToState("OutfitTimerState")
+function StartDomChangeOutfit()
+    GoToState("MoveDomToSubState")
     UnregisterForUpdate()
-    RegisterForSingleUpdate(15.0)
+    RegisterForSingleUpdate(5.0)
 endfunction
 
-state OutfitTimerState
+function StartOutfitTimer1()
+    GoToState("OutfitTimer1State")
+    UnregisterForUpdate()
+    RegisterForSingleUpdate(5.0)
+endfunction
+
+state OutfitTimer1State
     event OnUpdate()
         GoToState("")
         bindc_Slavery slv = (GetOwningQuest() as bindc_Slavery)
-        if slv.GetNeedOutfitChangeFlag() == 2
+        if slv.GetDistanceToSub() <= bindc_Util.MaxCheckRange()
+            bindc_Util.WriteInternalMonologue("I must ask to have my bondage changed...")
+            GoToState("OutfitTimer2State")
+            UnregisterForUpdate()
+            RegisterForSingleUpdate(15.0)
+        endif
+    endevent
+endstate
+
+state OutfitTimer2State
+    event OnUpdate()
+        GoToState("")
+        bindc_Slavery slv = (GetOwningQuest() as bindc_Slavery)
+        if slv.GetNeedOutfitChangeFlag() == 2 && slv.GetDistanceToSub() <= bindc_Util.MaxCheckRange()
             slv.OutfitChangeTimerExpired()
         endif
     endevent
@@ -41,7 +57,10 @@ endstate
 state MoveDomToSubState
     event OnUpdate()
         GoToState("")
+        bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is going to change my bondage...")
         bindc_Slavery slv = (GetOwningQuest() as bindc_Slavery)
-        slv.MoveDomToSub()
+        if slv.GetDistanceToSub() <= bindc_Util.MaxCheckRange()
+            slv.MoveDomToSub()
+        endif
     endevent
 endstate
