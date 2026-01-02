@@ -18,6 +18,7 @@ bool kneelingFlag = false
 bool posingFlag = false
 bool gagPulledOut = false
 bool domOnTheMove = false
+;int outfitTimerRunning = 0
 bool isIndoors
 
 int inConversation
@@ -139,23 +140,23 @@ function ProcessLoop()
         endif
     endif
 
-    if needOutfitChange > 0
-        if (needOutfitChange == 1 && !domOnTheMove)
-            if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-                debug.MessageBox("activating 1 from the looop...")
-                MoveDomToSub()
-            endif
-        elseif (needOutfitChange == 2 && !domOnTheMove)
-            if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-                debug.MessageBox("activating 2 from the looop...")
-                if p.InPresentHandsPose(sub1)
-                    MoveDomToSub()
-                else
-                    StartOutfitTimer()
-                endif
-            endif
-        endif
-    endif
+    ; if needOutfitChange > 0
+    ;     if (needOutfitChange == 1 && !outfitTimerRunning)
+    ;         if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
+    ;             bindc_Util.WriteInformation("activating outfit change 1 from the loop...")
+    ;             MoveDomToSub()
+    ;         endif
+    ;     elseif (needOutfitChange == 2 && !outfitTimerRunning)
+    ;         if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
+    ;             bindc_Util.WriteInformation("activating outfit change 2 from the loop...")
+    ;             if p.InPresentHandsPose(sub1)
+    ;                 MoveDomToSub()
+    ;             else
+    ;                 StartOutfitTimer()
+    ;             endif
+    ;         endif
+    ;     endif
+    ; endif
 
 endfunction
 
@@ -319,14 +320,19 @@ function MoveDomToSub()
     else
         ;arrived = false
         ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 90)
+        bindc_Util.DoSleep()
         dom.EvaluatePackage()
         domOnTheMove = true
+        bindc_Util.WriteInformation("adding bindc_PackageSlaveryMoveToPlayer")
         ; GoToState("DomTravelingState")
         ; RegisterForSingleUpdate(1.0)
     endif
 endfunction
 
 function DomArrived()
+
+    bindc_Util.WriteInformation("dom arrived...")
+
     ;GoToState("")
     if p.IsKneeling(sub1)
         ActorUtil.ClearPackageOverride(dom)
@@ -358,13 +364,38 @@ function DomArrived()
 
     elseif needOutfitChange == 1
         needOutfitChange = 0
+        ;outfitTimerRunning = 0
         EquipOutfit()
 
     elseif p.InPresentHandsPose(sub1) && needOutfitChange == 2
         needOutfitChange = 0
+        ;outfitTimerRunning = 0
         EquipOutfit()
 
     endif
+endfunction
+
+function DomChangedLocations(Location oldLoc, Location newLoc)
+
+    ;debug.MessageBox("dom changed locations...")
+
+endfunction
+
+function OutfitChangeTimerExpired()
+    if !p.InPresentHandsPose(sub1)
+        bindc_Util.MarkInfraction("I didn't ask for a bondage change", true)
+    endif
+    needOutfitChange = 1
+    ;outfitTimerRunning = 2
+    MoveDomToSub()
+endfunction
+
+int function GetNeedOutfitChangeFlag()
+    return needOutfitChange
+endfunction
+
+float function GetDistanceToSub()
+    return dom.GetDistance(sub1)
 endfunction
 
 function AskedForHarshBondage()
@@ -412,14 +443,63 @@ function EquipOutfit()
         b.RemoveAllBondageItems(sub1, false)
         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", -1)
     endif
+    StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", StorageUtil.GetIntValue(none, "bindc_safe_area", 1))
     bindc_Util.StopAnimations(dom)
 endfunction
 
-function StartOutfitTimer()
-    bindc_Util.WriteInternalMonologue("I must ask to have my bondage changed...")
-    GoToState("OutfitTimerState")
-    UnregisterForUpdate()
-    RegisterForSingleUpdate(15.0)
+
+
+function ProcessEquipOutfit()
+
+    int safeArea = StorageUtil.GetIntValue(none, "bindc_safe_area", 1)
+    int lastEquipSafeArea = StorageUtil.GetIntValue(none, "bindc_outfit_last_safe", 0)
+
+    int currentOutfitId = StorageUtil.GetIntValue(sub1, "bindc_outfit_id", -1)
+    int autoOutfitChanges = StorageUtil.GetIntValue(none, "bindc_auto_changes", 0)
+    int presentHands = StorageUtil.GetIntValue(none, "bindc_present_hands", 0)
+
+    int outfitId = b.GetBondageSetForLocation(sub1, newLocation, currentOutfitId)
+
+    int usesRules = 0
+    if outfitId > 0
+        usesRules = StorageUtil.GetIntValue(none, "bindc_outfit_" + outfitId + "_rules_based", 0)
+    endif
+
+    if data_script.SlaveryQuest_InGaggedPunishment == 1
+        outfitId = b.GetBondageOutfitForEvent(sub1, "event_gagged_for_punishment")
+    endif
+
+    bindc_Util.WriteInformation("outfit id: " + outfitId + " current: " + currentOutfitId + " userules: " + usesRules + " safe: " + safeArea + " lastesfa: " + lastEquipSafeArea)
+
+    if outfitId > 0 && ((currentOutfitId != outfitId) || (usesRules == 1 && safeArea != lastEquipSafeArea))
+        if autoOutfitChanges == 1
+            b.EquipBondageOutfit(sub1, outfitId)
+            StorageUtil.SetIntValue(sub1, "bindc_outfit_id", outfitId)
+            StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", safeArea)
+        elseif presentHands == 1
+            needOutfitChange = 2
+            targetOutfitId = outfitId
+        else
+            needOutfitChange = 1
+            targetOutfitId = outfitId
+        endif
+    elseif outfitId > 0 && ((currentOutfitId == outfitId) || (usesRules == 1 && safeArea == lastEquipSafeArea))
+        bindc_Util.WriteInformation("leaving outfit equipped: " + outfitId)
+    else
+        ;remove bindings items if no outfit
+        if autoOutfitChanges == 1
+            b.RemoveAllBondageItems(sub1, false)
+            StorageUtil.SetIntValue(sub1, "bindc_outfit_id", -1)
+            StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", safeArea)
+        elseif presentHands == 1
+            needOutfitChange = 2
+            targetOutfitId = -1
+        else
+            needOutfitChange = 1
+            targetOutfitId = -1
+        endif
+    endif
+
 endfunction
 
 function ProcessLocationChange(Location akOldLoc, Location akNewLoc)
@@ -429,36 +509,38 @@ function ProcessLocationChange(Location akOldLoc, Location akNewLoc)
     newLocation = akNewLoc
     TheCurrentLoction.ForceLocationTo(akNewLoc)
 
-    int currentOutfitId = StorageUtil.GetIntValue(sub1, "bindc_outfit_id", -1)
-    int autoOutfitChanges = StorageUtil.GetIntValue(none, "bindc_auto_changes", 0)
-    int outfitId = b.GetBondageSetForLocation(sub1, akNewLoc, currentOutfitId)
-    int usesRules = 0
-    if outfitId > 0
-        usesRules = StorageUtil.GetIntValue(none, "bindc_outfit_" + outfitId + "_rules_based", 0)
-    endif
-    if data_script.SlaveryQuest_InGaggedPunishment == 1
-        outfitId = b.GetBondageOutfitForEvent(sub1, "event_gagged_for_punishment")
-    endif
-    if outfitId > 0 && (currentOutfitId != outfitId || usesRules == 1)
-        if autoOutfitChanges == 1
-            b.EquipBondageOutfit(sub1, outfitId)
-            StorageUtil.SetIntValue(sub1, "bindc_outfit_id", outfitId)
-        else
-            needOutfitChange = 2
-            targetOutfitId = outfitId
-        endif
-    elseif outfitId > 0 && currentOutfitId == outfitId
-        bindc_Util.WriteInformation("leaving outfit equipped: " + outfitId)
-    else
-        ;remove bindings items if no outfit
-        if autoOutfitChanges == 1
-            b.RemoveAllBondageItems(sub1, false)
-            StorageUtil.SetIntValue(sub1, "bindc_outfit_id", -1)
-        else
-            needOutfitChange = 2
-            targetOutfitId = -1
-        endif
-    endif
+    ProcessEquipOutfit()
+
+    ; int currentOutfitId = StorageUtil.GetIntValue(sub1, "bindc_outfit_id", -1)
+    ; int autoOutfitChanges = StorageUtil.GetIntValue(none, "bindc_auto_changes", 0)
+    ; int outfitId = b.GetBondageSetForLocation(sub1, akNewLoc, currentOutfitId)
+    ; int usesRules = 0
+    ; if outfitId > 0
+    ;     usesRules = StorageUtil.GetIntValue(none, "bindc_outfit_" + outfitId + "_rules_based", 0)
+    ; endif
+    ; if data_script.SlaveryQuest_InGaggedPunishment == 1
+    ;     outfitId = b.GetBondageOutfitForEvent(sub1, "event_gagged_for_punishment")
+    ; endif
+    ; if outfitId > 0 && (currentOutfitId != outfitId || usesRules == 1)
+    ;     if autoOutfitChanges == 1
+    ;         b.EquipBondageOutfit(sub1, outfitId)
+    ;         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", outfitId)
+    ;     else
+    ;         needOutfitChange = 2
+    ;         targetOutfitId = outfitId
+    ;     endif
+    ; elseif outfitId > 0 && currentOutfitId == outfitId
+    ;     bindc_Util.WriteInformation("leaving outfit equipped: " + outfitId)
+    ; else
+    ;     ;remove bindings items if no outfit
+    ;     if autoOutfitChanges == 1
+    ;         b.RemoveAllBondageItems(sub1, false)
+    ;         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", -1)
+    ;     else
+    ;         needOutfitChange = 2
+    ;         targetOutfitId = -1
+    ;     endif
+    ; endif
 
     ;todo - this on a delay
     ;EntryExitChecks(akOldLoc, akNewLoc)
@@ -466,6 +548,7 @@ function ProcessLocationChange(Location akOldLoc, Location akNewLoc)
     GoToState("EntryExitState")
     UnregisterForUpdate()
     RegisterForSingleUpdate(2.0)
+    ;outfitTimerRunning = 1
 
     ;TODO - permissions need to flip between 1 or 2 depending on rule safe/unsafe options
     ;so if it is only enabled in safe areas (or vice versa) you don't get dinged for eating in that area and dialogue is hidden
@@ -479,39 +562,38 @@ state EntryExitState
     event OnUpdate()
         GoToState("")
         r.UpdateRulesByLocation(newLocation)
-        if needOutfitChange > 0
-            GoToState("ChangeOutfitState")
-            UnregisterForUpdate()
-            RegisterForSingleUpdate(10.0)
-        endif
+        ; if needOutfitChange > 0
+        ;     bindc_Util.WriteInformation("starting ChangeOutfitState timer")
+        ;     GoToState("ChangeOutfitState")
+        ;     UnregisterForUpdate()
+        ;     RegisterForSingleUpdate(10.0)
+        ; endif
     endevent
 endstate
 
-state ChangeOutfitState
-    event OnUpdate()
-        GoToState("")
-        debug.MessageBox("getting dom to change bondage...")
-        if needOutfitChange == 1
-            if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-                MoveDomToSub()
-            endif
-        elseif needOutfitChange == 2
-            if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-                StartOutfitTimer()
-            endif
-        endif
-    endevent
-endstate
+; state ChangeOutfitState
+;     event OnUpdate()
+;         GoToState("")
+;         ;debug.MessageBox("getting dom to change bondage...")
+;         if needOutfitChange == 1
+;             if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
+;                 MoveDomToSub()
+;                 outfitTimerRunning = 2
+;             else
+;                 outfitTimerRunning = 0
+;             endif
+;         elseif needOutfitChange == 2
+;             if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
+;                 StartOutfitTimer()
+;                 bindc_Util.WriteInformation("starting OutfitTimerState timer")
+;             else
+;                 outfitTimerRunning = 0
+;             endif
+;         endif
+;     endevent
+; endstate
 
-state OutfitTimerState
-    event OnUpdate()
-        if needOutfitChange == 2
-            bindc_Util.MarkInfraction("I didn't ask for a bondage change", true)
-            needOutfitChange = 1
-            MoveDomToSub()
-        endif
-    endevent
-endstate
+
 
 bool subUsingDoor = false
 

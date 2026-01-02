@@ -270,7 +270,7 @@ state RulesSettingsState
 
     string function FormatRuleText(int rule, int ruleType) ;1 - behavior, 2 - bondage
         
-        string ruleText = ""
+        string ruleText = "disabled"
         int onOff = 0
         int option = 0
         
@@ -286,24 +286,24 @@ state RulesSettingsState
             ruleText = "on"
         endif
 
-        if ruleText != ""
-            ruleText += " "
-        endif
+        ; if ruleText != ""
+        ;     ruleText += " "
+        ; endif
 
         if option == 0
 
         elseif option == data_script.RulesScript.RULE_OPTION_HARD_LIMIT
-            ruleText += "hard"
+            ruleText += ":hard"
         elseif option == data_script.RulesScript.RULE_OPTION_SAFE_AREAS
-            ruleText += "sfa"
+            ruleText += ":sf"
         elseif option == data_script.RulesScript.RULE_OPTION_PERMANENT
-            ruleText += "perm"
+            ruleText += ":perm"
         elseif option == data_script.RulesScript.RULE_OPTION_PERMANENT_SAFE_AREAS
-            ruleText += "perm sfa"
+            ruleText += ":psf"
         elseif option == data_script.RulesScript.RULE_OPTION_UNSAFE_AREAS
-            ruleText += "unsfa"
+            ruleText += ":usf"
         elseif option == data_script.RulesScript.RULE_OPTION_PERMANENT_UNSAFE_AREAS
-            ruleText += "perm unsfa"
+            ruleText += ":pusf"
         endif
 
         return ruleText
@@ -316,22 +316,22 @@ state RulesSettingsState
             ruleMenuOptions = new string[9]
             ruleMenuOptions[0] = "OFF - Turn Rule Off"
             ruleMenuOptions[1] = "ON - Turn Rule On"
-            ruleMenuOptions[2] = "Set Option - None"
-            ruleMenuOptions[3] = "Set Option - Hard Limit - Never Add This"
-            ruleMenuOptions[4] = "Set Option - Only In Safe Areas"
-            ruleMenuOptions[5] = "Set Option - Make Rule Permanent"
-            ruleMenuOptions[6] = "Set Option - Make Rule Permanent In Safe Areas"
-            ruleMenuOptions[7] = "Set Option - Only In Unsafe Areas"
-            ruleMenuOptions[8] = "Set Option - Make Rule Permanent In Unsafe Areas"
+            ruleMenuOptions[2] = "Option - Default"
+            ruleMenuOptions[3] = "Option - Hard Limit - Never Add This (HARD)"
+            ruleMenuOptions[4] = "Option - Only In Safe Areas (SF)"
+            ruleMenuOptions[5] = "Option - Make Rule Permanent (PERM)"
+            ruleMenuOptions[6] = "Option - Make Rule Permanent In Safe Areas (PSF)"
+            ruleMenuOptions[7] = "Option - Only In Unsafe Areas (USF)"
+            ruleMenuOptions[8] = "Option - Make Rule Permanent In Unsafe Areas (PUSF)"
 
             ruleMenuOptionsOnly = new string[7]
-            ruleMenuOptionsOnly[0] = "Set Option - None"
-            ruleMenuOptionsOnly[1] = "Set Option - Hard Limit - Never Add This"
-            ruleMenuOptionsOnly[2] = "Set Option - Only In Safe Areas"
-            ruleMenuOptionsOnly[3] = "Set Option - Make Rule Permanent"
-            ruleMenuOptionsOnly[4] = "Set Option - Make Rule Permanent In Safe Areas"
-            ruleMenuOptionsOnly[5] = "Set Option - Only In Unsafe Areas"
-            ruleMenuOptionsOnly[6] = "Set Option - Make Rule Permanent In Unsafe Areas"
+            ruleMenuOptionsOnly[0] = "Option - Default"
+            ruleMenuOptionsOnly[1] = "Option - Hard Limit - Never Add This (HARD)"
+            ruleMenuOptionsOnly[2] = "Option - Only In Safe Areas (SF)"
+            ruleMenuOptionsOnly[3] = "Option - Make Rule Permanent (PERM)"
+            ruleMenuOptionsOnly[4] = "Option - Make Rule Permanent In Safe Areas (PSF)"
+            ruleMenuOptionsOnly[5] = "Option - Only In Unsafe Areas (USF)"
+            ruleMenuOptionsOnly[6] = "Option - Make Rule Permanent In Unsafe Areas (PUSF)"
         endif
 
         int domControlledBehavior = StorageUtil.GetIntValue(none, "bindc_dom_controls_behavior_rules", 0)
@@ -1021,6 +1021,7 @@ state SubmissiveSettingsState
         AddHeaderOption("Other")
         AddHeaderOption("")
         controlGroup3[0] = AddToggleOption("Auto Outfit Changes", StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
+        controlGroup3[1] = AddToggleOption("Present Hands Outfit Change", StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
         ;toggleCleanSub = AddToggleOption("Dirt - Clean Sub Required", main.DomPreferenceCleanSub)
 
 
@@ -1046,6 +1047,11 @@ state SubmissiveSettingsState
             int autoChanges = ToggleInt(StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
             StorageUtil.SetIntValue(none, "bindc_auto_changes", autoChanges)
             SetToggleOptionValue(option, autoChanges)
+
+        elseif option == controlGroup3[0]
+            int presentHands = ToggleInt(StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
+            StorageUtil.SetIntValue(none, "bindc_present_hands", presentHands)
+            SetToggleOptionValue(option, presentHands)
 
         endif
 

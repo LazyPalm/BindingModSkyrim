@@ -40,6 +40,14 @@ endevent
 
 event OnLocationChange(Location akOldLoc, Location akNewLoc)
 
+	if akNewLoc.HasKeyword(LocTypePlayerHouse) || akNewLoc.HasKeyWord(LocTypeInn) || akNewLoc.HasKeyword(LocTypeCity) || akNewLoc.HasKeyword(LocTypeTown) || akNewLoc.HasKeyWord(LocTypeStore) || akNewLoc.HasKeyWord(LocTypeDwelling) || akNewLoc.HasKeyWord(LocTypeCastle) || akNewLoc.HasKeyWord(LocTypeHouse)
+		;safe area
+		StorageUtil.SetIntValue(none, "bindc_safe_area", 2)
+	else
+		;dangerous areaa
+		StorageUtil.SetIntValue(none, "bindc_safe_area", 1)
+	endif
+
     bindc_Slavery sl = GetOwningQuest() as bindc_Slavery
     sl.ProcessLocationChange(akOldLoc, akNewLoc)
 
@@ -148,3 +156,12 @@ endevent
 bindc_Data property data_script auto
 
 Form property ITMPotionUse auto
+
+Keyword property LocTypePlayerHouse auto
+Keyword property LocTypeInn auto
+Keyword property LocTypeCity auto
+Keyword property LocTypeTown auto
+Keyword property LocTypeStore auto
+Keyword property LocTypeDwelling auto
+Keyword property LocTypeCastle auto
+Keyword property LocTypeHouse auto
