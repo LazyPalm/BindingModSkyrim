@@ -18,13 +18,14 @@ bool kneelingFlag = false
 bool posingFlag = false
 bool gagPulledOut = false
 bool domOnTheMove = false
-;int outfitTimerRunning = 0
 bool isIndoors
 
 int inConversation
 
 int targetOutfitId = 0
 int needOutfitChange = 0
+
+Quest puppetQuest
 
 event OnInit()
 
@@ -85,6 +86,7 @@ function Startup()
     if outfitId > 0
         b.EquipBondageOutfit(sub1, outfitId)
         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", outfitId)
+        StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", StorageUtil.GetIntValue(none, "bindc_safe_area", 1))
     endif
 
 endfunction
@@ -140,24 +142,6 @@ function ProcessLoop()
         endif
     endif
 
-    ; if needOutfitChange > 0
-    ;     if (needOutfitChange == 1 && !outfitTimerRunning)
-    ;         if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-    ;             bindc_Util.WriteInformation("activating outfit change 1 from the loop...")
-    ;             MoveDomToSub()
-    ;         endif
-    ;     elseif (needOutfitChange == 2 && !outfitTimerRunning)
-    ;         if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-    ;             bindc_Util.WriteInformation("activating outfit change 2 from the loop...")
-    ;             if p.InPresentHandsPose(sub1)
-    ;                 MoveDomToSub()
-    ;             else
-    ;                 StartOutfitTimer()
-    ;             endif
-    ;         endif
-    ;     endif
-    ; endif
-
 endfunction
 
 function AddWheelMenuOption(UIWheelMenu menu, int optionIndex, string optionName, bool enabled = true)
@@ -169,32 +153,145 @@ endfunction
 function ActionMenu()
 
     UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
-    
-    AddWheelMenuOption(actionMenu, 0, "Close")
 
     if kneelingFlag || posingFlag
-        AddWheelMenuOption(actionMenu, 1, "Resume Standing")
+        AddWheelMenuOption(actionMenu, 0, "Resume Standing")
     else
-        AddWheelMenuOption(actionMenu, 1, "Kneel")
-        AddWheelMenuOption(actionMenu, 2, "Pose")
+        AddWheelMenuOption(actionMenu, 0, "Kneel")
+        AddWheelMenuOption(actionMenu, 1, "Pose")
     endif
 
-    AddWheelMenuOption(actionMenu, 7, "Pause")
+    AddWheelMenuOption(actionMenu, 7, "Settings")
 
     int actionResult = actionMenu.OpenMenu()
 
     if actionResult == 0
-        ;close menu
-    elseif actionResult == 1
         Kneel()
-    elseif actionResult == 2
+    elseif actionResult == 1
         PoseMenu()
     
     elseif actionResult == 7
-        Pause()
+        SettingsMenu()
     endif
 
 endfunction
+
+function SettingsMenu()
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("<-- Return To Menu")
+    listMenu.AddEntryItem("Pause")
+    listMenu.AddEntryItem("test")
+    listMenu.AddEntryItem("count")
+    listMenu.AddEntryItem("clear")
+    listMenu.AddEntryItem("hold position")
+    listMenu.AddEntryItem("arousal")
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+    if listReturn == 0
+        ActionMenu()
+    elseif listReturn == 1
+        Pause()
+
+    elseif listReturn == 2
+        ;bindc_Util.MoveToTarget(dom, sub1)
+
+        puppetQuest = Quest.GetQuest("bindc_Puppet1Quest")
+        if !puppetQuest.IsRunning()
+            puppetQuest.Start()
+        endif
+        bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
+        puppet.MoveToTarget(dom, sub1, true)
+        ;puppet.TheTarget.ForceRefTo(sub1)
+        ;puppet.MoveActorToTarget.ForceRefTo(dom)
+        ;dom.EvaluatePackage()
+        
+        debug.Notification("completed...")
+
+    elseif listReturn == 3
+        debug.MessageBox(ActorUtil.CountPackageOverride(dom))
+
+    elseif listReturn == 4
+        ;bindc_Util.ClearPackages(dom)
+
+        puppetQuest = Quest.GetQuest("bindc_Puppet1Quest")
+        if !puppetQuest.IsRunning()
+            puppetQuest.Start()
+        endif
+        bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
+        puppet.Clear(dom, true)
+
+        ; puppet.MoveActorToTarget.Clear()
+        ; puppet.MoveActorToBed.Clear()
+        ; puppet.HoldPosition.Clear()
+        ; puppet.DoTie.Clear()
+        ; puppet.DoSit.Clear()
+        ;dom.EvaluatePackage()
+
+
+    elseif listReturn == 5
+        puppetQuest = Quest.GetQuest("bindc_Puppet1Quest")
+        if !puppetQuest.IsRunning()
+            puppetQuest.Start()
+        endif
+        bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
+        puppet.HoldPosition.ForceRefTo(dom)
+
+    elseif listReturn == 6
+        debug.MessageBox("arousal: " + data_script.SexLabScript.UpdateArousalLevels(sub1))
+
+    ; elseif listReturn == 6
+    ;     puppetQuest = Quest.GetQuest("bindc_Puppet1Quest")
+    ;     if !puppetQuest.IsRunning()
+    ;         puppetQuest.Start()
+    ;     endif
+    ;     bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
+    ;     puppet.DoSit.ForceRefTo(dom)
+
+    ; elseif listReturn == 7
+    ;     puppetQuest = Quest.GetQuest("bindc_Puppet1Quest")
+    ;     if !puppetQuest.IsRunning()
+    ;         puppetQuest.Start()
+    ;     endif
+    ;     bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
+    ;     puppet.DoTie.ForceRefTo(dom)
+
+
+    endif
+
+endfunction
+
+; function FutureDomsMenu()
+
+;     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+;     listMenu.AddEntryItem("<-- Return To Settings")
+
+;     Form[] future = JsonUtil.FormListToArray("binding/bind_future.json", "future_doms")
+;     ;debug.MessageBox(future)
+
+;     int i = 0
+;     while i < future.Length
+;         ActorBase a = future[i] as ActorBase
+;         ;debug.MessageBox(a)
+;         listMenu.AddEntryItem(a.GetName())
+;         i += 1
+;     endwhile
+
+;     listMenu.OpenMenu()
+;     int listReturn = listMenu.GetResultInt()
+
+;     if listReturn == 0
+;         SettingsMenu()
+
+;     endif
+
+
+
+; endfunction
 
 function PoseMenu()
 
@@ -271,9 +368,7 @@ function Kneel(bool cancelKneel = false)
         bindc_Util.DisablePlayer()
         p.Kneel(sub1)
         MoveDomToSub()
-        ; arrived = false
-        ; ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 80)
-        ; dom.EvaluatePackage()
+
     elseif kneelingFlag || cancelKneel
         kneelingFlag = false
         posingFlag = false
@@ -281,11 +376,9 @@ function Kneel(bool cancelKneel = false)
             ActorUtil.ClearPackageOverride(dom)
             domOnTheMove = false
         endif
-        ; domOnTheMove = false
-        ; GoToState("")
-        PushInGag()
         p.ClearPose(sub1)
         bindc_Util.EnablePlayer()
+
     elseif posingFlag
         posingFlag = false
         kneelingFlag = false
@@ -296,10 +389,9 @@ function Kneel(bool cancelKneel = false)
         if bindc_Slavery_Scene_DomToNpc.IsPlaying()
             bindc_Slavery_Scene_DomToNpc.Stop()
         endif
-        ; domOnTheMove = false
-        ; GoToState("")
         p.ClearPose(sub1)
         bindc_Util.EnablePlayer()
+
     endif
 
 endfunction
@@ -314,18 +406,13 @@ function MoveDomToSub()
     if d > bindc_Util.MaxCheckRange()
         bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
     elseif d < 128.0
-        ;arrived = false 
-        ;debug.MessageBox("skipping travel...")
         DomArrived()
     else
-        ;arrived = false
         ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 90)
         bindc_Util.DoSleep()
         dom.EvaluatePackage()
         domOnTheMove = true
         bindc_Util.WriteInformation("adding bindc_PackageSlaveryMoveToPlayer")
-        ; GoToState("DomTravelingState")
-        ; RegisterForSingleUpdate(1.0)
     endif
 endfunction
 
@@ -364,12 +451,10 @@ function DomArrived()
 
     elseif needOutfitChange == 1
         needOutfitChange = 0
-        ;outfitTimerRunning = 0
         EquipOutfit()
 
     elseif p.InPresentHandsPose(sub1) && needOutfitChange == 2
         needOutfitChange = 0
-        ;outfitTimerRunning = 0
         EquipOutfit()
 
     endif
@@ -386,7 +471,6 @@ function OutfitChangeTimerExpired()
         bindc_Util.MarkInfraction("I didn't ask for a bondage change", true)
     endif
     needOutfitChange = 1
-    ;outfitTimerRunning = 2
     MoveDomToSub()
 endfunction
 
@@ -413,7 +497,9 @@ endfunction
 function AskedForHarshBondage()
     Kneel(true)
     bindc_Util.DoSleep(1.0)
-    m.StartEvent("Harsh Bondage", true)
+    Quest q = Quest.GetQuest("bindc_EventHarshQuest")
+    q.Start()
+    ;m.StartEvent("Harsh Bondage", true)
 endfunction
 
 function PullOutGag()
@@ -461,8 +547,6 @@ function EquipOutfit()
         Kneel(false)
     endif
 endfunction
-
-
 
 function ProcessEquipOutfit()
 
@@ -526,50 +610,9 @@ function ProcessLocationChange(Location akOldLoc, Location akNewLoc)
 
     ProcessEquipOutfit()
 
-    ; int currentOutfitId = StorageUtil.GetIntValue(sub1, "bindc_outfit_id", -1)
-    ; int autoOutfitChanges = StorageUtil.GetIntValue(none, "bindc_auto_changes", 0)
-    ; int outfitId = b.GetBondageSetForLocation(sub1, akNewLoc, currentOutfitId)
-    ; int usesRules = 0
-    ; if outfitId > 0
-    ;     usesRules = StorageUtil.GetIntValue(none, "bindc_outfit_" + outfitId + "_rules_based", 0)
-    ; endif
-    ; if data_script.SlaveryQuest_InGaggedPunishment == 1
-    ;     outfitId = b.GetBondageOutfitForEvent(sub1, "event_gagged_for_punishment")
-    ; endif
-    ; if outfitId > 0 && (currentOutfitId != outfitId || usesRules == 1)
-    ;     if autoOutfitChanges == 1
-    ;         b.EquipBondageOutfit(sub1, outfitId)
-    ;         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", outfitId)
-    ;     else
-    ;         needOutfitChange = 2
-    ;         targetOutfitId = outfitId
-    ;     endif
-    ; elseif outfitId > 0 && currentOutfitId == outfitId
-    ;     bindc_Util.WriteInformation("leaving outfit equipped: " + outfitId)
-    ; else
-    ;     ;remove bindings items if no outfit
-    ;     if autoOutfitChanges == 1
-    ;         b.RemoveAllBondageItems(sub1, false)
-    ;         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", -1)
-    ;     else
-    ;         needOutfitChange = 2
-    ;         targetOutfitId = -1
-    ;     endif
-    ; endif
-
-    ;todo - this on a delay
-    ;EntryExitChecks(akOldLoc, akNewLoc)
-
     GoToState("EntryExitState")
     UnregisterForUpdate()
     RegisterForSingleUpdate(2.0)
-    ;outfitTimerRunning = 1
-
-    ;TODO - permissions need to flip between 1 or 2 depending on rule safe/unsafe options
-    ;so if it is only enabled in safe areas (or vice versa) you don't get dinged for eating in that area and dialogue is hidden
-    ;BehaviorFoodRuleMustAskPermission
-
-    ;r.UpdateRulesByLocation(akNewLoc)
 
 endfunction
 
@@ -577,38 +620,8 @@ state EntryExitState
     event OnUpdate()
         GoToState("")
         r.UpdateRulesByLocation(newLocation)
-        ; if needOutfitChange > 0
-        ;     bindc_Util.WriteInformation("starting ChangeOutfitState timer")
-        ;     GoToState("ChangeOutfitState")
-        ;     UnregisterForUpdate()
-        ;     RegisterForSingleUpdate(10.0)
-        ; endif
     endevent
 endstate
-
-; state ChangeOutfitState
-;     event OnUpdate()
-;         GoToState("")
-;         ;debug.MessageBox("getting dom to change bondage...")
-;         if needOutfitChange == 1
-;             if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-;                 MoveDomToSub()
-;                 outfitTimerRunning = 2
-;             else
-;                 outfitTimerRunning = 0
-;             endif
-;         elseif needOutfitChange == 2
-;             if dom.GetDistance(sub1) <= bindc_Util.MaxCheckRange()
-;                 StartOutfitTimer()
-;                 bindc_Util.WriteInformation("starting OutfitTimerState timer")
-;             else
-;                 outfitTimerRunning = 0
-;             endif
-;         endif
-;     endevent
-; endstate
-
-
 
 bool subUsingDoor = false
 

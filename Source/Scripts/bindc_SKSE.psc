@@ -27,7 +27,6 @@ function UnequipAllBondage(Actor act) global native
 int[] function GetRandomNumbers(int minRange, int maxRange, int numberToReturn) global native
 int function FindRule(Armor item) global native
 
-
 int function SetToken(Actor act, Armor arm) global
     bindc_Util.WriteInformation("bindc_SKSE - SetToken - " + arm)
     StorageUtil.SetIntValue(act, "zad_RemovalToken" + arm, 1)	

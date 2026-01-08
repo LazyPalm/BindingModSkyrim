@@ -88,6 +88,7 @@ function LoadGame()
         (q as bindc_Bondage).LoadGame()
         (q as bindc_Rules).LoadGame()
         (q as bindc_Gear).LoadGame()
+        (q as bindc_Util).LoadGame()
 
         cycle = 0
         TriggerLoop(5.0)
@@ -161,7 +162,8 @@ endfunction
 function StartPause()
 endfunction
 
-function StartEvent(string eventName, bool sendDhlp = false)
+bool function StartEvent(Quest q, string eventName, bool sendDhlp = false)
+    return false
 endfunction
 
 function EndRunningEvent()
@@ -253,6 +255,10 @@ state RunningState
             bindc_Slavery s = bindc_SlaveryQuest as bindc_Slavery
             s.ActionMenu()
         endif
+        if bindc_PreQuest.IsRunning()
+            bindc_Pre p = bindc_PreQuest as bindc_Pre
+            p.ActionMenu()
+        endif
     endfunction
 
     function ActionLongPress()
@@ -262,25 +268,29 @@ state RunningState
         endif
     endfunction
 
-    function StartEvent(string eventName, bool sendDhlp = false)
+    bool function StartEvent(Quest q, string eventName, bool sendDhlp = false)
                 
         EventIsRunning = 1
         RunningEventName = eventName
+        eventQuest = q
 
         GoToState("InEventState")
         currentRunningState = "InEventState"
 
-        if eventName == "Harsh Bondage"
-            eventQuest = Quest.GetQuest("bindc_EventHarshQuest")
-            eventQuest.Start()
-        endif
+        ; if eventName == "Harsh Bondage"
+        ;     eventQuest = Quest.GetQuest("bindc_EventHarshQuest")
+        ; elseif eventName == "Camping"
+        ;     eventQuest = Quest.GetQuest("bindc_EventCampQuest")
+        ; endif
 
         if bindc_SlaveryQuest.IsRunning()
             bindc_SlaveryQuest.Stop()
             StorageUtil.SetIntValue(none, "bindc_slavery_running", 0)
         endif
 
-        ;debug.MessageBox("starting: " + eventName)
+        debug.MessageBox("starting: " + eventName)
+
+        return true
 
     endfunction
 
@@ -319,20 +329,39 @@ state RunningState
             int startEvent = 0
 
             if safeArea == 2
-                startEvent = EventCheck("harsh", 1, ct)
-                if startEvent == 0
 
-                endif
-                if startEvent == 0
+                int[] rnd = bindc_SKSE.GetRandomNumbers(1, 5, 5)
+                int i = 0
+                while i < rnd.Length && startEvent == 0
+                    int test = rnd[i]
+                    if test == 1
+                        startEvent = EventCheck("harsh", 1, ct)
+                    elseif test == 2
 
-                endif                
+                    elseif test == 3
+
+                    endif
+                    i += 1
+                endwhile
+
+                ; startEvent = EventCheck("harsh", 1, ct)
+                ; if startEvent == 0
+
+                ; endif
+                ; if startEvent == 0
+
+                ; endif                
             else
             
             endif
 
             if startEvent > 0
+                Quest q
                 if startEvent == 1
-                    StartEvent("Harsh Bondage", true)
+                    q = Quest.GetQuest("bindc_EventHarshQuest")
+                endif
+                if q != none
+                    q.Start()
                 endif
             else
 
@@ -369,17 +398,34 @@ endstate
 state InEventState
 
     function SafeWord()
+        if RunningEventName == "Harsh Bondage"
+            (eventQuest as bindc_EventHarsh).SafeWord()
+        elseif RunningEventName == "Camping"
+            (eventQuest as bindc_EventCamp).SafeWord()
+        elseif RunningEventName == "Inspect"
+            (eventQuest as bindc_EventInspect).SafeWord()
+        endif
         RunSafeword()
     endfunction
 
     function ActionShortPress()
         if RunningEventName == "Harsh Bondage"
             (eventQuest as bindc_EventHarsh).ActionShortPress()
-        ;elseif other events here...
+        elseif RunningEventName == "Camping"
+            (eventQuest as bindc_EventCamp).ActionShortPress()
+        elseif RunningEventName == "Inspect"
+            (eventQuest as bindc_EventInspect).ActionShortPress()
         endif
     endfunction
 
     function ActionLongPress()
+        if RunningEventName == "Harsh Bondage"
+            (eventQuest as bindc_EventHarsh).ActionLongPress()
+        elseif RunningEventName == "Camping"
+            (eventQuest as bindc_EventCamp).ActionLongPress()
+        elseif RunningEventName == "Inspect"
+            (eventQuest as bindc_EventInspect).ActionLongPress()
+        endif
     endfunction
 
     function EndRunningEvent()

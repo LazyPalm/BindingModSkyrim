@@ -1,5 +1,9 @@
 Scriptname bindc_Util extends Quest  
 
+function LoadGame()
+    UseBathingMod += 10
+endfunction
+
 ;colors - red, blue, violet, white
 function WriteNotification(string msg, string color = "white") global
     if color == "red"
@@ -400,10 +404,28 @@ function ModifyPoints(int points) global
     Game.GetPlayer().SetFactionRank(u.bindc_PointsFaction, p)
 endfunction
 
+;******************************************************
+;NPC/player control functions
+;******************************************************
+
+function PlayWorkAnimation(Actor akActor, float seconds = 2.0) global
+    Debug.SendAnimationEvent(akActor, "IdleLockPick")
+    bindc_Util.DoSleep(seconds)
+    Debug.SendAnimationEvent(akActor, "IdleForceDefaultState")
+endfunction
+
 function PlayTyingAnimation(Actor akActor, Actor akActorTarget) global
     float zOffset = akActor.GetHeadingAngle(akActorTarget)
     akActor.SetAngle(akActor.GetAngleX(), akActor.GetAngleY(), akActor.GetAngleZ() + zOffset)
     Debug.SendAnimationEvent(akActor, "IdleLockPick")
+endfunction
+
+function PlaySittingAnimation(Actor akActor, ObjectReference targetToFace = none) global
+    if targetToFace != none
+        float zOffset = akActor.GetHeadingAngle(targetToFace)
+        akActor.SetAngle(akActor.GetAngleX(), akActor.GetAngleY(), akActor.GetAngleZ() + zOffset)
+    endif
+    Debug.SendAnimationEvent(akActor, "IdleSitCrossLeggedEnter")
 endfunction
 
 function StopAnimations(Actor akActor) global
@@ -411,9 +433,139 @@ function StopAnimations(Actor akActor) global
     akActor.EvaluatePackage()
 endfunction
 
+function MoveToTarget(Actor akActor, ObjectReference target) global
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    u.TheTarget.ForceRefTo(target)
+    ActorUtil.AddPackageOverride(akActor, u.bindc_PackageMoveToTarget, 90)
+    akActor.EvaluatePackage()
+    int counter = 0
+    float d = akActor.GetDistance(target)
+    bindc_Util.WriteInformation("starting distance: " + d)
+    while counter < 60 && d > 200.0
+        d = akActor.GetDistance(target)
+        bindc_Util.WriteInformation("counter: " + counter + " distance: " + d)
+        bindc_Util.DoSleep(0.5)
+        counter += 1
+    endwhile
+    ActorUtil.RemovePackageOverride(akActor, u.bindc_PackageMoveToTarget)
+    ;ActorUtil.AddPackageOverride(akActor, u.bindc_PackageDoNothing, 90)
+    akActor.EvaluatePackage()
+    u.TheTarget.Clear()
+endfunction
+
+function MoveToPlayer(Actor akActor) global
+    Actor thePlayer = Game.GetPlayer()
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    ;ActorUtil.ClearPackageOverride(akActor)
+    ActorUtil.AddPackageOverride(akActor, u.bindc_PackageMoveToPlayer, 90)
+    akActor.EvaluatePackage()
+    int counter = 0
+    while counter < 60 && akActor.GetDistance(thePlayer) > 200.0
+        bindc_Util.DoSleep(0.5)
+        counter += 1
+    endwhile
+    ;ActorUtil.ClearPackageOverride(akActor)
+    ActorUtil.RemovePackageOverride(akActor, u.bindc_PackageMoveToPlayer)
+    ;ActorUtil.AddPackageOverride(akActor, u.bindc_PackageDoNothing, 90)
+    akActor.EvaluatePackage()
+    ;ActorUtil.ClearPackageOverride(akActor)
+endfunction
+
+function SleepOnTarget(Actor akActor, ObjectReference target) global
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    u.TheTarget.ForceRefTo(target)
+    ;ActorUtil.ClearPackageOverride(akActor)
+    ActorUtil.AddPackageOverride(akActor, u.bindc_PackageSleep, 90)
+    akActor.EvaluatePackage()
+endfunction
+
+function StopSleepOnTarget(Actor akActor) global
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    ActorUtil.RemovePackageOverride(akActor, u.bindc_PackageSleep)
+    akActor.EvaluatePackage()
+endfunction
+
+function HoldPosition(Actor akActor) global ;NOTE - probably don't use this one... alias on quest with do nothing should be better
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    ;ActorUtil.ClearPackageOverride(akActor)
+    ActorUtil.AddPackageOverride(akActor, u.bindc_PackageDoNothing, 90)
+    akActor.EvaluatePackage()
+endfunction
+
+function ClearPackages(Actor akActor) global
+    ActorUtil.ClearPackageOverride(akActor)
+    akActor.EvaluatePackage()
+endfunction
+
+;***********************************
+;Mod update functions
+;***********************************
+
+function UpdateDirtLevels(Actor akActor) global
+    bindc_Util u = Quest.GetQuest("bindc_MainQuest") as bindc_Util
+    if u.UseBathingMod >= 10
+        ;do a recheck of soft requirements
+        if (!Game.IsPluginInstalled("Bathing in Skyrim.esp")) && u.UseBathingMod == 11
+            u.UseBathingMod = 1
+        elseif (!Game.IsPluginInstalled("Dirt and Blood - Dynamic Visuals.esp")) && u.UseBathingMod == 12
+            u.UseBathingMod = 2
+        else
+            u.UseBathingMod = 0
+        endif
+    endif
+    if u.UseBathingMod == 0
+        if Game.IsPluginInstalled("Bathing in Skyrim.esp")
+            u.UseBathingMod = 1
+            string fileName = "Bathing in Skyrim.esp"
+            FormList list = Game.GetFormFromFile(0x0301408F, fileName) as FormList
+            u.DirtSpell1 = list.GetAt(0) as Spell
+            u.DirtSpell2 = list.GetAt(1) as Spell
+            u.DirtSpell3 = list.GetAt(2) as Spell
+            u.DirtSpell4 = list.GetAt(3) as Spell
+        elseif Game.IsPluginInstalled("Dirt and Blood - Dynamic Visuals.esp")
+            u.UseBathingMod = 2
+            string dirtAndBloodFile = "Dirt and Blood - Dynamic Visuals.esp"
+            u.DirtSpell1 = Game.GetFormFromFile(0x03000806, dirtAndBloodFile) as Spell
+            u.DirtSpell2 = Game.GetFormFromFile(0x03000807, dirtAndBloodFile) as Spell
+            u.DirtSpell3 = Game.GetFormFromFile(0x03000808, dirtAndBloodFile) as Spell
+            u.DirtSpell4 = Game.GetFormFromFile(0x03000838, dirtAndBloodFile) as Spell
+        else
+            u.UseBathingMod = 3
+        endif
+    endif
+    if u.UseBathingMod == 1 || u.UseBathingMod == 2
+        if akActor.HasSpell(u.DirtSpell4)
+            StorageUtil.SetIntValue(akActor, "bindc_dirt_level", 4) ;Filthy
+        elseif akActor.HasSpell(u.DirtSpell3)
+            StorageUtil.SetIntValue(akActor, "bindc_dirt_level", 3) ;Dirty
+        elseif akActor.HasSpell(u.DirtSpell2)
+            StorageUtil.SetIntValue(akActor, "bindc_dirt_level", 3) ;Not Dirty
+        elseif akActor.HasSpell(u.DirtSpell1)
+            StorageUtil.SetIntValue(akActor, "bindc_dirt_level", 1) ;Clean
+        else
+            StorageUtil.SetIntValue(akActor, "bindc_dirt_level", 0)
+        endif
+    endif
+endfunction
+
+int property UseBathingMod auto
+Spell property DirtSpell1 auto
+Spell property DirtSpell2 auto
+Spell property DirtSpell3 auto
+Spell property DirtSpell4 auto
+
 ImageSpaceModifier property FadeToBlackImod auto
 ImageSpaceModifier property FadeToBlackHoldImod auto
 
 Faction property PotentialFollowerFaction auto
 Faction property bindc_InfractionsFaction auto
 Faction property bindc_PointsFaction auto
+
+Package property bindc_PackageMoveToTarget auto
+Package property bindc_PackageMoveToPlayer auto
+Package property bindc_PackageDoNothing auto
+Package property bindc_PackageSleep auto
+
+Keyword property bindc_Target auto
+
+ReferenceAlias property TheTarget auto

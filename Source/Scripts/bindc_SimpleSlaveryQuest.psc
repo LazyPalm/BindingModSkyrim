@@ -193,8 +193,8 @@ bool function FindDom()
         Form[] list = StorageUtil.FormListToArray(none, "bindc_future_doms")
         if list.Length == 0
             ;use a hireling
-            int femaleFallback = StorageUtil.GetIntValue(none, "bindc_simple_female_fallback", 0)
-            int maleFallback = StorageUtil.GetIntValue(none, "bindc_simple_male_fallback", 0)
+            int femaleFallback = StorageUtil.GetIntValue(none, "bindc_event_ss_female_hirelings", 1)
+            int maleFallback = StorageUtil.GetIntValue(none, "bindc_event_ss_male_hirelings", 1)
 
             ;debug.MessageBox("femaleFallback: " + femaleFallback + " maleFallback: " + maleFallback)
 

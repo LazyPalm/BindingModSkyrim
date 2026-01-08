@@ -94,6 +94,8 @@ event OnPageReset(string page)
         GoToState("BondageOutfitsState")
     elseif page == "Submissive Settings"
         GoToState("SubmissiveSettingsState")
+    elseif page == "Dominant Settings"
+        GoToState("DominantSettingsState")     
     endif
 
     DisplayPage()
@@ -176,6 +178,7 @@ state DisplayStatusState
 
         AddTextOption("Bondage Outfit", StorageUtil.GetIntValue(thePlayer, "bindc_outfit_id", -1))
         AddTextOption("Pose", StorageUtil.SetIntValue(thePlayer, "bindc_pose", 0))
+        AddTextOption("Dirt Level", StorageUtil.GetIntValue(thePlayer, "bindc_dirt_level", 0))
 
 
     endfunction
@@ -220,6 +223,11 @@ state EventSettingsState
         controlGroup1[4] = AddSliderOption("Runs Minimum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_min", 20), "{0}")
         controlGroup1[5] = AddSliderOption("Runs Maximum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_max", 30), "{0}")
 
+        AddHeaderOption("Simple Slavery Outcome")
+        AddHeaderOption("")
+        controlGroup1[6] = AddToggleOption("Use Female Hirelings", StorageUtil.GetIntValue(none, "bindc_event_ss_female_hirelings", 1))
+        controlGroup1[7] = AddToggleOption("Use Male Hirelings", StorageUtil.GetIntValue(none, "bindc_event_ss_male_hirelings", 1))
+
     endfunction
 
     event OnOptionSliderOpen(int option)
@@ -256,6 +264,16 @@ state EventSettingsState
             int harshEnabled = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_harsh_enabled", 0))
             StorageUtil.SetIntValue(none, "bindc_event_harsh_enabled", harshEnabled)
             SetToggleOptionValue(option, harshEnabled)
+        elseif option == controlGroup1[6]
+            int hire = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_ss_female_hirelings", 0))
+            StorageUtil.SetIntValue(none, "bindc_event_ss_female_hirelings", hire)
+            SetToggleOptionValue(option, hire)
+        elseif option == controlGroup1[7]
+            int hire = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_ss_male_hirelings", 0))
+            StorageUtil.SetIntValue(none, "bindc_event_ss_male_hirelings", hire)
+            SetToggleOptionValue(option, hire)
+
+
         endif
 
     endevent
@@ -1012,13 +1030,28 @@ state SubmissiveSettingsState
         controlGroup1[13] = AddToggleOption("Kneeling Required - Infraction For Not", StorageUtil.GetIntValue(none, "bindc_setting_kneeling_infraction_when_not", 0))
         AddEmptyOption()
 
+        AddHeaderOption("Dirt & Bathing")
+        AddHeaderOption("")
+        if Game.IsPluginInstalled("Bathing in Skyrim.esp")
+            controlGroup1[14] = AddToggleOption("Clean Slave Required", StorageUtil.GetIntValue(none, "bindc_clean_slave", 0))
+            AddTextOption("Using", "Bathing in Skyrim - Renewed")    
+        elseif Game.IsPluginInstalled("Dirt and Blood - Dynamic Visuals.esp")
+            controlGroup1[14] = AddToggleOption("Clean Slave Required", StorageUtil.GetIntValue(none, "bindc_clean_slave", 0))
+            AddTextOption("Using", "Dirt and Blood")    
+        else
+            AddTextOption("Clean Slave Required", "N/A")
+            AddTextOption("Using", "No Bathing Mods Found")     
+            StorageUtil.SetIntValue(none, "bindc_clean_slave", 0) ;clear this out if no bathing mods
+            StorageUtil.SetIntValue(thePlayer, "bindc_dirt_level", 0)
+        endif
+
         AddHeaderOption("Punishment")
         AddHeaderOption("")
         ; sliderPunishmentMinGold = AddSliderOption("Gold Loss - Min", bind_GlobalPunishmentMinGold.GetValue() as int, "{0}")
         ; sliderPunishmentMaxGold = AddSliderOption("Gold Loss - Max", bind_GlobalPunishmentMaxGold.GetValue() as int, "{0}")
         ; sliderPunishmentGoldPercentage = AddSliderOption("Gold Loss - Percentage", bind_GlobalPunishmentGoldPercentage.GetValue() as int, "{0}")
 
-        AddHeaderOption("Other")
+        AddHeaderOption("Other Settings")
         AddHeaderOption("")
         controlGroup3[0] = AddToggleOption("Auto Outfit Changes", StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
         controlGroup3[1] = AddToggleOption("Must Present Hands For Outfit Change", StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
@@ -1042,6 +1075,11 @@ state SubmissiveSettingsState
             int infractionForNot = ToggleInt(StorageUtil.GetIntValue(none, "bindc_setting_kneeling_infraction_when_not", 0))
             StorageUtil.SetIntValue(none, "bindc_setting_kneeling_infraction_when_not", infractionForNot)
             SetToggleOptionValue(option, infractionForNot)
+
+        elseif option == controlGroup1[14] ;bathing
+            int bathing = ToggleInt(StorageUtil.GetIntValue(none, "bindc_clean_slave", 0))
+            StorageUtil.SetIntValue(none, "bindc_clean_slave", bathing)
+            SetToggleOptionValue(option, bathing)
 
         elseif option == controlGroup3[0]
             int autoChanges = ToggleInt(StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
@@ -1136,6 +1174,23 @@ state SubmissiveSettingsState
         endif
 
     endevent
+
+endstate
+
+state DominantSettingsState
+
+    function DisplayPage()
+
+        AddHeaderOption("Sex")
+        AddHeaderOption("")
+
+        controlGroup1[0] = AddSliderOption("Arousal Needed For Sex", StorageUtil.GetIntValue(none, "bindc_dom_arousal_need_for_sex", 70), "{0}")
+
+        AddHeaderOption("Other")
+        AddHeaderOption("")
+
+
+    endfunction
 
 endstate
 

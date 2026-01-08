@@ -15,19 +15,27 @@ event OnInit()
 
     if self.IsRunning()
 
-        GoToState("")
+        if data_script.MainScript.StartEvent(self, "Harsh Bondage", true)
 
-        minMinutes = StorageUtil.GetIntValue(none, "bindc_event_harsh_min", 20)
-        maxMinutes = StorageUtil.GetIntValue(none, "bindc_event_harsh_max", 30)
-        hoursBetween = StorageUtil.GetIntValue(none, "bindc_event_harsh_cooldown", 4)
+            GoToState("")
 
-        theSub = Game.GetPlayer()
-        theDom = bindc_Util.GetDom()
+            minMinutes = StorageUtil.GetIntValue(none, "bindc_event_harsh_min", 20)
+            maxMinutes = StorageUtil.GetIntValue(none, "bindc_event_harsh_max", 30)
+            hoursBetween = StorageUtil.GetIntValue(none, "bindc_event_harsh_cooldown", 4)
 
-        SetStage(10)
-        SetObjectiveDisplayed(10, true)
+            theSub = Game.GetPlayer()
+            theDom = bindc_Util.GetDom()
 
-        TieUpSub()
+            SetStage(10)
+            SetObjectiveDisplayed(10, true)
+
+            TieUpSub()
+
+        else
+
+            self.Stop()
+
+        endif
 
     endif
 
@@ -38,6 +46,10 @@ function ActionShortPress()
 endfunction
 
 function ActionLongPress()
+endfunction
+
+function SafeWord()
+
 endfunction
 
 state WaitingState
@@ -115,6 +127,8 @@ function FreeSub()
 
     debug.Notification("close enough...")
 
+    bindc_Util.PlayTyingAnimation(theDom, theSub)
+
     bindc_Util.DisablePlayer()
 
     bindc_Util.FadeOutApplyNoDisable()
@@ -128,6 +142,8 @@ function FreeSub()
     endif
 
     bindc_Util.EnablePlayer()
+
+    bindc_Util.StopAnimations(theDom)
 
     bindc_Util.FadeOutRemoveNoDisable()
 

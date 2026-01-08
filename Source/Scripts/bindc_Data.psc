@@ -3,8 +3,8 @@ Scriptname bindc_Data extends Quest conditional
 ;******************************************************
 ;CONSTANTS
 ;******************************************************
-
-
+int property EventCampMinDefault = 4 autoReadOnly
+int property EventCampMaxDefault = 8 autoReadOnly
 
 
 ;******************************************************
@@ -36,3 +36,4 @@ bindc_Rules property RulesScript auto
 bindc_Bondage property BondageScript auto
 bindc_Poser property PoserScript auto
 bindc_Gear property GearScript auto
+bindc_SexLab property SexLabScript auto
