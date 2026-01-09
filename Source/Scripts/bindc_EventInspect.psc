@@ -5,15 +5,11 @@ Actor theDom
 
 bool pressedAction
 bool longPressedAction
-; bool removedHeavyBondage
-; bool removedShackles
-; bool orderedToStrip
 bool failedInspection
 bool autoMode = false
 
 int commandCount
 int totalCommands
-;int dirtLevel
 
 bool inPose
 int currentPose
@@ -50,10 +46,7 @@ event OnInit()
 
             GoToState("")
 
-            ; RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
             RegisterForModEvent("AnimationEnd", "OnSexEndEvent")
-            ; RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
-            ; RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
 
             theSub = Game.GetPlayer()
             theDom = bindc_Util.GetDom()
@@ -61,15 +54,9 @@ event OnInit()
 
             bindc_Util.UpdateDirtLevels(theSub)
 
-            ; bcs.DoStartEvent()
-            ; bcs.SetEventName(self.GetName())
-
             domStartedSex = false
             sexAnimationRan = false
-            ;removedHeavyBondage = false
-            ;removedShackles = false
             commandCount = 0
-            ;orderedToStrip = false
             failedInspection = false
             pressedAction = false
             inPose = false
@@ -77,13 +64,6 @@ event OnInit()
             sexEvent = 0
             totalCommands = Utility.RandomInt(2, 3)
             bindc_Util.WriteInformation("total commands: " + totalCommands)
-
-            ;dirtLevel = 0 
-            ; if fs.CleanModsRunning()
-            ;     fs.UpdateCleanTracking()
-            ;     dirtLevel = main.SubDirtLevel
-            ;     bindc_Util.WriteInformation("dirtLevel: " + dirtLevel)
-            ; endif
 
             SetObjectiveDisplayed(10, true)
 
@@ -112,6 +92,10 @@ function ActionShortPress()
 endfunction
 
 function ActionLongPress()
+
+    if CheckForMovement()
+        return
+    endif
 
     if !longPressedAction
         longPressedAction = true
@@ -143,30 +127,17 @@ endfunction
 ;     endif
 ; endevent
 
-; event PressedAction(bool longPress)
-
-;     ;bindc_Util.WriteInternalMonologue("There is nothing else for me to do...")
-
-;     if !pressedAction
-;         pressedAction = true
-;         ShowActionMenu()
-;         pressedAction = false
-;     endif
-
-; endevent
-
 event OnSexEndEvent(string eventName, string argString, float argNum, form sender)
 
-;     ;debug.MessageBox("in sex end??")
-
     sexAnimationRan = true
-
     sexEvent = 3 ;end this
     IssueNextCommand()
 
 endevent
 
 function StartInspect()
+
+    bindc_InspectSceneIntro.Start()
 
     ;todo - make sub turn forward, l side, r side, back in addition to poses??
 
@@ -202,88 +173,15 @@ function StartInspect()
     startingMarker = theSub.PlaceAtMe(MAGINVHealSpellArt)
     startingMarker.Enable()
 
-
     IssueNextCommand()
-
-
-    ;debug.MessageBox("ready??")
-
-;     startingMarker = theSub.PlaceAtMe(bind_InspectionItemsList.GetAt(1))
-;     startingMarker.Enable()
-
-;     if theSub.IsInFaction(bman.WearingHeavyBondageFaction()) && main.SoftCheckDDNG == 0 ;NOTE - with NG poses can be used with heavy bondage
-;         fs.EventDomTyingAnimation(theSub, theDom, true)
-;         if bman.RemoveItem(theSub, bman.BONDAGE_TYPE_HEAVYBONDAGE())
-;             bindc_Util.DoSleep()
-;             removedHeavyBondage = true
-;         endif
-;     endif
-    
-;     if theSub.IsInFaction(bman.WearingAnkleShacklesFaction())
-;         fs.EventDomTyingAnimation(theSub, theDom, false)
-;         if bman.RemoveItem(theSub, bman.BONDAGE_TYPE_ANKLE_SHACKLES())
-;             bindc_Util.DoSleep()
-;             removedShackles = true
-;         endif
-;     endif
-
-;     SetObjectiveDisplayed(10, true)
-
-;     if !gms.IsNude(theSub)
-;         OrderToStrip()
-;     else
-;         IssueNextCommand()
-;     endif
 
 endfunction
 
-; function OrderToStrip()
-
-;     orderedToStrip = true
-
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeStripCommand())
-
-;     bindc_Util.WriteInternalMonologue("I have been ordered to strip.")
-
-;     GoToState("OrderedToStripState")
-;     RegisterForSingleUpdate(10.0)
-
-; endfunction
-
-; state OrderedToStripState
-
-;     event OnUpdate()
-
-;         if !CheckForMovement()
-
-;             if gms.IsNude(theSub)
-;                 ;bindc_Util.WriteInternalMonologue(main.GetDomTitle() + " looks pleased at my nudity...")
-
-;             else
-;                 bindc_Util.WriteInternalMonologue("I am not naked yet. Shit.")
-;                 failedInspection = true
-;             endif
-
-;         endif
-
-;         GoToState("")
-;         LookAtSub()
-
-;     endevent
-
-; endstate
-
 function OrderToStand()
 
-;     commandCount += 1
-
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
+    bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseStandUp.Start()
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderReset())
 
     bindc_Util.WriteInternalMonologue("I have been ordered to stand.")
 
@@ -321,9 +219,7 @@ function OrderToKnees()
 
     commandCount += 1
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderKneel())
+    bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseKneel.Start()
 
@@ -365,9 +261,7 @@ function OrderToShowAss()
 
     commandCount += 1
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderAssOut())
+    ;bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseAssOut.Start()
 
@@ -409,9 +303,7 @@ function OrderToInspection()
 
     commandCount += 1
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderInspection())
+    bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseInspection.Start()
 
@@ -452,9 +344,7 @@ function OrderToShowSex()
 
     commandCount += 1
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderShowSex())
+    bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseShowSex.Start()
 
@@ -497,9 +387,7 @@ function OrderAttention()
 
     commandCount += 1
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
-
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypePoseOrderAttention())
+    bindc_Util.FaceTarget(theDom, theSub)
 
     bindc_InspectScenePoseAttention.Start()
 
@@ -546,7 +434,7 @@ function LookAtSub()
         ;make dirt comment
 
         if Utility.RandomInt(1, 2) == 2
-            ;bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeBodyComment())
+            bindc_InspectSceneLookComment.Start()
         endif
 
         ;possible good comment?
@@ -611,10 +499,9 @@ function IssueNextCommand()
 
     if StorageUtil.GetIntValue(none, "bindc_clean_slave", 0) == 1
         if StorageUtil.GetIntValue(theSub, "bindc_dirt_level", 0) > 25
-            ;bindc_Util.WriteInternalMonologue("I am not allowed to be this dirty...")
             bindc_Util.MarkInfraction("I am not allowed to be this dirty", false)
-            ;bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTooDirty())
-            ;Debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+            bindc_InspectSceneDirty.Start()
+            Debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
             SetStage(30)
             EventInspectEnd()
             return
@@ -623,7 +510,7 @@ function IssueNextCommand()
 
     if failedInspection
 
-;         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentDisappointmentComment())
+        bindc_InspectSceneFailed.Start()
 
         bindc_Util.MarkInfraction("I failed my inspection", false)
 
@@ -707,7 +594,7 @@ function HaveSex()
 
     domStartedSex = true
 
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentDomStartingSex())
+    bindc_InspectSceneSex.Start()
 
     bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is going to have sex with me...")
 
@@ -731,9 +618,9 @@ endstate
 
 function OrderToMasturbate()
 
-;     bind_MovementQuestScript.FaceTarget(theDom, theSub)
+    bindc_Util.FaceTarget(theDom, theSub)
 
-;     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentDomOrderToMasturbate())
+    bindc_InspectSceneMasturbate.Start()
 
     bindc_Util.WriteInternalMonologue("I have been ordered to masturbate.")
 
@@ -799,8 +686,6 @@ function EventInspectEnd()
 
     data_script.MainScript.EndRunningEvent()
 
-;     bindc_Util.DisablePlayer()
-
 ;     if sexAnimationRan && domStartedSex
 ;         bind_RulesManager rms = Quest.GetQuest("bind_MainQuest") as bind_RulesManager
 ;         Quest q = Quest.GetQuest("bind_SexGiveThanksQuest")
@@ -814,57 +699,15 @@ function EventInspectEnd()
 ;         endif
 ;     endif
 
-;     if orderedToStrip && gms.IsNude(theSub)
-;         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeGetDressedCommand())
-;         bind_MovementQuestScript.PlayDressUndress(theSub)
-;         ;gms.RestoreWornGear(theSub)
-;         ;fs.GetSubDressed()
-;         bind_SkseFunctions.DoDressActor(theSub, rItems)
-;         bindc_Util.DoSleep(1.0)
-;     endif
-
-;     if removedHeavyBondage || removedShackles
-;         fs.EventDomTyingAnimation(theSub, theDom, removedHeavyBondage)
-;     endif
-
-;     if removedHeavyBondage
-;         if bman.AddItem(theSub, bman.BONDAGE_TYPE_HEAVYBONDAGE())
-;             bindc_Util.DoSleep()
-;         endif
-;     endif
-
-;     if removedShackles
-;         if bman.AddItem(theSub, bman.BONDAGE_TYPE_HEAVYBONDAGE())
-;             bindc_Util.DoSleep()
-;         endif
-;     endif
-
-;     bindc_Util.EnablePlayer()
-
-;     startingMarker.Delete()
-;     startingMarker = none
-
-;     bcs.DoEndEvent()
-
-;     bind_GlobalEventInspectionNextRun.SetValue(bindc_Util.AddTimeToCurrentTime(main.InspectionHoursBetween, 0))
-
-;     self.Stop()
-
 endfunction
 
 function ShowActionMenu()
 
+    if CheckForMovement()
+        return
+    endif
+
     UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
-    
-    ; if !gms.IsNude(theSub)
-    ;     actionMenu.SetPropertyIndexString("optionText", 0, "Strip")
-    ;     actionMenu.SetPropertyIndexString("optionLabelText", 0, "Strip")
-    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 0, true)
-    ; else
-    ;     actionMenu.SetPropertyIndexString("optionText", 0, "Dress")
-    ;     actionMenu.SetPropertyIndexString("optionLabelText", 0, "Dress")
-    ;     actionMenu.SetPropertyIndexBool("optionEnabled", 0, true)
-    ; endif
 
     actionMenu.SetPropertyIndexString("optionText", 0, "Close This")
     actionMenu.SetPropertyIndexString("optionLabelText", 0, "Close This")
@@ -901,54 +744,45 @@ function ShowActionMenu()
     int actionResult = actionMenu.OpenMenu()
 
     if actionResult == 0
-        ; if theSub.IsInFaction(bman.WearingHeavyBondageFaction())
-        ;     bind_MovementQuestScript.PlayDoWork(theDom)
-        ; else
-        ;     bind_MovementQuestScript.PlayDressUndress(theSub)
-        ; endif
-        ; if !gms.IsNude(theSub)
-        ;     rItems = bind_SkseFunctions.DoStripActor(theSub, removeDevious = false)
-        ;     ;gms.WearOutfit(theSub, "nude")
-        ; else
-        ;     bind_SkseFunctions.DoDressActor(theSub, rItems)
-        ;     ;fs.GetSubDressed()
-        ; endif
+        ;close
+
     elseif actionResult == 1
     	theSub.PlayIdle(ResetIdle)
-        ;Debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
         inPose = false
         currentPose = POSE_STANDING
+
     elseif actionResult == 2
         theSub.PlayIdle(KneelingIdle)
-    	;Debug.SendAnimationEvent(theSub, "ZapWriPose07")
         inPose = true
         currentPose = POSE_KNEELING
+
     elseif actionResult == 3
         theSub.PlayIdle(InspectionIdle)
-    	;Debug.SendAnimationEvent(theSub, "ft_bdsm_idle_inspection")
         inPose = true
         currentPose = POSE_INSPECTION
+
     elseif actionResult == 4
         theSub.PlayIdle(ShowAssIdle)
-    	;Debug.SendAnimationEvent(theSub, "ZapWriPose03") ;zapwripose04
         inPose = true
         currentPose = POSE_ASS_OUT
+
     elseif actionResult == 5
         theSub.PlayIdle(ShowSexIdle)
-        ;Debug.SendAnimationEvent(theSub, "TepiShowVagina")
         inPose = true
         currentPose = POSE_SHOW_SEX
+
     elseif actionResult == 6
         theSub.PlayIdle(AttentionIdle)
         inPose = true
         currentPose = POSE_ATTENTION
+
     elseif actionResult == 7
-        ;bind_SexLabHelper.StartOnePersonSex(theSub)
-        if data_script.SexLabScript.StartSexScene(theSub) ;!sms.StartSexScene(theSub)
+        if data_script.SexLabScript.StartSexScene(theSub)
             debug.MessageBox("Could not start sex scene")
         endif
         sexEvent = 3        
         GoToState("MasurbatingState")
+
     endif
 
     UnregisterForUpdate()
@@ -959,7 +793,7 @@ endfunction
 bool function CheckForMovement()
 
     if theSub.GetDistance(startingMarker) > 150.0
-        bindc_Util.WriteInternalMonologue("I am not allowed to move during an inspection.")
+        bindc_Util.WriteInternalMonologue("I am not allowed to move during an inspection...")
         failedInspection = true
         return true
     else
@@ -989,3 +823,9 @@ Scene property bindc_InspectScenePoseInspection auto
 Scene property bindc_InspectScenePoseKneel auto
 Scene property bindc_InspectScenePoseShowSex auto
 Scene property bindc_InspectScenePoseStandUp auto
+Scene property bindc_InspectSceneDirty auto
+Scene property bindc_InspectSceneFailed auto
+Scene property bindc_InspectSceneLookComment auto
+Scene property bindc_InspectSceneMasturbate auto
+Scene property bindc_InspectSceneSex auto
+Scene property bindc_InspectSceneIntro auto

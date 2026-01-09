@@ -408,6 +408,28 @@ endfunction
 ;NPC/player control functions
 ;******************************************************
 
+Function PlayDressUndress(Actor a) global
+    int Gender = a.GetLeveledActorBase().GetSex()
+    Debug.SendAnimationEvent(a, "Arrok_Undress_G" + Gender)
+EndFunction
+
+function FaceTwoActors(Actor a1, Actor a2) global
+    float zOffset = a1.GetHeadingAngle(a2)
+    a1.SetAngle(a1.GetAngleX(), a1.GetAngleY(), a1.GetAngleZ() + zOffset)
+    zOffset = a2.GetHeadingAngle(a1)
+    a2.SetAngle(a2.GetAngleX(), a2.GetAngleY(), a2.GetAngleZ() + zOffset)
+endfunction
+
+function FaceTarget(Actor a, ObjectReference target) global
+    float zOffset = a.GetHeadingAngle(target)
+    a.SetAngle(a.GetAngleX(), a.GetAngleY(), a.GetAngleZ() + zOffset)
+endfunction
+
+function FaceAwayFromTarget(Actor a, ObjectReference target) global
+    float zOffset = a.GetHeadingAngle(target) + 180
+    a.SetAngle(a.GetAngleX(), a.GetAngleY(), a.GetAngleZ() + zOffset)
+endfunction
+
 function PlayWorkAnimation(Actor akActor, float seconds = 2.0) global
     Debug.SendAnimationEvent(akActor, "IdleLockPick")
     bindc_Util.DoSleep(seconds)
