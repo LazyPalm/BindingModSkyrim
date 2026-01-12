@@ -34,7 +34,7 @@ event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
                 if hasBlock || (nudeRule && slotMask != 128) ;allow shoes on nudity rule
                     if !b.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
                         bindc_Util.WriteInternalMonologue("I am not allowed to wear this...")
-                        bindc_Util.WriteNotification("Nudity rule or bondage set block found", bindc_Util.TextColorRed())
+                        bindc_Util.WriteModNotification("Nudity rule or bondage set block found")
                         a.UnequipItem(dev, false, true)
                         removed = true
                     endif

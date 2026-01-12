@@ -26,6 +26,7 @@ function CleanUnusedBondageItemsFromInventory(Actor act) global native
 function UnequipAllBondage(Actor act) global native
 int[] function GetRandomNumbers(int minRange, int maxRange, int numberToReturn) global native
 int function FindRule(Armor item) global native
+string function IntToHex(int value) global native
 
 int function SetToken(Actor act, Armor arm) global
     bindc_Util.WriteInformation("bindc_SKSE - SetToken - " + arm)
@@ -138,5 +139,11 @@ int function ActivatedDoor(ObjectReference o) global
         sqs.SubUsedADoor(o)
     endif
 
+    return 0
+endfunction
+
+int function SleepMenuClosed() global
+    ;debug.MessageBox("SKSE closed sleep/wait menu")
+    bindc_Util.SendSimpleModEvent("bindc_SleepWaitMenuClosed")
     return 0
 endfunction

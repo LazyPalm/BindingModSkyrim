@@ -77,8 +77,8 @@ function LoadGame()
             thePlayer = Game.GetPlayer()
         endif
 
-        GoToState("SoftCheckStateStart")
-        currentRunningState = "SoftCheckStateStart"
+        ;GoToState("SoftCheckStateStart")
+        ;currentRunningState = "SoftCheckStateStart"
 
         if DhlpSuspend != DHLP_STATE_SUSPENDED_OTHER_MOD
             DhlpSuspend = DHLP_STATE_OFF
@@ -90,8 +90,25 @@ function LoadGame()
         (q as bindc_Gear).LoadGame()
         (q as bindc_Util).LoadGame()
 
+        Quest mcmQuest = Quest.GetQuest("bindc_McmQuest")
+        if !mcmQuest.IsRunning()
+            mcmQuest.Start()
+        endif
+
+        ;do soft checks here
+
+        if EventIsRunning == 1
+            GoToState("InEventState")
+            currentRunningState = "InEventState"
+        else
+            GoToState("RunningState")
+            currentRunningState = "RunningState"
+        endif
+        TriggerLoop()
+
         cycle = 0
-        TriggerLoop(5.0)
+        TriggerLoop()
+        ;TriggerLoop(5.0)
 
     else
 
@@ -128,7 +145,7 @@ event OnKeyUp(Int KeyCode, Float HoldTime)
 
                 if thePlayer.IsWeaponDrawn()
 
-                    bindc_Util.WriteNotification("Action key disabled when combat ready", bindc_Util.TextColorBlue())
+                    bindc_Util.WriteModNotification("Action key disabled when combat ready")
 
                 else
 
@@ -178,8 +195,8 @@ endfunction
 function SafeWord()
 endfunction
 
-int function EventCheck(string n, int num, float currentTime)
-endfunction
+; int function EventCheck(string n, int num, float currentTime, int enabledDefault, int chanceDefault, int cooldownDefault)
+; endfunction
 
 function TriggerLoop(float s = 1.0)
     ;make the loop cycle faster than the normal 30s
@@ -195,13 +212,13 @@ endstate
 
 state SoftCheckStateRunning
     function SafeWord()
-        bindc_Util.WriteNotification("Can't run safeword during Binding startup", bindc_Util.TextColorRed())
+        bindc_Util.WriteModNotification("Can't run safeword during Binding startup")
     endfunction
 endstate
 
 state DhlpSuspendedState
     function SafeWord()
-        bindc_Util.WriteNotification("Can't run safeword during DHLP suspend", bindc_Util.TextColorRed())
+        bindc_Util.WriteModNotification("Can't run safeword during DHLP suspend")
     endfunction
 endstate
 
@@ -211,7 +228,7 @@ endstate
 state PausedState
 
     function SafeWord()
-        bindc_Util.WriteNotification("Can't run safeword when Binding is paused", bindc_Util.TextColorRed())
+        bindc_Util.WriteModNotification("Can't run safeword when Binding is paused")
     endfunction
 
     function ActionShortPress()
@@ -288,33 +305,33 @@ state RunningState
             StorageUtil.SetIntValue(none, "bindc_slavery_running", 0)
         endif
 
-        debug.MessageBox("starting: " + eventName)
+        bindc_Util.WriteInformation("starting event: " + eventName)
 
         return true
 
     endfunction
 
-    int function EventCheck(string n, int num, float currentTime)
-        if StorageUtil.GetIntValue(none, "bindc_event_" + n + "_enabled", 0) == 0
-            bindc_Util.WriteInformation("EventCheck - event: " + n + " [disabled]")
-            return -1
-        endif
-        int roll = Utility.RandomInt(1, 100)
-        int chance = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_chance", 5)
-        float last = StorageUtil.GetFloatValue(none, "bindc_event_" + n + "_last", 0.0)
-        int cool = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_cooldown", 6)
-        float next = bindc_Util.AddTimeToTime(last, cool, 0)
-        int result
-        if roll <= chance
-            if next < currentTime
-                result = num
-            else
-                result = 0
-            endif
-        endif
-        bindc_Util.WriteInformation("EventCheck - event: " + n + " roll: " + roll + " chance: " + chance + " ct: " + currentTime + " last: " + last + " cool: " + cool + " next: " + next)
-        return result
-    endfunction
+    ; int function EventCheck(string n, int num, float currentTime, int enabledDefault, int chanceDefault, int cooldownDefault)
+    ;     if StorageUtil.GetIntValue(none, "bindc_event_" + n + "_enabled", enabledDefault) == 0
+    ;         bindc_Util.WriteInformation("EventCheck - event: " + n + " [disabled]")
+    ;         return -1
+    ;     endif
+    ;     int roll = Utility.RandomInt(1, 100)
+    ;     int chance = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_chance", chanceDefault)
+    ;     float last = StorageUtil.GetFloatValue(none, "bindc_event_" + n + "_last", 0.0)
+    ;     int cool = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_cooldown", cooldownDefault)
+    ;     float next = bindc_Util.AddTimeToTime(last, cool, 0)
+    ;     int result
+    ;     if roll <= chance
+    ;         if next < currentTime
+    ;             result = num
+    ;         else
+    ;             result = 0
+    ;         endif
+    ;     endif
+    ;     bindc_Util.WriteInformation("EventCheck - event: " + n + " roll: " + roll + " chance: " + chance + " ct: " + currentTime + " last: " + last + " cool: " + cool + " next: " + next)
+    ;     return result
+    ; endfunction
 
     function ProcessLoop()
 
@@ -324,41 +341,46 @@ state RunningState
                 bindc_PreQuest.Stop()
             endif
 
-            int safeArea = StorageUtil.GetIntValue(none, "bindc_safe_area", 2)
-            float ct = bindc_Util.GetTime()
-            int startEvent = 0
+            ; int safeArea = StorageUtil.GetIntValue(none, "bindc_safe_area", 2)
+            ; float ct = bindc_Util.GetTime()
+            int startEvent = bindc_EventQuest.EventTest()
 
-            if safeArea == 2
+            ; if safeArea == 2
 
-                int[] rnd = bindc_SKSE.GetRandomNumbers(1, 5, 5)
-                int i = 0
-                while i < rnd.Length && startEvent == 0
-                    int test = rnd[i]
-                    if test == 1
-                        startEvent = EventCheck("harsh", 1, ct)
-                    elseif test == 2
+            ;     int[] rnd = bindc_SKSE.GetRandomNumbers(1, 5, 5)
+            ;     bindc_Util.WriteInformation("event check rnd: " + rnd)
+            ;     int i = 0
+            ;     while i < rnd.Length && startEvent == 0
+            ;         int test = rnd[i]
+            ;         if test == 1
+            ;             startEvent = EventCheck("harsh", 1, ct)
+            ;         elseif test == 2
+            ;             startEvent = EventCheck("display", 2, ct)
+            ;         elseif test == 3
+            ;             startEvent = EventCheck("inspect", 3, ct)
+            ;         endif
+            ;         i += 1
+            ;     endwhile
 
-                    elseif test == 3
+            ;     ; startEvent = EventCheck("harsh", 1, ct)
+            ;     ; if startEvent == 0
 
-                    endif
-                    i += 1
-                endwhile
+            ;     ; endif
+            ;     ; if startEvent == 0
 
-                ; startEvent = EventCheck("harsh", 1, ct)
-                ; if startEvent == 0
-
-                ; endif
-                ; if startEvent == 0
-
-                ; endif                
-            else
+            ;     ; endif                
+            ; else
             
-            endif
+            ; endif
 
             if startEvent > 0
                 Quest q
                 if startEvent == 1
                     q = Quest.GetQuest("bindc_EventHarshQuest")
+                elseif startEvent == 2
+                    q = Quest.GetQuest("bindc_EventDisplayQuest")
+                elseif startEvent == 3
+                    q = Quest.GetQuest("bindc_EventInspectQuest")
                 endif
                 if q != none
                     q.Start()
@@ -404,6 +426,8 @@ state InEventState
             (eventQuest as bindc_EventCamp).SafeWord()
         elseif RunningEventName == "Inspect"
             (eventQuest as bindc_EventInspect).SafeWord()
+        elseif RunningEventName == "Display"
+            (eventQuest as bindc_EventDisplay).SafeWord()
         endif
         RunSafeword()
     endfunction
@@ -415,6 +439,8 @@ state InEventState
             (eventQuest as bindc_EventCamp).ActionShortPress()
         elseif RunningEventName == "Inspect"
             (eventQuest as bindc_EventInspect).ActionShortPress()
+        elseif RunningEventName == "Display"
+            (eventQuest as bindc_EventDisplay).ActionShortPress()
         endif
     endfunction
 
@@ -425,6 +451,8 @@ state InEventState
             (eventQuest as bindc_EventCamp).ActionLongPress()
         elseif RunningEventName == "Inspect"
             (eventQuest as bindc_EventInspect).ActionLongPress()
+        elseif RunningEventName == "Display"
+            (eventQuest as bindc_EventDisplay).ActionLongPress()
         endif
     endfunction
 
@@ -508,7 +536,7 @@ function RunSafeword()
     currentRunningState = "SafewordState"
     ShutdownQuests()
     StorageUtil.SetIntValue(thePlayer, "bindc_outfit_id", -2) ;force a re-equip
-    bindc_Util.WriteNotification("Safeword completed. Restarting slavery quest.", bindc_Util.TextColorRed())
+    bindc_Util.WriteModNotification("Safeword completed. Restarting slavery quest.")
     GoToState("RunningState")
     currentRunningState = "RunningState"
     TriggerLoop()

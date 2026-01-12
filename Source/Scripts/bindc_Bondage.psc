@@ -143,7 +143,7 @@ function EquipBondageOutfit(Actor a, int setId)
         ;float expirationDate = JsonUtil.GetFloatValue(outfitFileNameJson, setId + "_dynamic_bondage_expires", 0.0)
         if expirationDate < bindc_Util.GetTime() || JsonUtil.FormListCount(outfitFileNameJson, setId + "_dynamic_bondage_items") == 0
             
-            bindc_Util.WriteNotification("resetting dynamic gear", bindc_Util.TextColorRed())
+            bindc_Util.WriteModNotification("resetting dynamic gear")
 
             StorageUtil.FormListClear(none, "bindc_outfit_" + setId + "_dynamic_bondage_items")
             StorageUtil.SetFloatValue(none, "bindc_outfit_" + setId + "_dynamic_bondage_expires", bindc_Util.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours

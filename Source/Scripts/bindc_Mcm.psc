@@ -1,11 +1,18 @@
 Scriptname bindc_Mcm extends SKI_ConfigBase
 
+int mcmHeaderColor = 0x008542
+string mcmHeaderColorText = "#008542"
+
 int[] controlGroup1
 int[] controlGroup2
 int[] controlGroup3
 int[] controlGroup4
 int[] controlGroup5
 int[] controlGroup6
+int[] controlGroup7
+int[] controlGroup8
+int[] controlGroup9
+int[] controlGroup10
 
 bool toggled1
 
@@ -49,7 +56,7 @@ event OnConfigOpen()
             controlGroup6 = new int[50]
         endif
 
-        Pages = new string[6]
+        Pages = new string[7]
 
         Pages[0] = "Status Info"
         Pages[1] = "Debug Mod"
@@ -57,6 +64,7 @@ event OnConfigOpen()
         Pages[3] = "Event Settings"
         Pages[4] = "Bondage Outfits"
         Pages[5] = "Submissive Settings"
+        Pages[6] = "Dominant Settings"
 
     else
 
@@ -129,6 +137,15 @@ endevent
 event OnOptionInputAccept(int option, string value)
 endevent
 
+event OnOptionHighlight(int option)
+endevent
+
+event OnOptionColorOpen(int option)
+endEvent
+
+event OnOptionColorAccept(int option, int color)
+endEvent
+
 string function FormatRuleText(int rule, int ruleType)
 endfunction
 
@@ -150,6 +167,15 @@ function ClearTempVariables()
 
 endfunction
 
+function AddHeader(string text, string text2 = "")
+    AddHeaderOption("<font color='" + mcmHeaderColorText + "'>" + text + "</font>")
+    if text2 == ""
+        AddHeaderOption("")
+    else
+        AddHeaderOption("<font color='" + mcmHeaderColorText + "'>" + text2 + "</font>")
+    endif
+endfunction
+
 ;****************************************************************************
 state DisplaySplashState
 
@@ -163,9 +189,7 @@ state DisplayStatusState
 
     function DisplayPage()
 
-        AddHeaderOption("Mod Data")
-        AddHeaderOption("")
-
+        AddHeader("Mod Data")
         AddTextOption("Save ID", StorageUtil.GetIntValue(none, "bindc_save_id", -1))
         AddTextOption("Paused", data_script.MainScript.ModPaused)
         AddTextOption("DHLP", data_script.MainScript.DhlpSuspend)
@@ -173,12 +197,24 @@ state DisplayStatusState
         AddTextOption("Event Running", data_script.MainScript.EventIsRunning)
         AddTextOption("Event Name", data_script.MainScript.RunningEventName)
 
-        AddHeaderOption("User Data")
-        AddHeaderOption("")
-
+        AddHeader("Sub Data")
         AddTextOption("Bondage Outfit", StorageUtil.GetIntValue(thePlayer, "bindc_outfit_id", -1))
         AddTextOption("Pose", StorageUtil.SetIntValue(thePlayer, "bindc_pose", 0))
         AddTextOption("Dirt Level", StorageUtil.GetIntValue(thePlayer, "bindc_dirt_level", 0))
+        AddEmptyOption()
+
+        AddHeader("Sub Factions")
+        Faction[] factions = thePlayer.GetFactions(-128, 127)
+        int i = 0
+        while i < factions.Length
+            AddTextOption(PO3_SKSEFunctions.GetFormEditorID(factions[i]), thePlayer.GetFactionRank(factions[i]))
+            i += 1
+        endwhile
+        if factions.length > 0
+            if factions.Length % 2 > 0
+                AddEmptyOption()
+            endif
+        endif
 
 
     endfunction
@@ -189,7 +225,17 @@ endstate
 state DisplayDebugState
 
     function DisplayPage()
+        
+        AddHeader("Debug Options")
         controlGroup1[0] = AddToggleOption("Run Safeword", toggled1)
+        AddEmptyOption()
+
+        AddHeader("Color Options")
+        controlGroup1[1] = AddColorOption("Inner Thought Notifications", StorageUtil.GetIntValue(none, "bindc_color_inner", 0x8C6CD0))
+        controlGroup1[2] = AddColorOption("Dom Command Notifications", StorageUtil.GetIntValue(none, "bindc_color_dom", 0xCC0033))
+        controlGroup1[3] = AddColorOption("Mod Notifications", StorageUtil.GetIntValue(none, "bindc_color_mod", 0x4060AF))
+        controlGroup1[4] = AddColorOption("MCM Headers - " + mcmHeaderColorText, mcmHeaderColor)
+
     endfunction
 
     event OnOptionSelect(int option)
@@ -206,42 +252,205 @@ state DisplayDebugState
         endif
     endevent
 
+    event OnOptionColorOpen(int option)
+        if option == controlGroup1[1]
+            SetColorDialogStartColor(StorageUtil.GetIntValue(none, "bindc_color_inner", 0x8C6CD0))
+            SetColorDialogDefaultColor(0x8C6CD0)
+
+        elseif option == controlGroup1[2]
+            SetColorDialogStartColor(StorageUtil.GetIntValue(none, "bindc_color_dom", 0xCC0033))
+            SetColorDialogDefaultColor(0xCC0033)
+
+        elseif option == controlGroup1[3]
+            SetColorDialogStartColor(StorageUtil.GetIntValue(none, "bindc_color_mod", 0x4060AF))
+            SetColorDialogDefaultColor(0x4060AF)
+
+        elseif option == controlGroup1[4]
+            SetColorDialogStartColor(mcmHeaderColor)
+            SetColorDialogDefaultColor(0x008542)
+
+        endif
+    endEvent
+
+    event OnOptionColorAccept(int option, int color)
+        if option == controlGroup1[1]
+            SetColorOptionValue(option, color)
+            StorageUtil.SetIntValue(none, "bindc_color_inner", color)
+            StorageUtil.SetStringValue(none, "bindc_color_inner_text", "#" + bindc_SKSE.IntToHex(color))
+
+        elseif option == controlGroup1[2]
+            SetColorOptionValue(option, color)
+            StorageUtil.SetIntValue(none, "bindc_color_dom", color)
+            StorageUtil.SetStringValue(none, "bindc_color_dom_text", "#" + bindc_SKSE.IntToHex(color))
+
+        elseif option == controlGroup1[3]
+            SetColorOptionValue(option, color)
+            StorageUtil.SetIntValue(none, "bindc_color_mod", color)
+            StorageUtil.SetStringValue(none, "bindc_color_mod_text", "#" + bindc_SKSE.IntToHex(color))
+
+        elseif option == controlGroup1[4]            
+            SetColorOptionValue(option, color)
+            mcmHeaderColor = color
+            mcmHeaderColorText = "#" + bindc_SKSE.IntToHex(color)
+            ForcePageReset()
+
+        endif
+    endEvent
+
 endstate
 
 ;****************************************************************************
 state EventSettingsState
 
+    event OnOptionHighlight(int option)
+
+        if option == controlGroup5[0] ;bound sleep
+            SetInfoText("Activating (by looking at player owned / rented bed) this event will hogtie the submissive on the floor near the bed, while the Dom sleeps in the bed. This triggers in safe areas.")
+        elseif option == controlGroup2[0]  ;camping
+            SetInfoText("Enable this for a bondage themed camp site and sleeping event. It triggers in unsafe areas.")
+        elseif option == controlGroup1[0] ;harsh bondage
+            SetInfoText("This event covers the player in full body bondage, heavy bondage, gags, clamps, blindfolds, etc. It triggers in safe areas.")
+        elseif option == controlGroup6[0]
+            SetInfoText("When the Dom's arousal is higher than " + StorageUtil.GetIntValue(none, "bindc_dom_arousal_need_for_sex", data_script.DomArousalNeededForSex) + " (managed in Dom Settings), the Dom will initiate sex with the submissive. This triggers in safe areas.")
+        
+        
+        
+        endif
+
+    endevent
+
     function DisplayPage()
 
-        AddHeaderOption("Harsh Bondage")
-        AddHeaderOption("")
+        AddHeader("Bound Sleep")
+        controlGroup5[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_sleep_enabled", data_script.EventBoundSleepEnabledDefault)) 
+        controlGroup5[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_sleep_last", 0.0)) ; bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_camp_last", 0.0), bindc_Util.GetTime()))
+        controlGroup5[2] = AddSliderOption("Start % Chance When Looking At Bed", StorageUtil.GetIntValue(none, "bindc_event_sleep_chance", data_script.EventBoundSleepChanceDefault), "{0}")
+        controlGroup5[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_sleep_cooldown", data_script.EventBoundSleepCooldownDefault), "{0}")
 
-        controlGroup1[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_harsh_enabled", 1)) 
-        controlGroup1[1] = AddTextOption("Last Run", bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_harsh_last", 0.0), bindc_Util.GetTime()))
-        controlGroup1[2] = AddSliderOption("Start Chance Per Minute", StorageUtil.GetIntValue(none, "bindc_event_harsh_chance", 5), "{0}")
-        controlGroup1[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_harsh_cooldown", 6), "{0}")
-        controlGroup1[4] = AddSliderOption("Runs Minimum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_min", 20), "{0}")
-        controlGroup1[5] = AddSliderOption("Runs Maximum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_max", 30), "{0}")
+        AddHeader("Camping")
+        controlGroup2[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_camp_enabled", data_script.EventCampEnabledDefault)) 
+        controlGroup2[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_camp_last", 0.0)) ; bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_camp_last", 0.0), bindc_Util.GetTime()))
+        controlGroup2[2] = AddSliderOption("Start % Chance Per Minute", StorageUtil.GetIntValue(none, "bindc_event_camp_chance", data_script.EventCampChanceDefault), "{0}")
+        controlGroup2[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_camp_cooldown", data_script.EventCampCooldownDefault), "{0}")
+        controlGroup2[4] = AddSliderOption("Runs Minimum Hours", StorageUtil.GetIntValue(none, "bindc_event_camp_min", data_script.EventCampMinDefault), "{0}")
+        controlGroup2[5] = AddSliderOption("Runs Maximum Hours", StorageUtil.GetIntValue(none, "bindc_event_camp_max", data_script.EventCampMaxDefault), "{0}")
 
-        AddHeaderOption("Simple Slavery Outcome")
-        AddHeaderOption("")
+        if Game.IsPluginInstalled("MilkModNEW.esp")
+        AddHeader("Dairy (MME)")
+
+        endif
+
+        AddHeader("Free Use")
+        controlGroup6[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_free_enabled", data_script.EventFreeEnabledDefault)) 
+        controlGroup6[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_free_last", 0.0)) ; bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_camp_last", 0.0), bindc_Util.GetTime()))
+        controlGroup6[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_free_cooldown", data_script.EventFreeCooldownDefault), "{0}")
+        AddEmptyOption()
+
+        AddHeader("Harsh Bondage")
+        controlGroup1[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_harsh_enabled", data_script.EventHarshEnabledDefault)) 
+        controlGroup1[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_harsh_last", 0.0)) ;bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_harsh_last", 0.0), bindc_Util.GetTime()))
+        controlGroup1[2] = AddSliderOption("Start % Chance Per Minute", StorageUtil.GetIntValue(none, "bindc_event_harsh_chance", data_script.EventHarshChanceDefault), "{0}")
+        controlGroup1[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_harsh_cooldown", data_script.EventHarshCooldownDefault), "{0}")
+        controlGroup1[4] = AddSliderOption("Runs Minimum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_min", data_script.EventHarshMinDefault), "{0}")
+        controlGroup1[5] = AddSliderOption("Runs Maximum Minutes", StorageUtil.GetIntValue(none, "bindc_event_harsh_max", data_script.EventHarshMaxDefault), "{0}")
+
+        AddHeader("Inspection")
+        controlGroup3[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_inspect_enabled", data_script.EventInspectEnabledDefault)) 
+        controlGroup3[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_inspect_last", 0.0)) ;bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_inspect_last", 0.0), bindc_Util.GetTime()))    
+        controlGroup3[2] = AddSliderOption("Start % Chance Per Minute", StorageUtil.GetIntValue(none, "bindc_event_inspect_chance", data_script.EventInspectChanceDefault), "{0}")
+        controlGroup3[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_inspect_cooldown", data_script.EventInspectCooldownDefault), "{0}")
+
+        AddHeader("Put On Display")
+        controlGroup4[0] = AddToggleOption("Enabled", StorageUtil.GetIntValue(none, "bindc_event_display_enabled", data_script.EventDisplayEnabledDefault)) 
+        controlGroup4[1] = AddTextOption("Last Run", StorageUtil.GetFloatValue(none, "bindc_event_display_last", 0.0)) ; bindc_Util.DisplayTimeElapsed(StorageUtil.GetFloatValue(none, "bindc_event_display_last", 0.0), bindc_Util.GetTime()))
+        controlGroup4[2] = AddSliderOption("Start % Chance Per Minute", StorageUtil.GetIntValue(none, "bindc_event_display_chance", data_script.EventDisplayChanceDefault), "{0}")
+        controlGroup4[3] = AddSliderOption("Cooldown Hours", StorageUtil.GetIntValue(none, "bindc_event_display_cooldown", data_script.EventDisplayCooldownDefault), "{0}")
+        controlGroup4[4] = AddSliderOption("Runs Minimum Minutes", StorageUtil.GetIntValue(none, "bindc_event_display_min", data_script.EventDisplayMinDefault), "{0}")
+        controlGroup4[5] = AddSliderOption("Runs Maximum Minutes", StorageUtil.GetIntValue(none, "bindc_event_display_max", data_script.EventDisplayMaxDefault), "{0}")
+
+        AddHeader("Simple Slavery")
         controlGroup1[6] = AddToggleOption("Use Female Hirelings", StorageUtil.GetIntValue(none, "bindc_event_ss_female_hirelings", 1))
         controlGroup1[7] = AddToggleOption("Use Male Hirelings", StorageUtil.GetIntValue(none, "bindc_event_ss_male_hirelings", 1))
 
+        AddHeader("Whipped")
+        
     endfunction
 
     event OnOptionSliderOpen(int option)
 
+        string sKey = ""
+        int defaultValue = 0
+        int lowerRange = 0
+        int upperRange = 100
+        int interval = 1
+
         if option == controlGroup1[2]
-            SetSliderDialogStartValue(StorageUtil.GetIntValue(none, "bindc_event_harsh_chance", 5))
-            SetSliderDialogDefaultValue(5)
-            SetSliderDialogRange(0, 100)
-            SetSliderDialogInterval(1)
+            sKey = "bindc_event_harsh_chance"
+            defaultValue = data_script.EventHarshChanceDefault
         elseif option == controlGroup1[3]
-            SetSliderDialogStartValue(StorageUtil.GetIntValue(none, "bindc_event_harsh_cooldown", 6))
-            SetSliderDialogDefaultValue(6)
-            SetSliderDialogRange(0, 48)
-            SetSliderDialogInterval(1) 
+            sKey = "bindc_event_harsh_cooldown"
+            defaultValue = data_script.EventHarshCooldownDefault
+            upperRange = 48
+        elseif option == controlGroup1[4]
+            sKey = "bindc_event_harsh_min"
+            defaultValue = data_script.EventHarshMinDefault
+            upperRange = StorageUtil.GetIntValue(none, "bindc_event_harsh_max", data_script.EventHarshMaxDefault)
+        elseif option == controlGroup1[5]
+            sKey = "bindc_event_harsh_max"
+            defaultValue = data_script.EventHarshMaxDefault
+            lowerRange = StorageUtil.GetIntValue(none, "bindc_event_harsh_min", data_script.EventHarshMinDefault)
+            upperRange = 120
+
+        elseif option == controlGroup2[2]
+            sKey = "bindc_event_camp_chance"
+            defaultValue = data_script.EventCampChanceDefault
+        elseif option == controlGroup2[3]
+            sKey = "bindc_event_camp_cooldown"
+            defaultValue = data_script.EventCampCooldownDefault
+            upperRange = 48
+        elseif option == controlGroup2[4]
+            sKey = "bindc_event_camp_min"
+            defaultValue = data_script.EventCampMinDefault
+            upperRange = StorageUtil.GetIntValue(none, "bindc_event_camp_max", data_script.EventCampMaxDefault)
+        elseif option == controlGroup2[5]
+            sKey = "bindc_event_camp_max"
+            defaultValue = data_script.EventCampMaxDefault
+            lowerRange = StorageUtil.GetIntValue(none, "bindc_event_camp_min", data_script.EventCampMinDefault)
+            upperRange = 12
+
+        elseif option == controlGroup3[2]
+            sKey = "bindc_event_inspect_chance"
+            defaultValue = data_script.EventInspectChanceDefault
+        elseif option == controlGroup3[3]
+            sKey = "bindc_event_inspect_cooldown"
+            defaultValue = data_script.EventInspectCooldownDefault
+            upperRange = 48
+
+        elseif option == controlGroup4[2]
+            sKey = "bindc_event_display_chance"
+            defaultValue = data_script.EventDisplayChanceDefault
+        elseif option == controlGroup4[3]
+            sKey = "bindc_event_display_cooldown"
+            defaultValue = data_script.EventDisplayCooldownDefault
+            upperRange = 48
+        elseif option == controlGroup4[4]
+            sKey = "bindc_event_display_min"
+            defaultValue = data_script.EventDisplayMinDefault
+            upperRange = StorageUtil.GetIntValue(none, "bindc_event_display_max", data_script.EventCampMaxDefault)
+        elseif option == controlGroup4[5]
+            sKey = "bindc_event_display_max"
+            defaultValue = data_script.EventDisplayMaxDefault
+            lowerRange = StorageUtil.GetIntValue(none, "bindc_event_display_min", data_script.EventCampMinDefault)
+            upperRange = 120
+
+
+        endif
+
+        if sKey != ""
+            SetSliderDialogStartValue(StorageUtil.GetIntValue(none, sKey, defaultValue))
+            SetSliderDialogDefaultValue(defaultValue)
+            SetSliderDialogRange(lowerRange, upperRange)
+            SetSliderDialogInterval(interval) 
         endif
 
     endevent
@@ -252,6 +461,35 @@ state EventSettingsState
             StorageUtil.SetIntValue(none, "bindc_event_harsh_chance", value as int)
         elseif option == controlGroup1[3]
             StorageUtil.SetIntValue(none, "bindc_event_harsh_cooldown", value as int)
+        elseif option == controlGroup1[4]
+            StorageUtil.SetIntValue(none, "bindc_event_harsh_min", value as int)
+        elseif option == controlGroup1[5]
+            StorageUtil.SetIntValue(none, "bindc_event_harsh_max", value as int)
+
+        elseif option == controlGroup2[2]
+            StorageUtil.SetIntValue(none, "bindc_event_camp_chance", value as int)
+        elseif option == controlGroup2[3]
+            StorageUtil.SetIntValue(none, "bindc_event_camp_cooldown", value as int)
+        elseif option == controlGroup2[4]
+            StorageUtil.SetIntValue(none, "bindc_event_camp_min", value as int)
+        elseif option == controlGroup2[5]
+            StorageUtil.SetIntValue(none, "bindc_event_camp_max", value as int)
+
+        elseif option == controlGroup3[2]
+            StorageUtil.SetIntValue(none, "bindc_event_inspect_chance", value as int)
+        elseif option == controlGroup3[3]
+            StorageUtil.SetIntValue(none, "bindc_event_inspect_cooldown", value as int)
+
+        elseif option == controlGroup4[2]
+            StorageUtil.SetIntValue(none, "bindc_event_display_chance", value as int)
+        elseif option == controlGroup4[3]
+            StorageUtil.SetIntValue(none, "bindc_event_display_cooldown", value as int)
+        elseif option == controlGroup4[4]
+            StorageUtil.SetIntValue(none, "bindc_event_display_min", value as int)
+        elseif option == controlGroup4[5]
+            StorageUtil.SetIntValue(none, "bindc_event_display_max", value as int)
+
+
         endif
 
         SetSliderOptionValue(option, value, "{0}")
@@ -260,20 +498,28 @@ state EventSettingsState
 
     event OnOptionSelect(int option)
 
+        string sKey = ""
+
         if option == controlGroup1[0]
-            int harshEnabled = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_harsh_enabled", 0))
-            StorageUtil.SetIntValue(none, "bindc_event_harsh_enabled", harshEnabled)
-            SetToggleOptionValue(option, harshEnabled)
+            sKey = "bindc_event_harsh_enabled"
         elseif option == controlGroup1[6]
-            int hire = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_ss_female_hirelings", 0))
-            StorageUtil.SetIntValue(none, "bindc_event_ss_female_hirelings", hire)
-            SetToggleOptionValue(option, hire)
+            sKey = "bindc_event_ss_female_hirelings"
         elseif option == controlGroup1[7]
-            int hire = ToggleInt(StorageUtil.GetIntValue(none, "bindc_event_ss_male_hirelings", 0))
-            StorageUtil.SetIntValue(none, "bindc_event_ss_male_hirelings", hire)
-            SetToggleOptionValue(option, hire)
+            sKey = "bindc_event_ss_male_hirelings"
+        elseif option == controlGroup2[0]
+            sKey = "bindc_event_camp_enabled"
+        elseif option == controlGroup3[0]
+            sKey = "bindc_event_inspect_enabled"
+        elseif option == controlGroup4[0]
+            sKey = "bindc_event_display_enabled"
+  
 
+        endif
 
+        if sKey != ""
+            int value = ToggleInt(StorageUtil.GetIntValue(none, sKey, 0))
+            StorageUtil.SetIntValue(none, sKey, value)
+            SetToggleOptionValue(option, value)
         endif
 
     endevent
@@ -357,14 +603,11 @@ state RulesSettingsState
         string[] brules =  data_script.RulesScript.GetBehaviorRuleNameArray()
         string[] bndRules = data_script.RulesScript.GetBondageRuleNameArray()
 
-        AddHeaderOption("Rules Settings")
-        AddHeaderOption("")
+        AddHeader("Rules Settings")
         controlGroup1[0] = AddToggleOption("Dom Controls Behavior Rules", domControlledBehavior)
         controlGroup1[1] = AddToggleOption("Dom Controls Bondage Rules", domControlledBondage)
 
-        AddHeaderOption("Behavior Rules")
-        AddHeaderOption("")
-
+        AddHeader("Behavior Rules")
         int i = 0
         while i < brules.Length
             controlGroup2[i] = AddMenuOption(brules[i], FormatRuleText(i, 1))
@@ -377,9 +620,7 @@ state RulesSettingsState
             endif
         endif
 
-        AddHeaderOption("Bondage Rules")
-        AddHeaderOption("")
-
+        AddHeader("Bondage Rules")
         i = 0
         while i < bndRules.Length
             controlGroup3[i] = AddMenuOption(bndRules[i], FormatRuleText(i, 2))
@@ -543,9 +784,7 @@ state BondageOutfitsState
             buildOutfitArrays = true
         endif
 
-        AddHeaderOption("Manage Outfits")
-        AddHeaderOption("")
-
+        AddHeader("Manage Outfits")
         controlGroup1[0] = AddMenuOption("Select Bondage Outfit", "")
         ;AddEmptyOption()
 
@@ -559,9 +798,7 @@ state BondageOutfitsState
             int removeGear = StorageUtil.GetIntValue(none, "bindc_outfit_" + selectedInt1 + "_remove_existing_gear", 0)
             int leaveBondageItems = StorageUtil.GetIntValue(none, "bindc_outfit_" + selectedInt1 + "_leave_bondage_items", 0)
 
-            AddHeaderOption("Outfit Settings")
-            AddHeaderOption("")
-
+            AddHeader("Outfit Settings")
             controlGroup1[1] = AddInputOption("Name", selectedStr1)
             AddTextOption("Outfit ID", selectedInt1)
             controlGroup1[2] = AddToggleOption("Use Random Bondage", useRandomBondage)
@@ -575,9 +812,7 @@ state BondageOutfitsState
                 ;random bondage
                 int[] chances = StorageUtil.IntListToArray(none, "bindc_outfit_" + selectedInt1 + "_random_bondage_chance")
 
-                AddHeaderOption("Random Bondage Chances")
-                AddHeaderOption("")
-
+                AddHeader("Random Bondage Chances")
                 controlGroup2[0] = AddSliderOption("Anal Plug", chances[0], "{0}")
                 controlGroup2[1] = AddSliderOption("Vaginal Plug", chances[1], "{0}")
                 controlGroup2[2] = AddSliderOption("Genital Piercing", chances[2], "{0}")
@@ -599,17 +834,14 @@ state BondageOutfitsState
 
             else
                 ;fixed bondage
-                AddHeaderOption("Add Bondage Item(s)")
-                AddHeaderOption("")
-
+                AddHeader("Add Bondage Item(s)")
                 controlGroup1[5] = AddInputOption("Search", selectedStr2)
                 controlGroup1[6] = AddMenuOption("Search Results", selectedStr3) ;todo - display found count?
                 ;controlGroup1[7] = AddMenuOption("From Inventory", "") ;AddTextOption("Add Item", selectedStr3)
                 controlGroup1[8] = AddTextOption("Learn All Worn DD/ZAP Items", "")
                 AddEmptyOption()
 
-                AddHeaderOption("Bondage Items")
-                AddHeaderOption("")
+                AddHeader("Bondage Items")
                 formArr1 = StorageUtil.FormListToArray(none, "bindc_outfit_" + selectedInt1 + "_fixed_bondage_items")
                  i = 0
                 while i < formArr1.Length && i < 50 ;cap this at the max of the control group array
@@ -624,13 +856,11 @@ state BondageOutfitsState
 
             endif
 
-            AddHeaderOption("Add Clothing & Armor")
-            AddHeaderOption("")
+            AddHeader("Add Clothing & Armor")
             controlGroup1[11] = AddTextOption("Learn All Worn Items", "")
             AddEmptyOption()
 
-            AddHeaderOption("Clothing & Armor Items")
-            AddHeaderOption("")
+            AddHeader("Clothing & Armor Items")      
             formArr3 = StorageUtil.FormListToArray(none, "bindc_outfit_" + selectedInt1 + "_fixed_worn_items")
               i = 0
             while i < formArr3.Length
@@ -643,8 +873,7 @@ state BondageOutfitsState
                 endif
             endif
 
-            AddHeaderOption("Block Equipping - Clothing & Armor")
-            AddHeaderOption("")
+            AddHeader("Block Equipping - Clothing & Armor") 
             i = 0
             while i < bondageOutfitBlocks.Length
                 controlGroup4[i] = AddToggleOption(bondageOutfitBlocks[i], StorageUtil.IntListHas(none, "bindc_outfit_" + selectedInt1 + "_block_slots", bondageOutfitBlocksSlots[i]))
@@ -652,8 +881,7 @@ state BondageOutfitsState
             endwhile
             AddEmptyOption()
 
-            AddHeaderOption("Outfit Used For")
-            AddHeaderOption("")
+            AddHeader("Outfit Used For") 
             i = 0
             while i < bondageOutfitUsageList.Length
                 controlGroup5[i] = AddToggleOption(bondageOutfitUsageList[i], StorageUtil.StringListHas(none, "bindc_outfit_" + selectedInt1 + "_used_for", bondageOutfitUsageKey[i]))
@@ -1007,9 +1235,7 @@ state SubmissiveSettingsState
 
     function DisplayPage()
 
-        AddHeaderOption("Poses")
-        AddHeaderOption("")
-
+        AddHeader("Poses")
         controlGroup1[0] = AddInputOption("Kneel", StorageUtil.GetStringValue(none, "bindc_pose_kneel", "ZazAPC017"))
         controlGroup1[1] = AddInputOption("Prayer", StorageUtil.GetStringValue(none, "bindc_pose_prayer", "IdleGreybeardMeditateEnter"))
         controlGroup1[2] = AddInputOption("Sit On Ground", StorageUtil.GetStringValue(none, "bindc_pose_sit", "IdleSitCrossLeggedEnter"))
@@ -1023,15 +1249,13 @@ state SubmissiveSettingsState
         controlGroup1[10] = AddInputOption("Doorstep", StorageUtil.GetStringValue(none, "bindc_pose_door", "ZapWriPose08"))
         AddEmptyOption()
 
-        AddHeaderOption("Kneeling")
-        AddHeaderOption("")
+        AddHeader("Kneeling")
         controlGroup1[11] = AddToggleOption("Kneeling Required To Speak", data_script.SubPref_KneelingRequired)
         controlGroup1[12] = AddToggleOption("Kneeling Required - Gagged For Not", StorageUtil.GetIntValue(none, "bindc_setting_kneeling_gagged_when_not", 0))
         controlGroup1[13] = AddToggleOption("Kneeling Required - Infraction For Not", StorageUtil.GetIntValue(none, "bindc_setting_kneeling_infraction_when_not", 0))
         AddEmptyOption()
 
-        AddHeaderOption("Dirt & Bathing")
-        AddHeaderOption("")
+        AddHeader("Dirt & Bathing")
         if Game.IsPluginInstalled("Bathing in Skyrim.esp")
             controlGroup1[14] = AddToggleOption("Clean Slave Required", StorageUtil.GetIntValue(none, "bindc_clean_slave", 0))
             AddTextOption("Using", "Bathing in Skyrim - Renewed")    
@@ -1045,14 +1269,12 @@ state SubmissiveSettingsState
             StorageUtil.SetIntValue(thePlayer, "bindc_dirt_level", 0)
         endif
 
-        AddHeaderOption("Punishment")
-        AddHeaderOption("")
+        AddHeader("Punishment")
         ; sliderPunishmentMinGold = AddSliderOption("Gold Loss - Min", bind_GlobalPunishmentMinGold.GetValue() as int, "{0}")
         ; sliderPunishmentMaxGold = AddSliderOption("Gold Loss - Max", bind_GlobalPunishmentMaxGold.GetValue() as int, "{0}")
         ; sliderPunishmentGoldPercentage = AddSliderOption("Gold Loss - Percentage", bind_GlobalPunishmentGoldPercentage.GetValue() as int, "{0}")
 
-        AddHeaderOption("Other Settings")
-        AddHeaderOption("")
+        AddHeader("Other Settings")
         controlGroup3[0] = AddToggleOption("Auto Outfit Changes", StorageUtil.GetIntValue(none, "bindc_auto_changes", 0))
         controlGroup3[1] = AddToggleOption("Must Present Hands For Outfit Change", StorageUtil.GetIntValue(none, "bindc_present_hands", 0))
         ;toggleCleanSub = AddToggleOption("Dirt - Clean Sub Required", main.DomPreferenceCleanSub)
@@ -1181,13 +1403,12 @@ state DominantSettingsState
 
     function DisplayPage()
 
-        AddHeaderOption("Sex")
-        AddHeaderOption("")
+        AddHeader("Arousal & Sex")
+        controlGroup1[0] = AddSliderOption("Arousal Needed For Sex", StorageUtil.GetIntValue(none, "bindc_dom_arousal_need_for_sex", data_script.DomArousalNeededForSex), "{0}")
+        AddEmptyOption()
 
-        controlGroup1[0] = AddSliderOption("Arousal Needed For Sex", StorageUtil.GetIntValue(none, "bindc_dom_arousal_need_for_sex", 70), "{0}")
-
-        AddHeaderOption("Other")
-        AddHeaderOption("")
+        AddHeader("Other Settings")
+        
 
 
     endfunction

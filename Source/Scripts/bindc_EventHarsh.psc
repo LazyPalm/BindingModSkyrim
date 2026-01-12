@@ -151,13 +151,13 @@ function FreeSub()
     string domTitle = bindc_Util.GetDomTitle()
 
     if bindc_Util.GetInfractions() > 0
-        bindc_Util.WriteNotification(domTitle + " canceled a punishment for being a good bondage pet.", bindc_Util.TextColorBlue())
+        bindc_Util.WriteModNotification(domTitle + " canceled a punishment for being a good bondage pet.")
         bindc_Util.ModifyInfractions(-1)
     elseif awardsPoints == 1
-        bindc_Util.WriteNotification(domTitle + " enjoyed seeing you suffer in bondage and decided to award you a point.", bindc_Util.TextColorBlue())
+        bindc_Util.WriteModNotification(domTitle + " enjoyed seeing you suffer in bondage and decided to award you a point.")
         bindc_Util.ModifyPoints(1)
     else 
-        bindc_Util.WriteNotification(domTitle + " enjoyed the bondage show...", bindc_Util.TextColorBlue())
+        bindc_Util.WriteModNotification(domTitle + " enjoyed the bondage show...")
     endif
 
     float ct = bindc_Util.GetTime()

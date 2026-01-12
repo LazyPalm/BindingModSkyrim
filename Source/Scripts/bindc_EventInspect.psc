@@ -100,7 +100,7 @@ function ActionLongPress()
     if !longPressedAction
         longPressedAction = true
         autoMode = true
-        bindc_Util.WriteNotification("Auto mode enabled", bindc_Util.TextColorBlue())
+        bindc_Util.WriteModNotification("Auto mode enabled")
         bindc_Util.DisablePlayer()
         commandRespondTime = 5.0
         UnregisterForUpdate()
@@ -680,6 +680,8 @@ function EventInspectEnd()
     bindc_Util.ClearPackages(theDom)
 
     bindc_Util.EnablePlayer()
+
+    SetObjectiveDisplayed(10, false)
 
     float ct = bindc_Util.GetTime()
     StorageUtil.SetFloatValue(none, "bindc_event_inspect_last", ct)

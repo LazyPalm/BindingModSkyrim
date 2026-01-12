@@ -4,24 +4,35 @@ function LoadGame()
     UseBathingMod += 10
 endfunction
 
-;colors - red, blue, violet, white
-function WriteNotification(string msg, string color = "white") global
-    if color == "red"
-        debug.Notification("<font color='#ff0000'>" + msg + "</font>")
-    elseif color == "blue"
-        debug.Notification("<font color='#0000FF'>" + msg + "</font>")
-    elseif color == "violet"
-        debug.Notification("<font color='#8000ff'>" + msg + "</font>")
-    elseif color == "green"
-        debug.Notification("<font color='#228B22'>" + msg + "</font>")
-    else
-        debug.Notification(msg)   
-    endif
+; ;colors - red, blue, violet, white
+; function WriteNotification(string msg, string color = "white") global
+;     if color == "red"
+;         debug.Notification("<font color='#ff0000'>" + msg + "</font>")
+;     elseif color == "blue"
+;         debug.Notification("<font color='#0000FF'>" + msg + "</font>")
+;     elseif color == "violet"
+;         debug.Notification("<font color='#8000ff'>" + msg + "</font>")
+;     elseif color == "green"
+;         debug.Notification("<font color='#228B22'>" + msg + "</font>")
+;     else
+;         debug.Notification(msg)   
+;     endif
         
-endfunction
+; endfunction
 
 function WriteInternalMonologue(string msg) global
-    debug.Notification("<font color='#8000ff'>" + msg + "</font>")
+    debug.Notification("<font color='" + StorageUtil.GetStringValue(none, "bindc_color_inner_text", "#8C6CD0") + "'>" + msg + "</font>")
+endfunction
+
+function WriteDomCommand(string msg) global
+    ;#CC0033
+    debug.Notification("<font color='" + StorageUtil.GetStringValue(none, "bindc_color_dom_text", "#CC0033") + "'>" + msg + "</font>")
+endfunction
+
+function WriteModNotification(string msg) global
+    ;#4060AF
+    ;#99FFFF - cyan if this is blue is too dark
+    debug.Notification("<font color='" + StorageUtil.GetStringValue(none, "bindc_color_mod_text", "#4060AF") + "'>" + msg + "</font>")
 endfunction
 
 function WriteInformation(string msg) global
@@ -355,11 +366,11 @@ function MarkInfraction(string msg, bool distanceCheck = true) global
             mark = true
         endif
     else
-        bindc_Util.WriteNotification(msg + "...", bindc_Util.TextColorRed())
+        bindc_Util.WriteModNotification(msg + "...")
         if outOfRange
-            bindc_Util.WriteNotification(domTitle + " is not here to notice...", bindc_Util.TextColorRed())
+            bindc_Util.WriteModNotification(domTitle + " is not here to notice...")
         else
-            bindc_Util.WriteNotification("+1 infraction", bindc_Util.TextColorRed())
+            bindc_Util.WriteModNotification("+1 infraction")
             mark = true
         endif
     endif

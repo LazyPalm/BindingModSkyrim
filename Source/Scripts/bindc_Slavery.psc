@@ -107,7 +107,9 @@ endevent
 event OnUpdate()
 
     if domOnTheMove
-        ActorUtil.ClearPackageOverride(dom)
+        ActorUtil.RemovePackageOverride(dom, bindc_PackageSlaveryMoveToPlayer)
+        dom.EvaluatePackage()
+        ;ActorUtil.ClearPackageOverride(dom)
         domOnTheMove = false
     endif
 
@@ -142,6 +144,13 @@ function ProcessLoop()
         endif
     endif
 
+    ; if needOutfitChange == 1
+    ;     if MoveToSubAlias.GetReference() == none
+    ;         MoveToSubAlias.ForceRefTo(dom)
+    ;         bindc_Util.WriteInformation("")
+    ;     endif
+    ; endif
+
 endfunction
 
 function AddWheelMenuOption(UIWheelMenu menu, int optionIndex, string optionName, bool enabled = true)
@@ -154,24 +163,46 @@ function ActionMenu()
 
     UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
 
-    if kneelingFlag || posingFlag
+    if poseFlag > 0 ;kneelingFlag || posingFlag
         AddWheelMenuOption(actionMenu, 0, "Resume Standing")
     else
         AddWheelMenuOption(actionMenu, 0, "Kneel")
         AddWheelMenuOption(actionMenu, 1, "Pose")
     endif
 
+    AddWheelMenuOption(actionMenu, 5, "Furniture")
+    AddWheelMenuOption(actionMenu, 6, "More Options")
     AddWheelMenuOption(actionMenu, 7, "Settings")
 
     int actionResult = actionMenu.OpenMenu()
 
     if actionResult == 0
-        Kneel()
+        Kneel(poseFlag > 0)
     elseif actionResult == 1
         PoseMenu()
-    
+
+    elseif actionResult == 5
+        data_script.FurnScript.FurnitureMenu()
+    elseif actionResult == 6
+        MoreOptionsMenu()    
     elseif actionResult == 7
         SettingsMenu()
+    endif
+
+endfunction
+
+function MoreOptionsMenu()
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    listMenu.AddEntryItem("<-- Leave More Options Menu")
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+
+    if listReturn == 0
+        ActionMenu()
+
     endif
 
 endfunction
@@ -180,7 +211,7 @@ function SettingsMenu()
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
-    listMenu.AddEntryItem("<-- Return To Menu")
+    listMenu.AddEntryItem("<-- Leave Settings Menu")
     listMenu.AddEntryItem("Pause")
     listMenu.AddEntryItem("test")
     listMenu.AddEntryItem("count")
@@ -302,7 +333,7 @@ function PoseMenu()
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
-    listMenu.AddEntryItem("<-- Return To Menu")
+    listMenu.AddEntryItem("<-- Leave Pose Menu")
     listMenu.AddEntryItem("Kneel - Not To Speak") ;1
     listMenu.AddEntryItem("Spread Kneel - For Sex") ;2
     listMenu.AddEntryItem("Attention") ;3
@@ -325,31 +356,34 @@ function PoseMenu()
 
     if listReturn == 0
         ActionMenu()
-    elseif listReturn == 1
-        p.Kneel(sub1)
-    elseif listReturn == 2
-        p.SpreadKneelPose(sub1)
-    elseif listReturn == 3
-        p.AttentionPose(sub1)
-    elseif listReturn == 4
-        p.PresentHandsPose(sub1)
-        SubPresentedHands()
-    elseif listReturn == 5
-        p.WhippingPose(sub1)
-    elseif listReturn == 6
-        p.AssOutPose(sub1)
-    elseif listReturn == 7
-        p.PrayerPose(sub1)
-    elseif listReturn == 8
-        p.SitOnGroundPose(sub1)
-    elseif listReturn == 9
-        p.ConversationPose(sub1)
-        StartDomConversation()
-    elseif listReturn == 10
-        p.DeepKneelPose(sub1)
-    elseif listReturn == 11
-        p.DoorstepPose(sub1)
-        MoveDomToSub()
+    elseif listReturn > 0
+        DoPose(listReturn)
+
+    ; elseif listReturn == 1
+    ;     p.Kneel(sub1)
+    ; elseif listReturn == 2
+    ;     p.SpreadKneelPose(sub1)
+    ; elseif listReturn == 3
+    ;     p.AttentionPose(sub1)
+    ; elseif listReturn == 4
+    ;     p.PresentHandsPose(sub1)
+    ;     SubPresentedHands()
+    ; elseif listReturn == 5
+    ;     p.WhippingPose(sub1)
+    ; elseif listReturn == 6
+    ;     p.AssOutPose(sub1)
+    ; elseif listReturn == 7
+    ;     p.PrayerPose(sub1)
+    ; elseif listReturn == 8
+    ;     p.SitOnGroundPose(sub1)
+    ; elseif listReturn == 9
+    ;     p.ConversationPose(sub1)
+    ;     StartDomConversation()
+    ; elseif listReturn == 10
+    ;     p.DeepKneelPose(sub1)
+    ; elseif listReturn == 11
+    ;     p.DoorstepPose(sub1)
+    ;     MoveDomToSub()
     endif
 
 endfunction
@@ -361,108 +395,241 @@ function Pause()
     endif
 endfunction
 
+int poseFlag = 0
+
+function DoPose(int pose = 0)
+
+    if GetDistanceToSub() > 2000.0 && pose > 0
+        bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is probably too far away to notice...")
+    endif
+
+    poseFlag = pose
+
+    if pose == 0
+        MoveToSubAlias.Clear()
+        bindc_Util.EnablePlayer()
+    else
+        if MoveToSubAlias.GetReference() == none
+            MoveToSubAlias.ForceRefTo(dom)
+        endif
+        bindc_Util.DisablePlayer()
+    endif
+
+    if pose == 0
+        bindc_Util.WriteModNotification("clear the pose...")
+        p.ClearPose(sub1)
+    elseif pose == 1
+        p.Kneel(sub1)
+    elseif pose == 2
+        p.SpreadKneelPose(sub1)
+    elseif pose == 3
+        p.AttentionPose(sub1)
+    elseif pose == 4
+        p.PresentHandsPose(sub1)
+    elseif pose == 5
+        p.WhippingPose(sub1)
+    elseif pose == 6
+        p.AssOutPose(sub1)
+    elseif pose == 7
+        p.PrayerPose(sub1)
+    elseif pose == 8
+        p.SitOnGroundPose(sub1)
+    elseif pose == 9
+        p.ConversationPose(sub1)
+    elseif pose == 10
+        p.DeepKneelPose(sub1)
+    elseif pose == 11
+        p.DoorstepPose(sub1)
+    endif
+
+    if pose == 0 && GetDistanceToSub() < 500.0
+        PushInGag()
+    endif
+
+    ; if MoveToSubAlias.GetReference() != none
+    ;     MoveToSubAlias.Clear()
+    ;     ;dom.EvaluatePackage()
+    ;     p.ClearPose(sub1)
+    ;     bindc_Util.EnablePlayer()
+    ;     ;kneelingFlag = false
+    ; else
+        
+    ;     ;dom.EvaluatePackage()
+    ;     bindc_Util.DisablePlayer()
+    ;     p.Kneel(sub1)
+    ;     ;kneelingFlag = true
+    ; endif
+
+
+endfunction
+
 function Kneel(bool cancelKneel = false)
 
-    if !kneelingFlag && !posingFlag && !cancelKneel
-        kneelingFlag = true
-        bindc_Util.DisablePlayer()
-        p.Kneel(sub1)
-        MoveDomToSub()
-
-    elseif kneelingFlag || cancelKneel
-        kneelingFlag = false
-        posingFlag = false
-        if domOnTheMove
-            ActorUtil.ClearPackageOverride(dom)
-            domOnTheMove = false
-        endif
-        p.ClearPose(sub1)
-        bindc_Util.EnablePlayer()
-
-    elseif posingFlag
-        posingFlag = false
-        kneelingFlag = false
-        if domOnTheMove
-            ActorUtil.ClearPackageOverride(dom)
-            domOnTheMove = false
-        endif
-        if bindc_Slavery_Scene_DomToNpc.IsPlaying()
-            bindc_Slavery_Scene_DomToNpc.Stop()
-        endif
-        p.ClearPose(sub1)
-        bindc_Util.EnablePlayer()
-
-    endif
-
-endfunction
-
-function Stand()
-
-endfunction
-
-function MoveDomToSub()
-    float d = dom.GetDistance(sub1)
-    bindc_Util.WriteInformation("MoveDomToSub distance: " + d)
-    if d > bindc_Util.MaxCheckRange()
-        bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
-    elseif d < 128.0
-        DomArrived()
+    if cancelKneel
+        DoPose(0)
     else
-        ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 90)
-        bindc_Util.DoSleep()
-        dom.EvaluatePackage()
-        domOnTheMove = true
-        bindc_Util.WriteInformation("adding bindc_PackageSlaveryMoveToPlayer")
+        DoPose(1)
     endif
+
+    ; Quest q = Quest.GetQuest("bindc_ActionKneelQuest")
+    ; if q.IsRunning()
+    ;     q.Stop()
+    ;     p.ClearPose(sub1)
+    ;     kneelingFlag = false
+    ; else
+    ;     q.Start()
+    ;     p.Kneel(sub1)
+    ;     kneelingFlag = true
+    ; endif
+
+
+
+    return
+
+    ; if !kneelingFlag && !posingFlag && !cancelKneel
+    ;     kneelingFlag = true
+    ;     bindc_Util.DisablePlayer()
+    ;     p.Kneel(sub1)
+    ;     MoveDomToSub()
+
+    ; elseif kneelingFlag || cancelKneel
+    ;     kneelingFlag = false
+    ;     posingFlag = false
+    ;     if domOnTheMove
+    ;         ;ActorUtil.ClearPackageOverride(dom)
+    ;         ActorUtil.RemovePackageOverride(dom, bindc_PackageSlaveryMoveToPlayer)
+    ;         domOnTheMove = false
+    ;     endif
+    ;     p.ClearPose(sub1)
+    ;     PushInGag()
+    ;     bindc_Util.EnablePlayer()
+    ;     if ActorUtil.CountPackageOverride(dom) > 0
+    ;         ActorUtil.RemovePackageOverride(dom, bindc_PackageSlaveryHoldPosition)
+    ;     endif
+    ;     dom.EvaluatePackage()
+
+    ; elseif posingFlag
+    ;     posingFlag = false
+    ;     kneelingFlag = false
+    ;     if domOnTheMove
+    ;         ActorUtil.RemovePackageOverride(dom, bindc_PackageSlaveryMoveToPlayer)
+    ;         ;ActorUtil.ClearPackageOverride(dom)
+    ;         domOnTheMove = false
+    ;     endif
+    ;     if bindc_Slavery_Scene_DomToNpc.IsPlaying()
+    ;         bindc_Slavery_Scene_DomToNpc.Stop()
+    ;     endif
+    ;     p.ClearPose(sub1)
+    ;     PushInGag()
+    ;     bindc_Util.EnablePlayer()
+    ;     if ActorUtil.CountPackageOverride(dom) > 0
+    ;         ActorUtil.RemovePackageOverride(dom, bindc_PackageSlaveryHoldPosition)
+    ;     endif
+    ;     dom.EvaluatePackage()
+
+    ; endif
+
 endfunction
+
+; function MoveDomToSub()
+;     float d = dom.GetDistance(sub1)
+;     bindc_Util.WriteInformation("MoveDomToSub distance: " + d)
+;     if d > bindc_Util.MaxCheckRange()
+;         bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
+;     elseif d < 128.0
+;         DomArrived()
+;     else
+;         ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryMoveToPlayer, 90)
+;         bindc_Util.DoSleep()
+;         dom.EvaluatePackage()
+;         domOnTheMove = true
+;         bindc_Util.WriteInformation("adding bindc_PackageSlaveryMoveToPlayer")
+;     endif
+; endfunction
 
 function DomArrived()
 
+    if needOutfitChange == 1
+        EquipOutfit()
+        return
+    endif    
+
+    bindc_Util.WriteModNotification("pose: " + poseFlag)
+
     bindc_Util.WriteInformation("dom arrived...")
 
-    ;GoToState("")
-    if p.IsKneeling(sub1)
-        ActorUtil.ClearPackageOverride(dom)
-        ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryHoldPosition, 90)
-        dom.EvaluatePackage()
+    if poseFlag == 0
+
+
+    elseif poseFlag == 1
         if data_script.SlaveryQuest_InGaggedPunishment == 2
             EndGaggedPunishment()
         else 
             PullOutGag()
         endif
-        
-    elseif p.InConversationPose(sub1)
-        PullOutGag()
-        StorageUtil.SetFloatValue(sub1, "bindc_temp_speaking_permission", bindc_Util.AddTimeToCurrentTime(1, 0))
-        bindc_Slavery_Scene_DomToNpc.Start()
 
-    elseif p.InDoorstepPose(sub1)
-        if isIndoors
-            if r.BehaviorEnterExitRuleCurrentLocationType > 0
-                bindc_Slavery_Scene_ExitPermission.Start()
-                GrantExitPermission()
-            endif
-        else
-            if r.BehaviorEnterExitRuleCurrentDoorType > 0
-                bindc_Slavery_Scene_EntryPermission.Start()
-                GrantEntryPermission()
-            endif
-        endif
+    elseif poseFlag == 2
 
-    elseif needOutfitChange == 1
-        needOutfitChange = 0
+
+    elseif poseFlag == 4
         EquipOutfit()
 
-    elseif p.InPresentHandsPose(sub1) && needOutfitChange == 2
-        needOutfitChange = 0
-        EquipOutfit()
+
+    elseif poseFlag == 9
+        StartDomConversation()
+
 
     endif
+
+    return
+
+    ; ;GoToState("")
+    ; if p.IsKneeling(sub1)
+    ;     ;ActorUtil.ClearPackageOverride(dom)
+    ;     ;ActorUtil.RemovePackageOverride(dom, bindc_PackageMoveToPlayer)
+    ;     ActorUtil.AddPackageOverride(dom, bindc_PackageSlaveryHoldPosition, 90)
+    ;     dom.EvaluatePackage()
+    ;     if data_script.SlaveryQuest_InGaggedPunishment == 2
+    ;         EndGaggedPunishment()
+    ;     else 
+    ;         PullOutGag()
+    ;     endif
+        
+    ; elseif p.InConversationPose(sub1)
+    ;     PullOutGag()
+    ;     StorageUtil.SetFloatValue(sub1, "bindc_temp_speaking_permission", bindc_Util.AddTimeToCurrentTime(1, 0))
+    ;     bindc_Slavery_Scene_DomToNpc.Start()
+
+    ; elseif p.InDoorstepPose(sub1)
+    ;     if isIndoors
+    ;         if r.BehaviorEnterExitRuleCurrentLocationType > 0
+    ;             bindc_Slavery_Scene_ExitPermission.Start()
+    ;             GrantExitPermission()
+    ;         endif
+    ;     else
+    ;         if r.BehaviorEnterExitRuleCurrentDoorType > 0
+    ;             bindc_Slavery_Scene_EntryPermission.Start()
+    ;             GrantEntryPermission()
+    ;         endif
+    ;     endif
+
+    ; elseif needOutfitChange == 1
+    ;     needOutfitChange = 0
+    ;     EquipOutfit()
+
+    ; elseif p.InPresentHandsPose(sub1) && needOutfitChange == 2
+    ;     needOutfitChange = 0
+    ;     EquipOutfit()
+
+    ; endif
 endfunction
 
 function DomChangedLocations(Location oldLoc, Location newLoc)
 
     ;debug.MessageBox("dom changed locations...")
+    if MoveToSubAlias.GetReference() != none
+        dom.EvaluatePackage()
+    endif
 
 endfunction
 
@@ -471,7 +638,8 @@ function OutfitChangeTimerExpired()
         bindc_Util.MarkInfraction("I didn't ask for a bondage change", true)
     endif
     needOutfitChange = 1
-    MoveDomToSub()
+    MoveToSubAlias.ForceRefTo(dom)
+    ;MoveDomToSub()
 endfunction
 
 int function GetNeedOutfitChangeFlag()
@@ -482,17 +650,17 @@ float function GetDistanceToSub()
     return dom.GetDistance(sub1)
 endfunction
 
-function SubPresentedHands()
-    float d = dom.GetDistance(sub1)
-    bindc_Util.WriteInformation("MoveDomToSub distance: " + d)
-    if d > bindc_Util.MaxCheckRange()
-        bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
-    elseif d < 128.0
-        DomArrived()
-    else
-        MoveDomToSub()
-    endif
-endfunction
+; function SubPresentedHands()
+;     float d = dom.GetDistance(sub1)
+;     bindc_Util.WriteInformation("MoveDomToSub distance: " + d)
+;     if d > bindc_Util.MaxCheckRange()
+;         bindc_Util.WriteInternalMonologue(bindc_Util.GetDomTitle() + " is too far away to notice me...")
+;     elseif d < 128.0
+;         DomArrived()
+;     else
+;         MoveDomToSub()
+;     endif
+; endfunction
 
 function AskedForHarshBondage()
     Kneel(true)
@@ -500,6 +668,13 @@ function AskedForHarshBondage()
     Quest q = Quest.GetQuest("bindc_EventHarshQuest")
     q.Start()
     ;m.StartEvent("Harsh Bondage", true)
+endfunction
+
+function AskedForFurniture()
+    Kneel(true)
+    bindc_Util.DoSleep(1.0)
+    Quest q = Quest.GetQuest("bindc_EventDisplayQuest")
+    q.Start()
 endfunction
 
 function PullOutGag()
@@ -531,9 +706,10 @@ event OnTrackedStatsEvent(string asStatFilter, int aiStatValue)
 endevent
 
 function EquipOutfit()
+    needOutfitChange = 0
     bindc_Util.DoSleep(1.0)
     bindc_Util.PlayTyingAnimation(dom, sub1)
-    bindc_Util.WriteNotification("close enough...")
+    bindc_Util.WriteModNotification("close enough...")
     if targetOutfitId > 0
         b.EquipBondageOutfit(sub1, targetOutfitId)
         StorageUtil.SetIntValue(sub1, "bindc_outfit_id", targetOutfitId)
@@ -543,9 +719,9 @@ function EquipOutfit()
     endif
     StorageUtil.SetIntValue(none, "bindc_outfit_last_safe", StorageUtil.GetIntValue(none, "bindc_safe_area", 1))
     bindc_Util.StopAnimations(dom)
-    if posingFlag
-        Kneel(false)
-    endif
+    ; if posingFlag
+    ;     Kneel(true)
+    ; endif
 endfunction
 
 function ProcessEquipOutfit()
@@ -581,6 +757,7 @@ function ProcessEquipOutfit()
         else
             needOutfitChange = 1
             targetOutfitId = outfitId
+            MoveToSubAlias.ForceRefTo(dom)
         endif
     elseif outfitId > 0 && ((currentOutfitId == outfitId) || (usesRules == 1 && safeArea == lastEquipSafeArea))
         bindc_Util.WriteInformation("leaving outfit equipped: " + outfitId)
@@ -596,6 +773,7 @@ function ProcessEquipOutfit()
         else
             needOutfitChange = 1
             targetOutfitId = -1
+            MoveToSubAlias.ForceRefTo(dom)
         endif
     endif
 
@@ -679,7 +857,7 @@ function RewardGagRemoval()
     if b.RemoveGag(sub1)
         StorageUtil.SetIntValue(sub1, "bindc_temp_gag_removal", 10) ;set this for 10 minutes (5 now due to 30s loop vs. 60s) - testing real time vs game time
         bindc_Util.ModifyPoints(-1)
-        bindc_Util.WriteNotification("My gag is being removed... -1 points", bindc_Util.TextColorRed())
+        bindc_Util.WriteModNotification("Your gag is being removed... -1 points")
     endif
 
 endfunction
@@ -695,13 +873,13 @@ function StartDomConversation()
 
         bindc_Util.WriteInformation("have dom start conversation with: " + TheConversationTarget.GetActorReference().GetActorBase().GetName())
 
-        MoveDomToSub()
+        ;MoveDomToSub()
 
-        ; PullOutGag() ;this need to be made silent and does not seem to be working?
+        PullOutGag() ;this need to be made silent and does not seem to be working?
 
-        ; bindc_Slavery_Scene_DomToNpc.Start()
+        bindc_Slavery_Scene_DomToNpc.Start()
 
-        ; StorageUtil.SetFloatValue(sub1, "bindc_temp_speaking_permission", bindc_Util.AddTimeToCurrentTime(1, 0))
+        StorageUtil.SetFloatValue(sub1, "bindc_temp_speaking_permission", bindc_Util.AddTimeToCurrentTime(1, 0))
 
     endif
 
@@ -781,6 +959,7 @@ ReferenceAlias property Sub2Ref Auto
 ReferenceAlias property Sub3Ref Auto
 ReferenceAlias property TheBuildingDoor auto
 ReferenceAlias property TheConversationTarget auto
+ReferenceAlias property MoveToSubAlias auto
 
 Faction property bindc_KneelingFaction auto
 

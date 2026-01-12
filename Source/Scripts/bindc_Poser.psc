@@ -45,7 +45,7 @@ function Kneel(Actor akActor)
     debug.SendAnimationEvent(akActor, StorageUtil.GetStringValue(none, "bindc_pose_kneel", "ZazAPC017")); "ZazAPC018") ;ZapWriPose06 
     StorageUtil.SetIntValue(akActor, "bindc_pose", POSE_TYPE_KNEELING)
     if !akActor.IsInFaction(bindc_KneelingFaction)
-        akActor.SetFactionRank(bindc_KneelingFaction, 0)
+        akActor.AddToFaction(bindc_KneelingFaction)
     endif
     if akActor.GetFactionRank(bindc_KneelingFaction) == 0
         akActor.SetFactionRank(bindc_KneelingFaction, 1)
@@ -56,7 +56,7 @@ function ClearPose(Actor akActor)
     debug.SendAnimationEvent(akActor, "IdleForceDefaultState")
     StorageUtil.SetIntValue(akActor, "bindc_pose", POSE_TYPE_NONE)
     if !akActor.IsInFaction(bindc_KneelingFaction)
-        akActor.SetFactionRank(bindc_KneelingFaction, 0)
+        akActor.AddToFaction(bindc_KneelingFaction)
     endif
     if akActor.GetFactionRank(bindc_KneelingFaction) == 1
         akActor.SetFactionRank(bindc_KneelingFaction, 0)

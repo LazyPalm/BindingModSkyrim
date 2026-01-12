@@ -671,8 +671,6 @@ function EndTheQuest()
 
     SetObjectiveDisplayed(100, false)
 
-    SetStage(20)
-
     bindc_Util.ClearPackages(theDom)
 
     bindc_Util.EnablePlayer()
