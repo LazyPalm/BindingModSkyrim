@@ -447,6 +447,23 @@ function PlayWorkAnimation(Actor akActor, float seconds = 2.0) global
     Debug.SendAnimationEvent(akActor, "IdleForceDefaultState")
 endfunction
 
+function PlayKnockedDownAnimation(Actor akActor) global 
+    int result = Utility.RandomInt(1, 3)		
+    If result == 1
+        Debug.SendAnimationEvent(akActor, "IdleWounded_01")
+    ElseIf result == 2
+        Debug.SendAnimationEvent(akActor, "IdleWounded_02")
+    ElseIf result == 3
+        Debug.SendAnimationEvent(akActor, "IdleWounded_03")
+    EndIf
+endfunction
+
+function PlayWhipAnimation(Actor akActor, Actor akWhippingActor) global
+    float zOffset = akActor.GetHeadingAngle(akWhippingActor)
+    akActor.SetAngle(akActor.GetAngleX(), akActor.GetAngleY(), akActor.GetAngleZ() + zOffset)
+    debug.SendAnimationEvent(akActor, StorageUtil.GetStringValue(none, "bindc_pose_whip", "ft_bdsm_idle_inspection"))
+endfunction
+
 function PlayTyingAnimation(Actor akActor, Actor akActorTarget) global
     float zOffset = akActor.GetHeadingAngle(akActorTarget)
     akActor.SetAngle(akActor.GetAngleX(), akActor.GetAngleY(), akActor.GetAngleZ() + zOffset)
@@ -474,7 +491,7 @@ function MoveToTarget(Actor akActor, ObjectReference target) global
     int counter = 0
     float d = akActor.GetDistance(target)
     bindc_Util.WriteInformation("starting distance: " + d)
-    while counter < 60 && d > 200.0
+    while counter < 60 && d > 200.0 && StorageUtil.GetIntValue(none, "bindc_safeword_running", 0) == 0
         d = akActor.GetDistance(target)
         bindc_Util.WriteInformation("counter: " + counter + " distance: " + d)
         bindc_Util.DoSleep(0.5)
@@ -493,7 +510,7 @@ function MoveToPlayer(Actor akActor) global
     ActorUtil.AddPackageOverride(akActor, u.bindc_PackageMoveToPlayer, 90)
     akActor.EvaluatePackage()
     int counter = 0
-    while counter < 60 && akActor.GetDistance(thePlayer) > 200.0
+    while counter < 60 && akActor.GetDistance(thePlayer) > 200.0 && StorageUtil.GetIntValue(none, "bindc_safeword_running", 0) == 0
         bindc_Util.DoSleep(0.5)
         counter += 1
     endwhile

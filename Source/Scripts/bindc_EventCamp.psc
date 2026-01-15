@@ -20,6 +20,10 @@ bool foundFurnitureFlag
 int minHours = 0 
 int maxHours = 0
 
+int arrivedFlag = 0
+
+int sexThreadId = -1
+
 ; Quest puppetQuest
 ; bindc_Puppet1 puppet
 
@@ -55,7 +59,9 @@ event OnInit()
             
             SetObjectiveDisplayed(5, true)
 
-            PrepareSub()
+            arrivedFlag = 1
+            bindc_EventCampSceneMoveToPlayer.Start()
+            ;NOTE - calls PrepareSub()
 
         else
 
@@ -82,6 +88,10 @@ endfunction
 function SafeWord()
 
     bindc_Util.WriteInformation("camping quest safeword ending")
+
+    if data_script.SexLabScript.SceneRunningCheck(sexThreadId)
+        data_script.SexLabScript.StopRunningScene(sexThreadId)
+    endif
 
     if theFurniture != none && !foundFurnitureFlag
         theFurniture.Delete()
@@ -149,7 +159,7 @@ function PrepareSub()
 
     ;puppet.MoveToTarget(theDom, theSub, true)
 
-    bindc_Util.MoveToPlayer(theDom)
+    ;bindc_Util.MoveToPlayer(theDom)
     
     bindc_Util.PlayTyingAnimation(theDom, theSub)
 
@@ -210,7 +220,7 @@ state PlaceFurnitureState
         theFurnitureMarker = AddCampsiteObject(3)
         theFurnitureMarker.MoveTo(theFurniture)
                 
-        foundFurnitureFlag = true
+        ;foundFurnitureFlag = true
         SetObjectiveCompleted(20)
         SetObjectiveDisplayed(20, false)
         SetObjectiveDisplayed(30, true)
@@ -319,7 +329,22 @@ function CampReady()
     bindc_Util.DoSleep(1.0)
     theFurnitureMarker = none
 
-    bindc_Util.MoveToTarget(theDom, theClearedSpot)
+    GlobalMarker.GetReference().MoveTo(theClearedSpot)
+    arrivedFlag = 5
+    bindc_EventCampSceneMoveToGlobalMarker.Start()
+    ;NOTE - calls CampReady2()
+
+    ;bindc_Util.MoveToTarget(theDom, theClearedSpot)
+
+    ; bindc_Util.PlaySittingAnimation(theDom, theFirePit)
+
+    ; GoToState("LetSubStewState")
+
+    ; RegisterForSingleUpdate(Utility.RandomFloat(15.0, 35.0))
+
+endfunction
+
+function CampReady2()
 
     bindc_Util.PlaySittingAnimation(theDom, theFirePit)
 
@@ -333,7 +358,11 @@ state LetSubStewState
 
     event OnUpdate()
 
-        SecureSub()
+        bindc_Util.StopAnimations(theDom)
+
+        arrivedFlag = 2
+        bindc_EventCampSceneMoveToPlayer.Start()
+        ;NOTE - calls SecureSub()
 
     endevent
 
@@ -353,25 +382,48 @@ endstate
 
 function SecureSub()
 
-    bindc_Util.StopAnimations(theDom)
+    ;bindc_Util.StopAnimations(theDom)
 
-    bindc_Util.MoveToPlayer(theDom)
+    ;bindc_Util.MoveToPlayer(theDom)
 
     bindc_Util.PlayTyingAnimation(theDom, theSub)
 
     bindc_Util.FadeOutApply()
     bindc_Util.DoSleep(2.0)
 
-    Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
-    bindc_Util.DoSleep(1.0)
-    theSub.SetVehicle(theFurniture)
+    if foundFurnitureFlag
+
+        data_script.FurnScript.LockInFurniture(theSub, theFurniture)
+
+    else
+
+        Debug.SendAnimationEvent(theSub, "bind_PoleKneeling_A1_LP")
+        bindc_Util.DoSleep(1.0)
+        theSub.SetVehicle(theFurniture)
+
+    endif
 
     bindc_Util.StopAnimations(theDom)
 
     bindc_Util.FadeOutRemove()
 
-    bindc_Util.MoveToTarget(theDom, theClearedSpot)
+    GlobalMarker.GetReference().MoveTo(theClearedSpot)
+    arrivedFlag = 6
+    bindc_EventCampSceneMoveToGlobalMarker.Start()
+    ;NOTE - calls SecureSub2()
 
+    ;bindc_Util.MoveToTarget(theDom, theClearedSpot)
+    
+    ; bindc_Util.PlaySittingAnimation(theDom, theFirePit)
+
+    ; GoToState("LookAtFireState")
+
+    ; RegisterForSingleUpdate(Utility.RandomFloat(15.0, 35.0))
+
+endfunction
+
+function SecureSub2()
+    
     bindc_Util.PlaySittingAnimation(theDom, theFirePit)
 
     GoToState("LookAtFireState")
@@ -425,9 +477,13 @@ function DomMasturbate()
     bindc_Util.StopAnimations(theDom)
     bindc_Util.DoSleep(1.0)
 
-    data_script.SexLabScript.StartSexScene(theDom, none)
+    sexThreadId = data_script.SexLabScript.StartSexScene(theDom, none)
 
-    GoToState("DomMasturbateState")
+    if sexThreadId > -1
+        GoToState("DomMasturbateState")
+    else
+        PutDomToBed() ;sexlab start failed
+    endif
 
 endfunction
 
@@ -438,9 +494,9 @@ state DomMasturbateState
     endfunction
 
     function ActionLongPress()
-        if data_script.SexLabScript.SceneRunningCheck()
+        if data_script.SexLabScript.SceneRunningCheck(sexThreadId)
             if bindc_Util.ConfirmBox("End the sex scene?")
-                data_script.SexLabScript.StopRunningScene()
+                data_script.SexLabScript.StopRunningScene(sexThreadId)
             endif
         endif
     endfunction
@@ -451,7 +507,13 @@ state DomMasturbateState
 
         hasMasturbated = true
 
-        ReturnToFire()
+        GoToState("LookAtFireState")
+        GlobalMarker.GetReference().MoveTo(theClearedSpot)
+        arrivedFlag = 7
+        bindc_EventCampSceneMoveToGlobalMarker.Start()
+        ;NOTE - calls ReturnToFire()
+        
+        ;ReturnToFire()
 
     endevent
 
@@ -459,9 +521,9 @@ endstate
 
 function ReturnToFire()
 
-    GoToState("LookAtFireState")
+    ;GoToState("LookAtFireState")
 
-    bindc_Util.MoveToTarget(theDom, theClearedSpot)
+    ;bindc_Util.MoveToTarget(theDom, theClearedSpot)
 
     bindc_Util.PlaySittingAnimation(theDom, theFirePit)
 
@@ -528,7 +590,22 @@ function WakeDom()
 
     bindc_Util.StopSleepOnTarget(theDom)
 
-    bindc_Util.MoveToTarget(theDom, theClearedSpot)
+    GlobalMarker.GetReference().MoveTo(theClearedSpot)
+    arrivedFlag = 8
+    bindc_EventCampSceneMoveToGlobalMarker.Start()
+    ;NOTE - calls WakeDom2()
+
+    ;bindc_Util.MoveToTarget(theDom, theClearedSpot)
+
+    ; bindc_Util.PlaySittingAnimation(theDom, theFirePit)
+
+    ; GoToState("DomWakingState")
+
+    ; RegisterForSingleUpdate(30.0)
+
+endfunction
+
+function WakeDom2()
 
     bindc_Util.PlaySittingAnimation(theDom, theFirePit)
 
@@ -542,7 +619,11 @@ state DomWakingState
 
     event OnUpdate()
 
-        FreeSub()
+        bindc_Util.StopAnimations(theDom)
+
+        arrivedFlag = 3
+        bindc_EventCampSceneMoveToPlayer.Start()
+        ;NOTE - calls FreeSub()
 
     endevent
 
@@ -562,10 +643,10 @@ endstate
 
 function FreeSub()
 
-    bindc_Util.StopAnimations(theDom)
-    bindc_Util.DoSleep()
+    ;bindc_Util.StopAnimations(theDom)
+    ;bindc_Util.DoSleep()
 
-    bindc_Util.MoveToTarget(theDom, theSub)
+    ;bindc_Util.MoveToTarget(theDom, theSub)
 
     bindc_Util.PlayTyingAnimation(theDom, theSub)
 
@@ -574,8 +655,16 @@ function FreeSub()
     bindc_Util.FadeOutApply()
     bindc_Util.DoSleep(2.0)
 
-    debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
-    theSub.SetVehicle(none)
+    if foundFurnitureFlag
+
+        data_script.FurnScript.UnlockFromFurniture(theSub)
+
+    else
+
+        debug.SendAnimationEvent(theSub, "IdleForceDefaultState")
+        theSub.SetVehicle(none)
+
+    endif
 
     bindc_Util.FadeOutRemove()
 
@@ -584,10 +673,19 @@ function FreeSub()
     ; else
     ; endif
 
-    theFurniture.Delete()
+    if !foundFurnitureFlag
+        ;clean up markers
+        theFurniture.Delete()
+    endif
+
     theClearedSpot.Delete()
     bindc_Util.DoSleep()
-    theFurniture = none
+
+    if !foundFurnitureFlag
+        ;clean up markers
+        theFurniture = none
+    endif
+    
     theClearedSpot = none
     
     bindc_Util.EnablePlayer() ;NOTE - some dd furniture does not do this automatically??
@@ -625,12 +723,12 @@ state CleanUpCampState
             theFirePit = none
         endif
 
-        if !foundFurnitureFlag
-            if TryToRemoveCampItem(theSub, theFurniture)
-                didSomething = true
-                theFurniture = none
-            endif
-        endif
+        ; if !foundFurnitureFlag
+        ;     if TryToRemoveCampItem(theSub, theFurniture)
+        ;         didSomething = true
+        ;         theFurniture = none
+        ;     endif
+        ; endif
         
         if !didSomething
             bindc_Util.WriteInternalMonologue("I need to get closer to something...")
@@ -640,7 +738,10 @@ state CleanUpCampState
 
         if theBedroll == none && theFirePit == none && (theFurniture == none || foundFurnitureFlag)
             SetObjectiveCompleted(100, true)
-            EndTheQuest()
+
+            arrivedFlag = 4
+            bindc_EventCampSceneMoveToPlayer.Start()
+            ;NOTE - calls EndTheQuest()
         endif
 
     endfunction
@@ -649,7 +750,7 @@ endstate
 
 function EndTheQuest()
 
-    bindc_Util.MoveToPlayer(theDom)
+    ;bindc_Util.MoveToPlayer(theDom)
 
     bindc_Util.DisablePlayer()
 
@@ -754,6 +855,34 @@ ObjectReference function AddCampsiteObject(int idx)
 
 endfunction
 
+function Arrived()
+
+    int af = arrivedFlag
+    arrivedFlag = 0 ;NOTE - need to zero this out before the functions are call since the might adjust the value
+
+    bindc_Util.WriteModNotification("arrived " + af + "...")
+
+    if af == 1
+        PrepareSub()
+    elseif af == 2
+        SecureSub()
+    elseif af == 3
+        FreeSub()
+    elseif af == 4
+        EndTheQuest()
+    elseif af == 5
+        CampReady2()
+    elseif af == 6
+        SecureSub2()
+    elseif af == 7
+        ReturnToFire()
+    elseif af == 8
+        WakeDom2()
+
+    endif
+
+endfunction
+
 FormList property bindc_CampItemsList auto
 
 bindc_Data property data_script auto
@@ -762,6 +891,9 @@ Package property bindc_PackageMoveToPlayer auto
 
 ReferenceAlias property FoundFurniture auto
 ReferenceAlias property TheDomRef auto
+ReferenceAlias property GlobalMarker auto
 
 Scene property bindc_EventCampSceneSetupCamp auto
 Scene property bindc_EventCampScenePackCamp auto
+Scene property bindc_EventCampSceneMoveToGlobalMarker auto
+Scene property bindc_EventCampSceneMoveToPlayer auto

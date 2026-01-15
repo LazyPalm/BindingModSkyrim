@@ -744,6 +744,14 @@ endfunction
 ;permissions / rules checks
 ;**************************************
 
+function NeedsToThankForSex()
+
+endfunction
+
+function ThankedForSex()
+
+endfunction
+
 Function PrayedAtShrine(string shrineGod, bool isNude, bool wearingShoes, bool inPose)
 	
     bool result = true

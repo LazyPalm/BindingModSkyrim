@@ -1,68 +1,134 @@
 Scriptname bindc_EventQuest extends Quest conditional
 
-string property RunningEventName auto conditional
+Actor dom
+Actor sub
 
-int function EventCheck(string n, int num, float currentTime, int enabledDefault, int chanceDefault, int cooldownDefault)
-    if StorageUtil.GetIntValue(none, "bindc_event_" + n + "_enabled", enabledDefault) == 0
-        bindc_Util.WriteInformation("EventCheck - event: " + n + " [disabled]")
-        return -1
+ObjectReference globalMarker
+Package pMoveToPlayer
+Package pMoveToGlobal
+
+bindc_Bondage bm
+
+Actor function GetSub()
+    if sub == none
+        sub = Game.GetPlayer()
     endif
-    int roll = Utility.RandomInt(1, 100)
-    int chance = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_chance", chanceDefault)
-    float last = StorageUtil.GetFloatValue(none, "bindc_event_" + n + "_last", 0.0)
-    int cool = StorageUtil.GetIntValue(none, "bindc_event_" + n + "_cooldown", cooldownDefault)
-    float next = bindc_Util.AddTimeToTime(last, cool, 0)
-    int result
-    if roll <= chance
-        if next < currentTime
-            result = num
-        else
-            result = 0
-        endif
-    endif
-    bindc_Util.WriteInformation("EventCheck - event: " + n + " roll: " + roll + " chance: " + chance + " ct: " + currentTime + " last: " + last + " cool: " + cool + " next: " + next)
-    return result
+    return sub
+    Weather w = Weather.GetCurrentWeather()
 endfunction
 
-int function EventTest() global
+Actor function GetDom()
+    if dom == none
+        dom = StorageUtil.GetFormValue(none, "bindc_dom") as Actor
+    endif
+    return dom
+endfunction
 
-    Quest q = Quest.GetQuest("bindc_MainQuest")
-    bindc_EventQuest eq = q as bindc_EventQuest
+string function GetDomTitle()
+    return StorageUtil.GetStringValue(none, "bindc_dom_title")
+endfunction
 
-    int safeArea = StorageUtil.GetIntValue(none, "bindc_safe_area", 2)
-    float ct = bindc_Util.GetTime()
-    int startEvent = 0
+function MoveToObject(Actor akActor, ObjectReference destination, float distance = 200.0)
 
-    if safeArea == 2
-
-        int[] rnd = bindc_SKSE.GetRandomNumbers(1, 5, 5)
-        bindc_Util.WriteInformation("event check rnd: " + rnd)
-        int i = 0
-        while i < rnd.Length && startEvent == 0
-            int test = rnd[i]
-            if test == 1
-                startEvent = eq.EventCheck("harsh", 1, ct, eq.data_script.EventHarshEnabledDefault, eq.data_script.EventHarshChanceDefault, eq.data_script.EventHarshCooldownDefault)
-            elseif test == 2
-                startEvent = eq.EventCheck("display", 2, ct, eq.data_script.EventDisplayEnabledDefault, eq.data_script.EventDisplayChanceDefault, eq.data_script.EventDisplayCooldownDefault)
-            elseif test == 3
-                startEvent = eq.EventCheck("inspect", 3, ct, eq.data_script.EventInspectEnabledDefault, eq.data_script.EventInspectChanceDefault, eq.data_script.EventInspectCooldownDefault)
-            endif
-            i += 1
-        endwhile
-
-        ; startEvent = EventCheck("harsh", 1, ct)
-        ; if startEvent == 0
-
-        ; endif
-        ; if startEvent == 0
-
-        ; endif                
-    else
-    
+    if globalMarker == none
+        globalMarker = Game.GetFormFromFile(0x00AB1D, "binding.esm") as ObjectReference
     endif
 
-    return startEvent
+    if pMoveToGlobal == none
+        pMoveToGlobal = Game.GetFormFromFile(0x00AB1E, "binding.esm") as Package
+    endif
+
+    ;debug.MessageBox(globalMarker)
+    ;debug.MessageBox(pMoveToGlobal)
+
+    globalMarker.MoveTo(destination)
+    bindc_Util.DoSleep()
+
+    ActorUtil.AddPackageOverride(akActor, pMoveToGlobal, 90)
+    akActor.EvaluatePackage()
+
+    WaitForArrival(akActor, destination, distance)
+
+    ActorUtil.RemovePackageOverride(akActor, pMoveToGlobal)
+    akActor.EvaluatePackage()
+
+    ;debug.MessageBox("this finished...")
 
 endfunction
 
-bindc_Data property data_script auto
+function MoveToPlayer(Actor akActor, float distance = 200.0)
+
+    if pMoveToPlayer == none
+        pMoveToPlayer = Game.GetFormFromFile(0x000896, "binding.esm") as Package
+    endif
+
+    ;debug.MessageBox(pMoveToPlayer)
+
+    if sub == none
+        sub = Game.GetPlayer()
+    endif
+
+    ActorUtil.AddPackageOverride(akActor, pMoveToPlayer, 90)
+    akActor.EvaluatePackage()
+
+    WaitForArrival(akActor, sub, distance)
+
+    ActorUtil.RemovePackageOverride(akActor, pMoveToPlayer)
+    akActor.EvaluatePackage()
+
+    ;debug.MessageBox("this finished...")
+
+endfunction
+
+function WaitForArrival(Actor akActor, ObjectReference destination, float distance)
+
+    ;TODO - add a check in the loop to see if NPC is stuck
+
+    int counter = 0
+    while counter < 60 && akActor.GetDistance(destination) > distance && StorageUtil.GetIntValue(none, "bindc_safeword_running", 0) == 0
+        bindc_Util.DoSleep(0.5)
+        bindc_Util.WriteInformation("counter: " + counter)
+        counter += 1
+    endwhile
+
+    if (akActor.GetDistance(destination) > (distance * 1.5)) && StorageUtil.GetIntValue(none, "bindc_safeword_running", 0) == 0 ;teleport if they didn't make it
+        akActor.MoveTo(destination)
+    endif
+
+endfunction
+
+bool function PrepareSub(Actor theSub, Actor theDom, string eventSystemName)
+
+    if bm == none
+        Quest q = Quest.GetQuest("bindc_MainQuest")
+        bm = q as bindc_Bondage
+    endif
+
+    int outfitId = bm.GetBondageOutfitForEvent(theSub, eventSystemName)
+    if outfitId == 0
+        outfitId = bm.GetBondageOutfitForEvent(theSub, "event_any_event")
+    endif
+    if outfitId > 0
+    else 
+        return false
+    endif
+
+    bindc_Util.DisablePlayer()
+
+    bindc_Util.PlayTyingAnimation(theDom, theSub)
+
+    bindc_Util.FadeOutApplyNoDisable()
+
+    bm.EquipBondageOutfit(theSub, outfitId)
+
+    bindc_Util.DoSleep(2.0)
+
+    bindc_Util.StopAnimations(thedom)
+
+    bindc_Util.EnablePlayer()
+
+    bindc_Util.FadeOutRemoveNoDisable()
+
+    return true
+
+endfunction

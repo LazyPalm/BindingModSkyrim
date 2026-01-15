@@ -89,6 +89,7 @@ function LoadGame()
         (q as bindc_Rules).LoadGame()
         (q as bindc_Gear).LoadGame()
         (q as bindc_Util).LoadGame()
+        (q as bindc_SexLab).LoadGame()
 
         Quest mcmQuest = Quest.GetQuest("bindc_McmQuest")
         if !mcmQuest.IsRunning()
@@ -253,6 +254,7 @@ endstate
 state RunningState
 
     function SafeWord()
+        StorageUtil.SetIntValue(none, "bindc_safeword_running", 1)
         RunSafeword()
     endfunction
 
@@ -343,7 +345,7 @@ state RunningState
 
             ; int safeArea = StorageUtil.GetIntValue(none, "bindc_safe_area", 2)
             ; float ct = bindc_Util.GetTime()
-            int startEvent = bindc_EventQuest.EventTest()
+            int startEvent = bindc_EventHelper.EventTest()
 
             ; if safeArea == 2
 
@@ -420,6 +422,8 @@ endstate
 state InEventState
 
     function SafeWord()
+        StorageUtil.SetIntValue(none, "bindc_safeword_running", 1)
+        ;debug.MessageBox("this happening???")
         if RunningEventName == "Harsh Bondage"
             (eventQuest as bindc_EventHarsh).SafeWord()
         elseif RunningEventName == "Camping"
@@ -428,6 +432,12 @@ state InEventState
             (eventQuest as bindc_EventInspect).SafeWord()
         elseif RunningEventName == "Display"
             (eventQuest as bindc_EventDisplay).SafeWord()
+        elseif RunningEventName == "Sex"
+            (eventQuest as bindc_EventSex).SafeWord()
+        elseif RunningEventName == "Self"
+            (eventQuest as bindc_EventSelf).SafeWord()
+        elseif RunningEventName == "Whip"
+            (eventQuest as bindc_EventWhip).SafeWord()
         endif
         RunSafeword()
     endfunction
@@ -441,6 +451,12 @@ state InEventState
             (eventQuest as bindc_EventInspect).ActionShortPress()
         elseif RunningEventName == "Display"
             (eventQuest as bindc_EventDisplay).ActionShortPress()
+        elseif RunningEventName == "Sex"
+            (eventQuest as bindc_EventSex).ActionShortPress()
+        elseif RunningEventName == "Self"
+            (eventQuest as bindc_EventSelf).ActionShortPress()
+        elseif RunningEventName == "Whip"
+            (eventQuest as bindc_EventWhip).ActionShortPress()
         endif
     endfunction
 
@@ -453,6 +469,12 @@ state InEventState
             (eventQuest as bindc_EventInspect).ActionLongPress()
         elseif RunningEventName == "Display"
             (eventQuest as bindc_EventDisplay).ActionLongPress()
+        elseif RunningEventName == "Sex"
+            (eventQuest as bindc_EventSex).ActionLongPress()
+        elseif RunningEventName == "Self"
+            (eventQuest as bindc_EventSelf).ActionLongPress()
+        elseif RunningEventName == "Whip"
+            (eventQuest as bindc_EventWhip).ActionLongPress()
         endif
     endfunction
 
@@ -533,12 +555,14 @@ endevent
 
 function RunSafeword()
     GoToState("SafewordState")
+    StorageUtil.SetIntValue(none, "bindc_safeword_running", 2)
     currentRunningState = "SafewordState"
     ShutdownQuests()
     StorageUtil.SetIntValue(thePlayer, "bindc_outfit_id", -2) ;force a re-equip
     bindc_Util.WriteModNotification("Safeword completed. Restarting slavery quest.")
     GoToState("RunningState")
     currentRunningState = "RunningState"
+    StorageUtil.SetIntValue(none, "bindc_safeword_running", 0)
     TriggerLoop()
 endfunction
 
@@ -553,6 +577,7 @@ function ShutdownQuests()
     if eventQuest != none
         ;stop running events
         if eventQuest.IsRunning()
+        ;debug.MessageBox("make it here also?")
             eventQuest.Stop()
         endif
         EventIsRunning = 0
@@ -571,3 +596,4 @@ Quest property bindc_PreQuest auto
 
 Faction property bindc_DomFaction auto
 Faction property bindc_SubFaction auto
+

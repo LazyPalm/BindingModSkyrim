@@ -1,7 +1,20 @@
 Scriptname bindc_SexLab extends SexLabFramework  
 
-int threadId = 0
-bool running = false
+function LoadGame()
+    RegisterForModEvent("AnimationEnd", "OnSexEndEvent")
+endfunction
+
+event OnSexEndEvent(string eventName, string argString, float argNum, form sender)
+
+    bindc_Util.WriteInformation("sexlab AnimationEnd - eventName: " + eventName + " argString: " + argString + " argNum: " + argNum + " sender: " + sender)
+
+    sslThreadController c = sender as sslThreadController
+    if c != none
+        debug.MessageBox("threadid " + c.tid)
+        StorageUtil.IntListRemove(none, "bindc_sexlab_threads", c.tid)
+    endif
+
+endevent
 
 int function UpdateArousalLevels(Actor akActor)
     int level = slau.GetActorArousal(akActor)
@@ -9,23 +22,30 @@ int function UpdateArousalLevels(Actor akActor)
     return level
 endfunction
 
-function StopRunningScene()
+function StopRunningScene(int threadId)
 
-    if threadId > -1 && running
-
+    if threadId > -1
         sslThreadController c = GetController(threadId)
-        c.EndAnimation()
-        running = false
-
+        if c != none
+            c.EndAnimation()
+        endif
     endif
 
 endfunction
 
-bool function SceneRunningCheck()
-    return running
+bool function SceneRunningCheck(int threadId)
+    if threadId > -1
+        if StorageUtil.IntListHas(none, "bindc_arousal_level", threadId)
+            return true
+        endif
+    else
+        return false
+    endif
 endfunction
 
-bool function StartSexScene(Actor akActor1, Actor akActor2 = none)
+int function StartSexScene(Actor akActor1, Actor akActor2 = none)
+
+    int threadId = 0
 
     bool result
 
@@ -106,11 +126,13 @@ bool function StartSexScene(Actor akActor1, Actor akActor2 = none)
         result = false
     EndIf
 
+    if result
+        StorageUtil.IntListAdd(none, "bindc_sexlab_threads", threadId)
+    endif
+
     bindc_Util.WriteInformation("StartSex: " + result)
 
-    running = result
-
-	return result
+	return threadId
 
 endfunction
 

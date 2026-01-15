@@ -218,6 +218,8 @@ function SettingsMenu()
     listMenu.AddEntryItem("clear")
     listMenu.AddEntryItem("hold position")
     listMenu.AddEntryItem("arousal")
+    listMenu.AddEntryItem("global marker distance")
+    listMenu.AddEntryItem("global marker move")
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
@@ -290,6 +292,11 @@ function SettingsMenu()
     ;     bindc_Puppet1 puppet = puppetQuest as bindc_Puppet1
     ;     puppet.DoTie.ForceRefTo(dom)
 
+    elseif listReturn == 7
+        debug.MessageBox(GlobalMarker.GetReference().GetDistance(sub1))
+
+    elseif listreturn == 8
+        GlobalMarker.GetReference().MoveTo(sub1)
 
     endif
 
@@ -960,6 +967,7 @@ ReferenceAlias property Sub3Ref Auto
 ReferenceAlias property TheBuildingDoor auto
 ReferenceAlias property TheConversationTarget auto
 ReferenceAlias property MoveToSubAlias auto
+ReferenceAlias property GlobalMarker auto
 
 Faction property bindc_KneelingFaction auto
 
