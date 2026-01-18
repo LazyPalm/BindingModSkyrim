@@ -1946,8 +1946,8 @@ Function SafeWord()
 	UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
 	if listMenu
 		;listMenu.AddEntryItem("Remove Binding Bondage")
-		listMenu.AddEntryItem("Remove ALL Generic Bondage")
 		listMenu.AddEntryItem("Remove Binding Bondage & Restore")
+		listMenu.AddEntryItem("Remove ANY Mod's Generic Bondage")
 	EndIf
 
 	bool removeAllGeneric = false
@@ -1956,9 +1956,9 @@ Function SafeWord()
 	listMenu.OpenMenu()
 	int listReturn = listMenu.GetResultInt()
 	if listReturn == 0
-		removeAllGeneric = true
-	elseif listReturn == 1
 		restoreBondage = true
+	elseif listReturn == 1
+		removeAllGeneric = true		
 	endif
 
 	if theSubRef.IsInFaction(fman.GetLockedInFurnitureFaction())

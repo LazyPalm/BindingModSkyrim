@@ -15,6 +15,7 @@ Form[] function SearchFormListsByKeyword(string keywords, FormList formList, For
 Form[] function CreateRandomDeviousSet(FormList deviousItems, int material, int color, int[] chancesList) global native
 Form[] function StripBySlots(Actor act, int[] stripList) global native
 function EquipBondageOutfit(Actor act, Form[] ddItems, bool protectSltr = false, bool leaveBondageItems = false) global native
+function EquipBondageOutfit2(Actor act, Form[] ddItems, Form[] ddRemoveItems) global native
 Form[] function GetWornDevious(Actor act) global native
 Form[] function GetWornGear(Actor act) global native
 int function CalculateCrowd(Actor searchByActor, actor ignoreActor = none, float soundDistance = 1000.0, float visualDistance = 3000.0) global native ;returns count of npcs with line of sight
@@ -23,3 +24,5 @@ ObjectReference[] function GetFurniture(Actor searchByActor, Keyword[] keywordLi
 function CleanUnusedBondageItemsFromInventory(Actor act) global native
 function UnequipAllBondage(Actor act) global native
 int[] function GetRandomNumbers(int minRange, int maxRange, int numberToReturn) global native
+int function FindRule(Armor item) global native
+Form[] function GetDeviousInventory(Actor act) global native

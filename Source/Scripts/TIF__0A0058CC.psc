@@ -6,7 +6,7 @@ Scriptname TIF__0A0058CC Extends TopicInfo Hidden
 Function Fragment_0(ObjectReference akSpeakerRef)
 Actor akSpeaker = akSpeakerRef as Actor
 ;BEGIN CODE
-bind_SlaveStartScript s3 = Quest.GetQuest("BindingSlaveStart") as bind_SlaveStartScript
+bind_SlaveStartScript s3 = Quest.GetQuest("BindingSimpleSlaveryQuest") as bind_SlaveStartScript
 s3.ResumeBinding()
 ;END CODE
 EndFunction

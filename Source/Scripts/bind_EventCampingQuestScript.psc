@@ -324,6 +324,21 @@ function SecureSub()
     ;theSub.SetRestrained(true) ;.SetDontMove(true)
     ;(theSub as ObjectReference).SetMotionType(4)
 
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.HogtieActor(secondSub)
+        endif
+
+        if fs.TheThirdSub.GetReference() != none
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            bind_BondageManager.HogtieActor(thirdSub)
+        endif
+
+    endif
+
+
     bind_Utility.FadeOutRemove()
 
     bind_MovementQuestScript.WalkTo(theDom, theClearedSpot)
@@ -507,6 +522,21 @@ function FreeSub()
     ; bind_Utility.DoSleep(1.0)
     ; theSub.SetVehicle(none)
     ;(theSub as ObjectReference).SetMotionType(0)
+
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.FreeActorFromHogtie(secondSub)
+        endif
+
+        if fs.TheThirdSub.GetReference() != none
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            bind_BondageManager.FreeActorFromHogtie(thirdSub)
+        endif
+
+    endif
+
 
     bind_Utility.FadeOutRemove()
 

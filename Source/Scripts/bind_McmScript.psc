@@ -310,7 +310,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.32"
+    version = "0.4.33"
 
     theSub = fs.GetSubRef()
 
@@ -919,7 +919,7 @@ function DisplaySkyrimNet()
         slaveryTypes[4] = "Fighting Slave"
         slaveryTypes[5] = "Custom"
 
-        slaveryInSkyrimTypes = new string[5]
+        slaveryInSkyrimTypes = new string[6]
         slaveryInSkyrimTypes[0] = "Slavery Rare / Frowned Upon"
         slaveryInSkyrimTypes[1] = "Slavery Uncommon / Tolerated"
         slaveryInSkyrimTypes[2] = "Slavery Commmon / Legal"
@@ -1853,10 +1853,10 @@ Function DisplayPreferences()
     AddHeaderOption("")
 
     toggleCleanSub = AddToggleOption("Dirt - Clean Sub Required", main.DomPreferenceCleanSub)
-    toggleUnplugGagsOnly = AddToggleOption("Gags - Unplug Panel Gags Only", main.DomOnlyUnplugsPanelGags)
+    ;toggleUnplugGagsOnly = AddToggleOption("Gags - Unplug Panel Gags Only", main.DomOnlyUnplugsPanelGags)
     toggleRemoveGagForDialogue = AddToggleOption("Gags - Remove For Dialogue", main.DomRemovesGagForDialogue)
 
-    AddTextOption("", "")
+    ;AddTextOption("", "")
 
     ;get data from config file
     ;TODO - move this back to main or rules
@@ -1884,9 +1884,9 @@ Function DisplayPreferences()
     toggleSimpleSlaveryFemale = AddToggleOption("Simple Slavery - Female Hireling Fallbacks", main.SimpleSlaveryFemaleFallback)
     toggleSimpleSlaveryMale = AddToggleOption("Simple Slavery - Male Hireling Fallbacks", main.SimpleSlaveryMaleFallback)
     toggleCleanUpNonBindingItemsFromBags = AddToggleOption("Clean Unused Bondage Items From Inventory", main.CleanUpNonBindingItemsFromBags)
-    toggleSltrProtection = AddToggleOption("SLTR - Item Protection", main.ProtectSltr)
+    ;toggleSltrProtection = AddToggleOption("SLTR - Item Protection", main.ProtectSltr)
     toggleDisplayInfractionsInMessageBox = AddToggleOption("Display Infractions In Message Box", main.DisplayInfractionsInMessageBox)
-    
+    AddEmptyOption()
 
     ;toggleFakeSleep = AddToggleOption("Use Fake Sleep In Furniture", main.GamePreferenceUseFakeSleep)
     ;AddTextOption("", "")

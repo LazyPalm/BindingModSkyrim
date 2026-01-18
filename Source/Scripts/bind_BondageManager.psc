@@ -187,6 +187,260 @@ bool function ZadKeywordsCheck(Form item)
     return (lockable || inventory || questItem || blockGeneric || blockZap)
 endfunction
 
+; function EquipBondageOutfit(Actor a, int setId)
+
+;     float sleepWait = 0.1
+;     equippingBondageOutfit = true
+
+;     if setId == -1
+
+;         bind_Utility.WriteToConsole("EquipBondageOutfit - no outfit found - cleaning DD items off")
+
+;         RemoveAllBondageItems(a, false)
+
+;         StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", -1) ;NOTE - this is used by the sub alias to determine blocks
+;         StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", "")
+
+;         equippingBondageOutfit = false
+
+;         return
+
+;     endif
+
+;     StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+;     ;StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(outfitFileNameJson, setId + "_bondage_outfit_name", ""))
+;     StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", StorageUtil.GetStringValue(none, "bindc_outfit_" + setId + "_bondage_outfit_name", ""))
+
+;     int i
+
+;     Form[] ddRemoveItems = new Form[25]
+;     Form[] wornBondageItems = bind_SkseFunctions.GetDeviousInventory(a)
+;     i = 0
+;     int removeIdx = 0
+;     while i < wornBondageItems.Length
+;         Form f = wornBondageItems[i]
+;         int bindingItemFlag = StorageUtil.GetIntValue(f, "bindc_item_flag", 0)
+;         if bindingItemFlag == 1 && a.IsEquipped(f)
+;             ;debug.MessageBox("item: " + f.GetName() + " binding: " + bindingItemFlag)
+;             ;StorageUtil.FormListAdd(none, "bindc_remove_dd_list", f, false)
+;             ddRemoveItems[removeIdx] = f
+;             removeIdx += 1
+;         endif
+;         ;debug.MessageBox("item: " + f.GetName() + " binding: " + bindingItemFlag)
+;         i += 1
+;     endwhile
+
+;     ;EquippingBondageOutfit = true
+
+;     ;int useRulesBased = JsonUtil.GetIntValue(outfitFileNameJson, setId + "_rules_based", 0)
+;     int useRulesBased = StorageUtil.GetIntValue(none, "bindc_outfit_" + setId + "_rules_based", 0)
+
+;     ;NOTE - there is probably no reason to clean this out
+;     if a.WornHasKeyword(Keyword.GetKeyword("ArmorCuirass")) || a.WornHasKeyword(Keyword.GetKeyword("ClothingBody"))
+;         StorageUtil.FormListClear(a, "bind_strip_list")
+;         bind_Utility.WriteToConsole("clearing strip buffer")
+;     else
+;         bind_Utility.WriteToConsole("keeping strip buffer")
+;     endif
+
+;     if StorageUtil.GetIntValue(none, "bindc_outfit_" + setId + "_remove_existing_gear", 0) == 1
+;     ;if JsonUtil.GetIntValue(outfitFileNameJson, setId + "_remove_existing_gear", 0) == 1
+;         StorageUtil.FormListClear(a, "bind_strip_list")
+;         StorageUtil.FormListCopy(a, "bind_strip_list", bind_SkseFunctions.DoStripActor(a, false))
+;     endif
+
+;     ;add outfits fixed gear (non devious)
+;     ; Form[] fixedGear = StorageUtil.FormListToArray(none, "bindc_outfit_" + setId + "_fixed_worn_items")
+;     ; debug.MessageBox(fixedGear)
+;     ; ;Form[] fixedGear = JsonUtil.FormListToArray(outfitFileNameJson, setId + "_fixed_worn_items")
+;     ; if (fixedGear.Length > 0) 
+;     ;     bindc_SKSE.DoDressActor(a, fixedGear)
+;     ; endif
+
+;     ;unequip blocks
+;     StorageUtil.FormListClear(a, "bind_strip_list_blocked")
+;     int[] blocks = StorageUtil.IntListToArray(none, "bindc_outfit_" + setId + "_block_slots")
+;     ;int[] blocks = JsonUtil.IntListToArray(outfitFileNameJson, setId + "_block_slots")
+;     Form[] removedItems = bind_SkseFunctions.StripBySlots(a, blocks)
+;     StorageUtil.FormListCopy(a, "bind_strip_list", removedItems)
+
+;     int useRandom = StorageUtil.GetIntValue(none, "bindc_outfit_" + setId + "_use_random_bondage", 0)
+;     ;int useRandom = JsonUtil.GetIntValue(outfitFileNameJson, setId + "_use_random_bondage", 0)
+
+;     Form[] setItems
+;     Form[] fixedGear = StorageUtil.FormListToArray(none, "bindc_outfit_" + setId + "_fixed_worn_items")
+
+;     bind_Utility.WriteToConsole("EquipBondageOutfit - userandom: " + userandom)
+
+;     if useRandom == 1
+
+;         float expirationDate = StorageUtil.GetFloatValue(none, "bindc_outfit_" + setId + "_dynamic_bondage_expires", 0.0)
+;         ;float expirationDate = JsonUtil.GetFloatValue(outfitFileNameJson, setId + "_dynamic_bondage_expires", 0.0)
+;         if expirationDate < bind_Utility.GetTime() || JsonUtil.FormListCount(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items") == 0
+            
+;             bind_Utility.WriteNotification("resetting dynamic gear")
+
+;             StorageUtil.FormListClear(none, "bindc_outfit_" + setId + "_dynamic_bondage_items")
+;             StorageUtil.SetFloatValue(none, "bindc_outfit_" + setId + "_dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
+;             ;JsonUtil.FormListClear(outfitFileNameJson, setId + "_dynamic_bondage_items")
+;             ;JsonUtil.SetFloatValue(outfitFileNameJson, setId + "_dynamic_bondage_expires", bindc_Util.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
+
+;             if useRulesBased == 1
+;                 Form[] randomSetItems = bind_SkseFunctions.CreateRandomDeviousSet(bind_dd_all, Utility.RandomInt(1, 3), Utility.RandomInt(1, 4), none)
+;                 StorageUtil.FormListCopy(none, "bindc_outfit_" + setId + "_dynamic_bondage_items", randomSetItems)
+;                 ;JsonUtil.FormListCopy(outfitFileNameJson, setId + "_dynamic_bondage_items", randomSetItems)
+;                 bind_Utility.WriteToConsole("random set length: " + randomSetItems.Length)
+;             else
+;                 int[] chances = StorageUtil.IntListToArray(none, "bindc_outfit_" + setId + "_random_bondage_chance")
+;                 ;int[] chances = JsonUtil.IntListToArray(outfitFileNameJson, setId + "_random_bondage_chance")
+;                 Form[] randomSetItems = bind_SkseFunctions.CreateRandomDeviousSet(bind_dd_all, Utility.RandomInt(1, 3), Utility.RandomInt(1, 4), chances)
+;                 StorageUtil.FormListCopy(none, "bindc_outfit_" + setId + "_dynamic_bondage_items", randomSetItems)
+;                 ;JsonUtil.FormListCopy(outfitFileNameJson, setId + "_dynamic_bondage_items", randomSetItems)
+;                 bind_Utility.WriteToConsole("random set length: " + randomSetItems.Length)
+;             endif
+
+;         endif
+
+;         setItems = StorageUtil.FormListToArray(none, "bindc_outfit_" + setId + "_dynamic_bondage_items")
+;         ;setItems = JsonUtil.FormListToArray(outfitFileNameJson, setId + "_dynamic_bondage_items")
+
+;     else
+    
+;         setItems = StorageUtil.FormListToArray(none, "bindc_outfit_" + setId + "_fixed_bondage_items")
+;         ;setItems = JsonUtil.FormListToArray(outfitFileNameJson, setId + "_fixed_bondage_items")
+
+;     endif
+
+;     bind_Utility.WriteToConsole("EquipBondageOutfit - items: " + "bindc_outfit_" + setItems)
+
+;     Form[] tempItems = new Form[25] ;form list copy was failing on this - maybe a papyrusutil issue?
+;     int idx = 0
+
+;     ;debug.MessageBox(setItems)
+
+;     int leaveBondageItems = StorageUtil.GetIntValue(none, "bindc_outfit_" + setId + "_leave_bondage_items", 0)
+;     ;int leaveBondageItems = JsonUtil.GetIntValue(outfitFileNameJson, setId + "_leave_bondage_items", 0)
+
+;     ; Form[] wornBondageItems
+;     ; if leaveBondageItems == 1
+;     ;     wornBondageItems = StorageUtil.FormListToArray(a, "binding_worn_bondage_items")
+;     ;     debug.MessageBox(wornBondageItems)
+;     ; endif
+
+;     bool safeArea = (StorageUtil.GetIntValue(none, "bindc_safe_area", 1) == 2)
+
+;     if setItems != none
+;         i = 0
+;         while i < setItems.Length
+;             Form dev = setItems[i]
+;             if dev
+
+;                 bool addThisItem = false
+;                 bool blocked = false
+;                 int option = -1
+
+;                 if StorageUtil.GetIntValue(none, "bindc_slavery_running", 0) > 0
+;                     if StorageUtil.GetIntValue(a, "bindc_temp_gag_removal", 0) > 0
+;                         if dev.HasKeyWordString("zbfWornGag")
+;                             blocked = true
+;                         endif
+;                         if dev.HasKeywordString("zad_InventoryDevice")
+;                             Armor rDev = zlib.GetRenderedDevice(dev as Armor)
+;                             if rDev.HasKeywordString("zad_DeviousGag")
+;                                 blocked = true
+;                             endif
+;                         endif
+;                         bind_Utility.WriteInternalMonologue("I am not being gagged again yet...")
+;                     endif
+;                 endif
+
+;                 if !blocked
+;                     if useRulesBased == 1
+;                         ;int brule = -1
+;                         Armor renderedItem = zlib.GetRenderedDevice(dev as Armor)
+;                         int brule = bind_SkseFunctions.FindRule(renderedItem)                  
+;                         ;debug.MessageBox(brule)
+;                         if brule > -1                            
+;                             if (rms.GetBondageRule(a, brule) == 1)
+;                                 int bopt = rms.GetBondageRuleOption(a, brule)
+;                                 if (bopt == 0 || bopt == rms.RULE_OPTION_PERMANENT() || (safeArea && (bopt == rms.RULE_OPTION_SAFE_AREAS() || bopt == rms.RULE_OPTION_PERMANENT_SAFE_AREAS())) || (!safeArea && (bopt == rms.RULE_OPTION_UNSAFE_AREAS() || bopt == rms.RULE_OPTION_PERMANENT_UNSAFE_AREAS())))
+;                                     tempItems[idx] = dev as Form
+;                                     idx += 1
+;                                 endif
+;                             endif
+;                         endif
+;                     else
+;                         tempItems[idx] = dev as Form
+;                         idx += 1
+;                     endif  
+;                 endif   
+
+;             endif
+;             i += 1
+;         endwhile
+;         ; if wornBondageItems.Length > 0
+;         ;     ;append last set if keeping items
+;         ;     i = 0
+;         ;     while i < wornBondageItems.Length
+;         ;         Form f = wornBondageItems[i]
+;         ;         tempItems[idx] = f
+;         ;         idx += 1
+;         ;         i += 1
+;         ;     endwhile
+;         ; endif
+;     endif
+
+;     ;debug.MessageBox(tempItems)
+
+;     bind_Utility.WriteToConsole("equipbondageoutfit - actor: " + a.GetDisplayName())
+;     bind_Utility.WriteToConsole("equipbondageoutfit - tempitems: " + tempItems)
+
+;     ;dat.ProtectSltr = 1 ;for testing - add to mcm
+
+;     ;int ProtectSltr = data_script.Preference_ProtectSltr
+;     int RemoveUsedItems = 0 ;data_script.Preference_CleanUpNonBindingItemsFromBags
+
+;     ;bindc_SKSE.EquipBondageOutfit(a, tempItems, (ProtectSltr == 1 && a == Game.GetPlayer()), leaveBondageItems == 1)
+
+;     ;debug.MessageBox(ddRemoveItems)
+;     bind_SkseFunctions.EquipBondageOutfit2(a, tempItems, ddRemoveItems)
+
+;     ; StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
+;     ; StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(outfitFileNameJson, setId + "_bondage_outfit_name", ""))
+
+;     bind_Utility.DoSleep(2.0)
+
+;     ;debug.MessageBox(fixedGear)
+;     ;Form[] fixedGear = JsonUtil.FormListToArray(outfitFileNameJson, setId + "_fixed_worn_items")
+;     if (fixedGear.Length > 0) 
+;         bind_SkseFunctions.DoDressActor(a, fixedGear)
+;     endif
+
+;     int handle = ModEvent.Create("bindc_BondageOutfitEquipped")
+;     if handle
+;         ModEvent.Send(handle)
+;     endif
+
+;     ;if (leaveBondageItems == 0)
+;         StorageUtil.FormListClear(a, "binding_worn_bondage_items")
+;     ;endif    
+
+;     StorageUtil.FormListCopy(a, "binding_worn_bondage_items", tempItems)
+
+;     if RemoveUsedItems == 1
+;         bind_SkseFunctions.CleanUnusedBondageItemsFromInventory(a)
+;     endif
+
+;     ;the stored outfit id bindc_outfit_id is the desired outfit, which is not set here
+;     ;this stores the currently equipped outfit, used on aliases for strip functions
+;     StorageUtil.SetIntValue(a, "bindc_equipped_outfit_id", setId) 
+
+;     ;EquippingBondageOutfit = false
+;     equippingBondageOutfit = false
+
+; endfunction
+
+
 function EquipBondageOutfit(Actor a, int setId)
 
     float sleepWait = 0.1
@@ -208,6 +462,25 @@ function EquipBondageOutfit(Actor a, int setId)
     StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))
 
     int i
+
+    ; Form[] ddRemoveItems = new Form[25]
+    ; Form[] wornBondageItems = bind_SkseFunctions.GetDeviousInventory(a)
+    ; i = 0
+    ; int removeIdx = 0
+    ; while i < wornBondageItems.Length
+    ;     Form f = wornBondageItems[i]
+    ;     int bindingItemFlag = StorageUtil.GetIntValue(f, "binding_item_flag", 0)
+    ;     if bindingItemFlag == 1 && a.IsEquipped(f)
+    ;         ;debug.MessageBox("item: " + f.GetName() + " binding: " + bindingItemFlag)
+    ;         ;StorageUtil.FormListAdd(none, "bindc_remove_dd_list", f, false)
+    ;         ddRemoveItems[removeIdx] = f
+    ;         removeIdx += 1
+    ;     endif
+    ;     ;debug.MessageBox("item: " + f.GetName() + " binding: " + bindingItemFlag)
+    ;     i += 1
+    ; endwhile
+
+    Form[] ddRemoveItems = StorageUtil.FormListToArray(a, "binding_worn_bondage_items")
 
     EquippingBondageOutfit = true
 
@@ -292,7 +565,7 @@ function EquipBondageOutfit(Actor a, int setId)
                 if useRulesBased == 1
                     Armor renderedItem = zlib.GetRenderedDevice(dev as Armor)
                     if renderedItem != none
-                        int brule = bindc_SKSE.FindRule(renderedItem)                     
+                        int brule = bind_SkseFunctions.FindRule(renderedItem)                     
                         ;debug.MessageBox(brule)
                         if brule > -1
                             if (rms.GetBondageRule(a, brule) == 1)
@@ -321,7 +594,10 @@ function EquipBondageOutfit(Actor a, int setId)
 
     ;main.ProtectSltr = 1 ;for testing - add to mcm
 
-    bind_SkseFunctions.EquipBondageOutfit(a, tempItems, (main.ProtectSltr == 1 && a == Game.GetPlayer()))
+    ;debug.MessageBox(tempItems)
+
+    ;bind_SkseFunctions.EquipBondageOutfit(a, tempItems, (main.ProtectSltr == 1 && a == Game.GetPlayer()))
+    bind_SkseFunctions.EquipBondageOutfit2(a, tempItems, ddRemoveItems)
 
     ; StorageUtil.SetIntValue(a, "bind_wearing_outfit_id", setId) ;NOTE - this is used by the sub alias to determine blocks
     ; StorageUtil.SetStringValue(a, "bind_wearing_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name", ""))

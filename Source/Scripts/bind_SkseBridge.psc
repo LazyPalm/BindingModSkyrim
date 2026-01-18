@@ -19,9 +19,13 @@ int function SetDeviousRemovalTokens(Actor act, Form[] items) global
 endfunction
 
 int function LockDevice(Actor act, Armor arm) global
+    if arm.HasKeywordString("zbfWornDevice")
+        StorageUtil.SetIntValue(arm, "binding_item_flag", 1)
+        return 0
+    endif
     zadLibs zlib = Quest.GetQuest("zadQuest") as zadLibs
     StorageUtil.SetIntValue(arm, "binding_item_flag", 1)
-    StorageUtil.SetIntValue(arm, "bindc_item_flag", 1)
+    ;StorageUtil.SetIntValue(arm, "bindc_item_flag", 1)
     zlib.LockDevice(act, arm, false)
     Utility.Wait(2.0)
     return 0
