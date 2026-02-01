@@ -310,7 +310,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.33"
+    version = "0.4.34"
 
     theSub = fs.GetSubRef()
 
@@ -1296,7 +1296,7 @@ Function DisplaySexSettings()
 
     toggleFreeUse = AddToggleOption("Free Use Sex", main.SexFreeUse)
     sliderDomArousal = AddSliderOption("Dom Arousal Needed For Sex", main.SexDomArousalLevelToTrigger, "{0}")
-    sliderChastityRemovalChance = AddSliderOption("Chance For Chastity Removal", main.SexChanceOfChastityRemoval, "{0}")
+    ;sliderChastityRemovalChance = AddSliderOption("Chance For Chastity Removal", main.SexChanceOfChastityRemoval, "{0}")
 
     string sexFramework = "SexLab"
     if main.SexUseFramework == 1
@@ -1305,7 +1305,7 @@ Function DisplaySexSettings()
     toggleSexUseFramework = AddTextOption("Use Framework For Sex", sexFramework)
 
     toggleDomWantsPrivacy = AddToggleOption("Sex Requires Privacy", main.SexDomWantsPrivacy)
-    AddTextOption("", "")
+    ;AddTextOption("", "")
 
     ;unties for sex
 

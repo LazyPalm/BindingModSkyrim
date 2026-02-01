@@ -110,6 +110,20 @@ function EventStart()
         HogtiedForSleep()
     endif
 
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.HogtieActor(secondSub)
+        endif
+
+        if fs.TheThirdSub.GetReference() != none
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            bind_BondageManager.HogtieActor(thirdSub)
+        endif
+
+    endif
+
     bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeSexyBondagePet())
 
     CloseTheDoor()
@@ -362,6 +376,20 @@ function FreeTheSub()
         bind_Utility.DoSleep(1.0)
     else
         bind_MovementQuestScript.EndHogtied(theSub)
+    endif
+
+    if mqs.SubCount > 0
+
+        if fs.TheSecondSub.GetReference() != none
+            Actor secondSub = fs.TheSecondSub.GetActorReference()
+            bind_BondageManager.FreeActorFromHogtie(secondSub)
+        endif
+
+        if fs.TheThirdSub.GetReference() != none
+            Actor thirdSub = fs.TheThirdSub.GetActorReference()
+            bind_BondageManager.FreeActorFromHogtie(thirdSub)
+        endif
+
     endif
 
     fs.EventCleanUpSub(theSub, theDom, true)

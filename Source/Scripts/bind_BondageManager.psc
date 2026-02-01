@@ -528,7 +528,8 @@ function EquipBondageOutfit(Actor a, int setId)
             JsonUtil.SetFloatValue(main.BindingGameOutfitFile, setId + "_dynamic_bondage_expires", bind_Utility.AddTimeToCurrentTime(Utility.RandomInt(3, 24), 0)) ;testing 3-24 hours
 
             if useRulesBased == 1
-                Form[] randomSetItems = bind_SkseFunctions.CreateRandomDeviousSet(bind_dd_all, Utility.RandomInt(1, 3), Utility.RandomInt(1, 4), none)
+                int[] emptyList
+                Form[] randomSetItems = bind_SkseFunctions.CreateRandomDeviousSet(bind_dd_all, Utility.RandomInt(1, 3), Utility.RandomInt(1, 4), emptyList)
                 JsonUtil.FormListCopy(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items", randomSetItems)
                 bind_Utility.WriteToConsole("random set length: " + randomSetItems.Length)
             else

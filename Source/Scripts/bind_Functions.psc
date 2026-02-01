@@ -330,6 +330,12 @@ Function ClearDom()
 
 	Debug.MessageBox("You have been freed.")
 
+	if StorageUtil.FormListCount(theSubRef, "bind_future_doms") > 0
+		if !bind_DefeatedQuest.IsRunning()
+			bind_DefeatedQuest.Start()
+		endif
+	endif
+
 EndFunction
 
 event OnControlDown(string control)
@@ -1153,6 +1159,10 @@ ObjectReference subInFurnitureItemRef
 
 ;TODO - 3/24/25 move all of these permissions functions to the rules manager
 Function SubEnteredFurniture(ObjectReference furn)
+
+	if main.IsSub == 0
+		return
+	endif
 	
 	LogOutput("SubEnteredFurniture()")
 
@@ -1170,6 +1180,10 @@ Function SubEnteredFurniture(ObjectReference furn)
 EndFunction
 
 Function SubLeftFurniture(ObjectReference furn)
+
+	if main.IsSub == 0
+		return
+	endif
 	
 	LogOutput("SubLeftFurniture()")
 
@@ -1183,6 +1197,10 @@ endfunction
 
 
 function SubLookedAtDoor(ObjectReference ref) 
+
+	if main.IsSub == 0
+		return
+	endif
 
     ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
     if destination.GetBaseObject() as Door
