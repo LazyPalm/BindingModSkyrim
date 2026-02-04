@@ -803,14 +803,14 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		endif
 	endif
 
-	; int count = newlocation.GetNumKeywords()
-	; bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
-	; int index
-	; while (index < count)
-	; 	Keyword kw = newlocation.GetNthKeyword(index)
-	; 	bind_Utility.WriteToConsole("keyword: " + kw.GetString())
-	; 	index += 1
-	; endwhile
+	int count = newlocation.GetNumKeywords()
+	bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
+	int index
+	while (index < count)
+		Keyword kw = newlocation.GetNthKeyword(index)
+		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
+		index += 1
+	endwhile
 
 endfunction
 
