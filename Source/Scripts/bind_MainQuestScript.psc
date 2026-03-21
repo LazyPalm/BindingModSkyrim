@@ -9,6 +9,12 @@ string property BindingGameOutfitFile auto conditional
 
 string property ActiveQuestName auto conditional
 
+int property PreferenceTeleportDom auto conditional
+int property PreferenceHoldConversationTarget auto conditional
+int property PreferenceSpellChangeBondage auto conditional
+int property PreferenceDomRandomComments auto conditional
+int property PreferenceHideSetDomDialogue auto conditional
+
 ;string property BondageSetLocation auto conditional
 int property ActiveBondageSetId auto conditional
 string property ActiveBondageSetName auto conditional
@@ -237,7 +243,6 @@ GlobalVariable property bind_GlobalEventWhippingNextRun auto
 GlobalVariable property bind_GlobalEventHarshBondageNextRun auto
 GlobalVariable property bind_GlobalEventInspectionNextRun auto
 GlobalVariable property bind_GlobalEventPutOnDisplayNextRun auto
-
 
 event OnInit()
 

@@ -48,8 +48,8 @@ int function CrosshairNpc(Actor act) global
     ;debug.Notification("crosshair over: " + act.GetDisplayName())
 
     ;set conversation target
-    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
-    fs.ConversationTargetNpc.ForceRefTo(act)
+    ; bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    ; fs.ConversationTargetNpc.ForceRefTo(act)
 
     ;NOTE - when using conversation target (posing) check distance and clear if player has moved away too far
     return 0
@@ -60,9 +60,9 @@ int function CrosshairDoor(Form d, ObjectReference o) global
     ; debug.MessageBox(o)
     ; debug.MessageBox(d.GetName())
 
-    Quest q = Quest.GetQuest("bind_MainQuest")
-    bind_Functions fs = q as bind_Functions
-    fs.SubLookedAtDoor(o)
+    ; Quest q = Quest.GetQuest("bind_MainQuest")
+    ; bind_Functions fs = q as bind_Functions
+    ; fs.SubLookedAtDoor(o)
 
     ; Quest sq = Quest.GetQuest("bindc_SlaveryQuest")
     ; if sq.IsRunning()
@@ -106,8 +106,9 @@ int function CrosshairDoor(Form d, ObjectReference o) global
 endfunction
 
 int function CrosshairBed(ObjectReference o) global
-    bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
-    fs.NearbyBed.ForceRefTo(o) 
+    ; bind_Functions fs = Quest.GetQuest("bind_MainQuest") as bind_Functions
+    ; fs.NearbyBed.ForceRefTo(o) 
+    ; debug.MessageBox("looked at bed???")
     return 0
 endfunction
 
@@ -130,11 +131,13 @@ int function ActivatedDragon(ObjectReference o) global
     bind_Functions fs = q as bind_Functions
     bind_MainQuestScript main = q as bind_MainQuestScript
 
+    ;debug.MessageBox("activated dragon??")
+
     if !StorageUtil.FormListHas(fs.GetSubRef(), "binding_dragons_list", o)
         ;debug.MessageBox("activated dragon: " + o)
         StorageUtil.FormListAdd(fs.GetSubRef(), "binding_dragons_list", o)
         ;Debug.MessageBox("start: " + main.DomStartupQuestsEnabled)
-        if fs.ModInRunningState() && main.DomStartupQuestsEnabled == 1
+        if fs.ModInRunningState() && main.DomUseDragonSoulRitual == 1
             Quest souls = Quest.GetQuest("bind_SoulsFromBonesQuest")
             souls.Start()
         endif

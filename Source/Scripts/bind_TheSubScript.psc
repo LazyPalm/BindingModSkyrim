@@ -8,6 +8,10 @@ int spellsLearned
 bool cheatDeath = false
 
 ObjectReference currentConversationTarget
+ObjectReference currentBedTarget
+ObjectReference currentFurnitureTarget
+
+Actor sub
 
 event OnInit()
 
@@ -15,10 +19,12 @@ event OnInit()
 	kwClothingBody = Keyword.GetKeyword("ClothingBody")
 
 	RegisterForSleep()
-	;RegisterforCrosshairRef()
+	RegisterforCrosshairRef()
 
 	foodEaten = Game.queryStat("Food Eaten")
 	spellsLearned = Game.queryStat("Spells Learned")
+
+	sub = self.GetActorReference()
 
 endevent
 
@@ -55,6 +61,10 @@ Event OnPlayerLoadGame()
 
 	foodEaten = Game.queryStat("Food Eaten")
 	spellsLearned = Game.queryStat("Spells Learned")
+
+	processingCrosshair = false
+
+	sub = self.GetActorReference()
 
 EndEvent
 
@@ -107,6 +117,76 @@ EndEvent
 
 
 bool lookedAtFurniture
+bool processingCrosshair
+
+event OnCrosshairRefChange(ObjectReference ref)
+
+	if !processingCrosshair && ref != none
+
+		processingCrosshair = true
+
+		if ref != currentConversationTarget
+			if currentBedTarget != none
+				if currentConversationTarget.GetDistance(sub) > 500.0
+					;fs.ClearConversationTargetNpc()
+					ConversationTarget.Clear()
+				endif
+			endif
+		endif
+
+		; if ref != currentBedTarget
+		; 	fs.ClearNearbyBed()
+		; endif
+
+		bool keepTesting = true
+
+		;if MQS.PreferenceHoldConversationTarget == 1
+			if ref as Actor
+				bind_Utility.WriteToConsole("fill conversation target with: " + ref)
+				currentConversationTarget = ref
+				ConversationTarget.ForceRefTo(ref)
+				;fs.SetConversationTargetNpc(ref as Actor)
+				keepTesting = false
+			endif
+		;endif
+
+		if keepTesting
+			if bind_FormListBeds.HasForm(ref.GetBaseObject())
+				currentBedTarget = ref
+				bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
+				fs.SetNearbyBed(ref)
+				MQS.bind_GlobalLocationHasBed.SetValue(1)
+				keepTesting = false
+			endif
+		endif
+
+		if keepTesting
+			if ref.HasKeywordString("zadc_FurnitureDevice") || (ref.HasKeywordString("dse_dm_KeywordFurniture") && MQS.EnableModDM3 == 1) || ref.HasKeywordString("zbfFurniture")
+				currentFurnitureTarget = ref
+				bind_Utility.WriteInternalMonologue("This furniture looks like fun...")
+				fs.EventSetFurniture(ref)
+				bind_GlobalLocationHasFurniture.SetValue(1)
+				keepTesting = false
+				if !lookedAtFurniture
+					lookedAtFurniture = true
+					bind_Utility.SendSimpleModEvent("bind_SubLookedAtFurnitureEvent")
+				endif
+			endif
+		endif
+
+		if keepTesting
+			if ref.GetBaseObject() as Door
+				bind_Utility.WriteToConsole("looking at door: " + ref)
+				fs.SubLookedAtDoor(ref)
+				keepTesting = false
+			endif
+		endif
+
+		processingCrosshair = false
+
+	endif
+
+endevent
 
 ; Event OnCrosshairRefChange(ObjectReference ref)
 
@@ -293,10 +373,10 @@ bool lookedAtFurniture
 ; 	; 				; 		bind_Utility.SendSimpleModEvent("bind_SubLookedAtFurnitureEvent")
 ; 	; 				; 	endif
 
-; 	; 				; elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
-; 	; 				; 	bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
-; 	; 				; 	fs.SetNearbyBed(ref)
-; 	; 				; 	MQS.bind_GlobalLocationHasBed.SetValue(1)
+					; elseif bind_FormListBeds.HasForm(ref.GetBaseObject())
+					; 	bind_Utility.WriteInternalMonologue("This bed looks very comfortable for " + fs.GetDomTitle() + "...")
+					; 	fs.SetNearbyBed(ref)
+					; 	MQS.bind_GlobalLocationHasBed.SetValue(1)
 
 ; 	; 				; ElseIf displayName == "Door"
 ; 	; 				; 	;float dist = ref.GetDistance(MQS.GetSubRef())
@@ -899,6 +979,7 @@ Form property ITMFoodEat auto
 ReferenceAlias property PrayerShrine auto
 ReferenceAlias property BuildingDoor auto
 ReferenceAlias property DeadDragon auto
+ReferenceAlias property ConversationTarget auto
 
 LocationAlias property BuildingDoorDestination auto
 

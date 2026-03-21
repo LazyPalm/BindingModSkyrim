@@ -142,8 +142,10 @@ function LoadGame()
 	bind_ActionMenu amenu = Quest.GetQuest("bind_MainQuest") as bind_ActionMenu
 	amenu.LoadGame()
 
+	string title = ""
+
 	if theDomRef != none
-		string title = StorageUtil.GetStringValue(theDomRef, "bind_dom_new_name")
+		title = StorageUtil.GetStringValue(theDomRef, "bind_dom_new_name")
 		bind_Utility.WriteToConsole("dom title: " + title)
 		Actor tc = TitleContainer.GetReference() as Actor
 		tc.GetActorBase().SetName(title)
@@ -620,7 +622,7 @@ bool safeAreaOldState
 ; 		safeAreaOldState = safeAreaNewState
 
 ; 		GotoState("ProcessLocationArrivedState")
-; 		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+; 		RegisterForSingleUpdate(main.AdventuringCheckAfterSecon	ds)
 
 ; 	endevent
 
@@ -630,11 +632,34 @@ state NoBondageOutfitState
 
 	event OnUpdate()
 
-		EventCleanUpSub(theSubRef, theDomRef, true) ;should we do this?
+		if !bind_ArrivalCheckQuest.IsRunning()
+			;debug.MessageBox("in here??")
+			bind_ArrivalCheckQuest.Start()
+		endif
 
-		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+		if main.PreferenceSpellChangeBondage == 1
 
-		main.NeedsBondageSetChange = 0
+			BlueGlow.Play(theSubRef, 10.0)
+
+			EventCleanUpSub(theSubRef, theDomRef, true) ;should we do this?
+
+			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+
+			BlueGlow.Stop(theSubRef)
+
+			main.NeedsBondageSetChange = 0
+
+		else
+
+			main.NeedsBondageSetChange = 1
+			bind_Utility.WriteNotification("Marked remove all bondage needed...", bind_Utility.TextColorRed())
+			bcs.AdvanceGameLoop()
+
+			; if !bind_BoundForLocations.IsRunning() && ModInRunningState()
+			; 	bind_BoundForLocations.Start()
+			; endif
+
+		endif
 
 		GotoState("")
 
@@ -645,6 +670,10 @@ endstate
 state ArrivalCheckState
 
 	event OnUpdate()
+
+		if !bind_ArrivalCheckQuest.IsRunning()
+			bind_ArrivalCheckQuest.Start()
+		endif
 
 		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
 
@@ -661,9 +690,35 @@ state ArrivalCheckState
 		else
 
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
-			main.NeedsBondageSetChange = 1
-			bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
-			bcs.AdvanceGameLoop()
+
+			if main.PreferenceSpellChangeBondage == 1
+
+				BlueGlow.Play(theSubRef, 10.0)
+
+				int outfitId = main.ActiveBondageSetId
+				bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
+				;if outfitId > 0
+				bms.EquipBondageOutfit(theSubRef, outfitId)
+				if TheSecondSub.GetReference() != none
+					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+				endif
+				if TheThirdSub.GetReference() != none
+					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+				endif
+				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId)
+
+				BlueGlow.Stop(theSubRef)
+
+			else
+				main.NeedsBondageSetChange = 1
+				bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
+				bcs.AdvanceGameLoop()
+
+				; if !bind_BoundForLocations.IsRunning() && ModInRunningState()
+				; 	bind_BoundForLocations.Start()
+				; endif
+
+			endif
 
 			; if main.AdventuringAutomatic == 1
 
@@ -707,6 +762,12 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 
 	TheSubCurrentLocation.ForceLocationTo(newLocation)
 	rman.BehaviorEnterExitRuleCurrentLocationType == 0
+
+
+	;debug.MessageBox("new: : " + newLocation.GetName() + " old: " + oldLocation.GetName())
+
+	;debug.MessageBox("indoors " + isIndoors + " rule: " + rman.BehaviorEnterExitRule)
+
 	if newLocation != none && isIndoors && rman.BehaviorEnterExitRule == 1
 		;entered a building
 		if (newLocation.HasKeywordString("LocTypeInn") && rman.BehaviorEnterExitRuleInn == 1) 
@@ -777,9 +838,16 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 
 	if main.ActiveBondageSetId == 0
 		bind_Utility.WriteToConsole("DEBUG - No bondage outfit could be found")
-		bind_Utility.WriteNotification("No bondage outfit could be found", bind_Utility.TextColorGreen())
+		if StorageUtil.GetIntValue(theSubRef, "bind_display_no_outfit", 0) == 1
+			bind_Utility.WriteNotification("No bondage outfit could be found", bind_Utility.TextColorGreen())
+		endif
 		GoToState("NoBondageOutfitState")
-		RegisterForSingleUpdate(3.0)
+		UnregisterForUpdate()
+		if isIndoors
+			RegisterForSingleUpdate(3.0)
+		else
+			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
+		endif
 	else
 		if main.ActiveBondageSetId != currentBondageSetId
 			;update bondage??
@@ -811,6 +879,8 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		bind_Utility.WriteToConsole("keyword: " + kw.GetString())
 		index += 1
 	endwhile
+
+
 
 endfunction
 
@@ -1121,32 +1191,34 @@ Function ProcessConversation()
 
 		;Speech Rule:Dom Speaks,Speech Rule:Must Ask,Speech Rule:Must Pose
 
-		if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_DOM()) == 1 ;rman.GetBehaviorRuleByName("Speech Rule:Dom Speaks") == 1
-			float tempSpeakingPermission = StorageUtil.GetFloatValue(theSubRef, "bind_temp_speaking_permission", 0.0)
-			if tempSpeakingPermission < bind_Utility.GetTime()
-				MarkSubBrokeRule("What was I thinking? I am not allowed to speak", true)
+		if ModInRunningState()
+			if rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_DOM()) == 1 ;rman.GetBehaviorRuleByName("Speech Rule:Dom Speaks") == 1
+				float tempSpeakingPermission = StorageUtil.GetFloatValue(theSubRef, "bind_temp_speaking_permission", 0.0)
+				if tempSpeakingPermission < bind_Utility.GetTime()
+					MarkSubBrokeRule("What was I thinking? I am not allowed to speak", true)
+				endif
+
+			elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_ASK()) == 1 ; rman.GetBehaviorRuleByName("Speech Rule:Must Ask") == 1
+				if StorageUtil.GetIntValue(theSubRef, "bind_has_speech_permission", 0) == 0
+					MarkSubBrokeRule("Oh no, I forgot to ask permission to speak", true)
+				endif
+
+			elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_POSE()) == 1 ; rman.GetBehaviorRuleByName("Speech Rule:Must Pose") == 1
+				if !pman.InConversationPose()
+					MarkSubBrokeRule("Oh dear, I was not posed properly", true)
+				endif
+
+			;NOTE - this was replaced by a stat check 11/16
+			; elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ASK_TO_TRAIN()) == 1 ;rman.BehaviorStudiesAskToTrainMustAsk == 1
+			; 	Actor trainer = ConversationTargetNpc.GetReference() as Actor
+			; 	if trainer.IsInFaction(JobTrainerFaction)
+			; 		if rman.BehaviorStudiesAskToTrainPermission == 1
+			; 		else
+			; 			MarkSubBrokeRule("I can't speak to a trainer without asking first", true)
+			; 		endif
+			; 	endif
+
 			endif
-
-		elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_ASK()) == 1 ; rman.GetBehaviorRuleByName("Speech Rule:Must Ask") == 1
-			if StorageUtil.GetIntValue(theSubRef, "bind_has_speech_permission", 0) == 0
-				MarkSubBrokeRule("Oh no, I forgot to ask permission to speak", true)
-			endif
-
-		elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_SPEECH_POSE()) == 1 ; rman.GetBehaviorRuleByName("Speech Rule:Must Pose") == 1
-			if !pman.InConversationPose()
-				MarkSubBrokeRule("Oh dear, I was not posed properly", true)
-			endif
-
-		;NOTE - this was replaced by a stat check 11/16
-		; elseif rman.GetBehaviorRule(theSubRef, rman.BEHAVIOR_RULE_ASK_TO_TRAIN()) == 1 ;rman.BehaviorStudiesAskToTrainMustAsk == 1
-		; 	Actor trainer = ConversationTargetNpc.GetReference() as Actor
-		; 	if trainer.IsInFaction(JobTrainerFaction)
-		; 		if rman.BehaviorStudiesAskToTrainPermission == 1
-		; 		else
-		; 			MarkSubBrokeRule("I can't speak to a trainer without asking first", true)
-		; 		endif
-		; 	endif
-
 		endif
 
 	EndIf
@@ -1184,7 +1256,7 @@ Function SubLeftFurniture(ObjectReference furn)
 	if main.IsSub == 0
 		return
 	endif
-	
+
 	LogOutput("SubLeftFurniture()")
 
 	subInFurnitureItemRef = none
@@ -1200,6 +1272,10 @@ function SubLookedAtDoor(ObjectReference ref)
 
 	if main.IsSub == 0
 		return
+	endif
+
+	if !ModInRunningState()
+		return 
 	endif
 
     ObjectReference destination = PO3_SKSEFunctions.GetDoorDestination(ref)
@@ -1264,6 +1340,10 @@ Function SubPrayedAtShrine(string shrineGod)
 
 	if main.IsSub == 0
 		return
+	endif
+
+	if !ModInRunningState()
+		return 
 	endif
 
 	bool result = true
@@ -1462,6 +1542,10 @@ Function BedtimeCheck()
 
 	if main.IsSub == 0
 		return
+	endif
+
+	if !ModInRunningState()
+		return 
 	endif
 
 	LogOutput("BedtimeCheck()")
@@ -2294,6 +2378,10 @@ function SetDom(Actor dom)
 		bind_DefeatedQuest.Stop()
 	endif
 
+	StorageUtil.SetFormValue(theSubRef, "bind_dom_ref", theDomRef)
+	StorageUtil.SetStringValue(theSubRef, "bind_dom_title", domTitle)
+	StorageUtil.SetIntValue(theSubRef, "bind_is_sub", 1)
+
 endfunction
 
 string function SettingsGetDomTitle()
@@ -2302,6 +2390,7 @@ endfunction
 
 function SettingsSetDomTitleByString(string title)
 	StorageUtil.SetStringValue(theDomRef, "bind_dom_new_name", title)
+	StorageUtil.SetStringValue(theSubRef, "bind_dom_title", title)
 	Actor tc = TitleContainer.GetReference() as Actor
 	tc.GetActorBase().SetName(title)
 	domTitle = title
@@ -2317,6 +2406,7 @@ function SettingsSetDomTitle()
 
     if result != ""
 		StorageUtil.SetStringValue(theDomRef, "bind_dom_new_name", result)
+		StorageUtil.SetStringValue(theSubRef, "bind_dom_title", result)
 		Actor tc = TitleContainer.GetReference() as Actor
 		tc.GetActorBase().SetName(result)
 		domTitle = result
@@ -2621,6 +2711,8 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 	endif
 
+	;debug.MessageBox("outfit: " + eventOutfitId)
+
 	if eventOutfitId > 0 ; outfitIds.Length > 0
 		; int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
 		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
@@ -2715,13 +2807,18 @@ endfunction
 
 function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 
-    bind_MovementQuestScript.WalkTo(dom, sub)
+	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
+	;debug.MessageBox(main.ActiveBondageSetId)
 
-	bind_MovementQuestScript.FaceTarget(dom, sub)
-	bind_Utility.DoSleep()
+	if main.ActiveBondageSetId > 0
+		bind_MovementQuestScript.WalkTo(dom, sub)
 
-	if playAnimations
-    	bind_MovementQuestScript.PlayDoWork(dom)
+		bind_MovementQuestScript.FaceTarget(dom, sub)
+		bind_Utility.DoSleep()
+
+		if playAnimations
+			bind_MovementQuestScript.PlayDoWork(dom)
+		endif
 	endif
 
     ; if bms.RemoveAllDetectedBondageItems(sub)
@@ -2751,7 +2848,6 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 
 	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
 
-	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 	;debug.MessageBox(currentLocation.GetName())
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
@@ -3203,26 +3299,61 @@ endfunction
 
 function PoseForSleep()
 	if ModInRunningState()
-		; if !bind_KneelingQuest.IsRunning()
-		; 	bind_KneelingQuest.Start()
-		; 	bind_Utility.DoSleep(2.0)
-		; endif
-		ObjectReference bed = EventGetNearbyBed()
-		;debug.MessageBox("bed: " + bed)
-		if bed
-			if bed.GetDistance(theSubRef) < 1000.0
-				if theSubRef.GetDistance(theDomRef) > 160.0
-					bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
-					bind_Utility.DoSleep(2.0)
-				endif				
-				pman.ResumeStanding()
-				if !bind_EventBoundSleepQuest.IsRunning()
-					bind_EventBoundSleepQuest.Start()
-				endif
+
+		ObjectReference[] bedList = bind_SkseFunctions.GetNearbyBeds(theSubRef, 1000.0)
+		;debug.MessageBox(bedList)
+
+		bool nearBed = false
+
+		int i = 0
+		while i < bedList.Length
+			if theSubRef.HasLOS(bedList[i])
+				;debug.MessageBox("can see: " + bedList[i])
+				SetNearbyBed(bedList[i])
+				nearBed = true
 			else
-				bind_Utility.WriteInternalMonologue("I am not close enough to the bed...")
+				;debug.MessageBox("CANT see: " + bedList[i])
 			endif
+			i += 1
+		endwhile
+
+		;TODO - maybe do any distance inside a player home??
+
+		if nearBed
+			if theSubRef.GetDistance(theDomRef) > 160.0
+				bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+				bind_Utility.DoSleep(2.0)
+			endif				
+			pman.ResumeStanding()
+			if !bind_EventBoundSleepQuest.IsRunning()
+				bind_EventBoundSleepQuest.Start()
+			endif
+		else
+			bind_Utility.WriteInternalMonologue("I must be facing a bed when I pose for sleep...")
 		endif
+
+		; return
+
+		; ; if !bind_KneelingQuest.IsRunning()
+		; ; 	bind_KneelingQuest.Start()
+		; ; 	bind_Utility.DoSleep(2.0)
+		; ; endif
+		; ObjectReference bed = EventGetNearbyBed()
+		; ;debug.MessageBox("bed: " + bed)
+		; if bed
+		; 	if bed.GetDistance(theSubRef) < 1000.0
+		; 		if theSubRef.GetDistance(theDomRef) > 160.0
+		; 			bind_MovementQuestScript.WalkTo(theDomRef, theSubRef)
+		; 			bind_Utility.DoSleep(2.0)
+		; 		endif				
+		; 		pman.ResumeStanding()
+		; 		if !bind_EventBoundSleepQuest.IsRunning()
+		; 			bind_EventBoundSleepQuest.Start()
+		; 		endif
+		; 	else
+		; 		bind_Utility.WriteInternalMonologue("I am not close enough to the bed...")
+		; 	endif
+		; endif		
 	endif
 endfunction
 
@@ -3376,7 +3507,8 @@ Quest property bind_EventBoundSleepQuest auto
 Quest property bind_BoundSexQuest auto
 Quest property bind_BoundMasturbationQuest auto
 Quest property bind_WhippingQuest auto
-
+Quest property bind_ArrivalCheckQuest auto
+Quest property bind_BoundForLocations auto
 
 Spell property ActionButtonMagicEffect auto
 
@@ -3385,3 +3517,5 @@ FormList property bind_SafeOutdoorLocationsTypeList auto
 FormList property bind_ZapFurnitureList auto
 FormList property bind_DDCFurnitureList auto
 FormList property bind_DSEFurnitureList auto ;NOTE - empty by default DM3 - helper will load
+
+VisualEffect property BlueGlow auto

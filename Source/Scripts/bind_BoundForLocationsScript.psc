@@ -11,16 +11,48 @@ event OnInit()
 
     if self.IsRunning()
 
-        bind_Utility.WriteToConsole("Bound for location quest starting")
+        ;debug.MessageBox("started arrival check")
 
-        RegisterForModEvent("bind_LocationChangeEvent", "LocationChangeEvent")
-        RegisterForModEvent("bind_QuestEvStartEvent", "QuestEvStartEvent")
-        RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+        bcs.DoStartEvent(false)
+        bcs.SetEventName(self.GetName())
 
-        bind_Utility.WriteToConsole("started bound for location")
+        bind_Utility.WriteToConsole("bind_BoundForLocations outfit id: " + mqs.ActiveBondageSetId)
+        mqs.NeedsBondageSetChange = 0
 
-        theSub = fs.GetSubRef()
-        theDom = fs.GetDomRef()
+        if fs.GetDomRef().GetDistance(fs.GetSubRef()) > 255.0
+            bind_Utility.WriteInternalMonologue("I need to get closer to " + fs.GetDomTitle() + "...")
+            bind_MovementQuestScript.WalkTo(fs.GetDomRef(), fs.GetSubRef(), 255.0)
+        endif
+        bind_MovementQuestScript.FaceTarget(fs.GetDomRef(), fs.GetSubRef())
+        bind_MovementQuestScript.PlayDoWork(fs.GetDomRef())
+
+        bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
+
+        ;debug.MessageBox(mqs.ActiveBondageSetId)
+
+        bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
+
+        if fs.TheSecondSub.GetReference() != none
+            bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
+        endif
+        if fs.TheThirdSub.GetReference() != none
+            bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+        endif
+
+        bcs.DoEndEvent(false)
+
+        self.Stop()
+
+        ; bind_Utility.WriteToConsole("Bound for location quest starting")
+
+        ; RegisterForModEvent("bind_LocationChangeEvent", "LocationChangeEvent")
+        ; RegisterForModEvent("bind_QuestEvStartEvent", "QuestEvStartEvent")
+        ; RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+
+        ; bind_Utility.WriteToConsole("started bound for location")
+
+        ; theSub = fs.GetSubRef()
+        ; theDom = fs.GetDomRef()
 
         ; if !theSub.IsInInterior()
         ;     QuestEventEnd()
@@ -34,64 +66,86 @@ event OnInit()
 
 endevent
 
-event QuestEvStartEvent()
-
-    bind_Utility.WriteToConsole("bound for location - detected new event")
-
-    if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
-        theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
-        StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 3) 
-    endif
-
-    ;set the rules check flag to on - since the snapshot will get messed up by the quest starting
-    ;bind_GlobalRulesUpdatedFlag.SetValue(1)
-    ;StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 3) ;set to to-do
-
-    ;self.Stop()
-
+event OnUpdate()
+    self.Stop()
 endevent
 
-event LocationChangeEvent(Form oldLocation, Form newLocation)
+; event QuestEvStartEvent()
 
-    bind_Utility.WriteToConsole("bound for location quest - not running")
+;     bind_Utility.WriteToConsole("bound for location - detected new event")
 
-    ; if fs.ModInRunningState()
+;     if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
+;         theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
+;         StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 3) 
+;     endif
 
-    ;     currentLocation = newLocation as Location
-    ;     ;Location parentLocation = PO3_SKSEFunctions.GetParentLocation(currentLocation)
+;     ;set the rules check flag to on - since the snapshot will get messed up by the quest starting
+;     ;bind_GlobalRulesUpdatedFlag.SetValue(1)
+;     ;StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 3) ;set to to-do
 
-    ;     bind_Utility.WriteToConsole("bound for location - location: " + currentLocation.GetName() + " inside: " + theSub.IsInInterior())
-    ;     if !theSub.IsInInterior()
-    ;         LocationExit()
-    ;     else
-    ;         LocationEntry()
-    ;     endif
+;     ;self.Stop()
 
-    ; else       
-    ;     bind_Utility.WriteToConsole("bound for location - mod not in running state")
-    ; endif
+; endevent
 
-endevent
+; event LocationChangeEvent(Form oldLocation, Form newLocation)
 
-event SafewordEvent()
+;     bind_Utility.WriteToConsole("bound for location quest - not running")
+
+;     ; if fs.ModInRunningState()
+
+;     ;     currentLocation = newLocation as Location
+;     ;     ;Location parentLocation = PO3_SKSEFunctions.GetParentLocation(currentLocation)
+
+;     ;     bind_Utility.WriteToConsole("bound for location - location: " + currentLocation.GetName() + " inside: " + theSub.IsInInterior())
+;     ;     if !theSub.IsInInterior()
+;     ;         LocationExit()
+;     ;     else
+;     ;         LocationEntry()
+;     ;     endif
+
+;     ; else       
+;     ;     bind_Utility.WriteToConsole("bound for location - mod not in running state")
+;     ; endif
+
+; endevent
+
+; event SafewordEvent()
     
-    bind_Utility.WriteToConsole("bound for location quest safeword ending")
+;     bind_Utility.WriteToConsole("bound for location quest safeword ending")
 
-    if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
-        theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
-    endif
+;     if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
+;         theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
+;     endif
 
-    ;self.Stop()
+;     ;self.Stop()
 
-endevent
+; endevent
 
-; event OnUpdate()
+; ; event OnUpdate()
+
+; ;     float distance = theDom.GetDistance(theSub)
+
+; ;     bind_Utility.WriteToConsole("updating bound for location")
+
+; ;     Location loc = CurrentLocationAlias.GetLocation()
+
+; ;     if loc.HasKeyWord(LocTypeCastle) && distance < 1500.0
+; ;         AddCastleBondage()
+; ;     endif
+    
+; ;     if loc.HasKeyWord(LocTypePlayerHouse) && distance < 1500.0
+; ;         AddPlayerHouseBondage()
+; ;     endif
+
+; ; endevent
+
+; function LocationEntry()
 
 ;     float distance = theDom.GetDistance(theSub)
 
 ;     bind_Utility.WriteToConsole("updating bound for location")
 
-;     Location loc = CurrentLocationAlias.GetLocation()
+;     Location loc = currentLocation ;CurrentLocationAlias.GetLocation()
 
 ;     if loc.HasKeyWord(LocTypeCastle) && distance < 1500.0
 ;         AddCastleBondage()
@@ -101,71 +155,53 @@ endevent
 ;         AddPlayerHouseBondage()
 ;     endif
 
-; endevent
+; endfunction
 
-function LocationEntry()
+; function AddCastleBondage()
+;     string setName = bms.GetRandomSet("Location - Castle")
+;     bind_Utility.WriteToConsole("castle - found set: " + setName)
+;     if setName != ""
+;         bind_Utility.WriteInternalMonologue("I am getting special bondage for " + currentLocation.GetName() + "...")
+;         EquipTheSet(setName)
+;     endif
+; endfunction
 
-    float distance = theDom.GetDistance(theSub)
+; function AddPlayerHouseBondage()
+;     string setName = bms.GetRandomSet("Location - Player Home")
+;     bind_Utility.WriteToConsole("player home - found set: " + setName)
+;     if setName != ""
+;         bind_Utility.WriteInternalMonologue("I am getting special bondage for home...")
+;         EquipTheSet(setName)
+;     endif
+; endfunction
 
-    bind_Utility.WriteToConsole("updating bound for location")
+; function EquipTheSet(string setName)
+;     bind_MovementQuestScript.PlayDoWork(theDom)
+;     bms.SnapshotCurrentBondage(theSub)
+;     bms.RemoveAllDetectedBondageItems(theSub)
+;     bind_Utility.DoSleep(2.0)
+;     bms.EquipSet(theSub, setName)
+;     if !theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
+;         theSub.AddToFaction(bind_WearingLocationSpecificBondageFaction)
+;     endif
+; endfunction
 
-    Location loc = currentLocation ;CurrentLocationAlias.GetLocation()
+; function LocationExit()
 
-    if loc.HasKeyWord(LocTypeCastle) && distance < 1500.0
-        AddCastleBondage()
-    endif
-    
-    if loc.HasKeyWord(LocTypePlayerHouse) && distance < 1500.0
-        AddPlayerHouseBondage()
-    endif
+;     if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
+;         bind_MovementQuestScript.PlayDoWork(theDom)
+;         ;bms.RemoveAllDetectedBondageItems(theSub)
+;         bms.RemoveAllDetectedBondageItems(theSub)
+;         bind_Utility.DoSleep(2.0)
+;         bms.RestoreFromSnapshot(theSub)
+;         theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
+;     endif
 
-endfunction
+;     ;bind_Utility.WriteToConsole("ending the bound for location quest")
 
-function AddCastleBondage()
-    string setName = bms.GetRandomSet("Location - Castle")
-    bind_Utility.WriteToConsole("castle - found set: " + setName)
-    if setName != ""
-        bind_Utility.WriteInternalMonologue("I am getting special bondage for " + currentLocation.GetName() + "...")
-        EquipTheSet(setName)
-    endif
-endfunction
+;     ;self.Stop()
 
-function AddPlayerHouseBondage()
-    string setName = bms.GetRandomSet("Location - Player Home")
-    bind_Utility.WriteToConsole("player home - found set: " + setName)
-    if setName != ""
-        bind_Utility.WriteInternalMonologue("I am getting special bondage for home...")
-        EquipTheSet(setName)
-    endif
-endfunction
-
-function EquipTheSet(string setName)
-    bind_MovementQuestScript.PlayDoWork(theDom)
-    bms.SnapshotCurrentBondage(theSub)
-    bms.RemoveAllDetectedBondageItems(theSub)
-    bind_Utility.DoSleep(2.0)
-    bms.EquipSet(theSub, setName)
-    if !theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
-        theSub.AddToFaction(bind_WearingLocationSpecificBondageFaction)
-    endif
-endfunction
-
-function LocationExit()
-
-    if theSub.IsInFaction(bind_WearingLocationSpecificBondageFaction)
-        bind_MovementQuestScript.PlayDoWork(theDom)
-        ;bms.RemoveAllDetectedBondageItems(theSub)
-        bms.RemoveAllDetectedBondageItems(theSub)
-        bind_Utility.DoSleep(2.0)
-        bms.RestoreFromSnapshot(theSub)
-        theSub.RemoveFromFaction(bind_WearingLocationSpecificBondageFaction)
-    endif
-
-    ;bind_Utility.WriteToConsole("ending the bound for location quest")
-
-    ;self.Stop()
-
-endfunction
+; endfunction
 
 bind_MainQuestScript property mqs auto
 bind_BondageManager property bms auto

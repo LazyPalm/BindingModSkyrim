@@ -27,13 +27,13 @@ event OnInit()
 
     if self.IsRunning()
 
-        Quest q = Quest.GetQuest("bind_MainQuest")
-        mqs = q as bind_MainQuestScript
-        bms = q as bind_BondageManager
-        bcs = q as bind_Controller
-        gms = q as bind_GearManager
-        fms = q as bind_FurnitureManager
-        fs = q as bind_Functions
+        ; Quest q = Quest.GetQuest("bind_MainQuest")
+        ; mqs = q as bind_MainQuestScript
+        ; bms = q as bind_BondageManager
+        ; bcs = q as bind_Controller
+        ; gms = q as bind_GearManager
+        ; fms = q as bind_FurnitureManager
+        ; fs = q as bind_Functions
 
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
@@ -407,12 +407,12 @@ function FreeTheSub()
 
 endfunction
 
-; bind_MainQuestScript property mqs auto
-; bind_BondageManager property bms auto
-; bind_Controller property bcs auto
-; bind_GearManager property gms auto
-; bind_FurnitureManager property fms auto
-; bind_Functions property fs auto
+bind_MainQuestScript property mqs auto
+bind_BondageManager property bms auto
+bind_Controller property bcs auto
+bind_GearManager property gms auto
+bind_FurnitureManager property fms auto
+bind_Functions property fs auto
 
 ReferenceAlias property NearestFurniture auto
 ReferenceAlias property TheDoor auto

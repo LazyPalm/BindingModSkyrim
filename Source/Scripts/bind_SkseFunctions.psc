@@ -26,3 +26,4 @@ function UnequipAllBondage(Actor act) global native
 int[] function GetRandomNumbers(int minRange, int maxRange, int numberToReturn) global native
 int function FindRule(Armor item) global native
 Form[] function GetDeviousInventory(Actor act) global native
+ObjectReference[] function GetNearbyBeds(Actor act, float distance = 1000.0) global native

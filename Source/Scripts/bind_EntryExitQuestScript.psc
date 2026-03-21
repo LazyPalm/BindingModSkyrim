@@ -52,15 +52,18 @@ event OnInit()
                     if doorLoc != none
                         fs.BuildingDoorDestination.ForceLocationTo(doorLoc)
                         if isIndoors
-                            Location currentLocation = fs.TheSubCurrentLocation.GetLocation()
+                            ;debug.MessageBox("current loc from alias: " + CurrentLoc.GetLocation().GetName())
+
+                            Location currentLocation = CurrentLoc.GetLocation() ;fs.TheSubCurrentLocation.GetLocation()
+                            bind_Utility.WriteToConsole("entry/exit kneel for - current loc: " + currentLocation.GetName())
                             if currentLocation != none
-                                if rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
+                                if currentLocation.HasKeywordString("LocTypeInn") ;rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
                                     rm.BehaviorEnterExitRuleInnPermission = 1
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
-                                elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
+                                elseif currentLocation.HasKeywordString("LocTypeCastle"); rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
                                     rm.BehaviorEnterExitRuleCastlePermission = 1
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
-                                elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
+                                elseif currentLocation.HasKeywordString("LocTypePlayerHouse") ;rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
                                     rm.BehaviorEnterExitRulePlayerHomePermission = 1
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
                                 endif                            
@@ -173,6 +176,8 @@ endevent
 event PressedAction(bool longPress)
     bind_Utility.WriteToConsole("pressed action in entry/exit quest - no state")
 endevent
+
+LocationAlias property CurrentLoc auto
 
 ReferenceAlias property TheDoor auto
 

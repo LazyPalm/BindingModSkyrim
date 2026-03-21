@@ -96,6 +96,13 @@ int sliderPunishmentMaxGold
 int sliderPunishmentGoldPercentage
 
 ;preferences
+int toggleTeleportDom
+int toggleHoldConversationTarget
+int toggleDisplayNoBondageOutfit
+int toggleSpellBondage
+int toggleDomComments
+int toggleHideSetDomDialogue
+
 int toggleAdventuringUse
 int sliderAdventuringPointCost
 int toggleAdventuringGoodBehavior
@@ -179,6 +186,7 @@ int toggleFurnitureMenu
 int menuFurnitureType
 int toggleDisplayLocationChange
 int toggleExperimentalFeaturesFlag
+int toggleWriteToConsole
 
 ;dependencies
 int toggleEnableDD
@@ -310,7 +318,7 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.34"
+    version = "0.4.41"
 
     theSub = fs.GetSubRef()
 
@@ -677,6 +685,11 @@ event OnOptionHighlight(int option)
     elseif option == toggleSltrProtection
         SetInfoText("Toggling this on will attempt to leave items (only the collar currently) added by Submissive Lola: The Resubmission in place during outfit changes and block Binding items in outfits already added by SLTR.")
 
+
+    elseif option == toggleTeleportDom
+        SetInfoText("This will teleport your target (usually the Dom) to you when the walk-to-target routines fail to move the target close to the player.")
+    elseif option == toggleHoldConversationTarget
+        SetInfoText("This will cause a conversational target to pause what they are doing, and when you have your crosshair over the target, it helps facilitate easier interactions using conversation rules.")
 
     endif
 
@@ -1836,6 +1849,14 @@ EndFunction
 
 Function DisplayPreferences()
 
+    AddHeaderOption("Gameplay Mechanics")
+    AddHeaderOption("")
+    toggleTeleportDom = AddToggleOption("Teleport Dom To Player", main.PreferenceTeleportDom)
+    toggleHoldConversationTarget = AddToggleOption("Hold Conversation Target", main.PreferenceHoldConversationTarget)
+    toggleDisplayNoBondageOutfit = AddToggleOption("Display No Bondage Outfit Found Message", StorageUtil.GetIntValue(theSub, "bind_display_no_outfit", 0))
+    AddEmptyOption()
+
+
     AddHeaderOption("Bondage Outfit Changes")
     AddHeaderOption("")
 
@@ -1845,8 +1866,8 @@ Function DisplayPreferences()
     ;toggleAdventuringAutomatic = AddToggleOption("Auto When Entering/Leaving", main.AdventuringAutomatic)
     sliderAdventuringSeconds = AddSliderOption("Run Check After Seconds", main.AdventuringCheckAfterSeconds, "{0}")
     ;toggleAdventuringSuspendRules = AddToggleOption("Suspend Rules & Auto *", main.AdventuringSuspendRules)
-    
-    AddTextOption("", "")
+    toggleSpellBondage = AddToggleOption("Magic Bondage Change - Dom Can Be Away", main.PreferenceSpellChangeBondage)  
+    ;AddTextOption("", "")
 
 
     AddHeaderOption("Dominant Preferences")
@@ -1855,6 +1876,10 @@ Function DisplayPreferences()
     toggleCleanSub = AddToggleOption("Dirt - Clean Sub Required", main.DomPreferenceCleanSub)
     ;toggleUnplugGagsOnly = AddToggleOption("Gags - Unplug Panel Gags Only", main.DomOnlyUnplugsPanelGags)
     toggleRemoveGagForDialogue = AddToggleOption("Gags - Remove For Dialogue", main.DomRemovesGagForDialogue)
+    toggleDomComments = AddToggleOption("Dom Makes Random Comments", main.PreferenceDomRandomComments)
+    toggleHideSetDomDialogue = AddToggleOption("Hide Set Dom Dialogue", main.PreferenceHideSetDomDialogue)
+
+    ;AddEmptyOption()
 
     ;AddTextOption("", "")
 
@@ -2319,6 +2344,8 @@ Function DisplayDebug()
     toggleDisplayLocationChange = AddToggleOption("Show Location Change", main.DisplayLocationChange)
     AddTextOption("Binding Version", version)
     toggleExperimentalFeaturesFlag = AddToggleOption("Experimental Features", main.ExperimentalFeaturesFlag)
+    toggleWriteToConsole = AddToggleOption("Write Log Information To Console", StorageUtil.GetIntValue(none, "bind_write_to_console", 0))
+
 
 EndFunction
 
@@ -2611,27 +2638,38 @@ Event OnOptionSelect(int option)
             if ShowMessage("Make bondage outfit templates backup?", true, "$Yes", "$No")
                 string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
                 string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
-                string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
-                ;ShowMessage(outfitsFileText, false)
-                MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
 
-                string backupOutfitList = ""
-
-                int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
-
+                string[] templateFiles = MiscUtil.FilesInFolder(folder)
                 i = 0
-                string outfitFileText
-                while i < outfitList.Length
-                    if backupOutfitList != ""
-                        backupOutfitList += "|"
-                    endif
-                    backupOutfitList += outfitList[i]
-                    outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                    MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                while i < templateFiles.Length
+                    string fileName = templateFiles[i]
+                    ;ShowMessage(templateFiles[i], false)
+                    string fileData = MiscUtil.ReadFromFile(folder + fileName)
+                    MiscUtil.WriteToFile(backupFolder + fileName, fileData, false, true)
                     i += 1
                 endwhile
 
-                MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+                ; string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
+                ; ;ShowMessage(outfitsFileText, false)
+                ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+
+                ; string backupOutfitList = ""
+
+                ; int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
+
+                ; i = 0
+                ; string outfitFileText
+                ; while i < outfitList.Length
+                ;     if backupOutfitList != ""
+                ;         backupOutfitList += "|"
+                ;     endif
+                ;     backupOutfitList += outfitList[i]
+                ;     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+                ;     MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                ;     i += 1
+                ; endwhile
+
+                ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
 
                 ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 binding_backup overwrite folder.", false)
             endif
@@ -2640,32 +2678,43 @@ Event OnOptionSelect(int option)
         if option == clickedRestoreBondageOutfits
             string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
             string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
-            if !MiscUtil.FileExists(backupFolder + "bind_bondage_outfits.json")
+            string[] templateFiles = MiscUtil.FilesInFolder(backupFolder)
+
+            if templateFiles.Length == 0 ; !MiscUtil.FileExists(backupFolder + "bind_bondage_outfits.json")
                 ShowMessage("No backup exists", false)
             else
                 if ShowMessage("Restore bondage outfit templates backup? This will overwrite your current outfit templates.", true, "$Yes", "$No")
 
-                    string outfitsFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfits.json")
-
-                    ;debug.MessageBox(outfitsFileText)
-
-                    MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
-
-                    string backupOutfitList = MiscUtil.ReadFromFile(backupfolder + "bind_bondage_outfit_list_backup.txt")
-
-                    debug.MessageBox(backupOutfitList)
-
-                    string[] outfitList = StringUtil.Split(backupOutfitList, "|")
-                    
-                    ;ShowMessage(outfitList, false)
-
                     i = 0
-                    string outfitFileText
-                    while i < outfitList.Length
-                        outfitFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                        MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                    while i < templateFiles.Length
+                        string fileName = templateFiles[i]
+                        ;ShowMessage(templateFiles[i], false)
+                        string fileData = MiscUtil.ReadFromFile(backupFolder + fileName)
+                        MiscUtil.WriteToFile(folder + fileName, fileData, false, true)
                         i += 1
                     endwhile
+
+                    ; string outfitsFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfits.json")
+
+                    ; ;debug.MessageBox(outfitsFileText)
+
+                    ; MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+
+                    ; string backupOutfitList = MiscUtil.ReadFromFile(backupfolder + "bind_bondage_outfit_list_backup.txt")
+
+                    ; debug.MessageBox(backupOutfitList)
+
+                    ; string[] outfitList = StringUtil.Split(backupOutfitList, "|")
+                    
+                    ; ;ShowMessage(outfitList, false)
+
+                    ; i = 0
+                    ; string outfitFileText
+                    ; while i < outfitList.Length
+                    ;     outfitFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+                    ;     MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+                    ;     i += 1
+                    ; endwhile
 
                     ShowMessage("Restore Completed. Template data will be available for new games.", false)
                 endif
@@ -3461,6 +3510,38 @@ Event OnOptionSelect(int option)
         i += 1
     endwhile
 
+    if option == toggleTeleportDom
+        main.PreferenceTeleportDom = ToggleValue(main.PreferenceTeleportDom)
+        SetToggleOptionValue(toggleTeleportDom, main.PreferenceTeleportDom)
+    endif
+
+    if option == toggleHoldConversationTarget
+        main.PreferenceHoldConversationTarget = ToggleValue(main.PreferenceHoldConversationTarget)
+        SetToggleOptionValue(toggleHoldConversationTarget, main.PreferenceHoldConversationTarget)
+    endif
+
+    if option == toggleDisplayNoBondageOutfit
+        int val = ToggleValue(StorageUtil.GetIntValue(theSub, "bind_display_no_outfit", 0))
+        StorageUtil.SetIntValue(theSub, "bind_display_no_outfit", val)
+        SetToggleOptionValue(toggleDisplayNoBondageOutfit, val)
+    endif
+
+    if option == toggleSpellBondage
+        main.PreferenceSpellChangeBondage = ToggleValue(main.PreferenceSpellChangeBondage)
+        SetToggleOptionValue(toggleSpellBondage, main.PreferenceSpellChangeBondage)
+    endif
+
+    if option == toggleDomComments
+        main.PreferenceDomRandomComments = ToggleValue(main.PreferenceDomRandomComments)
+        SetToggleOptionValue(toggleDomComments, main.PreferenceDomRandomComments)
+    endif
+
+    ;toggleHideSetDomDialogue = AddToggleOption("Hide Set Dom Dialogue", main.PreferenceHideSetDomDialogue)
+    if option == toggleHideSetDomDialogue
+        main.PreferenceHideSetDomDialogue = ToggleValue(main.PreferenceHideSetDomDialogue)
+        SetToggleOptionValue(toggleHideSetDomDialogue, main.PreferenceHideSetDomDialogue)
+    endif
+
     If option == toggleCleanSub
         main.DomPreferenceCleanSub = ToggleValue(main.DomPreferenceCleanSub)
         SetToggleOptionValue(toggleCleanSub, main.DomPreferenceCleanSub)
@@ -3584,6 +3665,12 @@ Event OnOptionSelect(int option)
             main.ExperimentalFeaturesFlag = 0
             SetToggleOptionValue(toggleExperimentalFeaturesFlag, main.ExperimentalFeaturesFlag)
         endif
+    endif
+
+    if option == toggleWriteToConsole
+        int val = ToggleValue(StorageUtil.GetIntValue(none, "bind_write_to_console", 0))
+        StorageUtil.SetIntValue(none, "bind_write_to_console", val)
+        SetToggleOptionValue(toggleWriteToConsole, val)
     endif
 
     ;diagnostics

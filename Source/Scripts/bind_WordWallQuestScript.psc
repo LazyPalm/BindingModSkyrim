@@ -72,9 +72,11 @@ event SafewordEvent()
 endevent
 
 event CombatStartedInEvent(Form akTarget)
-    if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
-        fs.Safeword()
-    endif
+    ; if bind_Utility.ConfirmBox("Your party has been attacked. End this?", "I must fight", fs.GetDomTitle() + " can handle this. Leave me.")
+	; 	StorageUtil.SetIntValue(theSub, "bind_word_wall_combat_ending", 1)
+	; 	EmergencyQuestEnd()
+    ;     fs.Safeword()
+    ; endif
 endevent
 
 event PressedAction(bool longPress)
@@ -130,6 +132,12 @@ endfunction
 event OnSexEndEvent(string eventName, string argString, float argNum, form sender)
 
     ;StopEvent()
+
+	if !theSub.IsInFaction(bms.WearingBlindfoldFaction()) || !theSub.IsInFaction(bms.WearingHoodFaction())
+		if bms.AddItem(theSub, bms.BONDAGE_TYPE_BLINDFOLD())
+			bind_Utility.DoSleep()
+		endif
+	endif
 
 	SetObjectiveCompleted(20)
 	SetObjectiveDisplayed(20, false)
@@ -228,6 +236,8 @@ function EmergencyQuestEnd()
 	StorageUtil.SetIntValue(theSub, "bind_known_words", Game.queryStat("Words Of Power Learned")) ;NOTE: not sure if this will be updated at this point
 
 	fs.EventCleanUpSub(theSub, theDom, false)
+
+	StorageUtil.SetIntValue(theSub, "bind_word_wall_emergency_ending", 1)
 
     bcs.DoEndEvent()
 

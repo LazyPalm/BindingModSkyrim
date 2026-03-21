@@ -911,12 +911,12 @@ Function DoConversationPose()
 
     if rms.GetBehaviorRule(theSubRef, rms.BEHAVIOR_RULE_SPEECH_DOM()) == 1 ;.GetBehaviorRuleByName("Speech Rule:Dom Speaks") == 1
         
-        if main.SoftCheckChim == 1 && main.EnableModChim == 1
-            bind_Utility.WriteToConsole("CHIM enabled, not starting bind_ConversationQuest")
-            bind_Utility.SendSimpleModEvent("bind_ConversationPoseEvent")
-        else
-            bind_ConversationQuest.Start()
-        endif
+        ; if main.SoftCheckChim == 1 && main.EnableModChim == 1
+        ;     bind_Utility.WriteToConsole("CHIM enabled, not starting bind_ConversationQuest")
+        ;     bind_Utility.SendSimpleModEvent("bind_ConversationPoseEvent")
+        ; else
+        bind_ConversationQuest.Start()
+        ;endif
 
         StorageUtil.SetFloatValue(theSubRef, "bind_temp_speaking_permission", bind_Utility.AddTimeToCurrentTime(1, 0))
     endif

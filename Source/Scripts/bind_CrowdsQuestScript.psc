@@ -252,7 +252,7 @@ function SetActiveState(Actor c, bool activeFlag)
                     SkyrimNetApi.DirectNarration(c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.", c, fs.GetDomRef())
                 else
                     bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
-                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " makes a comment {{ player.name }}'s current situation.", c)
+                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " makes a comment about {{ player.name }}'s current situation.", c)
                 endif
                 ;endif
             endif

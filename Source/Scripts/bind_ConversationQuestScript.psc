@@ -7,6 +7,8 @@ event OnInit()
 
     if self.IsRunning()
 
+        bind_Utility.WriteToConsole("conversation quest starting...")
+
         playingScene = true
         standingAgain = false
 
@@ -62,6 +64,8 @@ function EndQuest()
     bind_Utility.EnablePlayer()
 
     bcs.DoEndEvent()
+
+    bind_Utility.WriteToConsole("conversation quest ended...")
 
     self.Stop()
 

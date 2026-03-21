@@ -1,0 +1,32 @@
+{
+	"formList" : 
+	{
+		"default_bondage_items" : 
+		[
+			"0x14929|Devious Devices - Expansion.esm",
+			"0x14927|Devious Devices - Expansion.esm",
+			"0x14920|Devious Devices - Expansion.esm",
+			"0x1491E|Devious Devices - Expansion.esm",
+			"0x39C73|Devious Devices - Expansion.esm",
+			"0x5845E|Devious Devices - Expansion.esm",
+			"0x31019|Devious Devices - Expansion.esm",
+			"0x5846E|Devious Devices - Expansion.esm",
+			"0x2324D|Devious Devices - Expansion.esm",
+			"0x5859F|Devious Devices - Expansion.esm",
+			"0x3D2E8|Devious Devices - Expansion.esm",
+			"0x3D850|Devious Devices - Expansion.esm",
+			"0x100DC|Devious Devices - Expansion.esm",
+			"0x56785|Devious Devices - Expansion.esm",
+			"0x58474|Devious Devices - Expansion.esm",
+			"0x5847A|Devious Devices - Expansion.esm"
+		]
+	},
+	"int" : 
+	{
+		"key_action" : 27,
+		"key_action_mod" : 0,
+		"key_setting" : 27,
+		"key_setting_mod" : 54,
+        "handy_info_change_action_key_to" : 27
+	}
+}

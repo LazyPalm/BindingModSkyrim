@@ -414,8 +414,12 @@ function WalkTo(Actor a, ObjectReference target, float targetDistance = 128.0, i
         i += 1
     endwhile
 
-    if a.GetDistance(target) > targetDistance
-        a.MoveTo(target)
+    bind_MainQuestScript mqs = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+    ;debug.MessageBox(Quest.GetQuest("bind_MainQuest"))
+    if mqs.PreferenceTeleportDom == 1
+        if a.GetDistance(target) > targetDistance
+            a.MoveTo(target)
+        endif
     endif
 
     bm.MoveToTarget.Clear()

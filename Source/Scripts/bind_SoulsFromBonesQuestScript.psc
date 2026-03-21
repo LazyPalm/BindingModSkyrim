@@ -73,7 +73,7 @@ state WantsToTalk
         ;     bind_Utility.WriteNotification(mqs.GetDomTitle() + " wants to talk...", bind_Utility.TextColorRed())
         ; endif
 
-        if theSub.GetDistance(TheDeadDragon.GetReference()) > 1500.0
+        if theSub.GetDistance(TheDeadDragon.GetReference()) > 100000.0
             
             UnregisterForUpdate()
             fs.MarkSubBrokeRule("I was supposed to talk to " + fs.GetDomTitle())
@@ -91,8 +91,9 @@ state WantsToTalk
         
         if !pressedButton 
             pressedButton = true
-            bind_Controller.SendActionKneelTriggerEvent()
-            bind_Utility.DoSleep(2.0)
+            bind_Utility.WriteInternalMonologue("I need to speak with " + fs.GetDomTitle() + " about the dragon...")
+            ;bind_Controller.SendActionKneelTriggerEvent()
+            ;bind_Utility.DoSleep(2.0)
             pressedButton = false
         endif
 

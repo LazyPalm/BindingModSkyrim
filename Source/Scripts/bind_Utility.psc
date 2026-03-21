@@ -216,7 +216,9 @@ endfunction
 
 function WriteToConsole(string msg) global
     ;get global to see if this is enabled
-    MiscUtil.PrintConsole("[BIND]: " + msg)
+    if StorageUtil.GetIntValue(none, "bind_write_to_console", 0) == 1
+        MiscUtil.PrintConsole("[BIND]: " + msg)
+    endif
     Debug.Trace("[BINDING]: " + msg)
 endfunction
 

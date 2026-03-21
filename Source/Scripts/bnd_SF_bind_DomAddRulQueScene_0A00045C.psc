@@ -2,6 +2,14 @@
 ;NEXT FRAGMENT INDEX 4
 Scriptname bnd_SF_bind_DomAddRulQueScene_0A00045C Extends Scene Hidden
 
+;BEGIN FRAGMENT Fragment_2
+Function Fragment_2()
+;BEGIN CODE
+;scene start - REMOVE RULE SCENE
+;END CODE
+EndFunction
+;END FRAGMENT
+
 ;BEGIN FRAGMENT Fragment_0
 Function Fragment_0()
 ;BEGIN CODE
@@ -12,14 +20,6 @@ Function Fragment_0()
 ;         ;add to faction?
 ;     endif
 ; endif
-;END CODE
-EndFunction
-;END FRAGMENT
-
-;BEGIN FRAGMENT Fragment_2
-Function Fragment_2()
-;BEGIN CODE
-;scene start - REMOVE RULE SCENE
 ;END CODE
 EndFunction
 ;END FRAGMENT

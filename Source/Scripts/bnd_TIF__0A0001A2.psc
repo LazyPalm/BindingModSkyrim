@@ -18,17 +18,17 @@ Actor akSpeaker = akSpeakerRef as Actor
 Quest q = Quest.GetQuest("bind_MainQuest")
 bind_RulesManager rm = q as bind_RulesManager
 
-rm.BehaviorEnterExitRuleInnPermission = 0
-rm.BehaviorEnterExitRuleCastlePermission = 0
-rm.BehaviorEnterExitRulePlayerHomePermission = 0
+; rm.BehaviorEnterExitRuleInnPermission = 0
+; rm.BehaviorEnterExitRuleCastlePermission = 0
+; rm.BehaviorEnterExitRulePlayerHomePermission = 0
 
-if rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
+;if rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
     rm.BehaviorEnterExitRuleInnPermission = 1
-elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
+;elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
     rm.BehaviorEnterExitRuleCastlePermission = 1
-elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
+;elseif rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
     rm.BehaviorEnterExitRulePlayerHomePermission = 1
-endif
+;endif
 
 bind_Utility.WriteInternalMonologue("I have permission to leave...")
 

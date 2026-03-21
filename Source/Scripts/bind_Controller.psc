@@ -13,6 +13,8 @@ int MOD_STATE_PAUSED = 2
 int MOD_STATE_DHLP = 3
 int MOD_STATE_EVENT = 4
 
+int currentModState = 0
+
 int keyCodeLeftControl = 29
 int keyCodeRightControl = 157
 int keyCodeLeftAlt = 56
@@ -68,17 +70,17 @@ function LoadGame()
         bind_CrowdsQuest.Start()
     endif
 
-    if !bind_LocationChangeDetectionQuest.IsRunning()
-        ;bind_LocationChangeDetectionQuest.Start()
-        bind_LocationChangeDetectionQuest.Stop() ;NOTE - moved detection to Functions / ProcessLocationChange
-    endif
+    ; if bind_LocationChangeDetectionQuest.IsRunning()
+    ;     ;bind_LocationChangeDetectionQuest.Start()
+    ;     bind_LocationChangeDetectionQuest.Stop() ;NOTE - moved detection to Functions / ProcessLocationChange
+    ; endif
 
     if !bind_EntryExitQuest.IsRunning()
         ;bind_EntryExitQuest.Start()
     endif
 
-    if !bind_BoundForLocations.IsRunning()
-        bind_BoundForLocations.Start()
+    if bind_BoundForLocations.IsRunning()
+         bind_BoundForLocations.Stop()
     endif
 
     if bind_GoAdventuringQuest.IsRunning()
@@ -105,7 +107,10 @@ function DoInitTasks()
     RegisterForModEvent("bind_PauseStartEvent", "OnPauseStart")
     RegisterForModEvent("bind_PauseEndEvent", "OnPauseEnd")
 
-    SetModState(MOD_STATE_RUNNING)
+    if currentModState == MOD_STATE_INIT
+        SetModState(MOD_STATE_RUNNING)
+    endif
+
     RegisterForSingleUpdate(1.0)
 
 endfunction
@@ -200,6 +205,12 @@ endfunction
 function SetModState(int modState)
     if bind_GlobalModState.GetValue() != modState
         bind_GlobalModState.SetValue(modState)
+    endif
+    currentModState = modState
+    if modState == MOD_STATE_RUNNING
+        StorageUtil.SetIntValue(none, "bind_rules_checks_active", 1)
+    else
+        StorageUtil.SetIntValue(none, "bind_rules_checks_active", 0)
     endif
 endfunction
 
@@ -484,6 +495,10 @@ Bool Function SafeProcess()
 		Return False
 	EndIf
 EndFunction
+
+bool function RulesChecksActive() global
+    return StorageUtil.GetIntValue(none, "bind_rules_checks_active", 0) == 1
+endfunction
 
 ; function SetDom(Actor dom)
 ;     actorDom = dom
