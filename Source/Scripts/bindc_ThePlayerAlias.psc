@@ -20,7 +20,7 @@ event OnPlayerLoadGame()
 	RegisterForSleep()
 	RegisterforCrosshairRef()
 
-    debug.MessageBox("reloading...")
+    ;debug.MessageBox("reloading...")
 	
     (GetOwningQuest() as bindc_Main).LoadGame()
     (GetOwningQuest() as bindc_Bondage).LoadGame()
@@ -70,7 +70,7 @@ endevent
 state ChangedLocationState
     event OnUpdate()
         bindc_Util.SendSimpleModEvent("BindingChangedLocationWithDelay")
-        (GetOwningQuest() as bindc_Main).RunMasterDetection()
+        (GetOwningQuest() as bindc_Main).TryStartQuests()
         GoToState("")
     endevent
 endstate
