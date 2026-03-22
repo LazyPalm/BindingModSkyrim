@@ -142,7 +142,7 @@ function LoadGame()
     ;StateTrigger() ;this needs to be here in case main quest is stopped / started
     RegisterForSingleUpdate(updateInterval)
 
-    debug.MessageBox("load completed...")
+    ;debug.MessageBox("load completed...")
 
 endfunction
 
