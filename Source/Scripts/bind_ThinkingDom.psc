@@ -49,6 +49,8 @@ endfunction
 
 Function LoadGame(bool rebuildStorage = false)
     
+    ;debug.MessageBox("loading thinking dom...")
+
     _SetupStorage(rebuildStorage)
     _SetLikes()
     ;for testing
@@ -82,7 +84,7 @@ Function LoadGame(bool rebuildStorage = false)
     RegisterForModEvent("bind_SubLeftKneelEvent", "SubLeftKneelEvent")
     RegisterForModEvent("bind_SubLookedAtFurnitureEvent", "SubLookedAtFurnitureEvent")
 
-    if main.SoftCheckSkyrimNet == 1 ;&& main.EnableModSkyrimNet == 1
+    if StorageUtil.GetIntValue(theSubRef, "bind_skyrimnet_enabled", 0) == 1 ; main.SoftCheckSkyrimNet == 1 ;&& main.EnableModSkyrimNet == 1
         RegisterDecorators()
         RegisterFunctions()
     endif
@@ -128,6 +130,110 @@ function RegisterFunctions()
 
     bind_Utility.WriteToConsole("Registering SkyrimNet actions")
 
+    ;debug.MessageBox("registering actions...")
+
+    SkyrimNetApi.RegisterAction("BindingInspection", "Examine {{ player.name }}'s body/pose. Use to check posture and verbal command compliance.", \
+        "bind_ThinkingDom", "BindingInspection_IsEligible", \
+        "bind_ThinkingDom", "BindingInspection_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try new bondage gear. Only use when explicitly requested.", \
+        "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
+        "bind_ThinkingDom", "BindingDressingRoom_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingBed", "Secure {{ player.name }} for sleep (hogtie or furniture). Use at bedtime for immobilization.", \
+        "bind_ThinkingDom", "BindingSleep_IsEligible", \
+        "bind_ThinkingDom", "BindingSleep_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingWhip", "Whip {{ player.name }} for punishment or play. Use when discipline is needed or for enjoyment.", \
+        "bind_ThinkingDom", "BindingWhip_IsEligible", \
+        "bind_ThinkingDom", "BindingWhip_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingSex", "Engage in sexual activity with {{ player.name }} using bondage equipment.", \
+        "bind_ThinkingDom", "BindingSex_IsEligible", \
+        "bind_ThinkingDom", "BindingSex_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingFurniture", "Secure {{ player.name }} to bondage furniture (pillories, racks, etc.) for immobilization.", \
+        "bind_ThinkingDom", "BindingFurniture_IsEligible", \
+        "bind_ThinkingDom", "BindingFurniture_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingHarshBondage", "Apply extreme bondage to {{ player.name }} (hand restraint + gag + blindfold). Use for maximum control/punishment.", \
+        "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
+        "bind_ThinkingDom", "BindingHarshBondage_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingCamping", "Setup kink-friendly campsite. Use when traveling in unsafe areas.", \
+        "bind_ThinkingDom", "BindingCamping_IsEligible", \
+        "bind_ThinkingDom", "BindingCamping_Execute", "", "PAPYRUS", 1, "")
+
+    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permissions: entry/exit, prayer, speech, learn spell, eat/drink, train, masturbate. THIS IS MANDATORY - dialogue alone cannot grant these permissions. Format: {\"permission\":\"[type]\"}.", \
+        "bind_ThinkingDom", "BindingPermissions_IsEligible", \
+        "bind_ThinkingDom", "BindingPermissions_Execute", "", "PAPYRUS", 1, "{\"permission\":\"entry|exit|prayer|speech|learn spell|eat|drink|train|masturbate\"}")
+
+    if main.SoftCheckMME == 1 && main.EnableModMME == 1
+
+        SkyrimNetApi.RegisterAction("BindingLactacid", "Feed {{ player.name }} Lactacid when their level is too.", \
+            "bind_ThinkingDom", "BindingLactacid_IsEligible", \
+            "bind_ThinkingDom", "BindingLactacid_Execute", "", "PAPYRUS", 1, "")
+
+        SkyrimNetApi.RegisterAction("BindingMilk", "Milk {{ player.name }} when their breasts are full.", \
+            "bind_ThinkingDom", "BindingMilk_IsEligible", \
+            "bind_ThinkingDom", "BindingMilk_Execute", "", "PAPYRUS", 1, "")
+
+    endif
+
+    ; SkyrimNetApi.RegisterAction("BindingInspection", "Conduct a thorough inspection of {{ player.name }}'s body and current pose. Use this when you want to examine their physical state, check bondage equipment, or assess their posture. This is appropriate when you suspect they're not following rules or want to admire their form.", \
+    ;                                 "bind_ThinkingDom", "BindingInspection_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingInspection_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingDressingRoom", "Allow {{ player.name }} to try on new bondage gear. ONLY use this when {{ player.name }} specifically requests to try on new equipment or when you want to outfit them with something different. Never use this unprompted.", \
+    ;                                 "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingDressingRoom_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingBed", "Prepare {{ player.name }} for sleep by either hogtying them or securing them to bondage furniture. Use this at bedtime or when you want to ensure they remain immobilized overnight. Consider their current state - are they being punished or just secured for safety?", \
+    ;                                 "bind_ThinkingDom", "BindingSleep_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingSleep_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingWhip", "Administer a whipping to {{ player.name }}. Use this for either punishment (when they've broken rules) or for mutual enjoyment (when they're being good). Always consider the context - are they deserving of punishment or are you both in the mood for play?", \
+    ;                                 "bind_ThinkingDom", "BindingWhip_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingWhip_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingSex", "Engage in sexual activity with {{ player.name }} while using bondage equipment. Use this when the mood is appropriate.", \
+    ;                                 "bind_ThinkingDom", "BindingSex_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingSex_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingFurniture", "Secure {{ player.name }} into specialized bondage furniture (pillories, stocks, racks, wall mounts, etc.). Use this when you want to immobilize them for extended periods, either for punishment, protection, or play. Consider which furniture would be most appropriate for the current situation.", \
+    ;                                 "bind_ThinkingDom", "BindingFurniture_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingFurniture_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingHarshBondage", "Apply extreme bondage to {{ player.name }} that immobilizes them completely, restricts vision (blindfold/hood), limits speech (gag/bit), and may include sensory deprivation. Use for maximum punishment, intense BDSM scenes, or when absolute control is needed. This limits their ability to move, see, or speak clearly.", \
+    ;                                 "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingHarshBondage_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingCamping", "Set up a kink-friendly campsite for the night. Use this when traveling in unsafe areas where proper accommodations aren't available. The campsite should provide both safety and opportunities for bondage play.", \
+    ;                                 "bind_ThinkingDom", "BindingCamping_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingCamping_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
+
+    ; SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} specific permissions they must have to perform certain actions. THIS IS MANDATORY - dialogue alone cannot grant these permissions. Use this when you want to allow them to: enter/exit locations, pray, speak, learn spells, eat/drink, train skills, or masturbate. Specify which permission(s) to grant using the format: {\"permission\":\"[type]\"} where [type] is one of: entry, exit, prayer, speech, learn spell, eat, drink, train, or masturbate.", \
+    ;                                 "bind_ThinkingDom", "BindingPermissions_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingPermissions_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "{\"permission\":\"entry|exit|prayer|speech|learn spell|eat|drink|train|masturbate\"}")
+
     ;SkyrimNetApi.RegisterDecorator("get_hour", "bind_ThinkingDom", "Decorator_Function")
 
     ; SkyrimNetApi.RegisterAction("ExtCmdBindingTieWrists", "Bind {{ player.name }}'s wrists.", \
@@ -142,66 +248,66 @@ function RegisterFunctions()
     ;                                 "", "PAPYRUS", \
     ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("BindingInspection", "Start a body and pose inspection of {{ player.name }}.", \
-                                    "bind_ThinkingDom", "BindingInspection_IsEligible", \
-                                    "bind_ThinkingDom", "BindingInspection_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")
+    ; SkyrimNetApi.RegisterAction("BindingInspection", "Start a body and pose inspection of {{ player.name }}.", \
+    ;                                 "bind_ThinkingDom", "BindingInspection_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingInspection_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try on new bondage gear. Only use this if {{ player.name }} asks.", \
-                                    "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
-                                    "bind_ThinkingDom", "BindingDressingRoom_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")
+    ; SkyrimNetApi.RegisterAction("BindingDressingRoom", "Let {{ player.name }} try on new bondage gear. Only use this if {{ player.name }} asks.", \
+    ;                                 "bind_ThinkingDom", "BindingDressingRoom_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingDressingRoom_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("BindingBed", "Put {{ player.name }} to bed for the night to sleep hogtied or bound to furniture.", \
-                                    "bind_ThinkingDom", "BindingSleep_IsEligible", \
-                                    "bind_ThinkingDom", "BindingSleep_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")
+    ; SkyrimNetApi.RegisterAction("BindingBed", "Put {{ player.name }} to bed for the night to sleep hogtied or bound to furniture.", \
+    ;                                 "bind_ThinkingDom", "BindingSleep_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingSleep_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
 
-    SkyrimNetApi.RegisterAction("BindingWhip", "Give {{ player.name }} a good beating for punishment or fun.", \
-                                    "bind_ThinkingDom", "BindingWhip_IsEligible", \
-                                    "bind_ThinkingDom", "BindingWhip_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")
+    ; SkyrimNetApi.RegisterAction("BindingWhip", "Give {{ player.name }} a good beating for punishment or fun.", \
+    ;                                 "bind_ThinkingDom", "BindingWhip_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingWhip_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")
                                     
-    SkyrimNetApi.RegisterAction("BindingSex", "Have sex with {{ player.name }} using bondage gear.", \
-                                    "bind_ThinkingDom", "BindingSex_IsEligible", \
-                                    "bind_ThinkingDom", "BindingSex_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")    
+    ; SkyrimNetApi.RegisterAction("BindingSex", "Have sex with {{ player.name }} using bondage gear.", \
+    ;                                 "bind_ThinkingDom", "BindingSex_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingSex_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")    
 
-    SkyrimNetApi.RegisterAction("BindingFurniture", "Lock {{ player.name }} into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
-                                    "bind_ThinkingDom", "BindingFurniture_IsEligible", \
-                                    "bind_ThinkingDom", "BindingFurniture_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")    
+    ; SkyrimNetApi.RegisterAction("BindingFurniture", "Lock {{ player.name }} into bondage furniture like pillories, stockades, racks, wall manacles, cruxes.", \
+    ;                                 "bind_ThinkingDom", "BindingFurniture_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingFurniture_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")    
 
-    SkyrimNetApi.RegisterAction("BindingHarshBondage", "Tie {{ player.name }} into inescapably tight bondage for punishment or fun .", \
-                                    "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
-                                    "bind_ThinkingDom", "BindingHarshBondage_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")   
+    ; SkyrimNetApi.RegisterAction("BindingHarshBondage", "Tie {{ player.name }} into inescapably tight bondage for punishment or fun .", \
+    ;                                 "bind_ThinkingDom", "BindingHarshBondage_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingHarshBondage_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")   
 
-    ;"Setup a camp for the night. This can ONLY be used after the 18th hour or before the 6th hour of the day. The current hour is {{ get_hour(npc.UUID) }}."                                    
+    ; ;"Setup a camp for the night. This can ONLY be used after the 18th hour or before the 6th hour of the day. The current hour is {{ get_hour(npc.UUID) }}."                                    
 
-    ;TODO - this decorator is the wrong way to do this. the hours of the day just needs to be in the BindingCamping_IsEligible check
-    SkyrimNetApi.RegisterAction("BindingCamping", "Setup a kinky camp for the night.", \  
-                                    "bind_ThinkingDom", "BindingCamping_IsEligible", \
-                                    "bind_ThinkingDom", "BindingCamping_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "")   
-                                    ;removed this - " This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
+    ; ;TODO - this decorator is the wrong way to do this. the hours of the day just needs to be in the BindingCamping_IsEligible check
+    ; SkyrimNetApi.RegisterAction("BindingCamping", "Setup a kinky camp for the night.", \  
+    ;                                 "bind_ThinkingDom", "BindingCamping_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingCamping_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "")   
+    ;                                 ;removed this - " This can ONLY be used after the 18th hour of the day. The current hour is {{ get_hour(npc.UUID) }}.", \
 
 
-    ;RegisterBondageRule()
+    ; ;RegisterBondageRule()
 
-    SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things. This MUST be called before the player can have permission to do these things, dialogue responses alone will not grant permission. These permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate.", \  
-                                    "bind_ThinkingDom", "BindingPermissions_IsEligible", \
-                                    "bind_ThinkingDom", "BindingPermissions_Execute", \
-                                    "", "PAPYRUS", \
-                                    1, "{\"permission\":\"entry|exit|prayer|speech|learn spell|eat|drink|train|masturbate\"}")  
+    ; SkyrimNetApi.RegisterAction("BindingPermissions", "Grant {{ player.name }} permission to do things. This MUST be called before the player can have permission to do these things, dialogue responses alone will not grant permission. These permissions can be granted: entry, exit, prayer, speech, learn spell, eat, drink, train, masturbate.", \  
+    ;                                 "bind_ThinkingDom", "BindingPermissions_IsEligible", \
+    ;                                 "bind_ThinkingDom", "BindingPermissions_Execute", \
+    ;                                 "", "PAPYRUS", \
+    ;                                 1, "{\"permission\":\"entry|exit|prayer|speech|learn spell|eat|drink|train|masturbate\"}")  
 
 
 endfunction
@@ -254,7 +360,7 @@ string function DecoratorInfo(Actor akActor) global
     int isCollared = fun.SubIsCollared()
     int isKneeling = fun.GetIsKneeling()
 
-    int nudity = arcs_API.CheckNudity(fun.GetSubRef()) ;might move this code over?
+    int nudity = 0 ;arcs_API.CheckNudity(fun.GetSubRef()) ;might move this code over?
 
     string output = "{"
 
@@ -676,6 +782,71 @@ bool function BindingPermissions_IsEligible(Actor akOriginator, string contextJs
 
 endfunction
 
+bool function BindingLactacid_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingLactacid_IsEligible actor: " + akOriginator)
+
+    bool result
+
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+
+    if !f.UseSkyrimNetCheck(akOriginator)
+        return false
+    endif
+
+    ;check lactacid level?
+
+    if StorageUtil.GetIntValue(f.GetSubRef(), "bind_milk_slave", 0) != 1
+        return false
+    endif
+
+    ; Faction milkmaid = bind_MMEHelper.GetMilkmaidFaction()
+    ; if milkmaid != none
+    ;     if !f.GetSubRef().IsInFaction(milkmaid)
+    ;         return false
+    ;     endif
+    ; endif
+
+    result = true
+
+    return result
+
+endfunction
+
+bool function BindingMilk_IsEligible(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingMilk_IsEligible actor: " + akOriginator)
+
+    bool result
+
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+
+    if !f.UseSkyrimNetCheck(akOriginator)
+        return false
+    endif
+
+    ;check milk level?
+
+    if StorageUtil.GetIntValue(f.GetSubRef(), "bind_milk_slave", 0) != 1
+        return false
+    endif
+
+    ; Faction milkmaid = bind_MMEHelper.GetMilkmaidFaction()
+    ; if milkmaid != none
+    ;     if !f.GetSubRef().IsInFaction(milkmaid)
+    ;         return false
+    ;     endif
+    ; endif
+
+    result = true
+
+    return result
+
+endfunction
+
+    
+    
+
 ; function BindingTieWrists_Execute(Actor akOriginator, string contextJson, string paramsJson) global
 
 ;     bind_Utility.WriteToConsole("SkyrimNet called: BindingTieWrists_Execute actor: " + akOriginator)
@@ -885,16 +1056,40 @@ function BindingPermissions_Execute(Actor akOriginator, string contextJson, stri
 
         if permission == "entry" || permission == "exit"
 
-            string msg = "enter"
-            if permission == "exit"
-                msg = "leave"
+            Quest q = Quest.GetQuest("bind_MainQuest")
+            Quest entryExitQuest = Quest.GetQuest("bind_EntryExitQuest")
+            if q != none && entryExitQuest != none
+                if (q as bind_Functions).ModInRunningState()
+                    if !entryExitQuest.IsRunning()
+                        entryExitQuest.Start()
+                    endif
+                endif
             endif
-            ObjectReference ref = t.BuildingDoor.GetReference()
-            if ref
-                StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
-                StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
-            endif
-            bind_Utility.WriteInternalMonologue("I have permission to " + msg + "...")
+
+            ; bind_RulesManager rm = q as bind_RulesManager
+
+            ; rm.BehaviorEnterExitRuleInnPermission = 0
+            ; rm.BehaviorEnterExitRuleCastlePermission = 0
+            ; rm.BehaviorEnterExitRulePlayerHomePermission = 0
+
+            ; if rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_INN
+            ;     rm.BehaviorEnterExitRuleInnPermission = 1
+            ; elseif rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_CASTLE
+            ;     rm.BehaviorEnterExitRuleCastlePermission = 1
+            ; elseif rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_PLAYERHOME
+            ;     rm.BehaviorEnterExitRulePlayerHomePermission = 1
+            ; endif
+
+            ; string msg = "enter"
+            ; if permission == "exit"
+            ;     msg = "leave"
+            ; endif
+            ; ObjectReference ref = t.BuildingDoor.GetReference()
+            ; if ref
+            ;     StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
+            ;     StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
+            ; endif
+            ;bind_Utility.WriteInternalMonologue("I have permission to " + msg + "...")
 
         elseif permission == "prayer"
 
@@ -938,6 +1133,51 @@ function BindingPermissions_Execute(Actor akOriginator, string contextJson, stri
 
 endfunction
 
+function BindingLactacid_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingLactacid_Execute actor: " + akOriginator)
+
+    Quest dairy = Quest.GetQuest("bind_DairyQuest")
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
+
+    ;debug.MessageBox("feeding the sub lactacid...")
+
+    if f.ModInRunningState()
+        ;debug.MessageBox("start dairy quest")
+        SkyrimNetApi.DirectNarration(f.GetDomRef().GetDisplayName() + " orders {{ player.name }} to open their mouth and drink the lactacid", f.GetDomRef(), f.GetSubRef())        
+        StorageUtil.SetIntValue(f.GetSubRef(), "bind_dairy_feed", Utility.RandomInt(1, 5))
+        if !dairy.IsRunning()
+            dairy.Start()
+        endif
+    endif
+
+endfunction
+
+function BindingMilk_Execute(Actor akOriginator, string contextJson, string paramsJson) global
+
+    bind_Utility.WriteToConsole("SkyrimNet called: BindingMilk_Execute actor: " + akOriginator)
+
+    Quest dairy = Quest.GetQuest("bind_DairyQuest")
+    bind_Functions f = bind_Functions.GetBindingFunctions()
+    bind_PoseManager.StandFromKneeling(f.GetSubRef())
+
+    ;debug.MessageBox("milking the sub...")
+
+    if f.ModInRunningState()
+        ;debug.MessageBox("start dairy quest")
+        SkyrimNetApi.DirectNarration(f.GetDomRef().GetDisplayName() + " orders {{ player.name }} to find a milk stall or portable milker", f.GetDomRef(), f.GetSubRef())
+        StorageUtil.SetIntValue(f.GetSubRef(), "bind_dairy_launch_milking", 1)
+        if !dairy.IsRunning()
+            dairy.Start()
+        endif
+    endif
+
+endfunction
+
+    
+    
+
 event ConversationPoseEvent()
 
     if main.EnableModSkyrimNet == 1
@@ -949,7 +1189,8 @@ endevent
 event SubKneeledEvent()
 
     if main.EnableModSkyrimNet == 1
-        UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
+        SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} dropped submissively to their knees for " + domName, theSubRef, theDomRef)
+        ;UseDirectNarration(theDomRef, "{{ player.name }} dropped submissively to their knees for " + domName)
     endif
 
 endevent
@@ -986,11 +1227,13 @@ event LeavingSafeAreaEvent()
 
 endevent
 
-function WriteShortTermEvent(Actor a, string eventType, string eventText)
+; function WriteShortTermEvent(Actor a, string eventType, string eventText)
 
-    SkyrimNetApi.RegisterShortLivedEvent(eventType + "_" + a.GetDisplayName(), eventType, "", eventText, 60000, a, None)
+;     SkyrimNetApi.RegisterShortLivedEvent(eventType + "_" + a.GetDisplayName(), eventType, "", eventText, 60000, a, None)
 
-endfunction
+;     SkyrimNetApi.RegisterPersistentEvent(eventText, )
+
+; endfunction
 
 bool function UseDirectNarration(Actor a, string commentPrompt)
 
@@ -1033,6 +1276,16 @@ endstate
 
 bool function IsAiReady()
     return (main.SoftCheckChim == 1 && main.EnableModChim == 1) || (main.SoftCheckSkyrimNet == 1 && main.EnableModSkyrimNet == 1)
+endfunction
+
+bool function IsReadyCheck() global
+    return StorageUtil.GetIntValue(Game.GetPlayer(), "bind_skyrimnet_enabled", 0) == 1
+endfunction
+
+function SendDirectNarration(string text, Actor source = none, Actor target = none) global
+    if StorageUtil.GetIntValue(Game.GetPlayer(), "bind_skyrimnet_enabled", 0) == 1
+        SkyrimNetApi.DirectNarration(text, source, target)
+    endif
 endfunction
 
 Armor wristBondage

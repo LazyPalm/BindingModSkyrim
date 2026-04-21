@@ -575,6 +575,7 @@ Function DoHighKneel()
         replaceGag = true
         bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " pulls my gag out a bit to speak...")
         bind_GlobalGagPulledOutToSpeak.SetValue(1)
+        StorageUtil.SetIntValue(theSubRef, "bind_gag_pulled", 1)
         ;bman.RemoveItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         ; theSubRef.AddSpell(zadgag_SpeechDebuff)
         ; zadgag_SpeechDebuff.Cast(theSubRef, theSubRef)
@@ -907,6 +908,7 @@ Function DoConversationPose()
         ;bman.RemoveItem(theSubRef, bman.BONDAGE_TYPE_GAG())
         zgqs.canTalk = true
         bind_GlobalGagPulledOutToSpeak.SetValue(1)
+        StorageUtil.SetIntValue(theSubRef, "bind_gag_pulled", 1)
     endif
 
     if rms.GetBehaviorRule(theSubRef, rms.BEHAVIOR_RULE_SPEECH_DOM()) == 1 ;.GetBehaviorRuleByName("Speech Rule:Dom Speaks") == 1
@@ -1081,10 +1083,13 @@ function RemovePosingFactions()
         replaceGag = false
         ;theSubRef.RemoveSpell(zadgag_SpeechDebuff)
         ;bman.AddItem(theSubRef, bman.BONDAGE_TYPE_GAG())
-        zgqs.canTalk = false
-        bind_GlobalGagPulledOutToSpeak.SetValue(0)
-        if theSubRef.IsInFaction(bind_KneelingFaction) ;should still be in this faction before standing
-            bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is shoving my gag back in...")
+        if zgqs.canTalk == true
+            zgqs.canTalk = false
+            bind_GlobalGagPulledOutToSpeak.SetValue(0)
+            StorageUtil.SetIntValue(theSubRef, "bind_gag_pulled", 0)
+            if theSubRef.IsInFaction(bind_KneelingFaction) ;should still be in this faction before standing
+                bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " is shoving my gag back in...")
+            endif
         endif
         ;bind_Utility.WriteInternalMonologue(main.GetDomTitle() + " is shoving my gag back in...")
         ;TODO - add a gag keyword check on safeword and set this to false if detected - just in case

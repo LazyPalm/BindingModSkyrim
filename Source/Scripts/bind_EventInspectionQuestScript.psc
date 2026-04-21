@@ -140,6 +140,8 @@ function StartEvent()
 
     SetObjectiveDisplayed(10, true)
 
+    fs.EventStartCrowds()
+
     if !gms.IsNude(theSub)
         OrderToStrip()
     else
@@ -625,6 +627,8 @@ function EventEnd()
 
     startingMarker.Delete()
     startingMarker = none
+
+    fs.EventStopCrowds()
 
     bcs.DoEndEvent()
 

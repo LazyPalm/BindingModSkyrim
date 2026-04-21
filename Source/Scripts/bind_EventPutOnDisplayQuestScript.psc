@@ -376,6 +376,12 @@ function EventStart()
     ;FadeToBlackHoldImod.Remove()
     bind_Utility.FadeOutRemove("")
 
+    ; if bind_ThinkingDom.IsReadyCheck()
+    ;     SkyrimNetApi.DirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know how sexy the look bound to the device.", theDom, theSub)
+    ; endif
+
+    bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know how sexy the look bound to the device.", theDom, theSub)
+
     bind_MovementQuestScript.StartSandbox(theDom, theSub)
 
 endfunction
@@ -417,6 +423,8 @@ function EventEnd()
     bind_MovementQuestScript.EndSandbox()
 
     bind_MovementQuestScript.WalkTo(theDom, theSub)
+
+    bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they do not enjoy having to free them from the bondage device.", theDom, theSub)
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 
@@ -465,6 +473,10 @@ function EventEnd()
         ; bind_Utility.WriteNotification(mqs.GetDomTitle() + " canceled a punishment.", bind_Utility.TextColorBlue())
         ; mqs.AdjustRuleInfractions(-1)
     elseif fs.GetPointsFromFurniture()
+        bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they enjoyed the show and have decided to reward them a point.", theDom, theSub)
+        ; if bind_ThinkingDom.IsReadyCheck()
+        ;     SkyrimNetApi.DirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they enjoyed the show and have decided to reward them a point.", theDom, theSub)
+        ; endif
         bind_Utility.WriteNotification(fs.GetDomTitle() + " enjoyed seeing you suffer in furniture and decided to award you a point.", bind_Utility.TextColorBlue())
         fs.AddPoint()
     Else 

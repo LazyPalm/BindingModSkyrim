@@ -177,10 +177,10 @@ function MakeComment(Actor source, Actor target, int commentType) global
 
         string prompt = ""
         if commentType == GetCommentTypePackUpCamp()
-            prompt = "Order {{ player.name }}, to clean up the area used for camping."
+            prompt = source.GetDisplayName() + " orders {{ player.name }} to clean up the campsite."
 
         elseif commentType == GetCommentTypeUntyingSub()
-            prompt = "Since you like to see them tied up, tell {{ player.name }} how dispointed you are that it is time to untie them."
+            prompt = source.GetDisplayName() + " says how dispointed they are that it is time to untie {{ player.name }}."
 
         endif
 

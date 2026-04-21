@@ -7,6 +7,8 @@ Actor theDom
 
 Location currentLocation
 
+Quest guardBondageQuest
+
 event OnInit()
 
     if self.IsRunning()
@@ -17,26 +19,74 @@ event OnInit()
         bcs.SetEventName(self.GetName())
 
         bind_Utility.WriteToConsole("bind_BoundForLocations outfit id: " + mqs.ActiveBondageSetId)
-        mqs.NeedsBondageSetChange = 0
+        
+        if mqs.PreferenceSpellChangeBondage == 1
 
-        if fs.GetDomRef().GetDistance(fs.GetSubRef()) > 255.0
-            bind_Utility.WriteInternalMonologue("I need to get closer to " + fs.GetDomTitle() + "...")
-            bind_MovementQuestScript.WalkTo(fs.GetDomRef(), fs.GetSubRef(), 255.0)
-        endif
-        bind_MovementQuestScript.FaceTarget(fs.GetDomRef(), fs.GetSubRef())
-        bind_MovementQuestScript.PlayDoWork(fs.GetDomRef())
+            BlueGlow.Play(fs.GetSubRef(), 10.0)
 
-        bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
+            mqs.NeedsBondageSetChange = 0
 
-        ;debug.MessageBox(mqs.ActiveBondageSetId)
+            int outfitId = mqs.ActiveBondageSetId
+            ;bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
+            ;if outfitId > 0
+            bms.EquipBondageOutfit(fs.GetSubRef(), outfitId)
+            if fs.TheSecondSub.GetReference() != none
+                bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), outfitId)
+            endif
+            if fs.TheThirdSub.GetReference() != none
+                bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), outfitId)
+            endif
+            StorageUtil.SetIntValue(fs.GetSubRef(), "bind_target_outfit_id", outfitId)
 
-        bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
+            BlueGlow.Stop(fs.GetSubRef())
 
-        if fs.TheSecondSub.GetReference() != none
-            bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
-        endif
-        if fs.TheThirdSub.GetReference() != none
-            bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+        else
+
+            float dist = fs.GetDomRef().GetDistance(fs.GetSubRef())
+
+            if dist > 3000.0
+
+                bind_Utility.WriteToConsole("bind_BoundForLocations too far to use dom - dist: " + dist)
+
+                if mqs.PreferenceGuardsEquipBondage == 1
+                    if guardBondageQuest == none
+                        guardBondageQuest = Quest.GetQuest("binda_GuardsEquipBondageQuest")
+                    endif
+                    if guardBondageQuest.IsRunning()
+                        guardBondageQuest.Stop() ;if it is running from a failed forcegreet
+                    endif
+                    if !guardBondageQuest.IsRunning()
+                        guardBondageQuest.Start()
+                        bind_Utility.WriteToConsole("starting binda_GuardsEquipBondageQuest")
+                    endif
+                endif
+
+            else
+
+                mqs.NeedsBondageSetChange = 0
+
+                if fs.GetDomRef().GetDistance(fs.GetSubRef()) > 255.0
+                    bind_Utility.WriteInternalMonologue("I need to get closer to " + fs.GetDomTitle() + "...")
+                    bind_MovementQuestScript.WalkTo(fs.GetDomRef(), fs.GetSubRef(), 255.0)
+                endif
+                bind_MovementQuestScript.FaceTarget(fs.GetDomRef(), fs.GetSubRef())
+                bind_MovementQuestScript.PlayDoWork(fs.GetDomRef())
+
+                bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
+
+                ;debug.MessageBox(mqs.ActiveBondageSetId)
+
+                bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
+
+                if fs.TheSecondSub.GetReference() != none
+                    bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
+                endif
+                if fs.TheThirdSub.GetReference() != none
+                    bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+                endif
+
+            endif
+
         endif
 
         bcs.DoEndEvent(false)
@@ -226,3 +276,5 @@ LocationAlias property CurrentLocationAlias auto
 Faction property bind_WearingLocationSpecificBondageFaction auto
 
 GlobalVariable property bind_GlobalRulesUpdatedFlag auto
+
+VisualEffect property BlueGlow auto

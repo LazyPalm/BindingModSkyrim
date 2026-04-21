@@ -23,10 +23,10 @@
 	},
 	"int" : 
 	{
-		"key_action" : 27,
+		"key_action" : 0,
 		"key_action_mod" : 0,
-		"key_setting" : 27,
-		"key_setting_mod" : 54,
-        "handy_info_change_action_key_to" : 27
+		"key_setting" : 0,
+		"key_setting_mod" : 0,
+        "handy_info_change_action_key_to_27_0_27_54" : 0
 	}
 }

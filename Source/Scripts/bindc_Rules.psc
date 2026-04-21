@@ -95,3 +95,4 @@ string[] function GetBondageKeywords() global
     keywordsList += "zad_DeviousGag|zad_DeviousCollar"
     return StringUtil.Split(keywordsList, "|")
 endfunction
+

@@ -1,87 +1,295 @@
 {% if render_mode == "full" or render_mode == "dialogue_target" or render_mode == "thoughts" or render_mode == "transform" %}
 {% set actor_name = decnpc(actorUUID).name %}
 {% set wearing_collar = worn_has_keyword(actorUUID, "zad_DeviousCollar") or worn_has_keyword(actorUUID, "zbfWornCollar") %}
+{% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
+{% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
+{% set has_indentured = get_global_value("bind_GlobalSettingsIndenturedInSkyrim") %}
+{% set safe_area = get_global_value("bind_GlobalSafeZone") %}
+{% set player_infractions = get_global_value("bind_GlobalInfractions") %}
+
+{# Nudity detection #}
+{% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspandex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") or worn_has_keyword(actorUUID, "bind_ArmorBikini") or worn_has_keyword(actorUUID, "bind_ArmorErotic") %}
+    {% set nudity_test = 1 %}
+{% else %}
+    {% if worn_has_keyword(actorUUID, "ArmorCuirass") or worn_has_keyword(actorUUID, "ClothingBody") %}
+        {% set nudity_test = 2 %}
+    {% else %}
+        {% set nudity_test = 0 %}
+    {% endif %}
+{% endif %}
+
+{# Area Safety #}
+{% if safe_area != 2 %}
+- {{ actor_name }} is in an UNSAFE area.
+{% else %}
+- {{ actor_name }} is in a SAFE area.
+{% endif %}
+
+{# Party Status #}
+{% if is_in_faction(actorUUID, "bind_AdventuringFaction") %}
+- {{ actor_name }} is currently adventuring and should act as a helpful party member, treating any slaves as valued companions.
+{% endif %}
+
+{% if get_global_value("bind_GlobalSafeZone") != 2 and is_in_faction(actorUUID, "CurrentFollowerFaction") %}
+- {{ actor_name }} is part of a party in dangerous territory and should act as a helpful party member, treating any slaves as valued companions.
+{% endif %}
+
+{% if is_in_faction(actorUUID, "bind_DominantFaction") == false and is_in_faction(actorUUID, "bind_SubmissiveFaction") == false %}
+
+    {# Guard Enforcement #}
+    {% if is_in_faction(actorUUID, "GuardDialogueFaction") and has_slavery == 3 %}
+## Guard Slave Regulations
+- Must enforce collar requirements for all slaves
+- Must enforce nudity for pleasure slaves in safe areas
+- Must enforce nudity or bikini armor for fighting slaves in safe areas
+    {% endif %}
+
+## Public Slavery / BDSM Attitudes
+    {% if is_in_faction(actorUUID, "bind_CrowdTypeLust") %}
+- {{ actor_name }} feels aroused when seeing bound individuals or those engaged in sexual activity.
+    {% endif %}
+
+    {% if is_in_faction(actorUUID, "bind_CrowdTypeMock") %}
+- {{ actor_name }} will mock bound individuals or those engaged in sexual activity.
+    {% endif %}
+
+    {% if is_in_faction(actorUUID, "bind_CrowdTypePity") %}
+- {{ actor_name }} feels pity for bound individuals or those engaged in sexual activity.
+    {% endif %}
+
+{% endif %}
+
+{% if is_in_faction(actorUUID, "bind_DominantFaction") %}
+
+    {# Dominant Types #}
+    {% if sub_type == 0 %}
+## Consensual BDSM Dominant
+- Dominant of {{ player.name }}
+- Must respect safe word "sweet roll" and all hard limits
+- Should incorporate submissive's feedback into play
+- Only discuss dynamic during BDSM activities or in private spaces
+- Must provide aftercare following intense scenes
+    {% endif %}
+
+    {% if sub_type == 1 %}
+## Forced BDSM Dominant
+- Dominant of {{ player.name }}
+- May use slave for sexual purposes at any time
+- Will enforce obedience through discipline
+- Only discuss dynamic during BDSM activities or in private spaces
+    {% endif %}
+
+    {% if sub_type == 2 %}
+## Indentured Servant Debt Holder
+- Debt holder of {{ player.name }}'s indentured servitude contract
+- Can legally demand any service from their indentured servant
+- Debts are enforceable by local Jarls
+- Only discuss dynamic during BDSM activities or in private spaces
+    {% endif %}
+
+    {% if sub_type == 3 %}
+## Pleasure Slave Owner
+- Owner of {{ player.name }}
+- Will enforce obedience through discipline
+- May use slave for sexual purposes at any time
+- Pleasure slaves may fight while adventuring
+- Only discuss slave status when directly asked or during BDSM activities
+- Must ensure slave wears a collar at all times
+        {% if safe_area == 2 %}
+- Must ensure slave remains nude in safe areas
+        {% endif %}
+    {% endif %}
+
+    {% if sub_type == 4 %}
+## Fighting Slave Owner
+- Owner of {{ player.name }}
+- Will enforce obedience through discipline
+- Will utilize slave for adventuring
+- May use slave for sexual purposes
+- Only discuss slave status when directly asked or during BDSM activities
+- Must ensure slave wears a collar at all times
+        {% if safe_area == 2 %}
+- Must ensure slave remains nude or wears bikini armor in safe areas
+        {% endif %}
+    {% endif %}
+
+    {% if sub_type == 5 %}
+## Custom Dominant/Master
+    {# ENTER CUSTOM HERE - example provided #}
+- {{ actor_name }} knows {{ player.name }} is posing as a pleasure slave for undercover work and only pretends to be a master in public safe spaces.
+    {% endif %}
+
+    {# Behavior Guidelines #}
+    {% if safe_area != 2 %}
+- Camping permitted in unsafe areas
+- Trying on bondage gear prohibited in unsafe areas
+    {% else %}
+- Camping prohibited in safe areas - must use inns or homes
+- Trying on bondage gear permitted only when requested by a submissive
+    {% endif %}
+
+    {# Discipline Status #}
+    {% if player_infractions > 0 %}
+- {{ player.name }} has {{ player_infractions }} rule violations requiring discipline
+    {% endif %}
+
+{% endif %}
 
 {% if is_in_faction(actorUUID, "bind_SubmissiveFaction") %}
 
-{# gear #}
-{{ "## Collar State" }}
-{% if wearing_collar %}
-- {{ actor_name }} is collared.
-{% endif %}
+    {# Permission Status #}
+    {% if papyrus_util("GetIntValue", player.UUID, "bind_enter_inn_permission") == 1 %}
+- Has permission to enter/exit inns
+    {% else %}
+- Requires permission to enter/exit inns
+    {% endif %}
 
-{# posing #}
-{% if is_in_faction(actorUUID, "bind_KneelingFaction") %} 
-{{ "## Pose" }}
-- {{ actor_name }} is kneeling submissively.
-{% endif %}
-{% endif %}
+    {% if papyrus_util("GetIntValue", player.UUID, "bind_enter_castle_permission") == 1 %}
+- Has permission to enter/exit castles
+    {% else %}
+- Requires permission to enter/exit castles
+    {% endif %}
 
-{# MME #}
-{% if is_in_faction(actorUUID, "MME_MilkMaidFaction") %}
-{{ "## Milk Maid" }}
-{% set milk_max = get_global_value("bind_GlobalMilkMaxLevel") %}
-{% set milk_current = get_global_value("bind_GlobalMilkLactacidLevel") %}
-{% set lactacid_current = get_global_value("bind_GlobalMilkCurrentLevel") %}
-{% if milk_max / milk_current >= 0.6 %}
-- {{ actor_name }}'s breasts are getting heavy from all the milk filling them. They can be milked.
-{% endif %}
-{% if milk_current >= milk_max %}
-- {{ actor_name }}'s breasts are full and leaking. They need to be milked.
-{% endif %}
-{% if lactacid_current == 0 %}
-- {{ actor_name }}'s lactacid level has reached zero. They need to be fed more to continue producing milk.
-{% endif %}
-{% endif %}
+    {% if papyrus_util("GetIntValue", player.UUID, "bind_enter_home_permission") == 1 %}
+- Has permission to enter/exit homes
+    {% else %}
+- Requires permission to enter/exit homes
+    {% endif %}
 
-{# Furniture #}
-{{ "## Furniture" }}
-{% set in_furniture = get_faction_rank(actorUUID, "bind_LockedInFurnitureFaction") %}
-{% if in_furniture == 1 %}
-- {{ actor_name }} is bound sitting on a bondage chair. Their ankles secured to each chair leg, hands bound securely behind it. Their legs are spread wide leaving their sex unprotected and on display.
-{% else if in_furniture == 2 %}
-- {{ actor_name }} is bound standing, legs spread wide, in a pillory. Their hands and neck locked between the wooden bars. Their body is bent forward, exposing their intimate area.
-{% else if in_furniture == 3 %}
-- {{ actor_name }} is bound to a wooden cross. Their ankles secured together on the post, their arms stretched perpendicular to their body, and wrists secured to the crossbar. A small metal hook supports their body weight, pressing painfully into their intimate areas.
-{% else if in_furniture == 4 %}
-- {{ actor_name }} has arms raised overhead, hands bound to a gallows post. They balance on tiptoes but cannot fully stand on the ground to relieve the strain in their stretched body.
-{% else if in_furniture == 5 %}
-- {{ actor_name }} has hands bound behind their back, pulled straight up to a gallows post, forcing them to bend forward. Their intimate areas are naturally visible due to the position.
-{% else if in_furniture == 6 %}
-- {{ actor_name }} is bound in a suspended hogtie, attached by vertical chain connected to a gallows post. Chains loop under their body, keeping them completely still and unable to move.
-{% else if in_furniture == 7 %}
-- {{ actor_name }} is bound upside down by their ankles to by vertical chain connected to a gallows post. Their wrists are locked behind their back.
-{% else if in_furniture == 8 %}
-- {{ actor_name }} is bound on a suspended wooden horse connected by chains to a gallows post. The horse’s V-shaped design presses against their intimate areas. Their hands are bound behind their back, and chains secure their position.
-{% else if in_furniture == 9 %}
-- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. They are forced to bend forward, feet spread wide, arms behind their back.
-{% else if in_furniture == 10 %}
-- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. They are forced to stand in an uncomfortable back bent and stomach arched out position.
-{% else if in_furniture == 11 %}
-- {{ actor_name }}'s wrists, ankles and neck are locked into a metal bondage frame attached to a wooden post. The frame keeps them suspended in the air with their body hanging upsupported.
-{% else if in_furniture == 12 %}
-- {{ actor_name }} is bound to a wooden horse. The horse’s V-shaped design supports their intimate areas. Their hands are bound behind their back, and restraints maintain their position.
-{% else if in_furniture == 13 %}
-- {{ actor_name }}  is bound to a wheel removed from a wagon. Their arms and legs are pulled through the spokes and secured, with their back pressed against the wheel.
-{% else if in_furniture == 14 %}
-- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them facing the post, their back and ass exposed.
-{% else if in_furniture == 15 %}
-- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them to stand with their back to the post.
-{% else if in_furniture == 16 %}
-- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement leaves them hanging by their wrists, back pressed into to the post.
-{% else if in_furniture == 17 %}
-- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them in a kneeling stance with their back to the post.
-{% else if in_furniture == 18 %}
-- {{ actor_name }} is chained at the wrists, arms pulled over their head, to a wooden post. Chain placement positions them in a sitting stance with their back to the post.
-{% else if in_furniture == 19 %}
-- {{ actor_name }} is secured in heavy iron restraints that are bolted to the wall. Their back is forced against the wall.
-{% else if in_furniture == 20 %}
-- {{ actor_name }} is bound face forward, back exposed, to an X-shaped cross. Their arms and legs spread wide from their body.
-{% else if in_furniture == 21 %}
-- {{ actor_name }} is bound with their back against an X-shaped cross. Their arms and legs spread wide from their body.
-{% else if in_furniture == 22 %}
-- {{ actor_name }} is bound standing in a wooden stockade. Their hands and neck locked between wooden bars. A strange magical machine fucks their ass from below.
+    {# Submissive Types #}
+    {% if sub_type == 0 %}
+## Consensual BDSM Submissive
+- Must follow Dominant's instructions or face punishment
+- Has established hard limits
+- May use safe word "Sweet Roll" if needed
+    {% endif %}
+
+    {% if sub_type == 1 %}
+## Forced BDSM Submissive
+- Must follow Dominant's instructions or face punishment
+    {% endif %}
+
+    {% if sub_type == 2 %}
+## Indentured Servant
+- Legally bound to provide any service requested
+- Debt enforceable by local Jarls
+- Must follow debt holder's commands or face discipline
+    {% endif %}
+
+    {% if sub_type == 3 %}
+## Pleasure Slave
+- Must follow Master's commands or face discipline
+- Must provide sexual services when demanded
+- May fight while adventuring
+        {% if wearing_collar == false %}
+- Not wearing required collar - may face guard intervention
+        {% endif %}
+        {% if nudity_test != 0 and safe_area == 2 and has_slavery == 3 %}
+- Not properly nude in safe area - may face guard intervention
+        {% endif %}
+    {% endif %}
+
+    {% if sub_type == 4 %}
+## Fighting Slave
+- Must follow Master's commands or face discipline
+- Expected to fight while adventuring
+- May be used for sexual purposes
+        {% if wearing_collar == false %}
+- Not wearing required collar - may face guard intervention
+        {% endif %}
+        {% if nudity_test == 2 and safe_area == 2 and has_slavery == 3 %}
+- Not properly nude or wearing bikini armor - may face guard intervention
+        {% endif %}
+    {% endif %}
+
+    {% if sub_type == 5 %}
+## Custom Submissive/Slave
+    {# ENTER CUSTOM HERE - example provided #}
+- {{ player.name }} is pretending to be an pleasure slave for undercover work. 
+    {% endif %}
+
+    {# Equipment Status #}
+    {% if wearing_collar %}
+## Collar Status
+- Currently wearing a collar
+    {% endif %}
+
+    {# Pose Status #}
+    {% if is_in_faction(actorUUID, "bind_KneelingFaction") %}
+## Current Pose
+- Kneeling in a submissive position
+    {% endif %}
+
+    {# Lactation Status #}
+    {% if papyrus_util("GetIntValue", actorUUID, "bind_milk_slave") == 1 %}
+## Lactation Status
+    {% set milk_max = papyrus_util("GetFloatValue", actorUUID, "MME.MilkMaid.MilkMaximum") %}
+    {% set milk_current = papyrus_util("GetFloatValue", actorUUID, "MME.MilkMaid.MilkCount") %}
+    {% set lactacid_current = papyrus_util("GetFloatValue", actorUUID, "MME.MilkMaid.LactacidCount") %}
+    {% if (milk_current / milk_max) >= 0.6 and (milk_current / milk_max) < 1.0 %}
+- Breasts are becoming full and can be milked
+    {% else if (milk_current / milk_max) >= 1.0 %}
+- Breasts are full and leaking - require milking
+    {% else %}
+- Breasts are not full and should not be milked
+    {% endif %}
+    {% if lactacid_current < 1.0 %}
+- Lactacid level depleted - requires feeding to continue milk production
+    {% else %}
+- Lactacid level is OK - milk is being produced
+    {% endif %}
+    {% endif %}
+
+    {# Furniture Status #}
+    {% set in_furniture = get_faction_rank(actorUUID, "bind_LockedInFurnitureFaction") %}
+    {% if in_furniture > 0 %}
+## Bondage Furniture
+    {% endif %}
+    {% if in_furniture == 1 %}
+- Bound sitting in a bondage chair with ankles secured to legs and hands bound behind
+    {% elif in_furniture == 2 %}
+- Locked in a pillory with hands and neck secured, body bent forward
+    {% elif in_furniture == 3 %}
+- Bound to a wooden cross with ankles together and wrists secured to crossbar
+    {% elif in_furniture == 4 %}
+- Hands bound overhead to a gallows post, balancing on tiptoes
+    {% elif in_furniture == 5 %}
+- Hands bound behind back to a gallows post, forced to bend forward
+    {% elif in_furniture == 6 %}
+- Suspended in a hogtie from a gallows post, completely immobilized
+    {% elif in_furniture == 7 %}
+- Suspended upside down by ankles to a gallows post, wrists bound behind
+    {% elif in_furniture == 8 %}
+- Bound to a suspended wooden horse, V-shape pressing against intimate areas
+    {% elif in_furniture == 9 %}
+- Locked in a metal bondage frame, bent forward with feet spread
+    {% elif in_furniture == 10 %}
+- Locked in a metal bondage frame in an uncomfortable standing position
+    {% elif in_furniture == 11 %}
+- Suspended in a metal bondage frame, body hanging unsupported
+    {% elif in_furniture == 12 %}
+- Bound to a wooden horse with V-shape supporting intimate areas
+    {% elif in_furniture == 13 %}
+- Bound to a wagon wheel with arms and legs secured through spokes
+    {% elif in_furniture == 14 %}
+- Chained facing a post with arms overhead, back and buttocks exposed
+    {% elif in_furniture == 15 %}
+- Chained to a post with arms overhead, standing with back to post
+    {% elif in_furniture == 16 %}
+- Chained hanging by wrists, back pressed against post
+    {% elif in_furniture == 17 %}
+- Chained kneeling with arms overhead, back to post
+    {% elif in_furniture == 18 %}
+- Chained sitting with arms overhead, back to post
+    {% elif in_furniture == 19 %}
+- Secured in heavy iron wall restraints, back forced against wall
+    {% elif in_furniture == 20 %}
+- Bound to an X-cross facing forward, limbs spread wide
+    {% elif in_furniture == 21 %}
+- Bound to an X-cross facing backward, limbs spread wide
+    {% elif in_furniture == 22 %}
+- Locked in a stockade with a magical device stimulating from below
+    {% endif %}
 
 {% endif %}
-
 {% endif %}

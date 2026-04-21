@@ -158,7 +158,21 @@ function StartEvent()
 
     bind_Utility.FadeOutRemove("")
 
-    zclib.PlaySexScene(theSub, theDom)
+    ;debug.MessageBox("sl version: " + SexLabutil.GetVersion())
+
+    if SexLabUtil.GetVersion() < 20000
+        zclib.PlaySexScene(theSub, theDom)
+    else
+        ;if P+ is installed - zclib.PlaySexScene will fail
+        Quest q = Quest.GetQuest("bind_MainQuest")
+        if q != none
+            bind_SexManager sms = q as bind_SexManager
+            if !sms.StartSexScene(theSub, theDom)
+                debug.MessageBox("Could not start sex scene")
+                ;StopEvent(sexAnimationRan = false)
+            endif
+        endif
+    endif
 
     PlayEffects()
 
@@ -203,7 +217,7 @@ function StopEvent()
 
     bind_MovementQuestScript.PlayDoWork(theDom)
 
-    bind_Utility.FadeOutApply("My burning inside from the dragon soul stops...")
+    bind_Utility.FadeOutApply("The burning within me from the dragon soul stops...")
 
     zclib.UnlockActor(theSub)
 

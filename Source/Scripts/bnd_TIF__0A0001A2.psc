@@ -18,6 +18,11 @@ Actor akSpeaker = akSpeakerRef as Actor
 Quest q = Quest.GetQuest("bind_MainQuest")
 bind_RulesManager rm = q as bind_RulesManager
 
+Actor theSub = Game.GetPlayer()
+StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 1)
+StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 1)
+StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 1)
+
 ; rm.BehaviorEnterExitRuleInnPermission = 0
 ; rm.BehaviorEnterExitRuleCastlePermission = 0
 ; rm.BehaviorEnterExitRulePlayerHomePermission = 0

@@ -36,10 +36,19 @@ event OnInit()
             gettingMilked = false
             questEnding = false
 
-            SetObjectiveDisplayed(5)
-            SetStage(10)
-            GotoState("GetAttentionState")
-            RegisterForSingleUpdate(1.0)
+            if StorageUtil.GetIntValue(theSub, "bind_dairy_launch_milking", 0) == 1
+                StorageUtil.SetIntValue(theSub, "bind_dairy_launch_milking", 0)
+                FindStall()
+            elseif StorageUtil.GetIntValue(theSub, "bind_dairy_feed", 0) > 0
+                int feedQty = StorageUtil.GetIntValue(theSub, "bind_dairy_feed", 0)
+                StorageUtil.SetIntValue(theSub, "bind_dairy_feed", 0)
+                FeedLactacidBottle(feedQty)
+            else
+                SetObjectiveDisplayed(5)
+                SetStage(10)
+                GotoState("GetAttentionState")
+                RegisterForSingleUpdate(1.0)
+            endif
     
         else
 
@@ -82,6 +91,7 @@ event EventFurnitureSit()
 
     if furn.HasKeyWord(Keyword.GetKeyword("MME_zbfFurniture"))
         inMilkFurniture = true
+        fs.EventStartCrowds()
         ;debug.MessageBox("This is a milking machine...")
         bind_Utility.WriteToConsole("Dairy quest - sub entered milking machine")
         GoToState("InMilkingMachineState")
@@ -113,6 +123,7 @@ event EventFurnitureGetUp()
             EndTheQuest() ;this should not happen
         endif
         inMilkFurniture = false
+        fs.EventStopCrowds()
     endif
 endevent
 

@@ -40,11 +40,21 @@ event OnInit()
 
 endEvent
 
+; function TestFunction()
+;     debug.MessageBox("can it do the test function?")
+; endfunction
+
 function LoadGame()
+
+    ;debug.MessageBox("does controller end game happen 1??")
 
     UnregisterForUpdate()
 
+    ;debug.MessageBox("does controller end game happen 2??")
+
     DoInitTasks()
+
+    ;debug.MessageBox("does controller end game happen 3??")
 
     ; Quest mq = Quest.GetQuest("bind_MovementQuest")
     ; if !mq.IsRunning()
@@ -61,6 +71,8 @@ function LoadGame()
 
     ; RegisterForControl("Activate")
     ; RegisterForKey(bind_GlobalActionKey.GetValue() as int)
+
+    ;debug.MessageBox("does controller end game happen 4??")
 
     if !bind_MovementQuest.IsRunning()
         bind_MovementQuest.Start()
@@ -80,13 +92,15 @@ function LoadGame()
     endif
 
     if bind_BoundForLocations.IsRunning()
-         bind_BoundForLocations.Stop()
+        bind_BoundForLocations.Stop()
     endif
 
     if bind_GoAdventuringQuest.IsRunning()
         bind_GoAdventuringQuestScript adventure = bind_GoAdventuringQuest as bind_GoAdventuringQuestScript
         adventure.LoadGame()
     endif
+
+    ;debug.MessageBox("does controller end game happen 10??")
 
     ;actorDom = fs.GetDomRef() ; TheDom.GetReference() as Actor
 

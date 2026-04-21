@@ -450,7 +450,7 @@ function ShowPoseMenu()
         ShowActionMenuNested()
     elseif listReturn == 1
         pose_manager.DoHighKneel()
-        SendKneelingEvent()
+        bind_ActionMenu.SendKneelingEvent()
     elseif listReturn == 2
         pose_manager.DoSpreadKneel()
         int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
@@ -637,7 +637,7 @@ function ShowActionMenuNested()
         if pose_manager.IsInPose()
             pose_manager.ResumeStanding()
             bind_Utility.EnablePlayer()
-            SendLeftKneelEvent()
+            bind_ActionMenu.SendLeftKneelEvent()
             ;mqs.GetSubRef().SetDontMove(false)
         else
             ShowPoseMenu()
@@ -792,14 +792,14 @@ state MenuOpenState
 
 endstate
 
-function SendKneelingEvent()
+function SendKneelingEvent() global
    int handle = ModEvent.Create("bind_SubKneeledEvent")
     if handle
         ModEvent.Send(handle)
     endif
 endfunction
 
-function SendLeftKneelEvent()
+function SendLeftKneelEvent() global
    int handle = ModEvent.Create("bind_SubLeftKneelEvent")
     if handle
         ModEvent.Send(handle)

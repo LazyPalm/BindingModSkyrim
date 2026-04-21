@@ -22,13 +22,30 @@ rm.BehaviorEnterExitRuleInnPermission = 0
 rm.BehaviorEnterExitRuleCastlePermission = 0
 rm.BehaviorEnterExitRulePlayerHomePermission = 0
 
+Actor theSub = Game.GetPlayer()
+
+StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 0)
+StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 0)
+StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 0)
+
 if rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_INN
     rm.BehaviorEnterExitRuleInnPermission = 1
+    StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 1)
 elseif rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_CASTLE
     rm.BehaviorEnterExitRuleCastlePermission = 1
+    StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 1)
 elseif rm.BehaviorEnterExitRuleCurrentDoorType == rm.DESTINATION_TYPE_PLAYERHOME
     rm.BehaviorEnterExitRulePlayerHomePermission = 1
+    StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 1)
 endif
+
+; Quest q = Quest.GetQuest("bind_MainQuest")
+; bind_Functions f = q as bind_Functions
+; ObjectReference ref = f.BuildingDoor.GetReference()
+; if ref
+;     StorageUtil.SetIntValue(ref, "bind_door_sub_permission", 1)
+;     StorageUtil.SetFloatValue(ref, "bind_door_sub_permission_end_date", bind_Utility.AddTimeToCurrentTime(0, 30))
+; endif
 
 bind_Utility.WriteInternalMonologue("I have permission to enter...")
 

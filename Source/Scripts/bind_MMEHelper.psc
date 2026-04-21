@@ -17,6 +17,11 @@ Keyword function GetBoundMilkPumpKeyword() global
     ;return Game.GetFormFromFile(0x0307E3BD, "MilkModNEW.esp") as Keyword
 endfunction
 
+Faction function GetMilkmaidFaction() global
+    return Game.GetFormFromFile(0x04D53B, "MilkModNEW.esm") as Faction
+    ;MME_MilkMaidFaction
+endfunction
+
 float function GetLactacidLevel(Actor a) global
     return MME_Storage.getLactacidCurrent(a)
 endfunction
@@ -37,7 +42,7 @@ function MakeMilkSlave(Actor a) global
     ;NOTE - does not work for Player
     ;MilkQUEST milk = GetMilkQuest()
     ;milk.AssignSlotSlave(a, 1, 0.0)
-     StorageUtil.SetIntValue(a, "bind_milk_slave", 1)
+    StorageUtil.SetIntValue(a, "bind_milk_slave", 1)
 endfunction
 
 Spell function GetMilkLeakSpell() global

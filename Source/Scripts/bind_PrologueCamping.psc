@@ -24,7 +24,8 @@ event OnInit()
         bcs.SetEventName(self.GetName())
 
         if think.IsAiReady()
-            think.WriteShortTermEvent(theDom, "camping", theDom.GetDisplayName() + " has decided to camp for the night with {{ player.name }}.")
+            SkyrimNetApi.RegisterPersistentEvent(theDom.GetDisplayName() + " has decided to camp for the night with {{ player.name }}.", theDom, theSub)
+            ;think.WriteShortTermEvent(theDom, "camping", theDom.GetDisplayName() + " has decided to camp for the night with {{ player.name }}.")
         endif
 
         GotoState("GetAttentionState")

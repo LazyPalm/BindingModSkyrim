@@ -19,7 +19,7 @@
 {% endif %}
 
 {# Nudity detection #}
-{% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspendex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") %}
+{% if worn_has_keyword(actorUUID, "Eroticarmor") or worn_has_keyword(actorUUID, "sla_armorspandex") or worn_has_keyword(actorUUID, "sla_armorhalfnakedbikini") or worn_has_keyword(actorUUID, "sla_armorhalfnaked") %}
   {% set clothing_state = "minimal" %}
 {% else if worn_has_keyword(actorUUID, "ArmorCuirass") or worn_has_keyword(actorUUID, "ClothingBody") or bound_armor %}
   {% set clothing_state = "clothed" %}

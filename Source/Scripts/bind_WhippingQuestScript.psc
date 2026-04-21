@@ -115,9 +115,11 @@ function StartTheQuest()
             bind_Utility.WriteToConsole("whip furniture type: " + furnitureType)
             if think.IsAiReady()
                 if furnitureType == 1
-                    think.WriteShortTermEvent(theSub, "bound", "{{ player.name }} is stretched standing between two bondage posts, wrists tied to each; ready to be whipped.")
+                    SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} is stretched standing between two bondage posts, wrists tied to each; ready to be whipped.", theSub, thedom)
+                    ;think.WriteShortTermEvent(theSub, "bound", "{{ player.name }} is stretched standing between two bondage posts, wrists tied to each; ready to be whipped.")
                 else
-                    think.WriteShortTermEvent(theSub, "bound", "{{ player.name }} hangs by their wrists tied to post above them, their toes brushing the ground, body stretched; ready to be whipped.")
+                    SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} is stretched standing between two bondage posts, wrists tied to each; ready to be whipped.", theSub, theDom)
+                    ;think.WriteShortTermEvent(theSub, "bound", "{{ player.name }} hangs by their wrists tied to post above them, their toes brushing the ground, body stretched; ready to be whipped.")
                     ;think.UseDirectNarration(theDom, "{{ player.name }} hangs by their wrists tied to post above them, their toes brushing the ground, body stretched; ready to be whipped.")
                 endif
             else
@@ -286,24 +288,28 @@ function PamaMenu()
 
     if listReturn == 0
         if think.IsAiReady()
-            think.WriteShortTermEvent(theDom, "whipped", theDom.GetDisplayName() + " ends {{ player.name }}'s whipping after deciding they have had enough.")
+            SkyrimNetApi.RegisterPersistentEvent(theDom.GetDisplayName() + " ends {{ player.name }}'s whipping after deciding they have had enough.", theDom, theSub)
+            ;think.WriteShortTermEvent(theDom, "whipped", theDom.GetDisplayName() + " ends {{ player.name }}'s whipping after deciding they have had enough.")
         endif
         GotoState("")
         WhippingCompleted()
     elseif listReturn == 1
         if think.IsAiReady()
-            think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} closes their eyes and sinks into the lashes, accepting that this is needed.")
+            SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} closes their eyes and sinks into the lashes, accepting that this is needed.", theSub, theDom)
+            ;think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} closes their eyes and sinks into the lashes, accepting that this is needed.")
             ;think.UseDirectNarration(theDom, thedom.GetDisplayName() + " sees {{ player.name }} close their eyes and sink into the lashes, accepting that this is needed.")
         endif
     elseif listReturn == 2
         if think.IsAiReady()
-            think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} make moans of pleasure from the sting of the whip, thinking it hurts so good.")
+            SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} make moans of pleasure from the sting of the whip, thinking it hurts so good.", theSub, theDom)
+            ;think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} make moans of pleasure from the sting of the whip, thinking it hurts so good.")
             ;think.UseDirectNarration(theDom, thedom.GetDisplayName() + " hears {{ player.name }} make moans of please from the sting of the whip.")
         endif
     elseif listReturn == 3
         if think.IsAiReady()
-            think.WriteShortTermEvent(theDom, "whipped", theDom.GetDisplayName() + " ends {{ player.name }}'s whipping before they orgasm from it.")
-            think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} moans as the whipping ends before climax has been reached.")
+            SkyrimNetApi.RegisterPersistentEvent(theDom.GetDisplayName() + " ends {{ player.name }}'s whipping before they orgasm from it; {{ player.name }} moans in protest.", theDom, theSub)
+            ;think.WriteShortTermEvent(theDom, "whipped", theDom.GetDisplayName() + " ends {{ player.name }}'s whipping before they orgasm from it.")
+            ;think.WriteShortTermEvent(theSub, "whipped", "{{ player.name }} moans as the whipping ends before climax has been reached.")
             ;think.UseDirectNarration(theDom, thedom.GetDisplayName() + " ends {{ player.name }}'s whipping because they are getting too turned on by it.")
             GotoState("")
             WhippingCompleted()

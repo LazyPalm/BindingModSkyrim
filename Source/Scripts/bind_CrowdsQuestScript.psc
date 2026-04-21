@@ -131,68 +131,84 @@ function SetCrowd(ObjectReference c1, ObjectReference c2, ObjectReference c3, Ob
 
     if c1
         actor1 = c1 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor1)
-        else
-            SetFactions(actor1)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor1)
+        ; else
+        ;     SetFactions(actor1)
+        ; endif
+        SetFactions(actor1)
         Crowd1.ForceRefTo(c1)
         totalActors += 1
     endif
 
     if c2
         actor2 = c2 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor2)
-        else
-            SetFactions(actor2)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor2)
+        ; else
+        ;     SetFactions(actor2)
+        ; endif
+        SetFactions(actor2)
         Crowd2.ForceRefTo(c2)
         totalActors += 1
     endif
 
     if c3
         actor3 = c3 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor3)
-        else
-            SetFactions(actor3)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor3)
+        ; else
+        ;     SetFactions(actor3)
+        ; endif
+        SetFactions(actor3)
         Crowd3.ForceRefTo(c3)
         totalActors += 1
     endif
 
     if c4
         actor4 = c4 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor4)
-        else
-            SetFactions(actor4)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor4)
+        ; else
+        ;     SetFactions(actor4)
+        ; endif
+        SetFactions(actor4)
         Crowd4.ForceRefTo(c4)
         totalActors += 1
     endif
 
     if c5
         actor5 = c5 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor5)
-        else
-            SetFactions(actor5)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor5)
+        ; else
+        ;     SetFactions(actor5)
+        ; endif
+        SetFactions(actor5)
         Crowd5.ForceRefTo(c5)
         totalActors += 1
     endif
 
     if c6
         actor6 = c6 as Actor
-        if think.IsAiReady()
-            ClearFactions(actor6)
-        else
-            SetFactions(actor6)
-        endif
+        ; if think.IsAiReady()
+        ;     ClearFactions(actor6)
+        ; else
+        ;     SetFactions(actor6)
+        ; endif
+        SetFactions(actor6)
         Crowd6.ForceRefTo(c6)
         totalActors += 1
+    endif
+
+    if totalActors > 0
+        if think.IsAiReady()
+            if StorageUtil.SetIntValue(Game.GetPlayer(), "binding_furniture_status", 0) > 0
+                SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} is locked helplessly in a bondage furniture device; nearby people notice and want to get a closer look.", fs.GetSubRef())
+            else
+                SkyrimNetApi.RegisterPersistentEvent("{{ player.name }} is bound and exposed; nearby people notice and want to get a closer look.", fs.GetSubRef())
+            endif
+        endif
     endif
 
 endfunction
@@ -239,24 +255,25 @@ function SetActiveState(Actor c, bool activeFlag)
             c.AddToFaction(bind_CrowdIsActive)
         endif
 
-        if think.IsAiReady()
-            if Utility.RandomInt(1, 2) == 2 && chatCount < 3
-                chatCount += 1
-                ; if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
-                ;     bind_Utility.WriteToConsole("crowds quest - guard " + c.GetDisplayName() + " makes a comment")
-                ;     ;think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
-                ;     SkyrimNetApi.DirectNarration(c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.", c)
-                ; else
-                if Utility.RandomInt(1, 2) == 2 && c != fs.GetDomRef()
-                    bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " chats with dom")
-                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.", c, fs.GetDomRef())
-                else
-                    bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
-                    SkyrimNetApi.DirectNarration(c.GetDisplayName() + " makes a comment about {{ player.name }}'s current situation.", c)
-                endif
-                ;endif
-            endif
-        endif
+        ; if think.IsAiReady()
+        ;     if Utility.RandomInt(1, 2) == 2 && chatCount < 3
+        ;         chatCount += 1
+        ;         ; if StringUtil.Find(c.GetDisplayName(), "guard", 0) > -1
+        ;         ;     bind_Utility.WriteToConsole("crowds quest - guard " + c.GetDisplayName() + " makes a comment")
+        ;         ;     ;think.UseDirectNarration(c, c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.")
+        ;         ;     SkyrimNetApi.DirectNarration(c.GetDisplayName() + " without shame, since this is a common sight in Skyrim, has a lustful or lewd comment about {{ player.name }}'s current situation.", c)
+        ;         ; else
+        ;         if Utility.RandomInt(1, 2) == 2 && c != fs.GetDomRef()
+        ;             bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " chats with dom")
+        ;             SkyrimNetApi.DirectNarration(c.GetDisplayName() + " starts a conversation with " + fs.GetDomRef().GetDisplayName() + " about {{ player.name }}'s current situation.", c, fs.GetDomRef())
+                    
+        ;         else
+        ;             bind_Utility.WriteToConsole("crowds quest - " + c.GetDisplayName() + " makes a comment")
+        ;             SkyrimNetApi.DirectNarration(c.GetDisplayName() + " makes a comment about {{ player.name }}'s current situation.", c)
+        ;         endif
+        ;         ;endif
+        ;     endif
+        ; endif
 
     else
         if c.IsInFaction(bind_CrowdIsActive)

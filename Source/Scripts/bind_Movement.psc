@@ -27,11 +27,13 @@ event ProcessKneelTrigger()
         processingEvent = true
         if pms.IsInPose()
             pms.ResumeStanding()
+            bind_ActionMenu.SendLeftKneelEvent()
             bind_Utility.EnablePlayer()
         elseif actorSub.IsOnMount()
             ;don't do anything if riding
         else
             pms.DoHighKneel()
+            bind_ActionMenu.SendKneelingEvent()
             bind_Utility.DisablePlayer()
         endif
         ; if !actorSub.IsInFaction(bind_KneelingFaction)

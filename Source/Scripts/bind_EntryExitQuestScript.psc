@@ -32,6 +32,9 @@ event OnInit()
                 rm.BehaviorEnterExitRuleInnPermission = 1
                 rm.BehaviorEnterExitRuleCastlePermission = 1
                 rm.BehaviorEnterExitRulePlayerHomePermission = 1
+                StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 1)
+                StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 1)
+                StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 1)
                 bind_Utility.WriteInternalMonologue("I have permission to teleport to a location...")
 
             else
@@ -47,6 +50,9 @@ event OnInit()
                     rm.BehaviorEnterExitRuleInnPermission = 0
                     rm.BehaviorEnterExitRuleCastlePermission = 0
                     rm.BehaviorEnterExitRulePlayerHomePermission = 0
+                    StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 0)
+                    StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 0)
+                    StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 0)
 
                     fs.BuildingDoor.ForceRefTo(ref)
                     if doorLoc != none
@@ -59,12 +65,15 @@ event OnInit()
                             if currentLocation != none
                                 if currentLocation.HasKeywordString("LocTypeInn") ;rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_INN
                                     rm.BehaviorEnterExitRuleInnPermission = 1
+                                    StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 1)
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
                                 elseif currentLocation.HasKeywordString("LocTypeCastle"); rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_CASTLE
                                     rm.BehaviorEnterExitRuleCastlePermission = 1
+                                    StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 1)
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
                                 elseif currentLocation.HasKeywordString("LocTypePlayerHouse") ;rm.BehaviorEnterExitRuleCurrentLocationType == rm.DESTINATION_TYPE_PLAYERHOME
                                     rm.BehaviorEnterExitRulePlayerHomePermission = 1
+                                    StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 0)
                                     bind_Utility.WriteInternalMonologue("I have permission to leave " + currentLocation.GetName() + "...")
                                 endif                            
                             endif
@@ -72,14 +81,17 @@ event OnInit()
                             if (doorLoc.HasKeywordString("LocTypeInn") && rm.BehaviorEnterExitRuleInn == 1) 
                                 rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_INN
                                 rm.BehaviorEnterExitRuleInnPermission = 1
+                                StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 1)
                                 bind_Utility.WriteInternalMonologue("I have permission to enter " + doorLoc.GetName() + "...")
                             elseif (doorLoc.HasKeywordString("LocTypeCastle") && rm.BehaviorEnterExitRuleCastle == 1) 
                                 rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_CASTLE
                                 rm.BehaviorEnterExitRuleCastlePermission = 1
+                                StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 1)
                                 bind_Utility.WriteInternalMonologue("I have permission to enter " + doorLoc.GetName() + "...")
                             elseif (doorLoc.HasKeywordString("LocTypePlayerHouse") && rm.BehaviorEnterExitRulePlayerHome == 1) 
                                 rm.BehaviorEnterExitRuleCurrentDoorType = rm.DESTINATION_TYPE_PLAYERHOME
                                 rm.BehaviorEnterExitRulePlayerHomePermission = 1
+                                StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 1)
                                 bind_Utility.WriteInternalMonologue("I have permission to enter " + doorLoc.GetName() + "...")
                             endif
                         endif

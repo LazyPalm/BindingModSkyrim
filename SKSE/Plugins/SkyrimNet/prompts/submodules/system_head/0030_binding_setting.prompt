@@ -1,224 +1,64 @@
 {% if render_mode == "full" or render_mode == "thoughts" or render_mode == "transform" %}
-{% set actor_name = decnpc(npc.UUID).name %}
-{% set sub_type = get_global_value("bind_GlobalSettingsSubType") %}
+
+{% set skyrimnetEnabled = papyrus_util("GetIntValue", player.UUID, "bind_skyrimnet_enabled") %}
 {% set has_slavery = get_global_value("bind_GlobalSettingsSlaveryInSkyrim") %}
 {% set has_indentured = get_global_value("bind_GlobalSettingsIndenturedInSkyrim") %}
-{% set wearing_collar = worn_has_keyword(player.UUID, "zad_DeviousCollar") %}
-{% set safe_area = get_global_value("bind_GlobalSafeZone") %}
-{% set player_infractions = get_global_value("bind_GlobalInfractions") %}
 
-{% if worn_has_keyword(player.UUID, "Eroticarmor") or worn_has_keyword(player.UUID, "sla_armorspendex") or worn_has_keyword(player.UUID, "sla_armorhalfnakedbikini") or worn_has_keyword(player.UUID, "sla_armorhalfnaked") or worn_has_keyword(player.UUID, "bind_ArmorBikini") or worn_has_keyword(player.UUID, "bind_ArmorErotic") %}
-{% set pnudity = 1 %}
-{% else %}
-{% if worn_has_keyword(player.UUID, "ArmorCuirass") or worn_has_keyword(player.UUID, "ClothingBody") %}
-{% set pnudity = 2 %}
-{% else %}
-{% set pnudity = 0 %}
-{% endif %}
+{% if skyrimnetEnabled == 1 %}
+
+## Skyrim Slavery / BDSM System
+
+{# Slavery Settings #}
+{% if has_slavery == 0 %}
+- Slavery is illegal in Skyrim
+- Citizens openly criticize slave owners
 {% endif %}
 
-{# Player is sub and mod is active #}
-{% if is_in_faction(player.UUID, "bind_SubmissiveFaction") %}
+{% if has_slavery == 1 %}
+- Slavery exists but is only tolerated when discreet
+- Particularly frowned upon for Nord slaves
+- Collars serve as visible markers of slavery
+- Slaves receive poor treatment from the public
+{% endif %}
 
-    {{ "## "}} Skyrim Slavery
-    {# slavery type #}
-    {% if sub_type == 0 or sub_type == 1 %}
-    {% endif %}
-    {% if sub_type == 2 %}
-    - {{ player.name }} is an indentured servant.
-    {% endif %}
-    {% if sub_type == 3 %}
-    - {{ player.name }} is a pleasure slave
-    {% endif %}
-    {% if sub_type == 4 %}
-    - {{ player.name }} is a fighting slave
-    {% endif %}
-    {% if sub_type == 5 %}
-    {# ENTER CUSTOM HERE #}
-    {% endif %}
+{% if has_slavery == 2 %}
+- Slavery is legal and widespread in Skyrim
+- Some moral debate exists but authorities don't intervene
+- Collars commonly indicate slave status
+- Slaves face poor treatment from citizens
+{% endif %}
 
-    {% if is_in_faction(npc.UUID, "bind_AdventuringFaction") %}
-    - {{ actor_name }} is currently adventuring, which could involve life and death situations, and should be a helpful party member and treat any slaves in the party as valued party members.
-    {% endif %}
+{% if has_slavery == 3 %}
+- Slavery is government-mandated with strict enforcement
+- Public criticism is punishable by arrest
+- Collars are legally required for all slaves (except when caged or restrained)
+- Pleasure slaves must remain nude at all times in safe areas
+- Fighting slaves must be nude or wear only bikini armor
+- Slaveholders bear legal responsibility for compliance
+- Slaves are treated as valuable property - verbal abuse is common but physical contact is forbidden
+{% endif %}
 
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") and get_global_value("bind_GlobalSafeZone") != 2 %}
-    - {{ actor_name }} is a member of a party in a dangerous area, which could involve life and death situations. {{ actor_name }} should be a helpful party member and treat any slaves in the party as valued party members.
-    {% endif %}
+{% if has_slavery == 4 %}
+- Skyrim embraces alternative sexual practices
+- BDSM and sexual slavery are socially accepted
+- Public displays draw no attention or commentary
+{% endif %}
 
-    {# slavery in skyrim #}
-    {% if has_slavery == 0 %}
-    - Slavery does not legally exist in Skyrim.
-    - People make negative comments about slave owners.
-    {% endif %}
+{% if has_slavery == 5 %}
+{# Custom slavery settings - configure here #}
 
-    {% if has_slavery == 1 %}
-    - Slavery exists in Skyrim and is tolerated as long as it is low-key, especially if the slave isn't a Nord.
-    - Collars typically indicate slavery.
-    - People will treat slaves poorly.
-    {% endif %}
+{% endif %}
 
-    {% if has_slavery == 2 %}
-    - Slavery is common place and legal in Skyrim. Some may question the morality of it, but no guards or people of rank will interfere with it.
-    - Collars typically indicate slavery 
-    - People will treat slaves poorly.
-    {% endif %}
+{# Indentured Servitude Settings #}
+{% if has_indentured == 1 %}
+- Indentured servitude is common and often resembles slavery
+- Contracts may include labor, sexual services, or forced prostitution
+- Most citizens treat indentured individuals normally if unaware of their status
+{% endif %}
 
-    {% if has_slavery == 4 %}
-    - Skyrim is a kinky place with interesting sexual practices; BDSM and sexual slavery are not out of the ordinary.
-    - People will not pay attention to, nor comment about, public BDSM or sex slaves.
-    {% endif %}
-
-    {% if has_slavery == 5 %}
-    {# ENTER CUSTOM HERE #}
-    {% endif %}
-
-    {% if has_slavery == 3 %}
-    - Slavery is government sanctioned and none dare question its use, for fear of arrest.
-    - Collars are required for any slave.
-    - Pleasure slaves must be kept nude in a safe area. Slaveholders are legally responsible for ensuring this.
-    - Fighting slaves must be nude or wearing bikini armor. Slaveholders are legally responsible for ensuring this.
-    - Slaves are valued property and while people might speak to them poorly, they never touch them.
-    {% endif %}
-
-    {% if has_indentured == 1 %}
-    - Indentured service is commonplace and can, depending on the contractual details be pretty much indistinguishable from slavery.
-    - Indentured service commonly revolves about labor, but can also extend to sexual services or even forced prostitution.
-    - Most people will acknowledge indentured individuals as technically only being under a binding contract, so treating them like a regular, if perhaps impoverished individual. That is, if they even know that an individual is indentured, as there is often no way to tell at a glance.
-    - Contract holders of indentured individuals might be inclined to discuss the advantages, disadvantages and economic benefits they receive from it with each other.
-    {% endif %}
-
-    {% if has_indentured == 2 %}
-    {# ENTER CUSTOM HERE #}
-    {% endif %}
-
-    {# NPC is guard - enforce nudity and collars #}
-    {% if is_in_faction(npc.UUID, "GuardDialogueFaction") and has_slavery == 3 %}
-
-        {# player as pleasure slave #}
-        {% if sub_type == 3 %}
-        {% if wearing_collar == false and safe_area == 2  %}
-        - {{ player.name }} is not wearing a collar, {{ actor_name }} needs to enforce this.
-        {% endif %}
-        {% if wearing_collar == true and safe_area == 2  %}
-        - {{ player.name }} is wearing a collar, {{ actor_name }} will approve of this.
-        {% endif %}
-        {% if pnudity != 0 and safe_area == 2 %}
-        - {{ player.name }} is not nude, {{ actor_name }} needs to enforce this.
-        {% endif %}
-        {% if pnudity == 0 and safe_area == 2 %}
-        - {{ player.name }} is nude, {{ actor_name }} will approve of this.
-        {% endif %}
-        {% endif %}
-
-        {# player as fighting slave #}
-        {% if sub_type == 4 %}
-        {% if wearing_collar == false and safe_area == 2 %}
-        - {{ player.name }} is not wearing a collar, {{ actor_name }} needs to enforce this.
-        {% endif %}
-        {% if wearing_collar == true and safe_area == 2  %}
-        - {{ player.name }} is wearing a collar, {{ actor_name }} will approve of this.
-        {% endif %}
-        {% if pnudity == 2 and safe_area == 2 %}
-        - {{ player.name }} is not nude or in bikini armor, {{ actor_name }} needs to enforce this.
-        {% endif %}
-        {% if pnudity == 1 and safe_area == 2 %}
-        - {{ player.name }} is in bikini armor, {{ actor_name }} will approve of this.
-        {% endif %}
-        {% if pnudity == 0 and safe_area == 2 %}
-        - {{ player.name }} is nude, which is OK for fighting slaves, but {{ actor_name }} will recommend bikini armor for fighting slaves.
-        {% endif %}
-        {% endif %}
-    {% endif %}
-
-    {# NPC is the dominant #}
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") %}
-
-        {# player as con submissive #}
-        {% if sub_type == 0 %}
-        - {{ actor_name }} is in a consensual BDSM relationship with {{ player.name }}.
-        - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
-        - {{ player.name }} has agreed to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ actor_name }} should try to listen to {{ player.name }}'s feedback for enjoyable experiences and incorporate those into the BDSM dynamic.
-        - {{ actor_name }} does not need to talk about being a Dominant and should only make comments about {{ player.name }}'s submission during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
-        {% endif %}
-
-        {# player as non-con submissive #}
-        {% if sub_type == 1 %}
-        - {{ actor_name }} is in a non-consensual BDSM relationship with {{ player.name }}.
-        - {{ actor_name }} is Dominant and {{ player.name }} is submissive. 
-        - {{ player.name }} is forced to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ actor_name }} does not need to talk about being a Dominant and should only make comments about {{ player.name }}'s submission during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
-        {% endif %}
-
-        {# player as indentured servant #}
-        {% if sub_type == 2 %}
-        - {{ player.name }} has a debt of service to {{ actor_name }} by law and must render whatever services they require.
-        - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined. This debt of service can be enforced by the Jarl of the hold that issued it.
-        - {{ actor_name }} does not need to talk about being a debt of service except during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
-        {% endif %}
-
-        {# player as pleasure slave #}
-        {% if sub_type == 3 %}
-        - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
-        - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ player.name }} must offer their body to {{ actor_name }} whenever desired.
-        - Pleasure slaves can fight when adventuring.
-        - {{ actor_name }} does not need to talk about being a Master and should only make comments about {{ player.name }}'s slavery if directly asked or during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
-        {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
-        - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
-        {% endif %}
-        {% if pnudity != 0 and safe_area == 2 and has_slavery == 3 %}
-        - {{ player.name }} is not nude, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
-        {% endif %}
-        {% endif %}
-
-        {# player as fighting slave #}
-        {% if sub_type == 4 %}
-        - {{ actor_name }} is the Master to and owner of {{ player.name }}. 
-        - {{ player.name }} has no choice but to follow {{ actor_name }}'s commands or be disciplined.
-        - {{ player.name }} is expected to fight for {{ actor_name }} while adventuring.
-        - Fighting slaves can be used for sexual purposes.
-        - {{ actor_name }} does not need to talk about being a Master and should only make comments about {{ player.name }}'s slavery if directly asked or during BDSM activites (whipping, bondage, furniture use, etc.) or in the player home. 
-        {% if wearing_collar == false and safe_area == 2 and has_slavery == 3 %}
-        - {{ player.name }} is not wearing a collar, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
-        {% endif %}
-        {% if pnudity == 2 and safe_area == 2 and has_slavery == 3 %}
-        - {{ player.name }} is not nude or in bikini armor, {{ actor_name }} could get in trouble with the guards if this is not dealt with.
-        {% endif %}
-        {% endif %}
-
-        {# player as custom #}
-        {% if sub_type == 5 %}
-        {# ENTER CUSTOM HERE #}
-        {% endif %}
-
-        {# binding event awareness #}
-        {% if safe_area != 2 %}
-        - {{ actor_name }} is an unsafe area.
-        - Camping is OK in unsafe areas.
-        - Trying on bondage looks and gear is NOT OK in unsafe areas.
-        {% endif %}
-        {% if safe_area == 2 %}
-        - {{ actor_name }} is an safe area.
-        - Camping is NOT OK a safe area. In safe areas, {{ actor_name }} must spend the night in an inn or a home.
-        - Trying on bondage looks and gear is OK in safe areas, but only if {{ player.name }} asks.
-        {% endif %}
-
-        {# disciplined #}
-        {% if player_infractions > 0 %}
-        - {{ player.name }} has {{ player_infractions }} rule infractions.
-        - {{ player.name }} should be disciplined by {{ actor_name }}.
-        {% endif %}
-
-    {% endif %}
-
-    {# normal NPC #}
-    {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false and is_in_faction(npc.UUID, "GuardDialogueFaction") == false %}
-        {# player is nude #}
-        {% if pnudity < 2 %}
-  
-        {% endif %}
-    {% endif %}
+{% if has_indentured == 2 %}
+{# Custom indentured settings - configure here #}
+{% endif %}
 
 {% endif %}
 {% endif %}

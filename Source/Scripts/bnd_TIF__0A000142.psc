@@ -19,6 +19,14 @@ Actor akSpeaker = akSpeakerRef as Actor
 
 bind_MainQuestScript mqs = GetOwningQuest() as bind_MainQuestScript
 bind_Functions fs = GetOwningQuest() as bind_Functions
+; bind_BondageManager bms = GetOwningQuest() as bind_BondageManager
+; bind_PoseManager pman = GetOwningQuest() as bind_PoseManager
+
+; if bms.IsGagged(fs.GetSubRef())
+;     pman.zgqs.canTalk = true
+;     pman.bind_GlobalGagPulledOutToSpeak.SetValue(1)
+;     bind_Utility.WriteInternalMonologue(fs.GetDomTitle() + " pulls my gag out a bit to speak...")
+; endif
 
 mqs.AdventuringCheckStatus = 0
 if mqs.AdventuringUse == 1

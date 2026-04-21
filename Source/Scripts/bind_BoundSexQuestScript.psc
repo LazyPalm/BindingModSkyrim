@@ -148,10 +148,18 @@ function StartEvent()
 
     fs.EventStartCrowds()
 
-    if !sms.StartSexScene(theSub, theDom)
-        debug.MessageBox("Could not start sex scene")
-        StopEvent(sexAnimationRan = false)
-    endif
+    ; if SexLabUtil.GetVersion() < 20000
+        if !sms.StartSexScene(theSub, theDom)
+            debug.MessageBox("Could not start sex scene")
+            StopEvent(sexAnimationRan = false)
+        endif
+    ; else
+    ;     ;if P+ is installed
+    ;     if !sms.StartSexSceneNoTags(theSub, theDom)
+    ;         debug.MessageBox("Could not start sex scene")
+    ;         StopEvent(sexAnimationRan = false)
+    ;     endif
+    ; endif
 
     ; if !bind_SexLabHelper.StartTwoPersonSex(theDom, theSub)
     ;     StopEvent()

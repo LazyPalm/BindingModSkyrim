@@ -14,6 +14,7 @@ int property PreferenceHoldConversationTarget auto conditional
 int property PreferenceSpellChangeBondage auto conditional
 int property PreferenceDomRandomComments auto conditional
 int property PreferenceHideSetDomDialogue auto conditional
+int property PreferenceGuardsEquipBondage auto conditional
 
 ;string property BondageSetLocation auto conditional
 int property ActiveBondageSetId auto conditional

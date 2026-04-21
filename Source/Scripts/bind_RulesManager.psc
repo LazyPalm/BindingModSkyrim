@@ -593,6 +593,10 @@ function ClearLocationPermissions(Actor theSub)
     BehaviorEnterExitRuleInnPermission = 0
     BehaviorEnterExitRulePlayerHomePermission = 0
 
+    StorageUtil.SetIntValue(theSub, "bind_enter_inn_permission", 0)
+    StorageUtil.SetIntValue(theSub, "bind_enter_castle_permission", 0)
+    StorageUtil.SetIntValue(theSub, "bind_enter_home_permission", 0)
+
     StorageUtil.SetIntValue(theSub, "bind_has_speech_permission", 0)
     StorageUtil.SetIntValue(theSub, "bind_has_prayer_permission", 0)
 
@@ -749,6 +753,47 @@ function _BuildDRulesArray()
     endif
 endfunction
 
+string function GetBondageRuleText(int idx) global
+    string name = Game.GetPlayer().GetDisplayName()
+    if idx == 0
+        return name + " must wear shackles, which consist of locking cuffs worn on the ankles connected together with a short chain; this will prevent them from wandering away and slow their movement."
+    elseif idx == 1
+        return name + " must wear locking decorative cuffs on their wrists and around their biceps; these do not restrict movement but visibly mark them as a slave."
+    elseif idx == 2
+        return name + " must wear a locking blindfold that covers their eyes; without sight, they must trust their owner to guide in public spaces or feel around carefully in the dark."
+    elseif idx == 3
+        return name + " must wear slave boots with a tall, unstable heel; the design will make movement more difficult and require careful balance."
+    elseif idx == 4
+        return name + " must wear a locking belt made of leather or similar material, secured tightly around their waist to restrict access to their intimate areas."
+    elseif idx == 5
+        return name + " must wear a locking collar made of leather or metal, fitted tightly around their neck."
+    elseif idx == 6
+        return name + " must wear a corset laced tightly enough to restrict breathing and movement."
+    elseif idx == 7
+        return name + " must wear a gag that prevents clear speech, forcing them to communicate non-verbally."
+    elseif idx == 8
+        return name + " must wear full-finger gloves that reduce hand dexterity."
+    elseif idx == 9
+        return name + " must wear a leather harness that encases their torso and emphasizes their posture."
+    elseif idx == 10
+        return name + " must wear heavy bondage gear that includes wrist and arm restraints, severely limiting their movement."
+    elseif idx == 11
+        return name + " must wear a full-head hood that restricts vision and muffles hearing."
+    elseif idx == 12
+        return name + " must wear locking decorative leg cuffs at both ankles and thighs; these do not restrict movement but serve as visible markers."
+    elseif idx == 13
+        return name + " must have visible nipple piercings adorned with rings or decorative jewelry."
+    elseif idx == 14
+        return name + " must have a vaginal piercing with a visible decorative charm or chain."
+    elseif idx == 15
+        return name + " must wear an anal plug at all times."
+    elseif idx == 16
+        return name + " must wear a vaginal plug at all times."
+    elseif idx == 17
+        return name + " must wear a full-body leather BDSM suit or straightjacket that is form-fitting and restrictive."
+    endif
+endfunction
+
 int function GetBondageRulesCount()
     _BuildDRulesArray()
     return dRuleCount
@@ -874,6 +919,53 @@ function _BuildBRulesArray()
         bRuleName[19] = "Studies:Ask To Train"
         bRuleName[20] = "Body Rule:Proper Female Armor"
         ;bRuleName[21] = "Body Rule:Erotic Armor"
+    endif
+endfunction
+
+string function GetBehaviorRuleText(int idx) global
+    string name = Game.GetPlayer().GetDisplayName()
+    if idx == 0
+        return name + " must remain nude in safe areas, leaving their body exposed."
+    elseif idx == 1
+        return name + " is not permitted to use beds and must sleep hogtied on the floor."
+    elseif idx == 2
+        return name + " must stand at attention when ordered upon entering a home or inn and remain in position until dismissed."
+    elseif idx == 3
+        return name + " must remove their shoes before praying at shrines."
+    elseif idx == 4
+        return name + " must remove all clothing before praying at shrines."
+    elseif idx == 5
+        return name + " must assume a respectful prayer pose when praying at shrines."
+    elseif idx == 6
+        return name + " must obtain their owner’s permission before praying at shrines."
+    elseif idx == 7
+        return name + " must be bathed and perfectly clean before praying at shrines."
+    elseif idx == 8
+        return name + " must have been whipped within the last day before praying at shrines as a sign of humility."
+    elseif idx == 9
+        return name + " must assume a conversational pose and wait for their owner to speak first before engaging with others."
+    elseif idx == 10
+        return name + " must obtain their owner’s permission before speaking to others."
+    elseif idx == 11
+        return name + " must assume a conversational pose before speaking to others."
+    elseif idx == 12
+        return name + " must obtain permission before entering or exiting a castle."
+    elseif idx == 13
+        return name + " must obtain permission before entering or exiting an inn."
+    elseif idx == 14
+        return name + " must obtain permission before entering or exiting their owner’s home."
+    elseif idx == 15
+        return name + " must obtain their owner’s permission before eating or drinking."
+    elseif idx == 16
+        return name + " must sit on the floor when eating or drinking."
+    elseif idx == 17
+        return name + " must express gratitude to their owner after sex."
+    elseif idx == 18
+        return name + " must obtain their owner’s permission before learning a spell scroll."
+    elseif idx == 19
+        return name + " must obtain their owner’s permission before learning a skill from a trainer."
+    elseif idx == 20
+        return name + " must wear revealing female armor (such as bikini armor) when adventuring."
     endif
 endfunction
 

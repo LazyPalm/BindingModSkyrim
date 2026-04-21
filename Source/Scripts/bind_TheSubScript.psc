@@ -38,7 +38,19 @@ Event OnPlayerLoadGame()
 
 	;MQS.LoadGame()
 
+	; float currentM = StorageUtil.GetFloatValue(self.GetActorReference(), "MME.MilkMaid.MilkCount", 0.0)
+	; float maxM = StorageUtil.GetFloatValue(self.GetActorReference(), "MME.MilkMaid.MilkMaximum", 0.0)
+	; int mSlave = StorageUtil.GetIntValue(self.GetActorReference(), "bind_milk_slave", 0)
+	; float lactacid = StorageUtil.GetFloatValue(self.GetActorReference(), "MME.MilkMaid.LactacidCount", 0.0)
+
+	; debug.MessageBox("milk: " + mSlave + " current: " + currentM + " max: " + maxM + " lact: " + lactacid)
+
+	;debug.MessageBox("load player work??")
+
 	(GetOwningQuest() as bind_Controller).LoadGame()
+
+	;debug.MessageBox("load player work - part 2??")
+
 	(GetOwningQuest() as bind_Functions).LoadGame()
 
 	; ;TODO - figure why this will not work as a passed parameter (seems to be a ZAP issue, DD parameters work fine)

@@ -40,6 +40,8 @@ int OBJECTIVE_SELECTED_FURNITURE = 500
 
 int inConversation = 0
 
+Quest guardBondageQuest
+
 ;int saveGameUid
 
 Event OnInit()
@@ -75,6 +77,10 @@ function LoadGame()
 	; 	sending = false
 	; endif
 
+	StorageUtil.SetIntValue(theSubRef, "bind_skyrimnet_enabled", main.EnableModSkyrimNet)
+	
+	;debug.MessageBox(StorageUtil.GetIntValue(theSubRef, "bind_skyrimnet_enabled"))
+
 	if TheDom.GetReference()
 		;note - needed this fix after migrating code to this script (for existing saves)
 		theDomRef = TheDom.GetReference() as Actor
@@ -105,6 +111,8 @@ function LoadGame()
 	RegisterForModEvent("bind_PauseStartEvent", "OnPauseStart")
     RegisterForModEvent("bind_PauseEndEvent", "OnPauseEnd")
 
+	RegisterForMenu("Dialogue Menu")
+
 	;RegisterForModEvent("CHIM_CommandReceived", "ChimCommand")
 
 	If !theSubRef.HasSpell(ActionButtonMagicEffect)
@@ -130,6 +138,7 @@ function LoadGame()
 	; endif
 
 	gmanage.LoadGame(false)
+	;debug.MessageBox("in here???")
 	brain.LoadGame(false)
 	fman.LoadGame()
 	pman.LoadGame(theSubRef)
@@ -170,6 +179,31 @@ function LoadGame()
 	endif
 
 endfunction
+
+event OnMenuClose(String menuName)
+    if menuName == "Dialogue Menu"
+		; if pman.bind_GlobalGagPulledOutToSpeak.GetValue() == 1.0
+		; 	pman.zgqs.canTalk = false
+		; 	pman.bind_GlobalGagPulledOutToSpeak.SetValue(0)
+		; 	bind_Utility.WriteInternalMonologue(GetDomTitle() + " is shoving my gag back in...")
+		; endif
+        ;debug.MessageBox("closed dialogue menu...")
+	endif
+endevent
+
+event OnMenuOpen(String menuName)
+    if menuName == "Dialogue Menu"		
+        ; ObjectReference targetRef = Game.GetDialogueTarget()
+        ; Actor targetActor = targetRef as Actor
+		; if targetActor.IsInFaction(bind_DominantFaction)
+		; 	if bms.IsGagged(theSubRef)
+		; 		pman.zgqs.canTalk = true
+		; 		pman.bind_GlobalGagPulledOutToSpeak.SetValue(1)
+		; 		bind_Utility.WriteInternalMonologue(GetDomTitle() + " pulls my gag out a bit to speak...")
+		; 	endif
+		; endif
+	endif
+endevent
 
 ; Event ChimCommand(String npcname,String command,String parm)
 
@@ -691,25 +725,25 @@ state ArrivalCheckState
 
 			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
 
-			if main.PreferenceSpellChangeBondage == 1
+			; if main.PreferenceSpellChangeBondage == 1
 
-				BlueGlow.Play(theSubRef, 10.0)
+			; 	BlueGlow.Play(theSubRef, 10.0)
 
-				int outfitId = main.ActiveBondageSetId
-				bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
-				;if outfitId > 0
-				bms.EquipBondageOutfit(theSubRef, outfitId)
-				if TheSecondSub.GetReference() != none
-					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-				endif
-				if TheThirdSub.GetReference() != none
-					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-				endif
-				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId)
+			; 	int outfitId = main.ActiveBondageSetId
+			; 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
+			; 	;if outfitId > 0
+			; 	bms.EquipBondageOutfit(theSubRef, outfitId)
+			; 	if TheSecondSub.GetReference() != none
+			; 		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+			; 	endif
+			; 	if TheThirdSub.GetReference() != none
+			; 		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
+			; 	endif
+			; 	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId)
 
-				BlueGlow.Stop(theSubRef)
+			; 	BlueGlow.Stop(theSubRef)
 
-			else
+			; else
 				main.NeedsBondageSetChange = 1
 				bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
 				bcs.AdvanceGameLoop()
@@ -718,7 +752,7 @@ state ArrivalCheckState
 				; 	bind_BoundForLocations.Start()
 				; endif
 
-			endif
+			;endif
 
 			; if main.AdventuringAutomatic == 1
 
@@ -767,6 +801,8 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 	;debug.MessageBox("new: : " + newLocation.GetName() + " old: " + oldLocation.GetName())
 
 	;debug.MessageBox("indoors " + isIndoors + " rule: " + rman.BehaviorEnterExitRule)
+
+	CalculateDistanceAtAction()
 
 	if newLocation != none && isIndoors && rman.BehaviorEnterExitRule == 1
 		;entered a building
@@ -2042,6 +2078,12 @@ EndFunction
 Function SafeWord()
 
 	LogOutput("SafeWord()")
+
+	if bind_GlobalSettingsSubType.GetValue() == 0
+		bind_ThinkingDom.SendDirectNarration("{{ player.name }} calls out their safe word, " + theDomRef.GetDisplayName() + " must respect it.", theSubRef, theDomRef)
+	else
+		bind_ThinkingDom.SendDirectNarration(theDomRef.GetDisplayName() + " notices something is wrong with {{ player.name }} and stops what they are doing to check on them.", theDomRef, theSubRef)
+	endif
 
 	main.PlayerTiedInAnimation = 0
 
@@ -3421,6 +3463,10 @@ endfunction
 ; 	endif
 ; endfunction
 
+function AdvanceGameLoop()
+	bcs.AdvanceGameLoop()
+endfunction
+
 
 bind_ThinkingDom property brain auto
 bind_BondageManager property bms auto
@@ -3498,6 +3544,8 @@ GlobalVariable property bind_GlobalPunishmentGoldPercentage auto
 GlobalVariable property bind_GlobalRulesInEffect auto
 
 GlobalVariable property bind_GlobalKneelingOK auto
+
+GlobalVariable property bind_GlobalSettingsSubType auto
 
 Quest property bind_GoAdventuringQuest auto
 Quest property bind_DefeatedQuest auto

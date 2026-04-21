@@ -149,6 +149,8 @@ function TieUpSub()
 
     eventEndTime = bind_Utility.AddTimeToCurrentTime(0, Utility.RandomInt(main.HarshBondageMinMinutes, main.HarshBondageMaxMinutes)) 
     
+    bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they will be suffering in the bondage until they decide to free them.", theDom, theSub)
+
     GotoState("WaitingState")
 
     SetObjectiveCompleted(10)
@@ -182,9 +184,11 @@ function FreeSub()
         bind_Utility.WriteNotification(fs.GetDomTitle() + " canceled a punishment for being a good bondage pet.", bind_Utility.TextColorBlue())
         fs.AdjustRuleInfractions(-1)
     elseif fs.GetPointsFromHarshBondage()
+        bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they enjoyed see them suffer in bondage and have decided to reward them a point.", theDom, theSub)
         bind_Utility.WriteNotification(fs.GetDomTitle() + " enjoyed seeing you suffer in bondage and decided to award you a point.", bind_Utility.TextColorBlue())
         fs.AddPoint()
     Else 
+        bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " lets {{ player.name }} know they enjoyed see them suffer in bondage.", theDom, theSub)
     	bind_Utility.WriteNotification(fs.GetDomTitle() + " enjoyed the bondage show...", bind_Utility.TextColorBlue())
     EndIf
 

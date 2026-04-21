@@ -10,7 +10,7 @@ int choice = 0
 int rule = 0
 
 bind_ThinkingDom think
-string selectedRuleAiSummary
+string selectedRuleSummaryText
 
 event OnInit()
 
@@ -24,6 +24,8 @@ event OnInit()
         theDom = fs.GetDomRef()
 
         think = bind_ThinkingDom.GetThinkingDom()
+
+        ;debug.MessageBox("ai ready: " + think.IsAiReady())
 
         add = 0
         choice = 0
@@ -341,9 +343,9 @@ function HybridManagedPick()
     int listReturn = listMenu.GetResultInt()
     if listReturn < rules.Length
         rule = indexList[listReturn]
-        if think.IsAiReady()
-            CreateSelectedRuleAiSummary(choice, add, rule)
-        endif
+        ;if think.IsAiReady()
+        CreateSelectedRuleSummary(choice, add, rule)
+        ;endif
     else
         HybridManagedPick()
     endif
@@ -445,9 +447,10 @@ function SubManagedPickRule()
         return
     elseif listReturn > 0 && listReturn < rules.Length
         rule = indexList[listReturn - 1]
-        if think.IsAiReady()
-            CreateSelectedRuleAiSummary(choice, add, rule)
-        endif
+        ;debug.MessageBox(rule)
+        ;if think.IsAiReady()
+        CreateSelectedRuleSummary(choice, add, rule)
+        ;endif
     else
         SubManagedPickRule()
     endif
@@ -528,8 +531,8 @@ function EventStart()
     SetObjectiveDisplayed(10, true)
 
     if think.IsAiReady()
-        if selectedRuleAiSummary != ""
-            think.UseDirectNarration(theDom, theDom.GetDisplayName() + " is changing {{ player.name }}'s rules to " + selectedRuleAiSummary)
+        if selectedRuleSummaryText != ""
+            think.UseDirectNarration(theDom, theDom.GetDisplayName() + " is changing {{ player.name }}'s rules to " + selectedRuleSummaryText)
             DomRuleSceneEndedFunction()
         else
             EventEnd()
@@ -551,21 +554,22 @@ function EventStart()
 
 endfunction
 
-function CreateSelectedRuleAiSummary(int behaviorOrBondage, int addOrRemove, int ruleIdx)
-    selectedRuleAiSummary = ""
+function CreateSelectedRuleSummary(int behaviorOrBondage, int addOrRemove, int ruleIdx)
+    selectedRuleSummaryText = ""
     if behaviorOrBondage == 1
         if addOrRemove == 1
-            selectedRuleAiSummary = "Adding " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule"
+            selectedRuleSummaryText = "Adding " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule. " + bind_RulesManager.GetBehaviorRuleText(ruleIdx)
         elseif addOrRemove == 2
-            selectedRuleAiSummary = "Removing " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule"
+            selectedRuleSummaryText = "Removing " + brm.GetFriendlyBehaviorRuleName(ruleIdx) + " behavior rule."
         endif
     elseif behaviorOrBondage == 2
         if addOrRemove == 1
-            selectedRuleAiSummary = "Adding " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule"
+            selectedRuleSummaryText = "Adding " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule. " + bind_RulesManager.GetBondageRuleText(ruleIdx)
         elseif addOrRemove == 2
-            selectedRuleAiSummary = "Removing " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule"
+            selectedRuleSummaryText = "Removing " + brm.GetFriendlyBondageRuleName(ruleIdx) + " bondage rule."
         endif
     endif
+    debug.MessageBox(selectedRuleSummaryText)
 endfunction
 
 function SilentEventEnd()
@@ -767,9 +771,9 @@ function DomManagedRuleChange()
         endif
     endif
 
-    if think.IsAiReady()
-        CreateSelectedRuleAiSummary(choice, add, rule)
-    endif
+    ;if think.IsAiReady()
+    CreateSelectedRuleSummary(choice, add, rule)
+    ;endif
 
     bind_GlobalEventVar1.SetValue(add)
     bind_GlobalEventVar2.SetValue(choice)

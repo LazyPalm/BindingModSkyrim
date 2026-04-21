@@ -2,6 +2,6 @@
 {% set actor_name = decnpc(npc.UUID).name %}
 {% if triggeringEvent and triggeringEvent.type == "direct_narration" %}
 {% else %}
-    {# migrated this to 0875 - to load after 0799 #}
+    {# overriding this in the binding prompt - if before binding in load order #}
 {% endif %}
 {% endif %}

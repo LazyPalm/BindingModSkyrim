@@ -1,0 +1,23 @@
+{% if render_mode == "full" or render_mode == "dialogue_target" or render_mode == "transform" %}
+
+{% set actor_name = decnpc(npc.UUID).name %}
+
+{# Gag Handling Instructions #}
+{% if worn_has_keyword(npc.UUID, "zbfWornGag") or worn_has_keyword(npc.UUID, "zad_DeviousGag") %}
+    {% if papyrus_util("GetIntValue", player.UUID, "bind_gag_pulled") != 1 %}
+- {{actor_name}} gagged. REPLACE ALL DIALOGUE WITH onomatopoeic sounds (mmph, nnngh) maintaining length/rhythm/tone. No words.
+    {% endif %}
+{% endif %}
+
+{% if worn_has_keyword(player.UUID, "zad_DeviousGag") or worn_has_keyword(player.UUID, "zbfWornGag") %}
+    {% if papyrus_util("GetIntValue", player.UUID, "bind_gag_pulled") != 1 %}
+        {% if is_in_faction(npc.UUID, "bind_DominantFaction") == false %}
+- {{ actor_name }} cannot removed locked gags.
+- {{ actor_name }} CANNOT understand {{ player.name }}'s gagged speech; may recommend having gag removed, NEVER repeat sounds. 
+        {% else %}
+- {{actor_name}} may command silence/tease about gag/explain purpose, NEVER repeat sounds.
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+{% endif %}

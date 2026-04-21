@@ -559,6 +559,45 @@ function PriApiEquipBondageOutfit(Actor akActor, int outfitId) global
 
 endfunction
 
+function PriApiUpdatePlayerBondage(Actor akActor) global ;akActor could be the dom, guard, etc.
+
+    Quest q = Quest.GetQuest("bind_MainQuest")
+    bind_MainQuestScript mqs = q as bind_MainQuestScript
+    bind_Functions fs = q as bind_Functions
+    bind_BondageManager bms = q as bind_BondageManager
+
+    bind_Utility.DisablePlayer()
+
+    mqs.NeedsBondageSetChange = 0
+
+    if akActor.GetDistance(fs.GetSubRef()) > 255.0
+        bind_Utility.WriteInternalMonologue("I need to get closer to " + akActor.GetDisplayName() + "...")
+        bind_MovementQuestScript.WalkTo(akActor, fs.GetSubRef(), 255.0)
+    endif
+    bind_MovementQuestScript.FaceTarget(akActor, fs.GetSubRef())
+    bind_MovementQuestScript.PlayDoWork(akActor)
+
+    bind_Utility.WriteNotification("Applying bondage set...", bind_Utility.TextColorBlue())
+
+    ;debug.MessageBox(mqs.ActiveBondageSetId)
+
+    bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
+
+    if fs.TheSecondSub.GetReference() != none
+        bind_MovementQuestScript.FaceTarget(akActor, fs.TheSecondSub.GetActorReference())
+        bind_MovementQuestScript.PlayDoWork(akActor)        
+        bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
+    endif
+    if fs.TheThirdSub.GetReference() != none
+        bind_MovementQuestScript.FaceTarget(akActor, fs.TheThirdSub.GetActorReference())
+        bind_MovementQuestScript.PlayDoWork(akActor)  
+        bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+    endif
+
+    bind_Utility.EnablePlayer()
+
+endfunction
+
 ;***************************************************************
 ;end private api
 ;***************************************************************

@@ -75,8 +75,9 @@ function EventStart()
     bind_MovementQuestScript.StopWorking(theDom)
 
     if think.IsAiReady()
-        string narrationString = theDom.GetDisplayName() + " is gagging {{ player.name }} for not kneeling before speaking."
-        think.UseDirectNarration(theDom, narrationString)
+        ; string narrationString = theDom.GetDisplayName() + " is gagging {{ player.name }} for not kneeling before speaking."
+        ; think.UseDirectNarration(theDom, narrationString)
+        bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " is gagging {{ player.name }} for not kneeling before speaking.", theDom, theSub)
     else
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeStartGagSub())
     endif
@@ -108,8 +109,9 @@ function EventEnd()
     bind_MovementQuestScript.StopWorking(theDom)
 
     if think.IsAiReady()
-        string narrationString = theDom.GetDisplayName() + " removes the gag and hopes that {{ player.name }} learned not to speak without kneeling."
-        think.UseDirectNarration(theDom, narrationString)
+        ; string narrationString = theDom.GetDisplayName() + " removes the gag and hopes that {{ player.name }} learned not to speak without kneeling."
+        ; think.UseDirectNarration(theDom, narrationString)
+        bind_ThinkingDom.SendDirectNarration(theDom.GetDisplayName() + " removes the gag and hopes that {{ player.name }} learned not to speak without kneeling.", theDom, theSub)
     else
         bind_MovementQuestScript.MakeComment(theDom, theSub, bind_MovementQuestScript.GetCommentTypeEndGagSub())
     endif

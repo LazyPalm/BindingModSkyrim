@@ -26,6 +26,17 @@ function UpdateArousalLevels()
     bind_GlobalSexArousalSub.SetValue(slau.GetActorArousal(fs.GetSubRef()))
 endfunction
 
+bool function StartSexSceneNoTags(Actor sub, Actor dom)
+
+    sslThreadController thread = sfx.QuickStart(dom, sub) ;, none, none, none, none, "", "furniture")
+    if thread != none
+        return true
+    else
+        return false
+    endif
+
+endfunction
+
 bool function StartSexScene(Actor sub, Actor dom = none)
 
     bool result

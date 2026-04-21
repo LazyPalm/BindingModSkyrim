@@ -1,6 +1,9 @@
 Scriptname bind_McmScript extends SKI_ConfigBase  
 
 string version
+int versionMajor
+int versionMinor
+int versionUpdate
 
 string selectedPage
 
@@ -89,6 +92,7 @@ int togglePointsByBeingGood
 int sliderPointsMax
 string[] speechTypes
 string[] prayerTypes
+bool bondageUpdatedFlag
 
 ;punishment
 int sliderPunishmentMinGold
@@ -102,6 +106,7 @@ int toggleDisplayNoBondageOutfit
 int toggleSpellBondage
 int toggleDomComments
 int toggleHideSetDomDialogue
+int toggleGuardBondageQuest
 
 int toggleAdventuringUse
 int sliderAdventuringPointCost
@@ -318,7 +323,11 @@ string slTagsFile = "bind_sl_tags.json"
 
 Event OnConfigOpen()
 
-    version = "0.4.41"
+    versionMajor = 0
+    versionMinor = 4
+    versionUpdate = 46
+
+    version = versionMajor + "." + versionMinor + "." + versionUpdate
 
     theSub = fs.GetSubRef()
 
@@ -691,22 +700,42 @@ event OnOptionHighlight(int option)
     elseif option == toggleHoldConversationTarget
         SetInfoText("This will cause a conversational target to pause what they are doing, and when you have your crosshair over the target, it helps facilitate easier interactions using conversation rules.")
 
+    ; elseif option == clickedResetCurrentSaveBondageOutfits
+    ;     SetInfoText("Restores the bondage outfits in your current saved game to their default template values.")
+    ; elseif option == clickedBackupBondageOutfits
+    ;     SetInfoText("This process copies your bondage template files (the default outfits for new games) to a special folder 'binding_backup' in overwrite, ensuring they remain intact even if you reinstall the mod. If you haven't customized the templates in a saved game, the mod will save its default templates instead.")        
+    ; elseif option == clickedRestoreBondageOutfits
+    ;     SetInfoText("If you've created a backup of your bondage templates, this process will use your 'binding_backup' files to update the current templates - used when starting a new game or resetting outfits in your current save.")
+    ; elseif option == clickedUpdateTemplateFromCurrentSave
+    ;     SetInfoText("Rebuilds the mod's bondage templates using updated bondage outfit data from this save file. Templates stored in 'binding_backup' remain unchanged.")
+
+
     endif
 
 endevent
 
 function DisplayBackup()
 
-    AddHeaderOption("Bondage Outfit Backup")
+    AddHeaderOption("Save MCM Settings")
     AddHeaderOption("")
 
-    clickedBackupBondageOutfits = AddTextOption("Backup: bondage templates", "")
+    savesList = McmGetSaveList()
 
-    clickedRestoreBondageOutfits = AddTextOption("Restore: bondage templates", "")
+    menuMcmSaves = AddMenuOption("Selected Save", "")
+    toggleLoadMcm = AddToggleOption("Load Selected (exit menu after)", changeLoadMcm)
+    toggleSaveMcm = AddToggleOption("New Save (exit menu after)", changeSaveMcm)    
+    AddEmptyOption()
 
-    clickedResetCurrentSaveBondageOutfits = AddTextOption("Reset: save game bondage outfits", "")
+    ; AddHeaderOption("Bondage Outfit Backup")
+    ; AddHeaderOption("")
 
-    clickedUpdateTemplateFromCurrentSave = AddTextOption("Update: templates from save", "")
+    ; clickedBackupBondageOutfits = AddTextOption("Backup: bondage templates", "")
+
+    ; clickedRestoreBondageOutfits = AddTextOption("Restore: bondage templates", "")
+
+    ; clickedResetCurrentSaveBondageOutfits = AddTextOption("Reset: save game bondage outfits", "")
+
+    ; clickedUpdateTemplateFromCurrentSave = AddTextOption("Update: templates from save", "")
 
 endfunction
 
@@ -1495,7 +1524,8 @@ function DisplaySlTagSettings()
 
     bind_Utility.WriteToConsole("querying sexlab for tags.")
 
-    string[] tags = bind_SexLabHelper.GetAllAnimationTags(2)
+    SexLabFramework sfx = SexlabUtil.GetAPI()
+    string[] tags = sfx.GetAllAnimationTags(2, true)
     bind_Utility.WriteToConsole("sexlab GetAllAnimationTags count: " + tags.Length)
 
     if tags.Length == 0
@@ -1792,13 +1822,13 @@ Function DisplayEventSettings()
 
     if main.SoftCheckDwarvenDeviousCuirass == 1
         toggleAdventuringUseDwarven = AddToggleOption("Adventuring - Use Dwarven Devious Cuirass", main.AdventuringUseDwarven)
-        AddTextOption("", "")
+        AddEmptyOption()
     endif
 
     AddHeaderOption("Bound Bedtime (No Beds Rule Active)")
     AddHeaderOption("")
     sliderFurnitureForSleep = AddSliderOption("Furniture - Chance For Sleep Use", main.BedtimeFurnitureForSleep, "{0}")
-    AddTextOption("", "")
+    AddEmptyOption()
     ;toggleBedtimeUseHood = AddToggleOption("Bound Bedtime - Use Hood", bmanage.BedtimeUseHood)
 
     AddHeaderOption("Camping")
@@ -1809,7 +1839,7 @@ Function DisplayEventSettings()
     AddHeaderOption("Harsh Bondage")
     AddHeaderOption("")
     toggleRandomHarshBondage = AddToggleOption("Harsh Bondage - Random Use", main.HarshBondageRandomUse)
-    AddTextOption("", "")
+    AddEmptyOption()
     sliderHarshBondageHours = AddSliderOption("Harsh Bondage - Hours Between Use", main.HarshBondageHoursBetweenUse, "{0}")
     sliderHarshBondageChance = AddSliderOption("Harsh Bondage - Chance To Use", main.HarshBondageChance, "{0}%")
     sliderHarshBondageMin = AddSliderOption("Harsh Bondage - Min. Minutes", main.HarshBondageMinMinutes, "{0}")
@@ -1818,14 +1848,14 @@ Function DisplayEventSettings()
     AddHeaderOption("Inspection")
     AddHeaderOption("")
     toggleInspections = AddToggleOption("Inspection - Random Inspections", main.InspectionsRandomUse)
-    AddTextOption("", "")
+    AddEmptyOption()
     sliderInspectionsHours = AddSliderOption("Inspection - Hours Between", main.InspectionHoursBetween, "{0}")
     sliderInspectionsChance = AddSliderOption("Inspection - Chance Of Inspection", main.InspectionChance, "{0}%")
 
     AddHeaderOption("Put On Display (Special Furniture)")
     AddHeaderOption("")
     toggleRandomSubInFurniture = AddToggleOption("Furniture - Random Use", main.PutOnDisplayRandomUse)
-    AddTextOption("", "")
+    AddEmptyOption()
     sliderFurnitureHours = AddSliderOption("Furniture - Hours Between Use", main.PutOnDisplayHoursBetweenUse, "{0}")
     sliderFurnitureChance = AddSliderOption("Furniture - Chance To Use", main.PutOnDisplayChance, "{0}%")
     sliderFurnitureMin = AddSliderOption("Furniture - Min. Minutes", main.PutOnDisplayMinMinutes, "{0}")
@@ -1834,7 +1864,7 @@ Function DisplayEventSettings()
     AddHeaderOption("Whipping")
     AddHeaderOption("")
     toggleWhippingRandom = AddToggleOption("Whipping - Random Use", main.WhippingRandomUse)
-    AddTextOption("", "")
+    AddEmptyOption()
     sliderWhippingHours = AddSliderOption("Whipping - Hours Between", main.WhippingHoursBetween, "{0}")
     sliderWhippingChance = AddSliderOption("Whipping - Chance Of Whipping", main.WhippingChance, "{0}%")
 
@@ -1843,7 +1873,7 @@ Function DisplayEventSettings()
     toggleEventWordWall = AddToggleOption("Event - Word Wall", main.DomUseWordWallEvent)
     toggleDragonSoulRitual = AddToggleOption("Event - Souls From Bones", main.DomUseDragonSoulRitual)
     ; toggleChastiseSub = AddToggleOption("Event - Chastise Sub For Rule Breaking", main.DomChastiseForRuleBreaking)
-    ; AddTextOption("", "")
+    ; AddEmptyOption()
 
 EndFunction
 
@@ -1867,7 +1897,9 @@ Function DisplayPreferences()
     sliderAdventuringSeconds = AddSliderOption("Run Check After Seconds", main.AdventuringCheckAfterSeconds, "{0}")
     ;toggleAdventuringSuspendRules = AddToggleOption("Suspend Rules & Auto *", main.AdventuringSuspendRules)
     toggleSpellBondage = AddToggleOption("Magic Bondage Change - Dom Can Be Away", main.PreferenceSpellChangeBondage)  
-    ;AddTextOption("", "")
+    toggleGuardBondageQuest = AddToggleOption("Guards Update Bondage", main.PreferenceGuardsEquipBondage)
+
+    AddTextOption("", "")
 
 
     AddHeaderOption("Dominant Preferences")
@@ -1877,7 +1909,7 @@ Function DisplayPreferences()
     ;toggleUnplugGagsOnly = AddToggleOption("Gags - Unplug Panel Gags Only", main.DomOnlyUnplugsPanelGags)
     toggleRemoveGagForDialogue = AddToggleOption("Gags - Remove For Dialogue", main.DomRemovesGagForDialogue)
     toggleDomComments = AddToggleOption("Dom Makes Random Comments", main.PreferenceDomRandomComments)
-    toggleHideSetDomDialogue = AddToggleOption("Hide Set Dom Dialogue", main.PreferenceHideSetDomDialogue)
+    toggleHideSetDomDialogue = AddToggleOption("Hide Set Dom Option In Dialogue", main.PreferenceHideSetDomDialogue)
 
     ;AddEmptyOption()
 
@@ -2327,16 +2359,16 @@ Function DisplayDebug()
     endif        
     actionKeyModifierOption = AddTextOption("Action Key Modifier", GetModifierString(mdKey))
 
-    AddHeaderOption("Save MCM Settings")
-    AddHeaderOption("")
+    ; AddHeaderOption("Save MCM Settings")
+    ; AddHeaderOption("")
 
-    savesList = McmGetSaveList()
+    ; savesList = McmGetSaveList()
 
-    menuMcmSaves = AddMenuOption("Selected Save", "")
-    toggleLoadMcm = AddToggleOption("Load Selected (exit menu after)", changeLoadMcm)
+    ; menuMcmSaves = AddMenuOption("Selected Save", "")
+    ; toggleLoadMcm = AddToggleOption("Load Selected (exit menu after)", changeLoadMcm)
 
-    toggleSaveMcm = AddToggleOption("New Save (exit menu after)", changeSaveMcm)
-    AddTextOption("","")
+    ; toggleSaveMcm = AddToggleOption("New Save (exit menu after)", changeSaveMcm)
+    ; AddTextOption("","")
 
     AddHeaderOption("System")
     AddHeaderOption("")
@@ -2599,169 +2631,171 @@ Event OnOptionSelect(int option)
 
     int i
 
-    if selectedPage == "Backup Settings"
+    ; if selectedPage == "Backup Settings"
 
-        if option == clickedResetCurrentSaveBondageOutfits
-            if ShowMessage("Reset current save bondage outfits from bondage outfit template data?", true, "$Yes", "$No")
-                ; string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
-                ; string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
-                ; string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
-                ; ;ShowMessage(outfitsFileText, false)
-                ; MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+    ;     if option == clickedResetCurrentSaveBondageOutfits
+    ;         if ShowMessage("Reset current save bondage outfits from bondage outfit template data?", true, "$Yes", "$No")
+    ;             ; string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+    ;             ; string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
+    ;             ; string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
+    ;             ; ;ShowMessage(outfitsFileText, false)
+    ;             ; MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
 
-                ; string backupOutfitList = ""
+    ;             ; string backupOutfitList = ""
 
-                ; int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
+    ;             ; int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
 
-                ; i = 0
-                ; string outfitFileText
-                ; while i < outfitList.Length
-                ;     if backupOutfitList != ""
-                ;         backupOutfitList += "|"
-                ;     endif
-                ;     backupOutfitList += outfitList[i]
-                ;     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                ;     MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
-                ;     i += 1
-                ; endwhile
+    ;             ; i = 0
+    ;             ; string outfitFileText
+    ;             ; while i < outfitList.Length
+    ;             ;     if backupOutfitList != ""
+    ;             ;         backupOutfitList += "|"
+    ;             ;     endif
+    ;             ;     backupOutfitList += outfitList[i]
+    ;             ;     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+    ;             ;     MiscUtil.WriteToFile(gameFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+    ;             ;     i += 1
+    ;             ; endwhile
 
-                ; selectedBondageOutfit = ""
-                ; selectedBondageOutfitId = 0
+    ;             ; selectedBondageOutfit = ""
+    ;             ; selectedBondageOutfitId = 0
 
-                bmanage.CreateBondageOutfitFile()
+    ;             bmanage.CreateBondageOutfitFile()
 
-                ShowMessage("Bondage outfits refreshed from template data. Be sure to re-load the save.", false)
-            endif
-        endif
+    ;             ShowMessage("Bondage outfits refreshed from template data. Be sure to re-load the save.", false)
+    ;         endif
+    ;     endif
 
-        if option == clickedBackupBondageOutfits
-            if ShowMessage("Make bondage outfit templates backup?", true, "$Yes", "$No")
-                string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
-                string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
+    ;     if option == clickedBackupBondageOutfits
+    ;         if ShowMessage("Make bondage outfit templates backup?", true, "$Yes", "$No")
+    ;             string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+    ;             string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
 
-                string[] templateFiles = MiscUtil.FilesInFolder(folder)
-                i = 0
-                while i < templateFiles.Length
-                    string fileName = templateFiles[i]
-                    ;ShowMessage(templateFiles[i], false)
-                    string fileData = MiscUtil.ReadFromFile(folder + fileName)
-                    MiscUtil.WriteToFile(backupFolder + fileName, fileData, false, true)
-                    i += 1
-                endwhile
+    ;             string[] templateFiles = MiscUtil.FilesInFolder(folder)
+    ;             i = 0
+    ;             while i < templateFiles.Length
+    ;                 string fileName = templateFiles[i]
+    ;                 ;ShowMessage(templateFiles[i], false)
+    ;                 string fileData = MiscUtil.ReadFromFile(folder + fileName)
+    ;                 MiscUtil.WriteToFile(backupFolder + fileName, fileData, false, true)
+    ;                 i += 1
+    ;             endwhile
 
-                ; string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
-                ; ;ShowMessage(outfitsFileText, false)
-                ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+    ;             ; string outfitsFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfits.json")
+    ;             ; ;ShowMessage(outfitsFileText, false)
+    ;             ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfits.json", outfitsFileText, false, false)
 
-                ; string backupOutfitList = ""
+    ;             ; string backupOutfitList = ""
 
-                ; int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
+    ;             ; int[] outfitList = JsonUtil.IntListToArray("binding/templates/bind_bondage_outfits.json", "bondage_set_ids")
 
-                ; i = 0
-                ; string outfitFileText
-                ; while i < outfitList.Length
-                ;     if backupOutfitList != ""
-                ;         backupOutfitList += "|"
-                ;     endif
-                ;     backupOutfitList += outfitList[i]
-                ;     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                ;     MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
-                ;     i += 1
-                ; endwhile
+    ;             ; i = 0
+    ;             ; string outfitFileText
+    ;             ; while i < outfitList.Length
+    ;             ;     if backupOutfitList != ""
+    ;             ;         backupOutfitList += "|"
+    ;             ;     endif
+    ;             ;     backupOutfitList += outfitList[i]
+    ;             ;     outfitFileText = MiscUtil.ReadFromFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+    ;             ;     MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+    ;             ;     i += 1
+    ;             ; endwhile
 
-                ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
+    ;             ; MiscUtil.WriteToFile(backupFolder + "bind_bondage_outfit_list_backup.txt", backupOutfitList, false, false)
 
-                ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 binding_backup overwrite folder.", false)
-            endif
-        endif
+    ;             ShowMessage("Backup Completed. Be sure to leave the backup files in the MO2 binding_backup overwrite folder.", false)
+    ;         endif
+    ;     endif
 
-        if option == clickedRestoreBondageOutfits
-            string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
-            string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
-            string[] templateFiles = MiscUtil.FilesInFolder(backupFolder)
+    ;     if option == clickedRestoreBondageOutfits
+    ;         string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+    ;         string backupFolder = "data/skse/plugins/StorageUtilData/binding_backup/templates/outfits/"
+    ;         string[] templateFiles = MiscUtil.FilesInFolder(backupFolder)
 
-            if templateFiles.Length == 0 ; !MiscUtil.FileExists(backupFolder + "bind_bondage_outfits.json")
-                ShowMessage("No backup exists", false)
-            else
-                if ShowMessage("Restore bondage outfit templates backup? This will overwrite your current outfit templates.", true, "$Yes", "$No")
+    ;         if templateFiles.Length == 0 ; !MiscUtil.FileExists(backupFolder + "bind_bondage_outfits.json")
+    ;             ShowMessage("No backup exists", false)
+    ;         else
+    ;             if ShowMessage("Restore bondage outfit templates backup? This will overwrite your current outfit templates.", true, "$Yes", "$No")
 
-                    i = 0
-                    while i < templateFiles.Length
-                        string fileName = templateFiles[i]
-                        ;ShowMessage(templateFiles[i], false)
-                        string fileData = MiscUtil.ReadFromFile(backupFolder + fileName)
-                        MiscUtil.WriteToFile(folder + fileName, fileData, false, true)
-                        i += 1
-                    endwhile
+    ;                 i = 0
+    ;                 while i < templateFiles.Length
+    ;                     string fileName = templateFiles[i]
+    ;                     ;ShowMessage(templateFiles[i], false)
+    ;                     string fileData = MiscUtil.ReadFromFile(backupFolder + fileName)
+    ;                     if fileData != ""
+    ;                         MiscUtil.WriteToFile(folder + fileName, fileData, false, true)
+    ;                     endif
+    ;                     i += 1
+    ;                 endwhile
 
-                    ; string outfitsFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfits.json")
+    ;                 ; string outfitsFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfits.json")
 
-                    ; ;debug.MessageBox(outfitsFileText)
+    ;                 ; ;debug.MessageBox(outfitsFileText)
 
-                    ; MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
+    ;                 ; MiscUtil.WriteToFile(folder + "bind_bondage_outfits.json", outfitsFileText, false, false)
 
-                    ; string backupOutfitList = MiscUtil.ReadFromFile(backupfolder + "bind_bondage_outfit_list_backup.txt")
+    ;                 ; string backupOutfitList = MiscUtil.ReadFromFile(backupfolder + "bind_bondage_outfit_list_backup.txt")
 
-                    ; debug.MessageBox(backupOutfitList)
+    ;                 ; debug.MessageBox(backupOutfitList)
 
-                    ; string[] outfitList = StringUtil.Split(backupOutfitList, "|")
+    ;                 ; string[] outfitList = StringUtil.Split(backupOutfitList, "|")
                     
-                    ; ;ShowMessage(outfitList, false)
+    ;                 ; ;ShowMessage(outfitList, false)
 
-                    ; i = 0
-                    ; string outfitFileText
-                    ; while i < outfitList.Length
-                    ;     outfitFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
-                    ;     MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
-                    ;     i += 1
-                    ; endwhile
+    ;                 ; i = 0
+    ;                 ; string outfitFileText
+    ;                 ; while i < outfitList.Length
+    ;                 ;     outfitFileText = MiscUtil.ReadFromFile(backupFolder + "bind_bondage_outfit_" + outfitList[i] + ".json")
+    ;                 ;     MiscUtil.WriteToFile(folder + "bind_bondage_outfit_" + outfitList[i] + ".json", outfitFileText, false, false)
+    ;                 ;     i += 1
+    ;                 ; endwhile
 
-                    ShowMessage("Restore Completed. Template data will be available for new games.", false)
-                endif
-            endif
-        endif
+    ;                 ShowMessage("Restore Completed. Template data will be available for new games.", false)
+    ;             endif
+    ;         endif
+    ;     endif
 
-        if option == clickedUpdateTemplateFromCurrentSave
-            string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
-            string folderJson = "binding/templates/outfits/"
-            ;string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
-            if ShowMessage("Update bondage outfit templates with data from this save game? WARNING: this will overwrite templates for new games.", true, "$Yes", "$No")
+    ;     if option == clickedUpdateTemplateFromCurrentSave
+    ;         string folder = "data/skse/plugins/StorageUtilData/binding/templates/outfits/"
+    ;         string folderJson = "binding/templates/outfits/"
+    ;         ;string gameFolder = "data/skse/plugins/StorageUtilData/binding/games/" + main.SaveGameUid + "/outfits/"
+    ;         if ShowMessage("Update bondage outfit templates with data from this save game? WARNING: this will overwrite templates for new games.", true, "$Yes", "$No")
 
-                ;bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
-                int[] setIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
-                i = 0
-                debug.MessageBox(setIdList)
-                while i < setIdList.Length
+    ;             ;bondageSetNames = JsonUtil.StringListToArray(main.BindingGameOutfitFile, "outfit_name_list")
+    ;             int[] setIdList = JsonUtil.IntListToArray(main.BindingGameOutfitFile, "outfit_id_list")
+    ;             i = 0
+    ;             ;debug.MessageBox(setIdList)
+    ;             while i < setIdList.Length
 
-                    int setId = setIdList[i]
+    ;                 int setId = setIdList[i]
 
-                    string fileName = folder + "bind_bondage_outfit_" + setId + ".json"
-                    string jsonFileName = folderJson + "bind_bondage_outfit_" + setId + ".json"
+    ;                 string fileName = folder + "bind_bondage_outfit_" + setId + ".json"
+    ;                 string jsonFileName = folderJson + "bind_bondage_outfit_" + setId + ".json"
 
-                    MiscUtil.WriteToFile(fileName, "{}", false, false) ;clear the json
-                                        
-                    JsonUtil.SetIntValue(jsonFileName, "outfit_id", setId)
-                    JsonUtil.SetFloatValue(jsonFileName, "dynamic_bondage_expires", 0.0)
-                    JsonUtil.FormListCopy(jsonFileName, "dynamic_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items"))
-                    JsonUtil.FormListCopy(jsonFileName, "fixed_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_fixed_bondage_items"))
-                    JsonUtil.SetIntValue(jsonFileName, "outfit_enabled", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_outfit_enabled"))
-                    JsonUtil.SetIntValue(jsonFileName, "remove_existing_gear", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_remove_existing_gear"))
-                    JsonUtil.SetIntValue(jsonFileName, "use_random_bondage", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_use_random_bondage"))
-                    JsonUtil.IntListCopy(jsonFileName, "block_slots", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_block_slots"))
-                    JsonUtil.IntListCopy(jsonFileName, "random_bondage_chance", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_random_bondage_chance"))
-                    JsonUtil.StringListCopy(jsonFileName, "used_for", JsonUtil.StringListToArray(main.BindingGameOutfitFile, setId + "_used_for"))
-                    JsonUtil.SetStringValue(jsonFileName, "bondage_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name"))
-                    JsonUtil.Save(jsonFileName)
+    ;                 MiscUtil.WriteToFile(fileName, "{}", false, false) ;clear the json
+                                    
+    ;                 JsonUtil.SetIntValue(jsonFileName, "outfit_id", setId)
+    ;                 JsonUtil.SetFloatValue(jsonFileName, "dynamic_bondage_expires", 0.0)
+    ;                 JsonUtil.FormListCopy(jsonFileName, "dynamic_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_dynamic_bondage_items"))
+    ;                 JsonUtil.FormListCopy(jsonFileName, "fixed_bondage_items", JsonUtil.FormListToArray(main.BindingGameOutfitFile, setId + "_fixed_bondage_items"))
+    ;                 JsonUtil.SetIntValue(jsonFileName, "outfit_enabled", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_outfit_enabled"))
+    ;                 JsonUtil.SetIntValue(jsonFileName, "remove_existing_gear", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_remove_existing_gear"))
+    ;                 JsonUtil.SetIntValue(jsonFileName, "use_random_bondage", JsonUtil.GetIntValue(main.BindingGameOutfitFile, setId + "_use_random_bondage"))
+    ;                 JsonUtil.IntListCopy(jsonFileName, "block_slots", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_block_slots"))
+    ;                 JsonUtil.IntListCopy(jsonFileName, "random_bondage_chance", JsonUtil.IntListToArray(main.BindingGameOutfitFile, setId + "_random_bondage_chance"))
+    ;                 JsonUtil.StringListCopy(jsonFileName, "used_for", JsonUtil.StringListToArray(main.BindingGameOutfitFile, setId + "_used_for"))
+    ;                 JsonUtil.SetStringValue(jsonFileName, "bondage_outfit_name", JsonUtil.GetStringValue(main.BindingGameOutfitFile, setId + "_bondage_outfit_name"))
+    ;                 JsonUtil.Save(jsonFileName)
 
-                    i += 1
+    ;                 i += 1
 
-                endwhile
+    ;             endwhile
 
-                ShowMessage("Bondage template update completed.", false)
-            endif
-        endif
+    ;             ShowMessage("Bondage template update completed.", false)
+    ;         endif
+    ;     endif
 
-    endif
+    ; endif
 
     if selectedPage == "Bondage Outfits"
 
@@ -2783,6 +2817,7 @@ Event OnOptionSelect(int option)
         endif
 
         if option == toggleUseOutfit
+            bondageUpdatedFlag = true
             int newValue = 0
 
             if JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_outfit_enabled", 0) == 1
@@ -2797,6 +2832,7 @@ Event OnOptionSelect(int option)
         endif
 
         if option == toggleBondageOutfitRulesBased
+            bondageUpdatedFlag = true
             int useRulesBased = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", 0)
             if useRulesBased == 0
                 useRulesBased = 1
@@ -2840,6 +2876,7 @@ Event OnOptionSelect(int option)
 
         if option == clickedLearnBondageOutfit
             if ShowMessage("Learn worn DD items?", true, "$Yes", "$No")
+                bondageUpdatedFlag = true
                 bmanage.LearnWornDdItemsToSet(theSub, selectedBondageOutfitId)
                 ForcePageReset()
             endif
@@ -2847,6 +2884,7 @@ Event OnOptionSelect(int option)
 
         if option == clickedLearnWornGear
             if ShowMessage("Learn worn armor and clothing?", true, "$Yes", "$No")
+                bondageUpdatedFlag = true
                 gmanage.LearnWornItemsForBondageOutfit(theSub, selectedBondageOutfitId)
                 ForcePageReset()
             endif
@@ -2855,6 +2893,7 @@ Event OnOptionSelect(int option)
         if option == clickedFoundItem
             if selectedFoundItemId > -1
                 if ShowMessage("Add DD item " + selectedFoundItem + "?", true, "$Yes", "$No")
+                    bondageUpdatedFlag = true
                     ;string resultsFile = "binding/bind_dd_search_result.json"
                     Form dev = searchResultsForms[selectedFoundItemId] ;JsonUtil.FormListGet(resultsFile, "found_items", selectedFoundItemId)
                     if dev
@@ -2866,6 +2905,7 @@ Event OnOptionSelect(int option)
         endif
 
         if option == bondageSetRemoveExistingGearToggle
+            bondageUpdatedFlag = true
             if JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 0) == 0
                 JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_remove_existing_gear", 1)
                 SetToggleOptionValue(option, 1)
@@ -2880,6 +2920,7 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageSetUsedForToggle.Length
             if option == bondageSetUsedForToggle[i]
+                bondageUpdatedFlag = true
                 if JsonUtil.StringListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i])
                     JsonUtil.StringListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_used_for", bondageOutfitUsageKey[i])
                     SetToggleOptionValue(option, 0)
@@ -2896,6 +2937,7 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageOutfitBlockToggle.Length
             if option == bondageOutfitBlockToggle[i]
+                bondageUpdatedFlag = true
                 if JsonUtil.IntListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i])
                     ;JsonUtil.StringListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_blocks", bondageOutfitBlocks[i])
                     JsonUtil.IntListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i])
@@ -2913,6 +2955,7 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageSetRemoveDdToggle.Length
             if option == bondageSetRemoveDdToggle[i]
+                bondageUpdatedFlag = true
                 Form dev = JsonUtil.FormListGet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", i)
                 if ShowMessage("Remove " + dev.GetName() + "?", true, "$Yes", "$No")
                     JsonUtil.FormListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_bondage_items", dev, true)
@@ -2925,6 +2968,7 @@ Event OnOptionSelect(int option)
         i = 0
         while i < bondageSetRemoveGearToggle.Length
             if option == bondageSetRemoveGearToggle[i]
+                bondageUpdatedFlag = true
                 Form dev = JsonUtil.FormListGet(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_worn_items", i)
                 if ShowMessage("Remove " + dev.GetName() + "?", true, "$Yes", "$No")
                     JsonUtil.FormListRemove(main.BindingGameOutfitFile, selectedBondageOutfitId + "_fixed_worn_items", dev, true)
@@ -3024,6 +3068,7 @@ Event OnOptionSelect(int option)
         if !completed
             while i < rman.GetBondageRulesCount()
                 if option == toggleBondageRuleOptions[i]
+                    bondageUpdatedFlag = true
                     int ruleOption = rman.GetBondageRuleOption(theSub, i)
                     if bind_GlobalRulesControlledBy.GetValue() > 0
                         ruleOption += 1
@@ -3061,6 +3106,7 @@ Event OnOptionSelect(int option)
                     completed = true
                 endif
                 if option == toggleBondageRules[i]
+                    bondageUpdatedFlag = true
                     int ruleSetting = rman.GetBondageRule(theSub, i)
 
                     if bind_GlobalRulesControlledBy.GetValue() > 0
@@ -3092,6 +3138,7 @@ Event OnOptionSelect(int option)
         if !completed
             while i < rman.GetBehaviorRulesCount()
                 if option == toggleBehaviorRuleOptions[i]
+
                     int ruleOption = rman.GetBehaviorRuleOption(theSub, i)
                     if bind_GlobalRulesControlledBy.GetValue() > 0
                         ruleOption += 1
@@ -3129,6 +3176,7 @@ Event OnOptionSelect(int option)
                     completed = true
                 endif
                 if option == toggleBehaviorRules[i]
+
                     int ruleSetting = rman.GetBehaviorRule(theSub, i)
                     ;int ruleOption = rman.GetBehaviorRuleOption(theSub, i)
 
@@ -3529,6 +3577,11 @@ Event OnOptionSelect(int option)
     if option == toggleSpellBondage
         main.PreferenceSpellChangeBondage = ToggleValue(main.PreferenceSpellChangeBondage)
         SetToggleOptionValue(toggleSpellBondage, main.PreferenceSpellChangeBondage)
+    endif
+
+    if option == toggleGuardBondageQuest
+        main.PreferenceGuardsEquipBondage = ToggleValue(main.PreferenceGuardsEquipBondage)
+        SetToggleOptionValue(toggleGuardBondageQuest, main.PreferenceGuardsEquipBondage)
     endif
 
     if option == toggleDomComments
@@ -3955,6 +4008,23 @@ Event OnConfigClose()
     ;         StorageUtil.SetIntValue(theSub, "bind_safe_area_interaction_check", 3) ;set to to-do
     ;     endif
     ; endif
+
+    ;debug.MessageBox("rules updated: " + rulesUpdatedFlag)
+
+    if fs.ModInRunningState()
+        ;NOTE - run updates if mod is idle
+        if bondageUpdatedFlag == true            
+            bondageUpdatedFlag = false
+            bind_Utility.WriteNotification("Updating bondage rule changes...", bind_Utility.TextColorBlue())
+            main.NeedsBondageSetChange = 1
+            fs.AdvanceGameLoop()
+            ; Quest uq = Quest.GetQuest("bind_BoundForLocations")
+            ; debug.MessageBox(uq)
+            ; if !uq.IsRunning()
+            ;     uq.Start()
+            ; endif
+        endif
+    endif
 
 EndEvent
 
@@ -4741,16 +4811,30 @@ Function McmSaveFunction()
     if result != ""
         string saveFileName = "/binding/mcm/" + result + ".json"
 
+        JsonUtil.SetPathStringValue(saveFileName, "binding_mod_version", version)
+        JsonUtil.SetPathIntValue(saveFileName, "binding_mod_version_major", versionMajor)
+        JsonUtil.SetPathIntValue(saveFileName, "binding_mod_version_minor", versionMinor)
+        JsonUtil.SetPathIntValue(saveFileName, "binding_mod_version_update", versionUpdate)
+
         ;debug
         JsonUtil.SetPathIntValue(saveFileName, "debug_actionkey", bind_GlobalActionKey.GetValue() as int)
         JsonUtil.SetPathIntValue(saveFileName, "debug_actionkeymodifier", main.actionKeyModifier)
+        JsonUtil.SetPathIntValue(saveFileName, "debug_write_logs", main.WriteLogs)
+        JsonUtil.SetPathIntValue(saveFileName, "debug_display_loc_change", main.DisplayLocationChange)
+        JsonUtil.SetPathIntValue(saveFileName, "debug_exp_features", main.ExperimentalFeaturesFlag)
+        JsonUtil.GetPathIntValue(saveFileName, "debug_write_console_messages", StorageUtil.GetIntValue(none, "bind_write_to_console", 0))
 
-        ;sex
+        ;punishment
+        JsonUtil.SetPathIntValue(saveFileName, "punish_gold_min", bind_GlobalPunishmentMinGold.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "punish_gold_max", bind_GlobalPunishmentMaxGold.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "punish_gold_perentage", bind_GlobalPunishmentGoldPercentage.GetValue() as int)
+
+        ;sex **************************************************
         JsonUtil.SetPathIntValue(saveFileName, "sex_freeuse", main.SexFreeUse)
         JsonUtil.SetPathIntValue(saveFileName, "sex_domarousallevel", main.SexDomArousalLevelToTrigger)
         JsonUtil.SetPathIntValue(saveFileName, "sex_chastityremoval", main.SexChanceOfChastityRemoval)
 
-        ;poses
+        ;poses **************************************************
         JsonUtil.SetPathStringValue(saveFileName, "pose_highkneel", pman.GetHighKneel())
         JsonUtil.SetPathStringValue(saveFileName, "pose_highkneelbound", pman.GetHighKneel(true))
         JsonUtil.SetPathStringValue(saveFileName, "pose_deepkneel", pman.GetDeepKneel())
@@ -4766,15 +4850,25 @@ Function McmSaveFunction()
         JsonUtil.SetPathStringValue(saveFileName, "pose_conversation", pman.GetConversationPose())
         JsonUtil.SetPathStringValue(saveFileName, "pose_conversationbound", pman.GetConversationPose(true))
 
-        ;rules
-        JsonUtil.SetPathIntValue(saveFileName, "rules_nudity_required", bind_GlobalRulesNudityRequired.GetValue() as int)
+        ;rules **************************************************
+        ;JsonUtil.SetPathIntValue(saveFileName, "rules_nudity_required", bind_GlobalRulesNudityRequired.GetValue() as int)
         JsonUtil.SetPathIntValue(saveFileName, "rules_control", bind_GlobalRulesControlledBy.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "rules_fast", rman.UseFastRuleCheck)
+        JsonUtil.SetPathIntValue(saveFileName, "rules_behavior_min", bind_GlobalRulesBehaviorMin.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "rules_behavior_max", bind_GlobalRulesBehaviorMax.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "rules_bondage_min", bind_GlobalRulesBondageMin.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "rules_bondage_max", bind_GlobalRulesBondageMax.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "rule_cleanhome", main.RuleMustCleanPlayerHome)
+
+
+
+
+        ;points **************************************************
         JsonUtil.SetPathIntValue(saveFileName, "rules_pointsmax", main.PointsMax)
         JsonUtil.SetPathIntValue(saveFileName, "rules_earn_sex", main.PointsEarnFromSex)
         JsonUtil.SetPathIntValue(saveFileName, "rules_earn_harsh", main.PointsEarnFromHarshBondage)
         JsonUtil.SetPathIntValue(saveFileName, "rules_earn_furniture", main.PointsEarnFromFurniture)
         JsonUtil.SetPathIntValue(saveFileName, "rules_earn_good", main.PointsEarnFromBeingGood)
-        JsonUtil.SetPathIntValue(saveFileName, "rule_cleanhome", main.RuleMustCleanPlayerHome)
 
         ;string[] bRuleList = rman.GetBehaviorRuleNameArray()
         ;behaviorSettings = rman.GetBehaviorRulesSettingsList()
@@ -4799,46 +4893,46 @@ Function McmSaveFunction()
         endwhile
     
         ;bondage
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_cuffs", sms.BoundSexCuffs)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_heavy", sms.BoundSexHeavyBondage)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_gag", sms.BoundSexGag)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_blindfold", sms.BoundSexBlindfold)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_hood", sms.BoundSexHood)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_aplug", sms.BoundSexAPlug)
-        JsonUtil.SetPathIntValue(saveFileName, "boundsex_vplug", sms.BoundSexVPlug)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_cuffs", sms.BoundSexCuffs)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_heavy", sms.BoundSexHeavyBondage)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_gag", sms.BoundSexGag)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_blindfold", sms.BoundSexBlindfold)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_hood", sms.BoundSexHood)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_aplug", sms.BoundSexAPlug)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundsex_vplug", sms.BoundSexVPlug)
 
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_cuffs", sms.BoundMasturbationCuffs)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_gag", sms.BoundMasturbationGag)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_blindfold", sms.BoundMasturbationBlindfold)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_hood", sms.BoundMasturbationHood)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_aplug", sms.BoundMasturbationAPlug)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_vplug", sms.BoundMasturbationVPlug)
-        JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_unties", sms.BoundMasturbationUnties)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_cuffs", sms.BoundMasturbationCuffs)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_gag", sms.BoundMasturbationGag)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_blindfold", sms.BoundMasturbationBlindfold)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_hood", sms.BoundMasturbationHood)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_aplug", sms.BoundMasturbationAPlug)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_vplug", sms.BoundMasturbationVPlug)
+        ; JsonUtil.SetPathIntValue(saveFileName, "boundmasturbation_unties", sms.BoundMasturbationUnties)
 
-        JsonUtil.SetPathIntValue(saveFileName, "harshbondage_boots", bmanage.HarshBondageUseBoots)
-        JsonUtil.SetPathIntValue(saveFileName, "harshbondage_ankles", bmanage.HarshBondageUseAnkles)
-        JsonUtil.SetPathIntValue(saveFileName, "harshbondage_collar", bmanage.HarshBondageUseCollar)
-        JsonUtil.SetPathIntValue(saveFileName, "harshbondage_nipple", bmanage.HarshBondageUseNipple)
-        JsonUtil.SetPathIntValue(saveFileName, "harshbondage_chastity", bmanage.HarshBondageUseChastity)
-        JsonUtil.SetPathIntValue(saveFileName, "bedtime_usehood", bmanage.BedtimeUseHood)
+        ; JsonUtil.SetPathIntValue(saveFileName, "harshbondage_boots", bmanage.HarshBondageUseBoots)
+        ; JsonUtil.SetPathIntValue(saveFileName, "harshbondage_ankles", bmanage.HarshBondageUseAnkles)
+        ; JsonUtil.SetPathIntValue(saveFileName, "harshbondage_collar", bmanage.HarshBondageUseCollar)
+        ; JsonUtil.SetPathIntValue(saveFileName, "harshbondage_nipple", bmanage.HarshBondageUseNipple)
+        ; JsonUtil.SetPathIntValue(saveFileName, "harshbondage_chastity", bmanage.HarshBondageUseChastity)
+        ;JsonUtil.SetPathIntValue(saveFileName, "bedtime_usehood", bmanage.BedtimeUseHood)
 
-        InitBondageTypesArray()
-        string skeyf = "bind_favorite_dd_"
-        i = 0
-        while i < bondageTypes.Length
-            bind_Utility.WriteToConsole("writing bondage favorites: " + i)
-            Form[] favorites1 = StorageUtil.FormListToArray(theSub, skeyf + i + "_1")
-            Form[] favorites2 = StorageUtil.FormListToArray(theSub, skeyf + i + "_2")
-            Form[] favorites3 = StorageUtil.FormListToArray(theSub, skeyf + i + "_3")
-            JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_1", favorites1)
-            JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_2", favorites2)
-            JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_3", favorites3)
-            ; Form dev = bmanage.GetFavoriteItem(theSub, i)
-            ; if dev
-            ;     JsonUtil.SetPathFormValue(saveFileName, "favorite_bondage_" + i, dev)
-            ; endif
-            i += 1
-        endwhile
+        ; InitBondageTypesArray()
+        ; string skeyf = "bind_favorite_dd_"
+        ; i = 0
+        ; while i < bondageTypes.Length
+        ;     bind_Utility.WriteToConsole("writing bondage favorites: " + i)
+        ;     Form[] favorites1 = StorageUtil.FormListToArray(theSub, skeyf + i + "_1")
+        ;     Form[] favorites2 = StorageUtil.FormListToArray(theSub, skeyf + i + "_2")
+        ;     Form[] favorites3 = StorageUtil.FormListToArray(theSub, skeyf + i + "_3")
+        ;     JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_1", favorites1)
+        ;     JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_2", favorites2)
+        ;     JsonUtil.SetPathFormArray(saveFileName, "favorite_bondage_" + i + "_3", favorites3)
+        ;     ; Form dev = bmanage.GetFavoriteItem(theSub, i)
+        ;     ; if dev
+        ;     ;     JsonUtil.SetPathFormValue(saveFileName, "favorite_bondage_" + i, dev)
+        ;     ; endif
+        ;     i += 1
+        ; endwhile
 
         ;gear
         string[] slotNames = gmanage.GetSlotMaskNames()
@@ -4850,37 +4944,111 @@ Function McmSaveFunction()
             i += 1
         endwhile
 
-        ;preferences
-        JsonUtil.SetPathIntValue(saveFileName, "dp_untiedanger", main.DomPreferenceUntieForDangerousAreas)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_dressdanger", main.DomPreferenceDressForDangerousAreas)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_untieoutsidecity", main.DomPreferenceUntieHandsOutsideOfCitiesAndTowns)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_dressoutsidecity", main.DomPreferenceDressOutsideOfCitiesAndTowns)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furniture", main.PutOnDisplayRandomUse)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furniturehours", main.PutOnDisplayHoursBetweenUse)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furniturechance", main.PutOnDisplayChance)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furnituremin", main.PutOnDisplayMinMinutes)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furnituremax", main.PutOnDisplayMaxMinutes)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_furnituresleep", main.BedtimeFurnitureForSleep)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_harsh", main.HarshBondageRandomUse)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_harshhours", main.HarshBondageHoursBetweenUse)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_harshchance", main.HarshBondageChance)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_harshmin", main.HarshBondageMinMinutes)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_harshmax", main.HarshBondageMaxMinutes)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_inspect", main.InspectionsRandomUse)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_inspecthours", main.InspectionHoursBetween)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_inspectchance", main.InspectionChance)
+        ;preferences **************************************************
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_untiedanger", main.DomPreferenceUntieForDangerousAreas)
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_dressdanger", main.DomPreferenceDressForDangerousAreas)
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_untieoutsidecity", main.DomPreferenceUntieHandsOutsideOfCitiesAndTowns)
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_dressoutsidecity", main.DomPreferenceDressOutsideOfCitiesAndTowns)
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_rules_perhour", main.RulesChancePerHour)
+        ; JsonUtil.SetPathIntValue(saveFileName, "dp_rules_max", main.RulesMaxNumber)
+
+        JsonUtil.SetPathIntValue(saveFileName, "dp_teleport_dom", main.PreferenceTeleportDom)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_con_target", main.PreferenceHoldConversationTarget)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_display_no_outfit", StorageUtil.GetIntValue(theSub, "bind_display_no_outfit", 0))
+
+        JsonUtil.SetPathFloatValue(saveFileName, "dp_run_after_sec", main.AdventuringCheckAfterSeconds)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_magic_bondage", main.PreferenceSpellChangeBondage)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_guard_bondage", main.PreferenceGuardsEquipBondage)
+
+        JsonUtil.SetPathIntValue(saveFileName, "dp_remove_gag_for_dialogue", main.DomRemovesGagForDialogue)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_dom_comments", main.PreferenceDomRandomComments)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_set_dom_in_dialogue", main.PreferenceHideSetDomDialogue)
+
+        JsonUtil.SetPathIntValue(saveFileName, "dp_kneeling_required", StorageUtil.GetIntValue(theSub, "kneeling_required", 1))
+        JsonUtil.SetPathIntValue(saveFileName, "dp_gag_not_kneeling", StorageUtil.GetIntValue(theSub, "gagged_for_not_kneeling", 1))
+        JsonUtil.SetPathIntValue(saveFileName, "dp_not_kneeling_infraction", StorageUtil.GetIntValue(theSub, "rule_infraction_for_not_kneeling", 1))
+
+        JsonUtil.SetPathIntValue(saveFileName, "dp_no_freedom", main.DomWillNotOfferFreedom)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_pre_quests", main.DomStartupQuestsEnabled)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_ss_female", main.SimpleSlaveryFemaleFallback)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_ss_male", main.SimpleSlaveryMaleFallback)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_clean_bags", main.CleanUpNonBindingItemsFromBags)
+        JsonUtil.SetPathIntValue(saveFileName, "dp_display_infractions", main.DisplayInfractionsInMessageBox)
         JsonUtil.SetPathIntValue(saveFileName, "dp_cleansub", main.DomPreferenceCleanSub)
         JsonUtil.SetPathIntValue(saveFileName, "dp_gagsunplug", main.DomOnlyUnplugsPanelGags)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_rules_perhour", main.RulesChancePerHour)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_rules_max", main.RulesMaxNumber)
         JsonUtil.SetPathIntValue(saveFileName, "preference_freefollowerdimissed", main.PreferenceFreeWhenDismissedDisabled)
-        JsonUtil.SetPathIntValue(saveFileName, "dp_usewordwall", main.DomUseWordWallEvent)
         JsonUtil.SetPathIntValue(saveFileName, "gp_anynpccandom", main.GameplayAnyNpcCanDom)
+
+        ;event **************************************************     
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_use", main.AdventuringUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_cost", main.AdventuringPointCost)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_good", main.AdventuringGoodBehavior)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_tod", main.AdventuringTimeOfDayCheck)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_gold", main.AdventuringGoldGoal)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_kill", main.AdventuringImporantKill)
+        JsonUtil.SetPathIntValue(saveFileName, "event_adventure_suit", main.AdventuringUseDwarven)
+
+        JsonUtil.SetPathIntValue(saveFileName, "event_camp_use", main.CampingRandomUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_camp_chance", main.CampingChance)
+
+        JsonUtil.SetPathIntValue(saveFileName, "event_bedtime_furniture", main.BedtimeFurnitureForSleep)
+
+        JsonUtil.SetPathIntValue(saveFileName, "event_furniture", main.PutOnDisplayRandomUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_furniturehours", main.PutOnDisplayHoursBetweenUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_furniturechance", main.PutOnDisplayChance)
+        JsonUtil.SetPathIntValue(saveFileName, "event_furnituremin", main.PutOnDisplayMinMinutes)
+        JsonUtil.SetPathIntValue(saveFileName, "event_furnituremax", main.PutOnDisplayMaxMinutes)
+       
+        JsonUtil.SetPathIntValue(saveFileName, "event_harsh", main.HarshBondageRandomUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_harshhours", main.HarshBondageHoursBetweenUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_harshchance", main.HarshBondageChance)
+        JsonUtil.SetPathIntValue(saveFileName, "event_harshmin", main.HarshBondageMinMinutes)
+        JsonUtil.SetPathIntValue(saveFileName, "event_harshmax", main.HarshBondageMaxMinutes)
+        
+        JsonUtil.SetPathIntValue(saveFileName, "event_inspect", main.InspectionsRandomUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_inspecthours", main.InspectionHoursBetween)
+        JsonUtil.SetPathIntValue(saveFileName, "event_inspectchance", main.InspectionChance)
+
+        JsonUtil.SetPathIntValue(saveFileName, "event_whip_use", main.WhippingRandomUse)
+        JsonUtil.SetPathIntValue(saveFileName, "event_whip_hours", main.WhippingHoursBetween)
+        JsonUtil.SetPathIntValue(saveFileName, "event_whip_chance", main.WhippingChance)
+
+        JsonUtil.SetPathIntValue(saveFileName, "event_usewordwall", main.DomUseWordWallEvent)
+        JsonUtil.SetPathIntValue(saveFileName, "event_dragon", main.DomUseDragonSoulRitual) 
+
+        ;skyrimnet **************************************************    
+        JsonUtil.SetPathIntValue(saveFileName, "sky_slavery", main.bind_GlobalSettingsSlaveryInSkyrim.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_indentured", main.bind_GlobalSettingsIndenturedInSkyrim.GetValue() as int)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_slavery_type", main.SkryimNetSlaveryType)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_dressing", brain.EnableActionDressingRoom)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_bed", brain.EnableActionBed)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_whip", brain.EnableActionWhip)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_sex", brain.EnableActionSex)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_furniture", brain.EnableActionFurniture)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_harsh", brain.EnableActionHarshBondage)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_camp", brain.EnableActionCamping)
+        JsonUtil.SetPathIntValue(saveFileName, "sky_action_inspect", brain.EnableActionInspection)
+
+        ;dep  **************************************************  
+        JsonUtil.SetPathIntValue(saveFileName, "dep_dse", main.EnableModDM3)
+        JsonUtil.SetPathIntValue(saveFileName, "dep_dirt", main.EnableModDirtAndBlood)
+        JsonUtil.SetPathIntValue(saveFileName, "dep_bis", main.EnableModBathingInSkyrim)
+        JsonUtil.SetPathIntValue(saveFileName, "dep_mme", main.EnableModMME)
+        JsonUtil.SetPathIntValue(saveFileName, "dep_sky", main.EnableModSkyrimNet)
 
         JsonUtil.Save(saveFileName)
 
-
         bind_Utility.WriteToConsole("Binding MCM settings saved to " + saveFileName)
+
+        string outfitFile = "data/skse/plugins/StorageUtilData/binding/games/outfits_" + main.SaveGameUid + ".json"
+        string outfitData = MiscUtil.ReadFromFile(outfitFile)
+        ;debug.MessageBox(outfitData)
+        string saveOutfitFileName = "data/skse/plugins/StorageUtilData/binding/mcm_outfits/" + result + ".json"
+        ;debug.MessageBox(saveOutfitFileName)
+        bool writeResult = MiscUtil.WriteToFile(saveOutfitFileName, outfitData, false, false)
+        ;debug.MessageBox("result: " + writeResult)
+
+        debug.MessageBox(saveFileName + " save completed")
 
     else
 
@@ -4897,16 +5065,29 @@ Function McmLoadFunction(string saveFileName)
         return
     endif
 
+    string saveOutfitFileName = "data/skse/plugins/StorageUtilData/binding/mcm_outfits/" + saveFileName
+
     saveFileName = "/binding/mcm/" + saveFileName
     
-    ;debug
+    ;debug **************************************************
     bind_GlobalActionKey.SetValue(JsonUtil.GetPathIntValue(saveFileName, "debug_actionkey"))
     main.ActionKeyModifier = JsonUtil.GetPathIntValue(saveFileName, "debug_actionkeymodifier")
+    main.WriteLogs = JsonUtil.GetPathIntValue(saveFileName, "debug_write_logs")
+    main.DisplayLocationChange = JsonUtil.GetPathIntValue(saveFileName, "debug_display_loc_change")
+    main.ExperimentalFeaturesFlag = JsonUtil.GetPathIntValue(saveFileName, "debug_exp_features")
+    StorageUtil.SetIntValue(none, "bind_write_to_console", JsonUtil.GetPathIntValue(saveFileName, "debug_write_console_messages"))
 
-    ;sex settings
+    ;punishment **************************************************
+    bind_GlobalPunishmentMinGold.SetValue(JsonUtil.GetPathIntValue(saveFileName, "punish_gold_min"))
+    bind_GlobalPunishmentMaxGold.SetValue(JsonUtil.GetPathIntValue(saveFileName, "punish_gold_max"))
+    bind_GlobalPunishmentGoldPercentage.SetValue(JsonUtil.GetPathIntValue(saveFileName, "punish_gold_perentage"))
+
+    ;sex settings **************************************************
     main.SexFreeUse = JsonUtil.GetPathIntValue(saveFileName, "sex_freeuse")
     main.SexDomArousalLevelToTrigger = JsonUtil.GetPathIntValue(saveFileName, "sex_domarousallevel")
     main.SexChanceOfChastityRemoval = JsonUtil.GetPathIntValue(saveFileName, "sex_chastityremoval")
+
+    ;posing **************************************************
     pman.SetHighKneel(JsonUtil.GetPathStringValue(saveFileName, "pose_highkneel"))
     pman.SetHighKneel(JsonUtil.GetPathStringValue(saveFileName, "pose_highkneelbound"),true)
     pman.SetDeepKneel(JsonUtil.GetPathStringValue(saveFileName, "pose_deepkneel"))
@@ -4922,60 +5103,67 @@ Function McmLoadFunction(string saveFileName)
     pman.SetConversationPose(JsonUtil.GetPathStringValue(saveFileName, "pose_conversation"))
     pman.SetConversationPose(JsonUtil.GetPathStringValue(saveFileName, "pose_conversationbound"), true)
 
-    ;bondage settings
-    sms.BoundSexCuffs = JsonUtil.GetPathIntValue(saveFileName, "boundsex_cuffs")
-    sms.BoundSexHeavyBondage = JsonUtil.GetPathIntValue(saveFileName, "boundsex_heavy")
-    sms.BoundSexGag = JsonUtil.GetPathIntValue(saveFileName, "boundsex_gag")
-    sms.BoundSexBlindfold = JsonUtil.GetPathIntValue(saveFileName, "boundsex_blindfold")
-    sms.BoundSexHood = JsonUtil.GetPathIntValue(saveFileName, "boundsex_hood")
-    sms.BoundSexAPlug = JsonUtil.GetPathIntValue(saveFileName, "boundsex_aplug")
-    sms.BoundSexVPlug = JsonUtil.GetPathIntValue(saveFileName, "boundsex_vplug")
+    ; ;bondage settings
+    ; sms.BoundSexCuffs = JsonUtil.GetPathIntValue(saveFileName, "boundsex_cuffs")
+    ; sms.BoundSexHeavyBondage = JsonUtil.GetPathIntValue(saveFileName, "boundsex_heavy")
+    ; sms.BoundSexGag = JsonUtil.GetPathIntValue(saveFileName, "boundsex_gag")
+    ; sms.BoundSexBlindfold = JsonUtil.GetPathIntValue(saveFileName, "boundsex_blindfold")
+    ; sms.BoundSexHood = JsonUtil.GetPathIntValue(saveFileName, "boundsex_hood")
+    ; sms.BoundSexAPlug = JsonUtil.GetPathIntValue(saveFileName, "boundsex_aplug")
+    ; sms.BoundSexVPlug = JsonUtil.GetPathIntValue(saveFileName, "boundsex_vplug")
 
-    sms.BoundMasturbationCuffs = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_cuffs")
-    sms.BoundMasturbationGag = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_gag")
-    sms.BoundMasturbationBlindfold = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_blindfold")
-    sms.BoundMasturbationHood = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_hood")
-    sms.BoundMasturbationAPlug = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_aplug")
-    sms.BoundMasturbationVPlug = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_vplug")
-    sms.BoundMasturbationUnties = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_unties")
+    ; sms.BoundMasturbationCuffs = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_cuffs")
+    ; sms.BoundMasturbationGag = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_gag")
+    ; sms.BoundMasturbationBlindfold = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_blindfold")
+    ; sms.BoundMasturbationHood = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_hood")
+    ; sms.BoundMasturbationAPlug = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_aplug")
+    ; sms.BoundMasturbationVPlug = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_vplug")
+    ; sms.BoundMasturbationUnties = JsonUtil.GetPathIntValue(saveFileName, "boundmasturbation_unties")
 
-    bmanage.HarshBondageUseBoots = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_boots")
-    bmanage.HarshBondageUseAnkles = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_ankles")
-    bmanage.HarshBondageUseCollar = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_collar")
-    bmanage.HarshBondageUseNipple = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_nipple")
-    bmanage.HarshBondageUseChastity = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_chastity")
-    bmanage.BedtimeUseHood = JsonUtil.GetPathIntValue(saveFileName, "bedtime_usehood")
+    ; bmanage.HarshBondageUseBoots = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_boots")
+    ; bmanage.HarshBondageUseAnkles = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_ankles")
+    ; bmanage.HarshBondageUseCollar = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_collar")
+    ; bmanage.HarshBondageUseNipple = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_nipple")
+    ; bmanage.HarshBondageUseChastity = JsonUtil.GetPathIntValue(saveFileName, "harshbondage_chastity")
+    ; bmanage.BedtimeUseHood = JsonUtil.GetPathIntValue(saveFileName, "bedtime_usehood")
 
-    InitBondageTypesArray()
-    string skeyf = "bind_favorite_dd_"
+    ; InitBondageTypesArray()
+    ; string skeyf = "bind_favorite_dd_"
     int i = 0
-    while i < bondageTypes.Length
-        bind_Utility.WriteToConsole("reading bondage favorites: " + i)
+    ; while i < bondageTypes.Length
+    ;     bind_Utility.WriteToConsole("reading bondage favorites: " + i)
 
-        Form[] favorites1 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_1")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_1")
-        Form[] favorites2 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_2")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_2")
-        Form[] favorites3 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_3")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_3")
+    ;     Form[] favorites1 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_1")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_1")
+    ;     Form[] favorites2 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_2")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_2")
+    ;     Form[] favorites3 = JsonUtil.PathFormElements(saveFileName, "favorite_bondage_" + i + "_3")  ;StorageUtil.FormListToArray(theSub, skeyf + i + "_3")
         
-        StorageUtil.FormListCopy(theSub, skeyf + i + "_1", favorites1)
-        StorageUtil.FormListCopy(theSub, skeyf + i + "_2", favorites2)
-        StorageUtil.FormListCopy(theSub, skeyf + i + "_3", favorites3)
+    ;     StorageUtil.FormListCopy(theSub, skeyf + i + "_1", favorites1)
+    ;     StorageUtil.FormListCopy(theSub, skeyf + i + "_2", favorites2)
+    ;     StorageUtil.FormListCopy(theSub, skeyf + i + "_3", favorites3)
 
-        ; Form dev = JsonUtil.GetPathFormValue(saveFileName, "favorite_bondage_" + i)
-        ; if dev
-        ;     bmanage.StoreFavoriteItem(theSub, i, dev)
-        ; endif
-        i += 1
-    endwhile
+    ;     ; Form dev = JsonUtil.GetPathFormValue(saveFileName, "favorite_bondage_" + i)
+    ;     ; if dev
+    ;     ;     bmanage.StoreFavoriteItem(theSub, i, dev)
+    ;     ; endif
+    ;     i += 1
+    ; endwhile
 
-    ;rules
+    ;rules **************************************************
     bind_GlobalRulesNudityRequired.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_nudity_required"))
     bind_GlobalRulesControlledBy.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_control"))
+    rman.UseFastRuleCheck = JsonUtil.GetPathIntValue(saveFileName, "rules_fast")
+    bind_GlobalRulesBehaviorMin.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_behavior_min"))
+    bind_GlobalRulesBehaviorMax.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_behavior_max"))
+    bind_GlobalRulesBondageMin.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_bondage_min"))
+    bind_GlobalRulesBondageMax.SetValue(JsonUtil.GetPathIntValue(saveFileName, "rules_bondage_max"))
+    main.RuleMustCleanPlayerHome = JsonUtil.GetPathIntValue(saveFileName, "rule_cleanhome")
+
+    ;points **************************************************
     main.PointsMax = JsonUtil.GetPathIntValue(saveFileName, "rules_pointsmax")
     main.PointsEarnFromSex = JsonUtil.GetPathIntValue(saveFileName, "rules_earn_sex")
     main.PointsEarnFromHarshBondage = JsonUtil.GetPathIntValue(saveFileName, "rules_earn_harsh")
     main.PointsEarnFromFurniture = JsonUtil.GetPathIntValue(saveFileName, "rules_earn_furniture")
     main.PointsEarnFromBeingGood = JsonUtil.GetPathIntValue(saveFileName, "rules_earn_good")
-    main.RuleMustCleanPlayerHome = JsonUtil.GetPathIntValue(saveFileName, "rule_cleanhome")
 
     ; behaviorList = rman.GetBehaviorRulesList()
 
@@ -5023,34 +5211,116 @@ Function McmLoadFunction(string saveFileName)
         i += 1
     endwhile
 
-    ;preferences
-    main.DomPreferenceUntieForDangerousAreas = JsonUtil.GetPathIntValue(saveFileName, "dp_untiedanger")
-    main.DomPreferenceDressForDangerousAreas = JsonUtil.GetPathIntValue(saveFileName, "dp_dressdanger")
-    main.DomPreferenceUntieHandsOutsideOfCitiesAndTowns = JsonUtil.GetPathIntValue(saveFileName, "dp_untieoutsidecity")
-    main.DomPreferenceDressOutsideOfCitiesAndTowns = JsonUtil.GetPathIntValue(saveFileName, "dp_dressoutsidecity")
-    main.PutOnDisplayRandomUse = JsonUtil.GetPathIntValue(saveFileName, "dp_furniture")
-    main.PutOnDisplayHoursBetweenUse = JsonUtil.GetPathIntValue(saveFileName, "dp_furniturehours")
-    main.PutOnDisplayChance = JsonUtil.GetPathIntValue(saveFileName, "dp_furniturechance")
-    main.PutOnDisplayMinMinutes = JsonUtil.GetPathIntValue(saveFileName, "dp_furnituremin")
-    main.PutOnDisplayMaxMinutes = JsonUtil.GetPathIntValue(saveFileName, "dp_furnituremax")
-    main.BedtimeFurnitureForSleep = JsonUtil.GetPathIntValue(saveFileName, "dp_furnituresleep")
-    main.HarshBondageRandomUse = JsonUtil.GetPathIntValue(saveFileName, "dp_harsh")
-    main.HarshBondageHoursBetweenUse = JsonUtil.GetPathIntValue(saveFileName, "dp_harshhours")
-    main.HarshBondageChance = JsonUtil.GetPathIntValue(saveFileName, "dp_harshchance")
-    main.HarshBondageMinMinutes = JsonUtil.GetPathIntValue(saveFileName, "dp_harshmin")
-    main.HarshBondageMaxMinutes = JsonUtil.GetPathIntValue(saveFileName, "dp_harshmax")
-    main.InspectionsRandomUse = JsonUtil.GetPathIntValue(saveFileName, "dp_inspect")
-    main.InspectionHoursBetween = JsonUtil.GetPathIntValue(saveFileName, "dp_inspecthours")
-    main.InspectionChance = JsonUtil.GetPathIntValue(saveFileName, "dp_inspectchance")
+    ;preferences **************************************************
+    ; main.DomPreferenceUntieForDangerousAreas = JsonUtil.GetPathIntValue(saveFileName, "dp_untiedanger")
+    ; main.DomPreferenceDressForDangerousAreas = JsonUtil.GetPathIntValue(saveFileName, "dp_dressdanger")
+    ; main.DomPreferenceUntieHandsOutsideOfCitiesAndTowns = JsonUtil.GetPathIntValue(saveFileName, "dp_untieoutsidecity")
+    ; main.DomPreferenceDressOutsideOfCitiesAndTowns = JsonUtil.GetPathIntValue(saveFileName, "dp_dressoutsidecity")
+    ; main.DomPreferenceCleanSub = JsonUtil.GetPathIntValue(saveFileName, "dp_cleansub")
+    ; main.DomOnlyUnplugsPanelGags = JsonUtil.GetPathIntValue(saveFileName, "dp_gagsunplug")
+    ; ; main.RulesChancePerHour = JsonUtil.GetPathIntValue(saveFileName, "dp_rules_perhour")
+    ; ; main.RulesMaxNumber = JsonUtil.GetPathIntValue(saveFileName, "dp_rules_max")
+    ; main.PreferenceFreeWhenDismissedDisabled = JsonUtil.GetPathIntValue(saveFileName, "preference_freefollowerdimissed")
+    ; main.GameplayAnyNpcCanDom = JsonUtil.GetPathIntValue(saveFileName, "gp_anynpccandom")
+
+    main.PreferenceTeleportDom = JsonUtil.GetPathIntValue(saveFileName, "dp_teleport_dom")
+    main.PreferenceHoldConversationTarget = JsonUtil.GetPathIntValue(saveFileName, "dp_con_target")
+    StorageUtil.SetIntValue(theSub, "bind_display_no_outfit", JsonUtil.GetPathIntValue(saveFileName, "dp_display_no_outfit"))
+
+    main.AdventuringCheckAfterSeconds = JsonUtil.GetPathFloatValue(saveFileName, "dp_run_after_sec")
+    main.PreferenceSpellChangeBondage = JsonUtil.GetPathIntValue(saveFileName, "dp_magic_bondage")
+    main.PreferenceGuardsEquipBondage = JsonUtil.GetPathIntValue(saveFileName, "dp_guard_bondage")
+
+    main.DomRemovesGagForDialogue = JsonUtil.GetPathIntValue(saveFileName, "dp_remove_gag_for_dialogue")
+    main.PreferenceDomRandomComments = JsonUtil.GetPathIntValue(saveFileName, "dp_dom_comments")
+    main.PreferenceHideSetDomDialogue = JsonUtil.GetPathIntValue(saveFileName, "dp_set_dom_in_dialogue")
+
+    StorageUtil.SetIntValue(theSub, "kneeling_required", JsonUtil.GetPathIntValue(saveFileName, "dp_kneeling_required"))
+    StorageUtil.SetIntValue(theSub, "gagged_for_not_kneeling", JsonUtil.GetPathIntValue(saveFileName, "dp_gag_not_kneeling"))
+    StorageUtil.SetIntValue(theSub, "rule_infraction_for_not_kneeling", JsonUtil.GetPathIntValue(saveFileName, "dp_not_kneeling_infraction"))
+
+    main.DomWillNotOfferFreedom = JsonUtil.GetPathIntValue(saveFileName, "dp_no_freedom")
+    main.DomStartupQuestsEnabled = JsonUtil.GetPathIntValue(saveFileName, "dp_pre_quests")
+    main.SimpleSlaveryFemaleFallback = JsonUtil.GetPathIntValue(saveFileName, "dp_ss_female")
+    main.SimpleSlaveryMaleFallback = JsonUtil.GetPathIntValue(saveFileName, "dp_ss_male")
+    main.CleanUpNonBindingItemsFromBags = JsonUtil.GetPathIntValue(saveFileName, "dp_clean_bags")
+    main.DisplayInfractionsInMessageBox = JsonUtil.GetPathIntValue(saveFileName, "dp_display_infractions")
     main.DomPreferenceCleanSub = JsonUtil.GetPathIntValue(saveFileName, "dp_cleansub")
     main.DomOnlyUnplugsPanelGags = JsonUtil.GetPathIntValue(saveFileName, "dp_gagsunplug")
-    main.RulesChancePerHour = JsonUtil.GetPathIntValue(saveFileName, "dp_rules_perhour")
-    main.RulesMaxNumber = JsonUtil.GetPathIntValue(saveFileName, "dp_rules_max")
     main.PreferenceFreeWhenDismissedDisabled = JsonUtil.GetPathIntValue(saveFileName, "preference_freefollowerdimissed")
-    main.DomUseWordWallEvent = JsonUtil.GetPathIntValue(saveFileName, "dp_usewordwall")
     main.GameplayAnyNpcCanDom = JsonUtil.GetPathIntValue(saveFileName, "gp_anynpccandom")
 
+
+    ;events **************************************************
+    main.AdventuringUse = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_use")
+    main.AdventuringPointCost = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_cost")
+    main.AdventuringGoodBehavior = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_good")
+    main.AdventuringTimeOfDayCheck = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_tod")
+    main.AdventuringGoldGoal = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_gold")
+    main.AdventuringImporantKill = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_kill")
+    main.AdventuringUseDwarven = JsonUtil.GetPathIntValue(saveFileName, "event_adventure_suit")
+
+    main.BedtimeFurnitureForSleep = JsonUtil.GetPathIntValue(saveFileName, "event_bedtime_furniture")
+
+    main.CampingRandomUse = JsonUtil.GetPathIntValue(saveFileName, "event_camp_use")
+    main.CampingChance = JsonUtil.GetPathIntValue(saveFileName, "event_camp_chance")
+
+    main.PutOnDisplayRandomUse = JsonUtil.GetPathIntValue(saveFileName, "event_furniture")
+    main.PutOnDisplayHoursBetweenUse = JsonUtil.GetPathIntValue(saveFileName, "event_furniturehours")
+    main.PutOnDisplayChance = JsonUtil.GetPathIntValue(saveFileName, "event_furniturechance")
+    main.PutOnDisplayMinMinutes = JsonUtil.GetPathIntValue(saveFileName, "event_furnituremin")
+    main.PutOnDisplayMaxMinutes = JsonUtil.GetPathIntValue(saveFileName, "event_furnituremax")
+    
+    main.HarshBondageRandomUse = JsonUtil.GetPathIntValue(saveFileName, "event_harsh")
+    main.HarshBondageHoursBetweenUse = JsonUtil.GetPathIntValue(saveFileName, "event_harshhours")
+    main.HarshBondageChance = JsonUtil.GetPathIntValue(saveFileName, "event_harshchance")
+    main.HarshBondageMinMinutes = JsonUtil.GetPathIntValue(saveFileName, "event_harshmin")
+    main.HarshBondageMaxMinutes = JsonUtil.GetPathIntValue(saveFileName, "event_harshmax")
+    
+    main.InspectionsRandomUse = JsonUtil.GetPathIntValue(saveFileName, "event_inspect")
+    main.InspectionHoursBetween = JsonUtil.GetPathIntValue(saveFileName, "event_inspecthours")
+    main.InspectionChance = JsonUtil.GetPathIntValue(saveFileName, "event_inspectchance")
+
+    main.WhippingRandomUse = JsonUtil.GetPathIntValue(saveFileName, "event_whip_use")
+    main.WhippingHoursBetween = JsonUtil.GetPathIntValue(saveFileName, "event_whip_hours")
+    main.WhippingChance = JsonUtil.GetPathIntValue(saveFileName, "event_whip_chance")
+
+    main.DomUseWordWallEvent = JsonUtil.GetPathIntValue(saveFileName, "event_usewordwall")    
+    main.DomUseDragonSoulRitual = JsonUtil.GetPathIntValue(saveFileName, "event_dragon")   
+
+    ;skyrimnet **************************************************    
+    main.bind_GlobalSettingsSlaveryInSkyrim.SetValue(JsonUtil.GetPathIntValue(saveFileName, "sky_slavery"))
+    main.bind_GlobalSettingsIndenturedInSkyrim.SetValue(JsonUtil.GetPathIntValue(saveFileName, "sky_indentured"))
+    main.SkryimNetSlaveryType = JsonUtil.GetPathIntValue(saveFileName, "sky_slavery_type")
+    brain.EnableActionDressingRoom = JsonUtil.GetPathIntValue(saveFileName, "sky_action_dressing")
+    brain.EnableActionBed = JsonUtil.GetPathIntValue(saveFileName, "sky_action_bed")
+    brain.EnableActionWhip = JsonUtil.GetPathIntValue(saveFileName, "sky_action_whip")
+    brain.EnableActionSex = JsonUtil.GetPathIntValue(saveFileName, "sky_action_sex")
+    brain.EnableActionFurniture = JsonUtil.GetPathIntValue(saveFileName, "sky_action_furniture")
+    brain.EnableActionHarshBondage = JsonUtil.GetPathIntValue(saveFileName, "sky_action_harsh")
+    brain.EnableActionCamping = JsonUtil.GetPathIntValue(saveFileName, "sky_action_camp")
+    brain.EnableActionInspection = JsonUtil.GetPathIntValue(saveFileName, "sky_action_inspect")
+
+    ;dep  **************************************************  
+    main.EnableModDM3 = JsonUtil.GetPathIntValue(saveFileName, "dep_dse")
+    main.EnableModDirtAndBlood = JsonUtil.GetPathIntValue(saveFileName, "dep_dirt")
+    main.EnableModBathingInSkyrim = JsonUtil.GetPathIntValue(saveFileName, "dep_bis")
+    main.EnableModMME = JsonUtil.GetPathIntValue(saveFileName, "dep_mme")
+    main.EnableModSkyrimNet = JsonUtil.GetPathIntValue(saveFileName, "dep_sky")
+
+    ;debug.MessageBox(saveOutfitFileName)
+    string outfitFile = "data/skse/plugins/StorageUtilData/binding/games/outfits_" + main.SaveGameUid + ".json"
+    string outfitData = MiscUtil.ReadFromFile(saveOutfitFileName)
+    ;debug.MessageBox(outfitData)
+    ;string saveOutfitFileName = "data/skse/plugins/StorageUtilData/binding/mcm_outfits/" + result + ".json"
+    ;debug.MessageBox(outfitFile)
+    if outfitData != "0" ;bad json reads return 0
+        bool writeResult = MiscUtil.WriteToFile(outfitFile, outfitData, false, false)
+    endif
+
     bind_Utility.WriteToConsole("Binding MCM settings loaded from " + saveFileName)
+
+    debug.MessageBox(saveFileName + " load completed")
 
 EndFunction
 
