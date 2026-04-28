@@ -69,102 +69,104 @@ function StartEvent()
     replaceGear = false
     endMessage = 0
 
-    if theDom.GetDistance(theSub) < 3000.0 && sms.SubHasMasturbationPermission == 1
+    if mqs.IsSub == 1
+        if theDom.GetDistance(theSub) < 3000.0 && sms.SubHasMasturbationPermission == 1
 
-        replaceGear = true
+            replaceGear = true
 
-        bind_Utility.DisablePlayer()
+            bind_Utility.DisablePlayer()
 
-        bind_MovementQuestScript.FaceTarget(theDom, theSub)
+            bind_MovementQuestScript.FaceTarget(theDom, theSub)
 
-        fs.EventGetSubReady(theSub, theDom, "event_bound_masturbation")
+            fs.EventGetSubReady(theSub, theDom, "event_bound_masturbation")
 
-        ; ;remove chastity chance
-        ; if theSub.IsInFaction(bms.WearingBeltFaction())
-        ;     if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_BELT())
-        ;         bind_Utility.DoSleep()
-        ;     endif
-        ; endif
+            ; ;remove chastity chance
+            ; if theSub.IsInFaction(bms.WearingBeltFaction())
+            ;     if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_BELT())
+            ;         bind_Utility.DoSleep()
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationUnties == 1
-        ;     if theSub.IsInFaction(bms.WearingHeavyBondageFaction())
-        ;         if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationUnties == 1
+            ;     if theSub.IsInFaction(bms.WearingHeavyBondageFaction())
+            ;         if bms.RemoveItem(theSub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        ; ;set other bondage
+            ; ;set other bondage
 
-        ; if sms.BoundMasturbationAPlug == 1
-        ;     if bms.AddItem(theSub, bms.BONDAGE_TYPE_A_PLUG())
-        ;         bind_Utility.DoSleep()
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationAPlug == 1
+            ;     if bms.AddItem(theSub, bms.BONDAGE_TYPE_A_PLUG())
+            ;         bind_Utility.DoSleep()
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationVPlug == 1
-        ;     if bms.AddItem(theSub, bms.BONDAGE_TYPE_V_PLUG())
-        ;         bind_Utility.DoSleep()
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationVPlug == 1
+            ;     if bms.AddItem(theSub, bms.BONDAGE_TYPE_V_PLUG())
+            ;         bind_Utility.DoSleep()
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationGag == 1
-        ;     if !theSub.IsInFaction(bms.WearingGagFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_GAG())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationGag == 1
+            ;     if !theSub.IsInFaction(bms.WearingGagFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_GAG())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationBlindfold == 1
-        ;     if !theSub.IsInFaction(bms.WearingBlindfoldFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_BLINDFOLD())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationBlindfold == 1
+            ;     if !theSub.IsInFaction(bms.WearingBlindfoldFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_BLINDFOLD())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationBlindfold == 1
-        ;     if !theSub.IsInFaction(bms.WearingHoodFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_HOOD())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationBlindfold == 1
+            ;     if !theSub.IsInFaction(bms.WearingHoodFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_HOOD())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationHood == 1
-        ;     if !theSub.IsInFaction(bms.WearingHeavyBondageFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationHood == 1
+            ;     if !theSub.IsInFaction(bms.WearingHeavyBondageFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        ; if sms.BoundMasturbationCuffs == 1
-        ;     if !theSub.IsInFaction(bms.WearingHeavyBondageFaction()) && !theSub.IsInFaction(bms.WearingArmCuffsFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_ARM_CUFFS())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ;     if !theSub.IsInFaction(bms.WearingLegCuffsFaction())
-        ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_LEG_CUFFS())
-        ;             bind_Utility.DoSleep()
-        ;         endif
-        ;     endif
-        ; endif
+            ; if sms.BoundMasturbationCuffs == 1
+            ;     if !theSub.IsInFaction(bms.WearingHeavyBondageFaction()) && !theSub.IsInFaction(bms.WearingArmCuffsFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_ARM_CUFFS())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ;     if !theSub.IsInFaction(bms.WearingLegCuffsFaction())
+            ;         if bms.AddItem(theSub, bms.BONDAGE_TYPE_LEG_CUFFS())
+            ;             bind_Utility.DoSleep()
+            ;         endif
+            ;     endif
+            ; endif
 
-        bind_Utility.EnablePlayer()
-        
-        endMessage = 1
+            bind_Utility.EnablePlayer()
+            
+            endMessage = 1
 
-    elseif sms.SubHasMasturbationPermission == 0
-        ;breaking rules
-        endMessage = 2
+        elseif sms.SubHasMasturbationPermission == 0
+            ;breaking rules
+            endMessage = 2
 
-    else
-        ;too far for the dom to notice
-        endMessage = 3
+        else
+            ;too far for the dom to notice
+            endMessage = 3
 
+        endif
     endif
 
 	if !sms.StartSexScene(theSub)
@@ -172,6 +174,9 @@ function StartEvent()
         StopEvent()
     endif
 
+    bind_Utility.DoSleep(5.0)
+    fs.EventStartCrowds()
+    
     ; if !bind_SexLabHelper.StartOnePersonSex(theSub)
     ;     StopEvent()
     ; endif
@@ -203,6 +208,8 @@ function StopEvent()
         bind_Utility.WriteInternalMonologue("I hope I do not get caught...")
 
     endif
+
+    fs.EventStopCrowds()
 
     ;update arousal tracking
     sms.UpdateArousalLevels()

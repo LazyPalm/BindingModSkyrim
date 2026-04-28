@@ -1279,6 +1279,85 @@ function WhitelistItemsLoaded(Actor a)
 
 endfunction
 
+;***************************************************************************************
+;private API
+;***************************************************************************************
+
+function PriApiManageWhitelist(Actor akActor) global
+    bind_GearManager s = Quest.GetQuest("bind_MainQuest") as bind_GearManager
+    if s
+		s.WhitelistItems(akActor)
+    endif
+endfunction
+
+int function PriApiIsNude(Actor akActor) global ;results: 0 nude, 1 skimpy/erotic armor, 2 dressed/armored
+
+	int isNude = 0
+
+	Keyword kw = Keyword.GetKeyword("ArmorCuirass")
+	if kw
+		if akActor.WornHasKeyWord(kw)
+			isNude = 2
+		endif
+	endif
+
+	if isNude == 0
+		kw = Keyword.GetKeyword("ClothingBody")
+		if kw
+			if akActor.WornHasKeyWord(kw)
+				isNude = 2
+			endif
+		endif
+	endif
+
+	if isNude == 0
+		kw = Keyword.GetKeyword("Eroticarmor")
+		if kw
+			if akActor.WornHasKeyWord(kw)
+				isNude = 1
+			endif
+		endif
+	endif
+
+	if isNude == 0
+		kw = Keyword.GetKeyword("sla_armorspandex")
+		if kw
+			if akActor.WornHasKeyWord(kw)
+				isNude = 1
+			endif
+		endif
+	endif
+
+	if isNude == 0
+		kw = Keyword.GetKeyword("sla_armorhalfnakedbikini")
+		if kw
+			if akActor.WornHasKeyWord(kw)
+				isNude = 1
+			endif
+		endif
+	endif
+
+	if isNude == 0
+		kw = Keyword.GetKeyword("sla_armorhalfnaked")
+		if kw
+			if akActor.WornHasKeyWord(kw)
+				isNude = 1
+			endif
+		endif
+	endif
+
+	if isNude == 0
+		;white list checks
+		if akActor.WornHasKeyWord(Keyword.GetKeyword("bind_ArmorBikini")) || akActor.WornHasKeyWord(Keyword.GetKeyword("bind_ArmorErotic"))
+			isNude = 1
+		endif
+	endif
+
+	return isNude
+
+endfunction
+
+
 ; function SetAmmo(Form a)
 ; 	gearBufferAmmo = a
 ; endfunction

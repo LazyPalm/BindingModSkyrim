@@ -2714,6 +2714,32 @@ endfunction
 
 ; endfunction
 
+;***************************************************************************************
+;private API
+;***************************************************************************************
+
+bool function PriApiWearingHeavyBondage(Actor akActor) global
+    bool result = false
+    zadLibs z = Quest.GetQuest("zadQuest") as zadLibs
+    if z
+        if akActor.WornHasKeyword(z.zad_DeviousHeavyBondage)
+            result = true
+        endif
+    endif
+    return result
+endfunction
+
+bool function PriApiWearingChastity(Actor akActor) global
+    bool result = false
+    zadLibs z = Quest.GetQuest("zadQuest") as zadLibs
+    if z
+        if akActor.WornHasKeyword(z.zad_DeviousBelt)
+            result = true
+        endif
+    endif
+    return result
+endfunction
+
 
 bind_BondageManager function GetBindingBondageManager() global
     return Quest.GetQuest("bind_MainQuest") as bind_BondageManager

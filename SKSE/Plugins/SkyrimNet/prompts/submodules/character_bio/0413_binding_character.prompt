@@ -218,6 +218,9 @@
     {% if is_in_faction(actorUUID, "bind_KneelingFaction") %}
 ## Current Pose
 - Kneeling in a submissive position
+    {% elif get_faction_rank(actorUUID, "bind_InPoseFaction") == 5 %}
+        {% set dance_desc = papyrus_util("GetStringValue", actorUUID, "bind_dance_desc") %}
+- {{ actor_name }} is performing a {{ dance_desc }}
     {% endif %}
 
     {# Lactation Status #}

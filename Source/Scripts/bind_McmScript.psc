@@ -342,17 +342,18 @@ Event OnConfigOpen()
     Pages[6] = "Gameplay Preferences"
     Pages[7] = "Punishment"
     Pages[8] = "Rules - Behavior"
-    Pages[9] = "Rules Settings"
-    Pages[10] = "Sex & Arousal"
-    Pages[11] = "SexLab Tags"
-    Pages[12] = "Stripping"
-    Pages[13] = "Debug"
-    Pages[14] = "Dependencies"
-    Pages[15] = "Current Factions"
-    Pages[16] = "Control Panel"
-    Pages[17] = "SkyrimNet"
-    Pages[18] = "Backup Settings"
-    Pages[19] = "Rules - Bondage"
+    Pages[9] = "Rules - Bondage"
+    Pages[10] = "Rules Settings"
+    Pages[11] = "Sex & Arousal"
+    Pages[12] = "SexLab Tags"
+    Pages[13] = "Stripping"
+    Pages[14] = "Debug"
+    Pages[15] = "Dependencies"
+    Pages[16] = "Current Factions"
+    Pages[17] = "Control Panel"
+    Pages[18] = "SkyrimNet"
+    Pages[19] = "Backup Settings"
+
 
     MakeArrays()
 
@@ -556,9 +557,9 @@ Event OnPageReset(string page)
 
             DisplaySkyrimNet()
 
-        elseif page == "Outfits"
+        ; elseif page == "Outfits"
 
-            DisplayOutfits()
+        ;     DisplayOutfits()
 
         elseif page == "Bondage Outfits"
 
@@ -896,58 +897,58 @@ function DisplayBondageOutfits()
 
 endfunction
 
-function DisplayOutfits()
+; function DisplayOutfits()
 
-    Form[] items ;= StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
+;     Form[] items ;= StorageUtil.FormListToArray(a, "binding_outfit_set_" + setName)
 
-    string safeText = ""
-    string unsafeText = ""
-    string nudeText = ""
-    string eroticText = ""
-    string bikiniText = ""
+;     string safeText = ""
+;     string unsafeText = ""
+;     string nudeText = ""
+;     string eroticText = ""
+;     string bikiniText = ""
 
-    string selectedMessage = "Selected"
-    if selectedOutfit == 1
-        safeText = selectedMessage
-        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_safe")
-    elseif selectedOutfit == 2
-        unsafeText = selectedMessage
-        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_unsafe")
-    elseif selectedOutfit == 3
-        nudeText = selectedMessage
-        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_nude")
-    elseif selectedOutfit == 4
-        eroticText = selectedMessage
-        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_erotic")
-    elseif selectedOutfit == 5
-        bikiniText = selectedMessage
-        items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_bikini")
-    endif
+;     string selectedMessage = "Selected"
+;     if selectedOutfit == 1
+;         safeText = selectedMessage
+;         items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_safe")
+;     elseif selectedOutfit == 2
+;         unsafeText = selectedMessage
+;         items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_unsafe")
+;     elseif selectedOutfit == 3
+;         nudeText = selectedMessage
+;         items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_nude")
+;     elseif selectedOutfit == 4
+;         eroticText = selectedMessage
+;         items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_erotic")
+;     elseif selectedOutfit == 5
+;         bikiniText = selectedMessage
+;         items = StorageUtil.FormListToArray(theSub, "binding_outfit_set_bikini")
+;     endif
 
-    AddHeaderOption("Outfits")
-    AddHeaderOption("")
+;     AddHeaderOption("Outfits")
+;     AddHeaderOption("")
 
-    outfitSafe = AddTextOption("Safe Areas Outfit", safeText)
-    outfitUnsafe = AddTextOption("Unsafe Areas Outfit", unsafeText)
-    outfitNude = AddTextOption("Nude Outfit", nudeText)
-    outfitErotic = AddTextOption("Erotic Armor Outfit", eroticText)
-    outfitBikini = AddTextOption("Bikini Armor Outfit", bikiniText)
-    toggleOutfitsLearn = AddToggleOption("Outfits Learn Changes", gmanage.OutfitsLearn)
+;     outfitSafe = AddTextOption("Safe Areas Outfit", safeText)
+;     outfitUnsafe = AddTextOption("Unsafe Areas Outfit", unsafeText)
+;     outfitNude = AddTextOption("Nude Outfit", nudeText)
+;     outfitErotic = AddTextOption("Erotic Armor Outfit", eroticText)
+;     outfitBikini = AddTextOption("Bikini Armor Outfit", bikiniText)
+;     toggleOutfitsLearn = AddToggleOption("Outfits Learn Changes", gmanage.OutfitsLearn)
 
-    if selectedOutfit > 0
+;     if selectedOutfit > 0
 
-        AddHeaderOption("Outfit Items")
-        AddHeaderOption("")
+;         AddHeaderOption("Outfit Items")
+;         AddHeaderOption("")
 
-        int i = 0
-        while i < items.Length
-            AddTextOption(items[i].GetName(), "")
-            i += 1
-        endwhile
+;         int i = 0
+;         while i < items.Length
+;             AddTextOption(items[i].GetName(), "")
+;             i += 1
+;         endwhile
 
-    endif
+;     endif
 
-endfunction
+; endfunction
 
 function DisplaySkyrimNet()
 

@@ -713,6 +713,13 @@ function SelectFollowersList(float scanDistance = 2000.0, string storageKey, Fac
 
 endfunction
 
+;**************************************************************************
+;movement functions
+;**************************************************************************
+
+
+
+
 ImageSpaceModifier property FadeToBlackImod auto
 ImageSpaceModifier property FadeToBlackHoldImod auto
 

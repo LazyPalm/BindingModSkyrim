@@ -24,6 +24,8 @@ event OnInit()
 	foodEaten = Game.queryStat("Food Eaten")
 	spellsLearned = Game.queryStat("Spells Learned")
 
+	;RegisterForControl("Activate")
+
 	sub = self.GetActorReference()
 
 endevent
@@ -76,9 +78,15 @@ Event OnPlayerLoadGame()
 
 	processingCrosshair = false
 
+	;RegisterForControl("Activate")
+
 	sub = self.GetActorReference()
 
 EndEvent
+
+; Event OnObjectActivated(ObjectReference akReference)
+;     Debug.MessageBox("Player just activated: " + akReference.GetDisplayName())
+; EndEvent
 
 Event OnEnterBleedout()
 
@@ -133,7 +141,7 @@ bool processingCrosshair
 
 event OnCrosshairRefChange(ObjectReference ref)
 
-	if !processingCrosshair && ref != none
+	if !processingCrosshair && ref != none && MQS.IsSub == 1
 
 		processingCrosshair = true
 
@@ -577,7 +585,7 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					bool hasBlock = JsonUtil.IntListHas(MQS.BindingGameOutfitFile, wearingSetId + "_block_slots", slotMask)
 					
 					if hasBlock || (nudeRule && slotMask != 128) ;allow shoes on nudity rule
-						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip")
+						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip") && dev.IsPlayable()
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
 							bind_Utility.WriteNotification("Nudity rule or bondage set block found", bind_Utility.TextColorRed())
@@ -916,13 +924,26 @@ Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemRefe
 EndEvent
 
 Event OnSit(ObjectReference akFurniture)
+	
+	;debug.MessageBox(akFurniture)
+
 	If MQS.IsSub == 1 ;&& bind_GlobalModState.GetValue() == 1.0
 		fs.SubEnteredFurniture(akFurniture)
 	EndIf
+	
+	;should work for ZAP - not DDC or DSE
+	; Keyword ddc = Keyword.GetKeyword("zadc_FurnitureDevice")
+	; if ddc
+	; 	if akFurniture.HasKeyword(ddc)
+	; 		debug.MessageBox("DDC furniture item...")
+	; 	endif
+	; endif
+
     int handle = ModEvent.Create("bind_EventFurnitureSit")
     if handle
         ModEvent.Send(handle)
     endif
+
 EndEvent
 
 Event OnGetUp(ObjectReference akFurniture)

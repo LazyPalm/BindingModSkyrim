@@ -545,6 +545,11 @@ bool function UnlockFromFurniture2(Actor a) global
         a.RemoveFromFaction(fm.bind_LockedInFurnitureFaction)
     endif
 
+    Faction ff = Game.GetFormFromFile(0x003899, "Binding.esm") as Faction
+    if ff && a.IsInFaction(ff)
+        a.RemoveFromFaction(ff)
+    endif
+
 endfunction
 
 bool function LockInFurniture2(Actor a, ObjectReference furn, int zapSlot = 0) global
@@ -590,6 +595,10 @@ bool function LockInFurniture2(Actor a, ObjectReference furn, int zapSlot = 0) g
             int rank = fm.GetFurnitureFactionRank(f)
             ;debug.MessageBox("rank: " + rank)
             a.SetFactionRank(fm.bind_LockedInFurnitureFaction, rank)
+        endif
+        Faction ff = Game.GetFormFromFile(0x003899, "Binding.esm") as Faction
+        if ff && !a.IsInFaction(ff)
+            a.AddToFaction(ff)
         endif
     endif
 
@@ -757,6 +766,12 @@ bool Function LockInFurniture(Actor a, ObjectReference furn, bool player = true)
         ;mqs.SetFurnitureStatus(result)
         ;main.SubInFurniture = result
     EndIf
+
+    Faction ff = Game.GetFormFromFile(0x003899, "Binding.esm") as Faction
+    if ff && !a.IsInFaction(ff)
+        a.AddToFaction(ff)
+    endif
+
     return true
 EndFunction
 
@@ -834,6 +849,11 @@ bool Function UnlockFromFurniture(Actor a, ObjectReference furn, bool player = t
 
     StorageUtil.SetFormValue(a, "binding_locked_in_furniture", none)
     StorageUtil.SetIntValue(a, "binding_furniture_status", 0)
+
+    Faction ff = Game.GetFormFromFile(0x003899, "Binding.esm") as Faction
+    if ff && a.IsInFaction(ff)
+        a.RemoveFromFaction(ff)
+    endif
 
     return true
 EndFunction

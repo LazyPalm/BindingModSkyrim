@@ -19,6 +19,8 @@ int IDLE_STATE_CONVERSATION_POSE = 13
 int IDLE_STATE_INSPECTION = 14
 int IDLE_STATE_DOORSTEP = 15
 
+int IDLE_STATE_DANCING = 20
+
 string idleHighKneel
 string idleHighKneelSystemName
 string idleHighKneelBound
@@ -1046,13 +1048,13 @@ Function ResumeStanding()
     EndQuests()
 EndFunction
 
-bool Function InNoPose()
-    If PoseIdleState == IDLE_STATE_NONE
+bool function InNoPose()
+    if PoseIdleState == IDLE_STATE_NONE
         return true
-    Else
+    else
         return false 
-    EndIf
-EndFunction
+    endif
+endfunction
 
 bool function IsInPose()
     if theSubRef.IsInFaction(bind_InPoseFaction)
@@ -1064,7 +1066,7 @@ endfunction
 
 function AddToFaction(Faction f)
     if !theSubRef.IsInFaction(bind_InPoseFaction)
-        theSubRef.AddToFaction(bind_InPoseFaction)
+        theSubRef.SetFactionRank(bind_InPoseFaction, 1)        
     endif
     if !theSubRef.IsInFaction(f)
         theSubRef.AddToFaction(f)
@@ -1073,7 +1075,20 @@ endfunction
 
 function RemovePosingFactions()
 
+    ;debug.MessageBox(theSubRef)
+
     StorageUtil.SetIntValue(theSubRef, "pose_high_kneel", 0)
+    ;debug.MessageBox(StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0))
+    if StorageUtil.GetIntValue(theSubRef, "bind_dancing", 0) == 1
+        Quest q = Quest.GetQuest("binda_DanceQuest")
+        if q
+            if q.IsRunning()
+                (q as binda_Dance).EndDance()
+            endif
+        endif
+        StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0)
+    endif
+   ;debug.MessageBox(StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0))
 
     if StorageUtil.GetIntValue(theSubRef, "kneeling_required", 1) == 1 
 		bind_GlobalKneelingOK.SetValue(0.0) ; standing / not posing again
@@ -1159,7 +1174,7 @@ endfunction
 
 function StandFromKneeling(Actor a) global
 
-    if StorageUtil.GetIntValue(a, "pose_high_kneel", 0) == 1
+    if StorageUtil.GetIntValue(a, "pose_high_kneel", 0) == 1 || StorageUtil.GetIntValue(a, "bind_dancing", 0) == 1
 
         bind_PoseManager pms = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
 
@@ -1176,6 +1191,201 @@ endfunction
 function PoseDisablePlayerControls()
     Game.DisablePlayerControls(abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = true, abMenu = false, abActivate = false, abJournalTabs = false, aiDisablePOVType = 0)
 endfunction
+
+function Dance(Actor akActor, string plugin, string animationName, string description)
+
+    ;debug.MessageBox(akActor)
+
+    if !Game.IsPluginInstalled(plugin)
+        debug.MessageBox(plugin + " is not installed. Can't start " + animationName)
+        return
+    endif
+
+    Actor thePlayer = Game.GetPlayer()
+
+    if akActor == thePlayer
+        ;PoseDisablePlayerControls()
+        Game.SetPlayerAIDriven(true)
+        ;Game.DisablePlayerControls(abMovement = true, abFighting = true, abCamSwitch = false, abLooking = false, abSneaking = true, abMenu = false, abActivate = false, abJournalTabs = false, aiDisablePOVType = 0)
+    endif
+
+    string danceAnimation = ""
+
+    Quest q = Quest.GetQuest("binda_DanceQuest")
+    if !q.IsRunning() ;need to see if in an inn
+        q.Start()
+    endif
+
+    ; if danceType == "pole"
+    ;     danceAnimation = "ZazPoleDance_Loop"
+    ; elseif danceType == "snake"
+    ;     danceAnimation = "ZazSnakeDance_Loop"
+    ; elseif danceType == "sexyaj"
+    ;     danceAnimation = "ZazSexyAJDance_Loop"
+    ; elseif danceType == "belly"
+    ;     danceAnimation = "ZazBellyDance_Loop"
+    ; elseif danceType == "shakeass"
+    ;     danceAnimation = "ZazShakeAssDance_Loop"
+    ; elseif danceType == "sexy"
+    ;     danceAnimation = "ZazSexyDance_Loop"
+    ; elseif danceType == "funky"
+    ;     danceAnimation = "ZazFunky_Loop"
+    ; elseif danceType == "groovegirl"
+    ;     danceAnimation = "ZazGrooveGirl_Loop"
+    ; elseif danceType == "disco"
+    ;     danceAnimation = "ZazSeph05Disco_Loop"
+    ; else 
+    ;     ;never should happen
+    ; endif
+
+    ; Package p = Game.GetFormFromFile(0x018704, "ArcaneSexbotBDSM.esm") as Package ;do nothing package
+    ; ActorUtil.AddPackageOverride(akActor, p, 90, 0)
+    ; akActor.EvaluatePackage()
+
+    Debug.SendAnimationEvent(akActor, "IdleForceDefaultState")
+    bind_Utility.DoSleep()
+
+    debug.SendAnimationEvent(akActor, animationName)
+
+    ; StorageUtil.SetIntValue(akActor, "arcb_busy", 1)
+    ; StorageUtil.SetIntValue(akActor, "arcb_dancing", 1)
+    ; StorageUtil.SetStringValue(akActor, "arcb_dance", danceType)
+    ; StorageUtil.FormListAdd(Game.GetPlayer(), "arcb_busy_list", akActor, false)
+
+    ; Faction busyFaction = Game.GetFormFromFile(0x007E77, "ArcaneSexbotBDSM.esm") as Faction
+    ; if busyFaction
+    ;     akActor.SetFactionRank(busyFaction, 1)
+    ; endif
+
+    if akActor == thePlayer
+        PoseIdleState = IDLE_STATE_DANCING
+    endif
+
+    if !akActor.IsInFaction(bind_InPoseFaction)
+        akActor.SetFactionRank(bind_InPoseFaction, 5)
+    else 
+        debug.MessageBox("already in pose faction??")
+    endif
+
+    StorageUtil.SetIntValue(akActor, "bind_dancing", 1)
+    StorageUtil.SetStringValue(akActor, "bind_dance_desc", description)
+
+endfunction
+
+;***************************************************************************************
+;private API
+;***************************************************************************************
+
+bool function PriApiIsInPose(Actor akActor) global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        if akActor.IsInFaction(s.bind_InPoseFaction)
+            return true
+        else
+            return false
+        endif
+    endif
+endfunction
+
+function PriApiDance(Actor akActor, string plugin, string animationName, string description) global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.Dance(akActor, plugin, animationName, description)
+    endif
+endfunction
+
+function PriApiPlayerStand() global
+    bind_PoseManager.StandFromKneeling(Game.GetPlayer())
+endfunction
+
+function PriApiPlayerPerformHighKneel() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoHighKneel()
+    endif
+endfunction
+
+function PriApiPlayerPerformDeepKneel() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoDeepKneel()
+    endif
+endfunction
+
+function PriApiPlayerPerformSpreadKneel() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoSpreadKneel()
+    endif
+endfunction
+
+function PriApiPlayerPerformAttention() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoAttention()
+    endif
+endfunction
+
+function PriApiPlayerPerformPresentHands() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoPresentHands()
+    endif
+endfunction
+
+function PriApiPlayerPerformShowAss() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoShowAss()
+    endif
+endfunction
+
+function PriApiPlayerPerformWhippedPose() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoGetWhippedPose()
+    endif
+endfunction
+
+function PriApiPlayerPerformPrayerPose() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoPrayerPose()
+    endif
+endfunction
+
+function PriApiPlayerPerformSitOnGround() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoSitOnGround()
+    endif
+endfunction
+
+function PriApiPlayerPerformConversationPose() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoConversationPose()
+    endif
+endfunction
+
+function PriApiPlayerPerformInspectionPose() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoInspection()
+    endif
+endfunction
+
+function PriApiPlayerPerformDoorstepPose() global
+    bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
+    if s
+        s.DoDoorstepPose()
+    endif
+endfunction
+
+
+
+
+
 
 ;zadexpressionlibs property zexplib auto
 ; zadLibs property zlib auto

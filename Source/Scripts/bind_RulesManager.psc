@@ -1813,6 +1813,27 @@ string function DomManagedRuleChange(Actor theSub, bool testChanges = false)
 
 endfunction
 
+;***************************************************************************************
+;private API
+;***************************************************************************************
+function PriApiDomForceRuleChange(Actor akActor) global
+    bind_RulesManager s = Quest.GetQuest("bind_MainQuest") as bind_RulesManager
+    if s
+		s.DomManagedRuleChange(akActor, true)
+    endif
+endfunction
+
+bool function PriApiNudityRequired(Actor akActor, bool safeArea) global
+    bind_RulesManager s = Quest.GetQuest("bind_MainQuest") as bind_RulesManager
+    bool result = false
+    if s
+		result = s.IsNudityRequired(akActor, safeArea)
+    endif
+    return result
+endfunction
+
+
+
 
 ; bind_BondageManager property bbm auto
 ; bind_MainQuestScript property mqs auto

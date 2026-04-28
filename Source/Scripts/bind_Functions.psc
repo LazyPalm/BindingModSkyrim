@@ -395,6 +395,9 @@ Event OnControlUp(string control, float HoldTime)
 				EndIf
 			EndIf
 		EndIf
+
+
+
 	EndIf
 
 	; If control == "Activate" && Game.UsingGamepad()
@@ -2937,9 +2940,9 @@ function EventDomTyingAnimation(Actor sub, Actor dom, bool rotateSub = false)
 endfunction
 
 function EventStartCrowds()
-    if !theSubRef.IsInFaction(bind_CrowdTriggerToWatch)
-        theSubRef.AddToFaction(bind_CrowdTriggerToWatch)
-    endif
+    ; if !theSubRef.IsInFaction(bind_CrowdTriggerToWatch)
+    ;     theSubRef.AddToFaction(bind_CrowdTriggerToWatch)
+    ; endif
 endfunction
 
 function EventStopCrowds()

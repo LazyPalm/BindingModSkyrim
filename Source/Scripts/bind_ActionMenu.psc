@@ -1,11 +1,15 @@
 Scriptname bind_ActionMenu extends Quest  
 
+Actor thePlayer
+
 event OnInit()
 
     if self.IsRunning()
 
         RegisterForModEvent("bind_ActionOpenMenuEvent", "ActionOpenMenu")
         RegisterForModEvent("bind_LatencyCheck", "LatencyCheck")
+
+        thePlayer = Game.GetPlayer()
 
     endif
 
@@ -17,6 +21,8 @@ function LoadGame()
 
     UnregisterForModEvent("BindingPlayerChatCompleted")
     RegisterForModEvent("BindingPlayerChatCompleted", "OnBindingPlayerChatCompleted")
+
+    thePlayer = Game.GetPlayer()
 
 endfunction
 
@@ -42,42 +48,125 @@ endfunction
 
 function ShowMoreMenu()
 
+    bind_Functions functions_script = bind_Functions.GetBindingFunctions()
+
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
-    listMenu.AddEntryItem("<-- Return To Menu")
+    listMenu.AddEntryItem("<-- Leave More Menu")
     listMenu.AddEntryItem("Masturbate")
+    ;if !bind_PoseManager.PriApiIsInPose(thePlayer)
+        listMenu.AddEntryItem("Dance")
+    ;endif
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
+    string listSelect = listMenu.GetResultString()
 
     if listReturn == 0
         ShowActionMenu()
-    elseif listReturn == 1
+    elseif listSelect == "Masturbate"
         if functions_script.ModInRunningState()
-            if functions_script.GetSubRef().WornHasKeyword(bondage_manager.zlib.zad_DeviousBelt)
+            if bind_BondageManager.PriApiWearingChastity(thePlayer) ;functions_script.GetSubRef().WornHasKeyword(bondage_manager.zlib.zad_DeviousBelt)
                 debug.MessageBox("You look down helplessly at the belt locking away your sex. There will be no self pleasure for now...")
             else
                 bind_BoundMasturbationQuest.Start()
             endif
         endif
+    elseif listSelect == "Dance"
+        ShowDanceMenu()
     endif
 
 endfunction
 
+function ShowDanceMenu()
+
+    UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
+    
+    string fileName = "binding/dance.json"
+
+    string[] shortList = JsonUtil.StringListToArray(fileName, "short_names")
+    string[] pluginList = JsonUtil.StringListToArray(fileName, "plugin")
+    string[] animationList = JsonUtil.StringListToArray(fileName, "animation_name")
+    string[] descList = JsonUtil.StringListToArray(fileName, "short_description")
+
+    ;Debug.MessageBox(shortList)
+
+    listMenu.AddEntryItem("<-- Leave Dance Menu")
+    ; listMenu.AddEntryItem("Pole")
+    ; listMenu.AddEntryItem("Snake")
+    ; listMenu.AddEntryItem("Sexy AJ")
+    ; listMenu.AddEntryItem("Belly")
+    ; listMenu.AddEntryItem("Shake Ass")
+    ; listMenu.AddEntryItem("Sexy")
+    ; listMenu.AddEntryItem("Funky")
+    ; listMenu.AddEntryItem("Groove Girl")
+    ; listMenu.AddEntryItem("Disco")
+    int i = 0
+    while i < shortList.Length
+        listMenu.AddEntryItem(shortList[i])
+        i += 1
+    endwhile
+
+    listMenu.OpenMenu()
+    int listReturn = listMenu.GetResultInt()
+    string listSelect = listMenu.GetResultString()
+
+    string danceType = ""
+
+    if listReturn == 0
+        ShowMoreMenu()
+    elseif listReturn > 0
+        int idx = listReturn - 1
+        if idx > 0
+            bind_PoseManager.PriApiDance(Game.GetPlayer(), pluginList[idx], animationList[idx], descList[idx])
+        endif
+        ; elseif listSelect == "Pole"
+    ;     danceType = "pole"
+    ; elseif listSelect == "Snake"
+    ;     danceType = "snake"
+    ; elseif listSelect == "Sexy AJ"
+    ;     danceType = "sexyaj"
+    ; elseif listSelect == "Belly"
+    ;     danceType = "belly"
+    ; elseif listSelect == "Shake Ass"
+    ;     danceType = "shakeass"
+    ; elseif listSelect == "Sexy"
+    ;     danceType = "sexy"
+    ; elseif listSelect == "Funky"
+    ;     danceType = "funky"
+    ; elseif listSelect == "Groove Girl"
+    ;     danceType = "groovegirl"
+    ; elseif listSelect == "Disco"
+    ;     danceType = "disco"
+               
+
+    endif
+
+    ; if danceType != ""
+    ;     pose_manager.Dance(Game.GetPlayer(), danceType)
+    ;     ;bind_Utility.ActorDance(Game.GetPlayer(), danceType)
+    ; endif
+
+endfunction
+
 function ShowDebugMenu()
+
+    bind_Functions functions_script = bind_Functions.GetBindingFunctions()
+   
 
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
     listMenu.AddEntryItem("<-- Return To Menu")
     listMenu.AddEntryItem("Test Dom Rule Change")
     listMenu.AddEntryItem("Direct Narration Test")
-    listMenu.AddEntryItem("Skyrim Bondage Rule Test")
+    listMenu.AddEntryItem("SkyrimNet Bondage Rule Test")
     listMenu.AddEntryItem("Server Test")
     listMenu.AddEntryItem("SKSE - search test")
     listMenu.AddEntryItem("SKSE - crowd size test")
     listMenu.AddEntryItem("Fade to black")
     listMenu.AddEntryItem("Fade to black - remove")
     listMenu.AddEntryItem("Get Dom current package")
+    listMenu.AddEntryItem("Show widget test")
     ;listMenu.AddEntryItem("30s DHLP Test") ;send a dhlp event, register for a 30 second event and resume in onupdate - might need to be a new script
 
     listMenu.OpenMenu()
@@ -86,25 +175,28 @@ function ShowDebugMenu()
     if listReturn == 0
         ShowActionMenu()
     elseif listReturn == 1
-        rules_manager.DomManagedRuleChange(functions_script.GetSubRef(), true)
+        bind_RulesManager.PriApiDomForceRuleChange(thePlayer)
+        ;rules_manager.DomManagedRuleChange(functions_script.GetSubRef(), true)
     elseif listReturn == 2
-        if think.IsAiReady()
+        if bind_ThinkingDom.IsReadyCheck() 
             SkyrimNetApi.DirectNarration(functions_script.GetDomRef().GetDisplayName() + " orders {{ player.name }} to their knees.", functions_script.GetDomRef(), functions_script.GetSubRef())
             debug.Notification("Direct narration function called")
             ;think.UseDirectNarration(functions_script.GetDomRef(), functions_script.GetDomRef().GetDisplayName() + " praises {{ player.name }} for being a good slave.")
         endif
     elseif listReturn == 3
-        if think.IsAiReady()
-            bind_ThinkingDom.AddBondageRule_Execute(functions_script.GetDomRef(), "", "{\"rule\":\"Random Rule\"}")
+        if bind_ThinkingDom.IsReadyCheck() 
+            debug.MessageBox("This is disabled")
+            ;bind_ThinkingDom.SendDirectNarration("")
+            ;bind_ThinkingDom.AddBondageRule_Execute(functions_script.GetDomRef(), "", "{\"rule\":\"Random Rule\"}")
         endif
     elseif listReturn == 5
-        Form[] result = bind_SkseFunctions.CreateRandomDeviousSet(bondage_manager.bind_dd_all, 1, 4, none) ;, 0, Utility.RandomInt(1, 3))
-        debug.MessageBox(result)
-        int idx = 0
-        while idx < result.Length
-            bind_Utility.WriteToConsole(result[idx].GetName())
-            idx += 1
-        endwhile
+        ; Form[] result = bind_SkseFunctions.CreateRandomDeviousSet(bondage_manager.bind_dd_all, 1, 4, none) ;, 0, Utility.RandomInt(1, 3))
+        ; debug.MessageBox(result)
+        ; int idx = 0
+        ; while idx < result.Length
+        ;     bind_Utility.WriteToConsole(result[idx].GetName())
+        ;     idx += 1
+        ; endwhile
     elseif listReturn == 6
         int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
         debug.MessageBox("crowd size: " + crowdSize)
@@ -126,45 +218,69 @@ function ShowDebugMenu()
 
     elseif listReturn == 4
 
-	; Initialize the Text Entry Menu
-	UIExtensions.InitMenu("UITextEntryMenu")
+        ; Initialize the Text Entry Menu
+        UIExtensions.InitMenu("UITextEntryMenu")
 
-	; Set up the menu text prompts
-	;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "text", "Enter a name:")
-	;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "defaultText", "DefaultName")
+        ; Set up the menu text prompts
+        ;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "text", "Enter a name:")
+        ;UIExtensions.SetMenuPropertyString("UITextEntryMenu", "defaultText", "DefaultName")
 
-	; Optionally specify max input length
-	UIExtensions.SetMenuPropertyString("UITextEntryMenu", "title", "Name Your Item")
-	UIExtensions.SetMenuPropertyInt("UITextEntryMenu", "maxLength", 20)
+        ; Optionally specify max input length
+        UIExtensions.SetMenuPropertyString("UITextEntryMenu", "title", "Name Your Item")
+        UIExtensions.SetMenuPropertyInt("UITextEntryMenu", "maxLength", 20)
 
-	; Open the menu and store the result
-	int result = UIExtensions.OpenMenu("UITextEntryMenu")
+        ; Open the menu and store the result
+        int result = UIExtensions.OpenMenu("UITextEntryMenu")
 
-	if result == 1
-		; The player confirmed their input
-		string userInput = UIExtensions.GetMenuResultString("UITextEntryMenu")
-		;Debug.Notification("Player entered: " + userInput)
+        if result == 1
+            ; The player confirmed their input
+            string userInput = UIExtensions.GetMenuResultString("UITextEntryMenu")
+            ;Debug.Notification("Player entered: " + userInput)
 
 
-        if functions_script.GetConversationTarget() != none && userInput != ""
-		    bind_SkseFunctions.PlayerChat(functions_script.GetConversationTarget() as Actor, userInput)
-            ;DynamicScene.Start()
+            if functions_script.GetConversationTarget() != none && userInput != ""
+                bind_SkseFunctions.PlayerChat(functions_script.GetConversationTarget() as Actor, userInput)
+                ;DynamicScene.Start()
+            else
+                debug.Notification("No actor targeted")
+            endif
+
+            ; string llmResponse = MakeAiRequest(userInput, actorName)
+
+            ;ShowActorSubtitle(targetedActor, llmResponse)
+
+            ;Debug.Notification("LLM: " + llmResponse)
+            MiscUtil.PrintConsole("User to LLM: " + userInput)
+            ;ConsoleUtil.PrintMessage("LLM: " + llmResponse)
+
+            ; Do something useful with the input—like set a name or store it in a property
         else
-            debug.Notification("No actor targeted")
+            Debug.Notification("Text entry was canceled")
         endif
 
-		; string llmResponse = MakeAiRequest(userInput, actorName)
+    elseif listReturn == 10
+        iWant_Widgets iwd = Quest.GetQuest("iWant_WidgetQuest") as iWant_Widgets
+        if iwd
+            ;debug.MessageBox(iwd)
 
-		;ShowActorSubtitle(targetedActor, llmResponse)
+            int widget
+            widget = iwd.loadMeter(1280/2, 720/2, false)
+            iwd.setMeterPercent(widget, Utility.RandomInt(10, 90))
+            iwd.setVisible(widget, 1)
+            Utility.Wait(5.0)
+            iwd.setVisible(widget, 0)
 
-		;Debug.Notification("LLM: " + llmResponse)
-		MiscUtil.PrintConsole("User to LLM: " + userInput)
-		;ConsoleUtil.PrintMessage("LLM: " + llmResponse)
+			; Int hello
+			
+			; hello = iwd.loadText("Hello World!")
+			; iwd.setPos(hello, 1280/2, 720/2)
+			; iwd.setVisible(hello)
+			; Utility.Wait(5)
 
-		; Do something useful with the input—like set a name or store it in a property
-	else
-		Debug.Notification("Text entry was canceled")
-	endif
+
+        Else
+            debug.MessageBox("could not load iWant_Widgets")
+        endif
 
     endif
 
@@ -295,6 +411,8 @@ endfunction
 
 function ShowSettingsMenu()
 
+    bind_Functions functions_script = bind_Functions.GetBindingFunctions()
+
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
     listMenu.AddEntryItem("<-- Return To Menu")
@@ -371,7 +489,7 @@ function ShowSettingsMenu()
             endif
         endif
     elseif listReturn == 7
-        gear_manager.WhitelistItems(Game.GetPlayer())
+        bind_GearManager.PriApiManageWhitelist(Game.GetPlayer())
     
     elseif listReturn == 8
         Form[] items = bind_SkseFunctions.GetWornDevious(Game.GetPlayer())
@@ -418,6 +536,9 @@ endfunction
 
 function ShowPoseMenu()
 
+    bind_Functions functions_script = bind_Functions.GetBindingFunctions()
+
+
     if functions_script.GetSubRef().IsOnMount()
         bind_Utility.WriteInternalMonologue("I need to get off this horse first...")
         return
@@ -449,16 +570,16 @@ function ShowPoseMenu()
     if listReturn == 0
         ShowActionMenuNested()
     elseif listReturn == 1
-        pose_manager.DoHighKneel()
+        bind_PoseManager.PriApiPlayerPerformHighKneel()
         bind_ActionMenu.SendKneelingEvent()
     elseif listReturn == 2
-        pose_manager.DoSpreadKneel()
+        bind_PoseManager.PriApiPlayerPerformSpreadKneel()
         int crowdSize = bind_SkseFunctions.CalculateCrowd(functions_script.GetSubRef(), functions_script.GetDomRef(), 1000.0, 3000.0)
         bind_Utility.WriteToConsole("spread kneel (sex) - crowd: " + crowdSize)
-        if think.IsAiReady()
+        if bind_ThinkingDom.IsReadyCheck()
             bool start = false
             string prompt = "{{ player.name }} is kneeling with legs spead wide with a desire for sex."
-            if main.SexDomWantsPrivacy == 1 && crowdSize > 0
+            if bind_MainQuestScript.GetMainQuestScript().SexDomWantsPrivacy == 1 && crowdSize > 0
                 prompt += functions_script.GetDomRef().GetDisplayName() + " does not like fucking {{ player.name }} in public."
             else
                 if functions_script.GetRuleInfractions() > 0
@@ -481,13 +602,12 @@ function ShowPoseMenu()
             functions_script.PoseForSex(crowdSize)            
         endif
     elseif listReturn == 3     
-        pose_manager.DoAttention()
+        bind_PoseManager.PriApiPlayerPerformAttention()
     elseif listReturn == 4     
-        pose_manager.DoPresentHands()
         functions_script.PoseForBondage()
     elseif listReturn == 5     
-        pose_manager.DoGetWhippedPose()
-        if think.IsAiReady()
+        bind_PoseManager.PriApiPlayerPerformWhippedPose()
+        if bind_ThinkingDom.IsReadyCheck() 
             string prompt = "{{ player.name }} has entered a bent foward at the waist pose indicating a desire to be whipped."
             if functions_script.GetRuleInfractions() > 0
                 prompt += " {{ player.name }} has been bad and deserves to be punished."
@@ -496,24 +616,24 @@ function ShowPoseMenu()
             endif
             ;BETTER? OR BOTH?
             ;add punishments due decorator at the prompt and display the lines above
-            think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+            ;think.UseDirectNarration(functions_script.GetDomRef(), prompt)
+            SkyrimNetApi.DirectNarration(prompt, functions_script.GetDomRef())
         else
             functions_script.PoseForWhipping()
         endif
     elseif listReturn == 6     
-        pose_manager.DoShowAss()
+        bind_PoseManager.PriApiPlayerPerformShowAss()
     elseif listReturn == 7     
-        pose_manager.DoPrayerPose()
+        bind_PoseManager.PriApiPlayerPerformPrayerPose()
     elseif listReturn == 8     
-        pose_manager.DoSitOnGround()
+        bind_PoseManager.PriApiPlayerPerformSitOnGround()
     elseif listReturn == 9     
-        pose_manager.DoConversationPose()
+        bind_PoseManager.PriApiPlayerPerformConversationPose()
     elseif listReturn == 10    
-        pose_manager.DoDeepKneel()
         functions_script.PoseForSleep()
     elseif listReturn == 11
-        pose_manager.DoDoorstepPose()
-        if think.IsAiReady()
+        bind_PoseManager.PriApiPlayerPerformDoorstepPose()
+        if bind_ThinkingDom.IsReadyCheck() 
             ;have skyrimnet call an action
         else
 
@@ -558,7 +678,7 @@ function ShowActionMenuNested()
     actionMenu.SetPropertyIndexString("optionLabelText", 0, "Close")
     actionMenu.SetPropertyIndexBool("optionEnabled", 0, true)
 
-    if pose_manager.IsInPose()
+    if bind_PoseManager.PriApiIsInPose(thePlayer)
         actionMenu.SetPropertyIndexString("optionText", 1, "Kneel")
         actionMenu.SetPropertyIndexString("optionLabelText", 1, "Kneel")
         actionMenu.SetPropertyIndexBool("optionEnabled", 1, false)
@@ -576,6 +696,7 @@ function ShowActionMenuNested()
         actionMenu.SetPropertyIndexBool("optionEnabled", 2, true)
     endif
 
+    bind_Functions functions_script = bind_Functions.GetBindingFunctions()
     Actor a = functions_script.GetSubRef()
     Actor dom = functions_script.GetDomRef()
 
@@ -623,19 +744,18 @@ function ShowActionMenuNested()
 
     int actionResult = actionMenu.OpenMenu()
 
-    bool isBoundFlag = a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
-    bool isNudeFlag = gear_manager.IsNude(a)
+    bool isBoundFlag = bind_BondageManager.PriApiWearingHeavyBondage(thePlayer) ; a.IsInFaction(bondage_manager.WearingHeavyBondageFaction())
+    bool isNudeFlag = (bind_GearManager.PriApiIsNude(thePlayer) == 0)
     ;bool boundRule = rules_manager.IsHeavyBondageRequired(a, safeZone) ;(rules_manager.GetBondageRuleByName("Bound Rule") == 1)
-    bool nudeRule = rules_manager.IsNudityRequired(a, safeZone) ; (rules_manager.GetBehaviorRuleByName("Body Rule:Nudity") == 1)
+    bool nudeRule = bind_RulesManager.PriApiNudityRequired(a, safeZone) ; (rules_manager.GetBehaviorRuleByName("Body Rule:Nudity") == 1)
 
     if actionResult == 0
         ;close menu
     elseif actionResult == 1
-        pose_manager.DoHighKneel()
         SendKneelingEvent()
     elseif actionResult == 2
-        if pose_manager.IsInPose()
-            pose_manager.ResumeStanding()
+        if bind_PoseManager.PriApiIsInPose(thePlayer)
+            bind_PoseManager.PriApiPlayerStand()
             bind_Utility.EnablePlayer()
             bind_ActionMenu.SendLeftKneelEvent()
             ;mqs.GetSubRef().SetDontMove(false)
@@ -687,7 +807,7 @@ function ShowActionMenuNested()
                 ; functions_script.EventDomTyingAnimation(a, dom, false)
                 ; bind_Utility.EnablePlayer()
 
-                if !gear_manager.IsNude(a) ;|| StorageUtil.FormListCount(a, "bind_strip_list") == 0
+                if !(bind_GearManager.PriApiIsNude(thePlayer) == 0) ;gear_manager.IsNude(a) ;|| StorageUtil.FormListCount(a, "bind_strip_list") == 0
                     functions_script.EventDomTyingAnimation(a, dom, false)
                     ;gear_manager.RemoveWornGear(a)
                     Form[] rItems = bind_SkseFunctions.DoStripActor(a, removeDevious = true)
@@ -716,8 +836,9 @@ function ShowActionMenuNested()
                 bool isNude = bind_SkseFunctions.NudityTest(a)
                 ;debug.MessageBox("isnude: " + isNude)
                 if !isNude  ;!gear_manager.IsNude(a) || StorageUtil.FormListCount(a, "bind_strip_list") == 0 
-                    if think.IsAiReady()
-                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
+                    if bind_ThinkingDom.IsReadyCheck()
+                        SkyrimNetApi.DirectNarration("{{ player.name }} is removing their clothing.", functions_script.GetDomRef())
+                        ;think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
                     endif
                     ;gear_manager.RemoveWornGear(a)
                     Form[] rItems = bind_SkseFunctions.DoStripActor(a, removeDevious = false)
@@ -733,10 +854,13 @@ function ShowActionMenuNested()
                     ;     idx += 1
                     ; endwhile
                 else
-                    if think.IsAiReady()
-                        think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
+                    ; if think.IsAiReady()
+                    ;     think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is getting dressed into their clothing.")
+                    ; endif
+                    if bind_ThinkingDom.IsReadyCheck()
+                        SkyrimNetApi.DirectNarration("{{ player.name }} is getting dressed into their clothing.", functions_script.GetDomRef())
+                        ;think.UseDirectNarration(functions_script.GetDomRef(), "{{ player.name }} is removing their clothing.")
                     endif
-
                     bind_SkseFunctions.DoDressActor(a, StorageUtil.FormListToArray(a, "bind_strip_items_list"))
                     ;bind_Utility.DoDressActor(a, removedItems)
                     ;removedItems = none
@@ -849,13 +973,13 @@ endfunction
 
 ;bind_MainQuestScript property mqs auto
 
-bind_PoseManager property pose_manager auto
-bind_BondageManager property bondage_manager auto
-bind_GearManager property gear_manager auto
-bind_RulesManager property rules_manager auto
-bind_Functions property functions_script auto
-bind_ThinkingDom property think auto
-bind_MainQuestScript property main auto
+;bind_PoseManager property pose_manager auto
+;bind_BondageManager property bondage_manager auto
+;bind_GearManager property gear_manager auto
+;bind_RulesManager property rules_manager auto
+;bind_Functions property functions_script auto
+;bind_ThinkingDom property think auto
+;bind_MainQuestScript property main auto
 
 Quest property bind_BoundMasturbationQuest auto
 Quest property bind_EntryExitQuest auto
@@ -867,3 +991,5 @@ Scene property DynamicScene auto
 ImageSpaceModifier property FadeToBlackImod auto
 ImageSpaceModifier property FadeToBlackHoldImod auto
 ImageSpaceModifier property FadeToBlackBackImod auto
+
+;iWant_Widgets Property iWidgets Auto
