@@ -26,7 +26,7 @@ event OnBindCycleEvent(int cycleCount, int modState)
                 ;2 - lustful
                 ;3 - mocking
                 ;4 - pity
-                debug.MessageBox("setting type faction a: " + a.GetDisplayName() + " rank: " + a.GetFactionRank(CrowdTypeFaction))
+                bind_Utility.WriteToConsole("setting type faction a: " + a.GetDisplayName() + " rank: " + a.GetFactionRank(CrowdTypeFaction))
             endif
         endif
         bind_Utility.DoSleep(0.1)
