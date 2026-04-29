@@ -5031,6 +5031,7 @@ Function McmSaveFunction()
         JsonUtil.SetPathIntValue(saveFileName, "sky_action_inspect", brain.EnableActionInspection)
 
         ;dep  **************************************************  
+        JsonUtil.SetPathIntValue(saveFileName, "dep_pama", main.EnableModPama)
         JsonUtil.SetPathIntValue(saveFileName, "dep_dse", main.EnableModDM3)
         JsonUtil.SetPathIntValue(saveFileName, "dep_dirt", main.EnableModDirtAndBlood)
         JsonUtil.SetPathIntValue(saveFileName, "dep_bis", main.EnableModBathingInSkyrim)
@@ -5303,6 +5304,7 @@ Function McmLoadFunction(string saveFileName)
     brain.EnableActionInspection = JsonUtil.GetPathIntValue(saveFileName, "sky_action_inspect")
 
     ;dep  **************************************************  
+    main.EnableModPama = JsonUtil.GetPathIntValue(saveFileName, "dep_pama")
     main.EnableModDM3 = JsonUtil.GetPathIntValue(saveFileName, "dep_dse")
     main.EnableModDirtAndBlood = JsonUtil.GetPathIntValue(saveFileName, "dep_dirt")
     main.EnableModBathingInSkyrim = JsonUtil.GetPathIntValue(saveFileName, "dep_bis")

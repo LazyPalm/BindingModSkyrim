@@ -1032,6 +1032,8 @@ Function ResumeStanding()
         standingIdle = "IdleForceDefaultState"
     EndIf
 
+    RemovePosingFactions()
+
     ;Debug.MessageBox("stand idle: " + standingIdle)
     ;main.SubDialogueInCorrectPose = 0
 	bind_Utility.LogOutput("Pose Manager - ResumeStanding() idle: " + standingIdle)
@@ -1043,7 +1045,6 @@ Function ResumeStanding()
 	    Debug.SendAnimationEvent(theSubRef, standingIdle)
     endif
     
-    RemovePosingFactions()
     Game.EnablePlayerControls()
     EndQuests()
 EndFunction
@@ -1269,6 +1270,7 @@ function Dance(Actor akActor, string plugin, string animationName, string descri
 
     StorageUtil.SetIntValue(akActor, "bind_dancing", 1)
     StorageUtil.SetStringValue(akActor, "bind_dance_desc", description)
+    StorageUtil.SetStringValue(akActor, "bind_dance_animation", animationName)
 
 endfunction
 

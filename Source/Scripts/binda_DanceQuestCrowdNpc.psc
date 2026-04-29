@@ -20,11 +20,14 @@ event OnInit()
         widgetVisible = false
         iwd = Quest.GetQuest("iWant_WidgetQuest") as iWant_Widgets
         if iwd
-            widget = iwd.loadMeter(40, (AliasIndex * 35) + 40, false)
+            int topSpace = 40
+            int yPosBar = (AliasIndex * 50) + topSpace
+            int yPosText = yPosBar + 20
+            widget = iwd.loadMeter(40, yPosBar, false)
             iwd.setMeterPercent(widget, 0)
             ;iwd.SetName(me.GetDisplayName())
             iwd.setVisible(widget, 1)
-            widgetText = iwd.loadText(me.GetDisplayName(), "", 24, 100, (AliasIndex * 35) + 40, true)
+            widgetText = iwd.loadText(me.GetDisplayName(), "$EverywhereFont", 24, 40, yPosText, true)
             widgetVisible = true
         endif
     endif

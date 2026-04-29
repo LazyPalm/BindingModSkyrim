@@ -8,11 +8,38 @@ Actor me
 event OnInit()
 	RegisterforCrosshairRef()
     me = self.GetActorReference()
+    RegisterForAnimationEvent(self.GetReference(), "IdleStop") 
 endevent
 
 Event OnPlayerLoadGame()
     RegisterforCrosshairRef()
     me = self.GetActorReference()
+    RegisterForAnimationEvent(self.GetReference(), "IdleStop") 
+endevent
+
+bool restartDance = false
+
+Event OnAnimationEvent(ObjectReference akSource, string asEventName)
+    if (asEventName == "IdleStop")
+        if StorageUtil.GetIntValue(me, "bind_dancing", 0) == 1            
+            restartDance = true
+            bind_Utility.WriteNotification(me.GetDisplayName() + " wants to dance again...", bind_Utility.TextColorRed())
+            RegisterForSingleUpdate(3.0)
+        endif
+    endif
+EndEvent
+
+event OnUpdate()
+    if restartDance
+        string animationName = StorageUtil.GetStringValue(me, "bind_dance_animation")
+        if animationName != ""
+            debug.SendAnimationEvent(me, animationName)
+        else 
+            ;this should not happen
+            ;end dance??
+        endif
+        restartDance = false
+    endif
 endevent
 
 event OnCrosshairRefChange(ObjectReference ref)
