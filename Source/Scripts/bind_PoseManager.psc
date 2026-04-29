@@ -1244,7 +1244,7 @@ function Dance(Actor akActor, string plugin, string animationName, string descri
     ; akActor.EvaluatePackage()
 
     Debug.SendAnimationEvent(akActor, "IdleForceDefaultState")
-    bind_Utility.DoSleep()
+    bind_Utility.DoSleep(2.0)
 
     debug.SendAnimationEvent(akActor, animationName)
 
@@ -1265,7 +1265,7 @@ function Dance(Actor akActor, string plugin, string animationName, string descri
     if !akActor.IsInFaction(bind_InPoseFaction)
         akActor.SetFactionRank(bind_InPoseFaction, 5)
     else 
-        debug.MessageBox("already in pose faction??")
+        ;debug.MessageBox("already in pose faction??")
     endif
 
     StorageUtil.SetIntValue(akActor, "bind_dancing", 1)

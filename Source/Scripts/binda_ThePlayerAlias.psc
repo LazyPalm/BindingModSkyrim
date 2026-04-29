@@ -22,6 +22,8 @@ bool restartDance = false
 Event OnAnimationEvent(ObjectReference akSource, string asEventName)
     if (asEventName == "IdleStop")
         if StorageUtil.GetIntValue(me, "bind_dancing", 0) == 1            
+            ;TODO: need a changed dance flag that gets set if dance is already playing
+            ;this would trigger this idle stop, but we would not need to restart the dance animation
             restartDance = true
             bind_Utility.WriteNotification(me.GetDisplayName() + " wants to dance again...", bind_Utility.TextColorRed())
             RegisterForSingleUpdate(3.0)
