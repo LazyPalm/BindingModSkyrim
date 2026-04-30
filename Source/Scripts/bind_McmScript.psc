@@ -77,6 +77,13 @@ int menuPresentHandsTypeBound
 int menuShowAssTypeBound
 int menuConversationPoseTypeBound
 
+;dancing
+int toggleDanceShowBars
+int toggleDanceGiveTips
+int toggleAllowedToDance
+int sliderDanceTipMaxGold
+int sliderDanceTipCooldownHours
+
 string[] idleTypes
 
 ;rules
@@ -338,7 +345,7 @@ Event OnConfigOpen()
     Pages[2] = "Bondage Outfits"
     Pages[3] = "Event Settings"
     Pages[4] = "Points"
-    Pages[5] = "Poses"
+    Pages[5] = "Poses / Dancing"
     Pages[6] = "Gameplay Preferences"
     Pages[7] = "Punishment"
     Pages[8] = "Rules - Behavior"
@@ -462,7 +469,7 @@ Event OnPageReset(string page)
 
             DisplayStatus()
 
-        ElseIf page == "Poses"
+        ElseIf page == "Poses / Dancing"
 
             DisplayPoseSettings()
 
@@ -1160,6 +1167,17 @@ Function DisplayPoseSettings()
     menuShowAssTypeBound = AddMenuOption("Show Ass - Whip", pman.GetShowAss(true))
     menuConversationPoseTypeBound = AddMenuOption("Conversation Pose", pman.GetConversationPose(true))
     AddTextOption("", "")
+
+    AddHeaderOption("Dancing")
+    AddHeaderOption("")
+
+    toggleDanceShowBars = AddToggleOption("Crowd Status Bars (iWant Widgets)", StorageUtil.GetIntValue(none, "binding_mcm_dance_status", 1))
+    toggleDanceGiveTips = AddToggleOption("Crowd Gives Tips", StorageUtil.GetIntValue(none, "binding_mcm_dance_tips", 1))
+    toggleAllowedToDance = AddToggleOption("Dom Allows Dancing Anytime", StorageUtil.GetIntValue(none, "binding_mcm_dance_allow", 1))
+    sliderDanceTipMaxGold = AddSliderOption("Max Gold From Tips", StorageUtil.GetIntValue(none, "binding_mcm_dance_gold", 5), "{0}")
+    sliderDanceTipCooldownHours = AddSliderOption("Tips Cooldown Hours", StorageUtil.GetIntValue(none, "binding_mcm_dance_cooldown", 12), "{0}")
+    AddEmptyOption()
+    ;sliderDanceTipCooldownHours = AddSliderOption("Max Gold From Tips", StorageUtil.GetIntValue(none, "binding_mcm_dance_gold", 5), "{0}")
 
 EndFunction
 
@@ -3039,6 +3057,28 @@ Event OnOptionSelect(int option)
         completed = true
     endif
 
+    if option == toggleDanceShowBars && !completed
+        int newValue = ToggleValue(StorageUtil.GetIntValue(none, "binding_mcm_dance_status", 1))
+        StorageUtil.SetIntValue(none, "binding_mcm_dance_status", newValue)
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleDanceGiveTips && !completed
+        int newValue = ToggleValue(StorageUtil.GetIntValue(none, "binding_mcm_dance_tips", 1))
+        StorageUtil.SetIntValue(none, "binding_mcm_dance_tips", newValue)
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+    if option == toggleAllowedToDance && !completed
+        int newValue = ToggleValue(StorageUtil.GetIntValue(none, "binding_mcm_dance_allow", 1))
+        StorageUtil.SetIntValue(none, "binding_mcm_dance_allow", newValue)
+        SetToggleOptionValue(option, newValue)
+        completed = true
+    endif
+
+
     if option == actionKeyModifierOption && !completed
         int currentModifier = main.ActionKeyModifier
         int newModifier = AdvanceModifierValue(currentModifier)
@@ -4151,7 +4191,16 @@ Event OnOptionSliderOpen(Int option)
         SetSliderDialogRange(0, 15)
         SetSliderDialogInterval(1)
 
-
+    elseif option == sliderDanceTipMaxGold
+        SetSliderDialogStartValue(StorageUtil.GetIntValue(none, "binding_mcm_dance_gold", 5))
+        SetSliderDialogDefaultValue(5)
+        SetSliderDialogRange(0, 25)
+        SetSliderDialogInterval(1)
+    elseif option == sliderDanceTipCooldownHours
+        SetSliderDialogStartValue(StorageUtil.GetIntValue(none, "binding_mcm_dance_cooldown", 12))
+        SetSliderDialogDefaultValue(12)
+        SetSliderDialogRange(0, 48)
+        SetSliderDialogInterval(1)
 
     ElseIf option == sliderDomArousal
         SetSliderDialogStartValue(main.SexDomArousalLevelToTrigger)
@@ -4329,6 +4378,12 @@ Event OnOptionSliderAccept(Int option, Float value)
 
     elseif option == sliderAdventuringGoldGoal
         main.AdventuringGoldGoal = value as int
+
+    elseif option == sliderDanceTipMaxGold
+        StorageUtil.SetIntValue(none, "binding_mcm_dance_gold", value as int)
+
+    elseif option == sliderDanceTipCooldownHours
+        StorageUtil.SetIntValue(none, "binding_mcm_dance_cooldown", value as int)
 
     Endif
 
