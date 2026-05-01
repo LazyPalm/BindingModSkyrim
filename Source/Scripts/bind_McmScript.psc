@@ -1820,6 +1820,10 @@ Function DisplayPunishmentSettings()
 
 EndFunction
 
+int toggleDanceEvent
+int sliderDanceCooldown
+int sliderDanceChance
+
 Function DisplayEventSettings()
 
     ; toggleHarshUseBoots = AddToggleOption("Harsh Bondage - Use Boots", bmanage.HarshBondageUseBoots)
@@ -1886,6 +1890,13 @@ Function DisplayEventSettings()
     AddEmptyOption()
     sliderWhippingHours = AddSliderOption("Whipping - Hours Between", main.WhippingHoursBetween, "{0}")
     sliderWhippingChance = AddSliderOption("Whipping - Chance Of Whipping", main.WhippingChance, "{0}%")
+
+    AddHeaderOption("Forced To Dance")
+    AddHeaderOption("")
+    toggleDanceEvent = AddToggleOption("Forced To Dance - Random Use", binda_Util.SettingEventDanceEnabled())
+    AddEmptyOption()
+    sliderDanceCooldown = AddSliderOption("Forced To Dance - Hours Between", binda_Util.SettingEventDanceCooldownHours(), "{0}")
+    sliderDanceChance = AddSliderOption("Forced To Dance - Chance Of Dance", binda_Util.SettingEventDanceChance(), "{0}")
 
     AddHeaderOption("Other Events")
     AddHeaderOption("")
@@ -3495,6 +3506,12 @@ Event OnOptionSelect(int option)
         SetToggleOptionValue(option, main.CampingRandomUse)
     endif
 
+    if option == toggleDanceEvent
+        int newValue = ToggleValue(binda_Util.SettingEventDanceEnabled())
+        binda_Util.SettingEventDanceEnabled(newValue)
+        SetToggleOptionValue(option, newValue)
+    endif
+
     If option == toggleRunSafeword
         changeRunSafeword = ToggleValue(changeRunSafeword)
         SetToggleOptionValue(toggleRunSafeword, changeRunSafeword)
@@ -4253,6 +4270,17 @@ Event OnOptionSliderOpen(Int option)
         SetSliderDialogRange(0, 1000)
         SetSliderDialogInterval(25)
 
+    elseif option == sliderDanceCooldown
+        SetSliderDialogStartValue(binda_Util.SettingEventDanceCooldownHours())
+        SetSliderDialogDefaultValue(12)
+        SetSliderDialogRange(0, 48)
+        SetSliderDialogInterval(1)
+
+    elseif option == sliderDanceChance
+        SetSliderDialogStartValue(binda_Util.SettingEventDanceChance())
+        SetSliderDialogDefaultValue(5)
+        SetSliderDialogRange(0, 100)
+        SetSliderDialogInterval(1)
 
     EndIf
 
@@ -4384,6 +4412,12 @@ Event OnOptionSliderAccept(Int option, Float value)
 
     elseif option == sliderDanceTipCooldownHours
         StorageUtil.SetIntValue(none, "binding_mcm_dance_cooldown", value as int)
+
+    elseif option == sliderDanceCooldown
+        binda_Util.SettingEventDanceCooldownHours(value as int)
+
+    elseif option == sliderDanceChance
+        binda_Util.SettingEventDanceChance(value as int)
 
     Endif
 
@@ -5422,16 +5456,16 @@ function MakeArrays()
 
     bool refresh = true
 
-    if bondageOutfitUsageKey.Length != 33 || refresh
+    if bondageOutfitUsageKey.Length != 36 || refresh
 
-        bondageSetUsedForToggle = new int[33]
+        bondageSetUsedForToggle = new int[36]
 
         ;bondageOutfitUsageKey = new string[33]        
         string temp = "location_all_areas|location_any_city|location_dawnstar|location_falkreath|location_windhelm|location_markarth|location_morthal|location_riften|"
         temp += "location_solitude|location_high_hrothgar|location_whiterun|location_winterhold|location_raven Rock|location_towns|location_player_home|location_safe_area|"
         temp += "location_unsafe_area|location_inn|event_any_event|event_harsh_bondage|event_bound_masturbation|event_bound_sex|event_dairy|event_bound_sleep|event_camping|"
         temp += "event_put_on_display|event_public_humilation|event_whipping|event_souls_from_bones|event_word_wall|event_gagged_for_punishment|event_go_adventuring|event_free_for_work|"
-        temp += "event_hogtied|event_simple_slavery"
+        temp += "event_hogtied|event_simple_slavery|event_dancing"
         bondageOutfitUsageKey = StringUtil.Split(temp, "|")
         
         ;bondageOutfitUsageList = new string[32]
@@ -5439,7 +5473,7 @@ function MakeArrays()
         temp += "|Location - Solitude|Location - High Hrothgar|Location - Whiterun|Location - Winterhold|Location - Raven Rock |Location - Towns|Location - Player Home|Location - Safe Areas"
         temp += "|Location - Unsafe Areas|Location - Inn|Event - Any Event|Event - Harsh Bondage|Event - Bound Masturbation|Event - Bound Sex|Event - Dairy|Event - Bound Sleep|Event - Camping"
         temp += "|Event - Put On Display|Event - Public Humliation|Event - Whipping|Event - Souls From Bones|Event - Word Wall|Event - Gagged For Punishment|Event - Go Adventuring"
-        temp += "|Event - Free For Work|Event - Hogtied|Event - Simple Slavery"
+        temp += "|Event - Free For Work|Event - Hogtied|Event - Simple Slavery|Event - Dancing"
         bondageOutfitUsageList = StringUtil.Split(temp, "|")
 
         bondageOutfitBlocks = new string[13]

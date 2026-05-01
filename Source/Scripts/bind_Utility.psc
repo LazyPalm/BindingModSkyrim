@@ -514,10 +514,13 @@ bool function PriApiEventStart(string eventName, bool sendDhlp = true) global
     endif
 endfunction
 
-bool function PriApiEventEnd(bool sendDhlp = true) global
+bool function PriApiEventEnd(bool addInfraction = false, bool sendDhlp = true) global
     Quest q = Quest.GetQuest("bind_MainQuest")
     bind_Controller bc = q as bind_Controller
     bind_Functions fs = q as bind_Functions
+    if addInfraction
+        fs.MarkSubBrokeRule()
+    endif
     if fs.ModInRunningState()
         ;no quest is running
         return false

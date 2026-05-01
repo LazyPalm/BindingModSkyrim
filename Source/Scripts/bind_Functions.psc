@@ -2007,9 +2007,9 @@ int Function MarkSubBrokeRule(string msg = "", bool runDistanceCheck = false)
 			Else
 				msg = "[rule infraction had no message]"
 				if main.DisplayInfractionsInMessageBox == 1
-					debug.MessageBox("Oh no, I broke a rule... +1 infraction")
+					debug.MessageBox(theSubRef.GetDisplayName() + " did not obey. +1 infraction.")
 				else
-					bind_Utility.WriteNotification("Oh no, I broke a rule... +1 infraction", bind_Utility.TextColorRed()) ;this should never happen??
+					bind_Utility.WriteNotification(theSubRef.GetDisplayName() + " did not obey. +1 infraction.", bind_Utility.TextColorRed()) ;this should never happen??
 				endif
 			EndIf
 			;brain.MarkInfraction()
@@ -2421,6 +2421,12 @@ function SetDom(Actor dom)
 
 	if bind_DefeatedQuest.IsRunning()
 		bind_DefeatedQuest.Stop()
+	endif
+
+	int handle = ModEvent.Create("bind_SetDomModEvent")
+	if handle
+		ModEvent.PushForm(handle, theDomRef)
+		ModEvent.Send(handle)
 	endif
 
 	StorageUtil.SetFormValue(theSubRef, "bind_dom_ref", theDomRef)

@@ -15,6 +15,7 @@ Event OnPlayerLoadGame()
     RegisterforCrosshairRef()
     me = self.GetActorReference()
     RegisterForAnimationEvent(self.GetReference(), "IdleStop") 
+    (GetOwningQuest() as binda_Main).LoadGame()
 endevent
 
 bool restartDance = false
@@ -103,6 +104,17 @@ Event OnGetUp(ObjectReference akFurniture)
         if me.IsInFaction(InFurnitureFaction)
             me.RemoveFromFaction(InFurnitureFaction) ;this is added by the activator 
         endif
+    endif
+
+EndEvent
+
+Event OnLocationChange(Location akOldLoc, Location akNewLoc)
+
+    int handle = ModEvent.Create("binda_LocationChangeModEvent")
+    if handle
+        ModEvent.PushForm(handle, akOldLoc)
+        ModEvent.PushForm(handle, akNewLoc)
+        ModEvent.Send(handle)
     endif
 
 EndEvent

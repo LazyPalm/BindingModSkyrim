@@ -22,7 +22,7 @@ function EquipBondage(Actor theGuard)
 
     bind_Utility.PriApiUpdatePlayerBondage(theGuard)
 
-    bind_Utility.PriApiEventEnd(false)
+    bind_Utility.PriApiEventEnd(false, false)
 
     ;debug.MessageBox("ending quest...")
 

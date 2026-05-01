@@ -1040,6 +1040,9 @@ Function ResumeStanding()
     PoseIdleState = IDLE_STATE_NONE
 
     if zapIdle
+        ;Debug.MessageBox(zapIdle)
+        Debug.SendAnimationEvent(theSubRef, standingIdle)
+        bind_Utility.DoSleep()
         theSubRef.PlayIdle(zapIdle)
     else
 	    Debug.SendAnimationEvent(theSubRef, standingIdle)
@@ -1072,11 +1075,21 @@ function AddToFaction(Faction f)
     if !theSubRef.IsInFaction(f)
         theSubRef.AddToFaction(f)
     endif
+    int handle = ModEvent.Create("bind_StartedPosingModEvent")
+    if handle
+        ModEvent.PushInt(handle, 1)
+        ModEvent.Send(handle)
+    endif
 endfunction
 
 function RemovePosingFactions()
 
     ;debug.MessageBox(theSubRef)
+
+    int handle = ModEvent.Create("bind_StoppedPosingModEvent")
+    if handle
+        ModEvent.Send(handle)
+    endif
 
     StorageUtil.SetIntValue(theSubRef, "pose_high_kneel", 0)
     ;debug.MessageBox(StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0))
@@ -1086,6 +1099,10 @@ function RemovePosingFactions()
             if q.IsRunning()
                 (q as binda_Dance).EndDance()
             endif
+        endif
+        int handle2 = ModEvent.Create("bind_StoppedDancingModEvent")
+        if handle2
+            ModEvent.Send(handle2)
         endif
         StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0)
     endif
@@ -1264,6 +1281,11 @@ function Dance(Actor akActor, string plugin, string animationName, string descri
 
     if !akActor.IsInFaction(bind_InPoseFaction)
         akActor.SetFactionRank(bind_InPoseFaction, 5)
+        int handle = ModEvent.Create("bind_StartedPosingModEvent")
+        if handle
+            ModEvent.PushInt(handle, 5)
+            ModEvent.Send(handle)
+        endif        
     else 
         ;debug.MessageBox("already in pose faction??")
     endif

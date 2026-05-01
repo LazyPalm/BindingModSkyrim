@@ -752,6 +752,7 @@ function ShowActionMenuNested()
     if actionResult == 0
         ;close menu
     elseif actionResult == 1
+        bind_PoseManager.PriApiPlayerPerformHighKneel()
         SendKneelingEvent()
     elseif actionResult == 2
         if bind_PoseManager.PriApiIsInPose(thePlayer)
