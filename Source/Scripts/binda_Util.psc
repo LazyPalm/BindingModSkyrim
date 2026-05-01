@@ -40,3 +40,15 @@ int function SettingEventDanceEnabled(int changeEnabled = -1) global
         return -1
     endif
 endfunction
+
+int function ModState(int changeModState = -1) global
+    GlobalVariable g = Game.GetFormFromFile(0x004902, "Binding.esm") as GlobalVariable
+    if g
+        if changeModState > -1
+            g.SetValue(changeModState)
+        endif
+        return g.GetValue() as int
+    else 
+        return -1
+    endif
+endfunction

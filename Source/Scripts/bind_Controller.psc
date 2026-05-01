@@ -226,6 +226,7 @@ function SetModState(int modState)
     else
         StorageUtil.SetIntValue(none, "bind_rules_checks_active", 0)
     endif
+    binda_Util.ModState(currentModState)
 endfunction
 
 auto state RunningState
