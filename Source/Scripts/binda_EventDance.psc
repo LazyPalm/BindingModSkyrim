@@ -3,6 +3,7 @@ Scriptname binda_EventDance extends Quest
 bool gotTip = false
 bool npcPleased = false
 bool danceReady = false
+bool inStartup = true
 
 Actor theSub
 Actor theDom
@@ -24,10 +25,7 @@ event OnInit()
             RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
             RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
 
-            SetStage(10)
-            SetObjectiveDisplayed(10, true)
-
-            binda_EventDanceQuestStartScene.Start()
+            RegisterForSingleUpdate(Utility.randomFloat(10.0, 15.0))
 
         else
 
@@ -52,6 +50,13 @@ event OnUpdateGameTime()
 endevent
 
 event OnUpdate()
+
+    inStartup = false 
+
+    SetStage(10)
+    SetObjectiveDisplayed(10, true)
+
+    binda_EventDanceQuestStartScene.Start()
 
 endevent
 
@@ -118,6 +123,13 @@ endevent
 
 event ChangedLocation(Form oldLoc, Form newLoc)
 
+    ;leaving the inn
+    if inStartup
+        bind_Utility.PriApiEventEnd(false, true)
+        bind_Utility.WriteToConsole("binda_EventDanceQuest - player left inn before startup phase completed")
+        Stop()
+    endif
+
 endevent
 
 event StoppedDancing()
@@ -135,6 +147,8 @@ function StartPlayed()
     int outfitId = bind_Utility.PriApiGetBondageOutfitId("event_dancing")
     ;debug.MessageBox(outfitId)
     if outfitId > 0
+        bind_MovementQuestScript.FaceTarget(theDom, theSub)
+        bind_MovementQuestScript.PlayDoWork(theDom)
         bind_utility.PriApiEquipBondageOutfit(theSub, outfitId)
     endif
 
@@ -150,9 +164,6 @@ function StartPlayed()
 endfunction
 
 function SuccessPlayed()
-
-    bind_MovementQuestScript.FaceTarget(theDom, theSub)
-    bind_MovementQuestScript.PlayDoWork(theDom)
 
     bind_Utility.PriApiUpdatePlayerBondage(theDom)
 

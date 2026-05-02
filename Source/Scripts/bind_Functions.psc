@@ -178,6 +178,8 @@ function LoadGame()
 		bind_Utility.DisablePlayer()
 	endif
 
+	binda_Util.ModState(GetModState())
+
 endfunction
 
 event OnMenuClose(String menuName)
