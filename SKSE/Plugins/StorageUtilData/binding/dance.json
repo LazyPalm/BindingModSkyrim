@@ -10,7 +10,8 @@
             "0x00000|no music.esl",
             "0x00000|no music.esl",
             "0x00000|no music.esl",
-            "0x00D8B|shadowman_solobellydance.esp"
+            "0x00D8B|shadowman_solobellydance.esp",
+            "0x00D8C|shadowman_solobellydance.esp"
         ]
     },
     "intList" : {
@@ -24,6 +25,7 @@
             0,
             0,
             0,
+            1,
             1
         ]
     },    
@@ -39,7 +41,8 @@
             "Funky (zap)",
             "Groove Girl (zap)",
             "Disco (zap)",
-            "SM_01alabinaext"
+            "SM_01alabinaext",
+            "SM_02nancyajr"
         ],
         "plugin" : [
             "ZaZAnimationPack.esm",
@@ -51,6 +54,7 @@
             "ZaZAnimationPack.esm",
             "ZaZAnimationPack.esm",
             "ZaZAnimationPack.esm",
+            "shadowman_solobellydance.esp",
             "shadowman_solobellydance.esp"
         ],
         "animation_name" : [
@@ -63,7 +67,8 @@
             "ZazFunky_Loop",
             "ZazGrooveGirl_Loop",
             "ZazSeph05Disco_Loop",
-            "SM_01alabinaext"
+            "SM_01alabinaext",
+            "SM_02nancyajr"
         ],
         "short_description" : [
             "Pole dance - using a blend of acrobatics and sultry movement using a vertical pole, emphasizing strength and fluidity",
@@ -75,6 +80,7 @@
             "Funky dance - syncopated grooves, exaggerated poses, and playful, upbeat energy",
             "Groove Girl dance - dancing focused on personal style, light footwork, and attitude-driven moves",
             "Disco dance - glitzy, high-energy dance featuring spins, pointed fingers, and synchronized routines",
+            "Belly dance - focused on intricate torso undulations, shimmies, and hip articulations",
             "Belly dance - focused on intricate torso undulations, shimmies, and hip articulations"
         ]
     }
