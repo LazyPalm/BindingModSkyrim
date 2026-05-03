@@ -1105,6 +1105,11 @@ function RemovePosingFactions()
             ModEvent.Send(handle2)
         endif
         StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0)
+        int soundInstance = StorageUtil.GetIntValue(theSubRef, "bind_sound_instance", -1)
+        if soundInstance > -1
+            Sound.StopInstance(soundInstance)
+            StorageUtil.SetIntValue(theSubRef, "bind_sound_instance", -1)
+        endif
     endif
    ;debug.MessageBox(StorageUtil.SetIntValue(theSubRef, "bind_dancing", 0))
 
@@ -1311,10 +1316,17 @@ bool function PriApiIsInPose(Actor akActor) global
     endif
 endfunction
 
-function PriApiDance(Actor akActor, string plugin, string animationName, string description) global
+function PriApiDance(Actor akActor, string plugin, string animationName, string description, Sound music = none) global
     bind_PoseManager s = Quest.GetQuest("bind_MainQuest") as bind_PoseManager
     if s
         s.Dance(akActor, plugin, animationName, description)
+        if music != none
+            int soundInstance = music.Play(akActor as ObjectReference)
+            StorageUtil.SetIntValue(akActor, "bind_sound_instance", soundInstance)
+            StorageUtil.SetFormValue(akActor, "bind_sound", music)
+        else 
+            StorageUtil.SetIntValue(akActor, "bind_sound_instance", -1)
+        endif
     endif
 endfunction
 

@@ -5,6 +5,10 @@ bool processingCrosshair
 
 Actor me
 
+Location oldLocation
+Location newLocation
+bool IsSafe
+
 event OnInit()
 	RegisterforCrosshairRef()
     me = self.GetActorReference()
@@ -37,6 +41,14 @@ event OnUpdate()
         string animationName = StorageUtil.GetStringValue(me, "bind_dance_animation")
         if animationName != ""
             debug.SendAnimationEvent(me, animationName)
+            int soundInstance = StorageUtil.GetIntValue(me, "bind_sound_instance", -1)
+            if soundInstance > -1
+                Sound music = StorageUtil.GetFormValue(me, "bind_sound") as Sound
+                if music
+                    soundInstance = music.Play(me as ObjectReference)
+                    StorageUtil.SetIntValue(me, "bind_sound_instance", soundInstance)
+                endif
+            endif
         else 
             ;this should not happen
             ;end dance??
@@ -110,6 +122,29 @@ EndEvent
 
 Event OnLocationChange(Location akOldLoc, Location akNewLoc)
 
+    isSafe = false
+
+	if akNewLoc.HasKeyWord(LocTypeInn) || akNewLoc.HasKeyword(LocTypeCity) || akNewLoc.HasKeyword(LocTypeTown) || akNewLoc.HasKeyWord(LocTypeStore) || akNewLoc.HasKeyWord(LocTypeDwelling) || akNewLoc.HasKeyWord(LocTypeCastle) || akNewLoc.HasKeyWord(LocTypeHouse)
+		;safe area
+        binda_SafeLocationGlobal.SetValue(2)
+		StorageUtil.SetIntValue(me, "binda_safe_area", 2)
+        isSafe = true
+    elseif akNewLoc.HasKeyword(LocTypePlayerHouse)
+		;safe area
+        binda_SafeLocationGlobal.SetValue(3)
+		StorageUtil.SetIntValue(me, "binda_safe_area", 3)
+        isSafe = true
+	else
+		;dangerous areaa
+        binda_SafeLocationGlobal.SetValue(1)
+		StorageUtil.SetIntValue(me, "binda_safe_area", 1)
+	endif
+
+    bind_Utility.WriteToConsole("changed locations - loc: " + akNewLoc.GetName() + " safe: " + IsSafe)
+
+    oldLocation = akOldLoc
+    newLocation = akNewLoc
+
     int handle = ModEvent.Create("binda_LocationChangeModEvent")
     if handle
         ModEvent.PushForm(handle, akOldLoc)
@@ -123,3 +158,13 @@ ReferenceAlias property TheActivator auto
 
 Faction property InFurnitureFaction auto
 
+GlobalVariable property binda_SafeLocationGlobal auto
+
+Keyword property LocTypePlayerHouse auto
+Keyword property LocTypeInn auto
+Keyword property LocTypeCity auto
+Keyword property LocTypeTown auto
+Keyword property LocTypeStore auto
+Keyword property LocTypeDwelling auto
+Keyword property LocTypeCastle auto
+Keyword property LocTypeHouse auto

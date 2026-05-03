@@ -5,6 +5,10 @@ bool npcPleased = false
 bool danceReady = false
 bool inStartup = true
 
+; Sound snd
+; bool soundPlaying = false
+; int soundInstance
+
 Actor theSub
 Actor theDom
 
@@ -84,6 +88,7 @@ event PressedAction(bool longPress)
         string[] pluginList = JsonUtil.StringListToArray(fileName, "plugin")
         string[] animationList = JsonUtil.StringListToArray(fileName, "animation_name")
         string[] descList = JsonUtil.StringListToArray(fileName, "short_description")
+        int[] hasMusicList = JsonUtil.IntListToArray(fileName, "has_music")
 
         listMenu.AddEntryItem("Stop Dancing")
         int i = 0
@@ -101,11 +106,26 @@ event PressedAction(bool longPress)
         if listReturn == 0
             if bind_PoseManager.PriApiIsInPose(theSub)
                 bind_PoseManager.PriApiPlayerStand()
+                ; if soundPlaying
+                ;     Sound.StopInstance(soundInstance)
+                ;     soundPlaying = false
+                ; endif
             endif
         elseif listReturn > 0
             int idx = listReturn - 1
             if idx > 0
-                bind_PoseManager.PriApiDance(theSub, pluginList[idx], animationList[idx], descList[idx])
+                ;soundPlaying = false
+                Sound snd = none
+                if hasMusicList[idx] == 1
+                    snd = JsonUtil.FormListGet(fileName, "music", idx) as Sound
+                    ;debug.MessageBox(JsonUtil.FormListGet(fileName, "music", idx))
+                    ; snd = JsonUtil.FormListGet(fileName, "music", idx) as Sound
+                    ; if snd
+                    ;     soundInstance = snd.Play(theSub as ObjectReference)
+                    ;     soundPlaying = true
+                    ; endif
+                endif
+                bind_PoseManager.PriApiDance(theSub, pluginList[idx], animationList[idx], descList[idx], snd)
             endif
         endif
 

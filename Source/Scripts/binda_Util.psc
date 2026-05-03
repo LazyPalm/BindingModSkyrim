@@ -5,6 +5,14 @@ Scriptname binda_Util extends Quest
 ;*****************************************************
 ;Private API
 ;*****************************************************
+int function SettingActionKey(int changeActionKey = -1) global
+
+endfunction
+
+int function SettingActionKeyModifier(int changeModifier = -1) global
+
+endfunction
+
 int function SettingEventDanceCooldownHours(int changeHours = -1) global
     GlobalVariable g = Game.GetFormFromFile(0x0043A0, "Binding.esm") as GlobalVariable
     if g

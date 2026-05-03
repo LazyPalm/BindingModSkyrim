@@ -1,4 +1,32 @@
 {
+    "formList" : {
+        "music" : [
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00000|no music.esl",
+            "0x00D8B|shadowman_solobellydance.esp"
+        ]
+    },
+    "intList" : {
+        "has_music": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+        ]
+    },    
     "stringList" : 
 	{
         "short_names" : [

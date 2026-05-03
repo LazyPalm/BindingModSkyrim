@@ -88,6 +88,7 @@ function ShowDanceMenu()
     string[] pluginList = JsonUtil.StringListToArray(fileName, "plugin")
     string[] animationList = JsonUtil.StringListToArray(fileName, "animation_name")
     string[] descList = JsonUtil.StringListToArray(fileName, "short_description")
+    int[] hasMusicList = JsonUtil.IntListToArray(fileName, "has_music")
 
     ;Debug.MessageBox(shortList)
 
@@ -118,7 +119,13 @@ function ShowDanceMenu()
     elseif listReturn > 0
         int idx = listReturn - 1
         if idx > 0
-            bind_PoseManager.PriApiDance(Game.GetPlayer(), pluginList[idx], animationList[idx], descList[idx])
+            Sound snd = none
+            if hasMusicList[idx] == 1
+                snd = JsonUtil.FormListGet(fileName, "music", idx) as Sound
+            endif
+            bind_PoseManager.PriApiDance(thePlayer, pluginList[idx], animationList[idx], descList[idx], snd)
+
+            ;bind_PoseManager.PriApiDance(Game.GetPlayer(), pluginList[idx], animationList[idx], descList[idx])
         endif
         ; elseif listSelect == "Pole"
     ;     danceType = "pole"
