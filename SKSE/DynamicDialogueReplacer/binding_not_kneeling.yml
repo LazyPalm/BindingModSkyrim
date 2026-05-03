@@ -1,0 +1,12 @@
+Version: 1
+topicInfos:
+  - id: 0x000F5|Binding.esl
+    priority: 10
+    random: true
+    responses:
+    - subtitle: "Do not speak to me when you are not on your knees."
+  - id: 0x000F5|Binding.esl
+    priority: 10
+    random: true
+    responses:
+    - subtitle: "Get on your knees before you think about speaking."
