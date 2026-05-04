@@ -111,9 +111,10 @@ function DoInitTasks()
     actorSub = Game.GetPlayer()
 
     RegisterForControl("Activate")
-    RegisterForKey(bind_GlobalActionKey.GetValue() as int)
+    ;RegisterForKey(bind_GlobalActionKey.GetValue() as int)
     
     ;RegisterForKey(bind_GlobalActionKey.GetValue() as int)
+    UnregisterForKey(bind_GlobalActionKey.GetValue() as int)
 
     RegisterForModEvent("dhlp-Suspend", "OnDhlpSuspend")
     RegisterForModEvent("dhlp-Resume", "OnDhlpResume") 

@@ -18,6 +18,7 @@ function LoadGame()
 
 endfunction
 
+
 event SetDom(Form dom)
 
     Actor akDom = dom as Actor

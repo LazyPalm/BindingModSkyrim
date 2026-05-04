@@ -20,6 +20,7 @@ Event OnPlayerLoadGame()
     me = self.GetActorReference()
     RegisterForAnimationEvent(self.GetReference(), "IdleStop") 
     (GetOwningQuest() as binda_Main).LoadGame()
+    (GetOwningQuest() as binda_Input).LoadGame()
 endevent
 
 bool restartDance = false

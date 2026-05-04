@@ -5,14 +5,8 @@ Scriptname binda_Util extends Quest
 ;*****************************************************
 ;Private API
 ;*****************************************************
-int function SettingActionKey(int changeActionKey = -1) global
 
-endfunction
-
-int function SettingActionKeyModifier(int changeModifier = -1) global
-
-endfunction
-
+;MCM settings
 int function SettingEventDanceCooldownHours(int changeHours = -1) global
     GlobalVariable g = Game.GetFormFromFile(0x0043A0, "Binding.esm") as GlobalVariable
     if g
@@ -49,6 +43,45 @@ int function SettingEventDanceEnabled(int changeEnabled = -1) global
     endif
 endfunction
 
+int function SettingActionKey(int changeKeyCode = -1) global
+    GlobalVariable g = Game.GetFormFromFile(0x004E65, "Binding.esm") as GlobalVariable
+    if g
+        if changeKeyCode > -1
+            Quest q = Quest.GetQuest("binda_MainQuest")
+            if q
+                binda_Input iq = q as binda_Input
+                if iq
+                    iq.RemapKey(g.GetValue() as int, changeKeyCode)
+                    g.SetValue(changeKeyCode)
+                endif
+            endif
+        endif
+        return g.GetValue() as int
+    else 
+        return -1
+    endif
+endfunction
+
+int function SettingModifierKey(int changeKeyCode = -1) global
+    GlobalVariable g = Game.GetFormFromFile(0x004E66, "Binding.esm") as GlobalVariable
+    if g
+        if changeKeyCode > -1
+            Quest q = Quest.GetQuest("binda_MainQuest")
+            if q
+                binda_Input iq = q as binda_Input
+                if iq
+                    iq.RemapKey(g.GetValue() as int, changeKeyCode)
+                    g.SetValue(changeKeyCode)
+                endif
+            endif
+        endif
+        return g.GetValue() as int
+    else 
+        return -1
+    endif
+endfunction
+
+;variables
 int function ModState(int changeModState = -1) global
     GlobalVariable g = Game.GetFormFromFile(0x004902, "Binding.esm") as GlobalVariable
     if g

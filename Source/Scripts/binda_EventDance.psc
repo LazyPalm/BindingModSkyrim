@@ -1,9 +1,9 @@
 Scriptname binda_EventDance extends Quest  
 
-bool gotTip = false
-bool npcPleased = false
-bool danceReady = false
-bool inStartup = true
+bool gotTip ;= false
+bool npcPleased ;= false
+bool danceReady ;= false
+bool inStartup ;= true
 
 ; Sound snd
 ; bool soundPlaying = false
@@ -21,13 +21,7 @@ event OnInit()
             theSub = Game.GetPlayer()
             theDom = TheDomAlias.GetActorReference()
 
-            RegisterForModEvent("bind_DancingNpcPleasedModEvent", "NpcPleased")
-            RegisterForModEvent("bind_DancingGotTippedModEvent", "GotTipped")
-            RegisterForModEvent("binda_LocationChangeModEvent", "ChangedLocation")
-            RegisterForModEvent("bind_StoppedDancingModEvent", "StoppedDancing")
-
-            RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
-            RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+            RegisterModEvents()
 
             RegisterForSingleUpdate(Utility.randomFloat(10.0, 15.0))
 
@@ -40,6 +34,28 @@ event OnInit()
     endif
 
 endevent
+
+function LoadGame()
+
+    RegisterModEvents()
+
+    ;danceReady = true ;this OK???
+
+endfunction
+
+function RegisterModEvents()
+
+    ;debug.MessageBox("reloading dance event mod events...")
+            
+    RegisterForModEvent("bind_DancingNpcPleasedModEvent", "NpcPleased")
+    RegisterForModEvent("bind_DancingGotTippedModEvent", "GotTipped")
+    RegisterForModEvent("binda_LocationChangeModEvent", "ChangedLocation")
+    RegisterForModEvent("bind_StoppedDancingModEvent", "StoppedDancing")
+
+    RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
+    RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
+
+endfunction
 
 event OnUpdateGameTime()
 
@@ -77,6 +93,8 @@ event SafewordEvent()
 endevent
 
 event PressedAction(bool longPress)
+
+    ;debug.MessageBox("this happen?")
 
     if danceReady
 

@@ -193,6 +193,7 @@ int changeAddPunishment
 int changeAddRulePoints
 int toggleWriteLogs
 int keymapActionKey
+int keymapModifierKey
 int actionKeyModifierOption
 int toggleFurnitureMenu
 int menuFurnitureType
@@ -2382,12 +2383,14 @@ Function DisplayDebug()
 
     AddHeaderOption("Input Settings")
     AddHeaderOption("")
-    keymapActionKey = AddKeyMapOption("Binding Action Key", bind_GlobalActionKey.GetValue() as int) ; main.ActionKeyMappedKeyCode)
-    int mdKey = main.ActionKeyModifier
-    if main.ActionKeyModifier == 0
-        mdKey = -1
-    endif        
-    actionKeyModifierOption = AddTextOption("Action Key Modifier", GetModifierString(mdKey))
+    keymapActionKey = AddKeyMapOption("Binding Action Key", binda_Util.SettingActionKey()); bind_GlobalActionKey.GetValue() as int) ; main.ActionKeyMappedKeyCode)
+    keymapModifierKey = AddKeyMapOption("Action Key Modifier", binda_Util.SettingModifierKey())
+
+    ; int mdKey = main.ActionKeyModifier
+    ; if main.ActionKeyModifier == 0
+    ;     mdKey = -1
+    ; endif        
+    ; actionKeyModifierOption = AddTextOption("Action Key Modifier", GetModifierString(mdKey))
 
     ; AddHeaderOption("Save MCM Settings")
     ; AddHeaderOption("")
@@ -2427,16 +2430,21 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 
 	; clear if escape key
 	if (keyCode == 1)
-		keyCode = -1
+		keyCode = 0
 	endIf
 
 	if (continue)
         if option == keymapActionKey
-            UnregisterForKey(main.ActionKeyMappedKeyCode)
-            bind_GlobalActionKey.SetValue(keyCode)
-            RegisterForKey(keyCode)
+            ;UnregisterForKey(main.ActionKeyMappedKeyCode)
+            ;bind_GlobalActionKey.SetValue(keyCode)
+            ;RegisterForKey(keyCode)
+            binda_Util.SettingActionKey(keyCode)
             SetKeyMapOptionValue(keymapActionKey, keyCode)
         endIf
+        if option == keymapModifierKey
+            binda_Util.SettingModifierKey(keyCode)
+            SetKeyMapOptionValue(keymapModifierKey, keyCode)
+        endif
     endif
 
 endevent
