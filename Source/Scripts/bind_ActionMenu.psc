@@ -547,23 +547,28 @@ function ShowSettingsMenu()
         if f.PlayerIsSub() == 1
             debug.MessageBox("Already have a dominant")
         else
-            if f.GetConversationTarget() != none
-                Actor act = f.GetConversationTarget() as Actor
-                if act
-                    string actName = act.GetDisplayName()
-                    ;debug.MessageBox(f.GetConversationTarget().GetDisplayName())
-                    Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
-                    if act.IsInFaction(pf)
-                        if bind_Utility.ConfirmBox("Make " + actName + " your dominant?")
-                            f.SetDom(act)
-                        endif
-                    else 
-                        debug.MessageBox(actName + " is not a current follower")
+            Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
+            if pf 
+                Actor[] nearbyActors = MiscUtil.ScanCellNPCsByFaction(pf, Game.GetPlayer())
+                if nearbyActors.Length > 0                
+                ;if f.GetConversationTarget() != none
+                    Actor act = nearbyActors[0] as Actor
+                    if act
+                        string actName = act.GetDisplayName()
+                        ;debug.MessageBox(f.GetConversationTarget().GetDisplayName())
+                        ; Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
+                        ; if act.IsInFaction(pf)
+                            if bind_Utility.ConfirmBox("Make " + actName + " your dominant?")
+                                f.SetDom(act)
+                            endif
+                        ; else 
+                        ;     debug.MessageBox(actName + " is not a current follower")
+                        ; endif
+                        ;DynamicScene.Start()
                     endif
-                    ;DynamicScene.Start()
+                else
+                    debug.Notification("No follower nearby")
                 endif
-            else
-                debug.Notification("No actor targeted")
             endif
         endif
     endif
