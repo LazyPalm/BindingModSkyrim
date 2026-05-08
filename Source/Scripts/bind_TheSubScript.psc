@@ -582,13 +582,14 @@ Event OnObjectEquipped(Form akBaseObject, ObjectReference akReference)
 					
 					;string f = "bind_bondage_outfit_" + wearingSetId + ".json"
 					
-					bool hasBlock = JsonUtil.IntListHas(MQS.BindingGameOutfitFile, wearingSetId + "_block_slots", slotMask)
+					;disabling for testing 5/8/26
+					bool hasBlock = false ;JsonUtil.IntListHas(MQS.BindingGameOutfitFile, wearingSetId + "_block_slots", slotMask)
 					
 					if hasBlock || (nudeRule && slotMask != 128) ;allow shoes on nudity rule
 						if !BondageManager.ZadKeywordsCheck(dev) && !dev.HasKeyWordString("sexlabnostrip") && dev.IsPlayable()
 							;bind_Utility.WriteToConsole("block: " + slotMask + " dev: " + dev)
 							bind_Utility.WriteInternalMonologue("I am not allowed to wear this...")
-							bind_Utility.WriteNotification("Nudity rule or bondage set block found", bind_Utility.TextColorRed())
+							;bind_Utility.WriteNotification("Nudity rule or bondage set block found", bind_Utility.TextColorRed())
 							theSub.UnequipItem(dev, false, true)
 							removed = true
 						endif

@@ -584,17 +584,11 @@ function PriApiUpdatePlayerBondage(Actor akActor) global ;akActor could be the d
 
     ;debug.MessageBox(mqs.ActiveBondageSetId)
 
-    bms.EquipBondageOutfit(fs.GetSubRef(), mqs.ActiveBondageSetId)
-
-    if fs.TheSecondSub.GetReference() != none
-        bind_MovementQuestScript.FaceTarget(akActor, fs.TheSecondSub.GetActorReference())
-        bind_MovementQuestScript.PlayDoWork(akActor)        
-        bms.EquipBondageOutfit(fs.TheSecondSub.GetActorReference(), mqs.ActiveBondageSetId)
-    endif
-    if fs.TheThirdSub.GetReference() != none
-        bind_MovementQuestScript.FaceTarget(akActor, fs.TheThirdSub.GetActorReference())
-        bind_MovementQuestScript.PlayDoWork(akActor)  
-        bms.EquipBondageOutfit(fs.TheThirdSub.GetActorReference(), mqs.ActiveBondageSetId)
+    int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+    if handle
+        ModEvent.PushForm(handle, fs.GetSubRef())
+        ModEvent.PushInt(handle, mqs.ActiveBondageSetId)
+        ModEvent.Send(handle)
     endif
 
     bind_Utility.EnablePlayer()

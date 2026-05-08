@@ -786,7 +786,9 @@ function DisplayBondageOutfits()
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
         toggleBondageOutfitRulesBased = AddToggleOption("Use Bondage Rules", useRulesBased)
 
-        ;if useRandomBondage == 1
+        Form[] setItems
+
+        if useRandomBondage == 1
 
             int[] chances = JsonUtil.IntListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_random_bondage_chance")
 
@@ -828,7 +830,7 @@ function DisplayBondageOutfits()
                 AddHeaderOption("")
             endif
 
-            Form[] setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_dynamic_bondage_items")
+            setItems = JsonUtil.FormListToArray(main.BindingGameOutfitFile, selectedBondageOutfitId + "_dynamic_bondage_items")
             i = 0
             while i < setItems.Length
                 AddTextOption(setItems[i].GetName(), "")
@@ -840,7 +842,9 @@ function DisplayBondageOutfits()
                 endif
             endif
 
-        ;else
+        endif
+
+        if useRandomBondage == 0
 
             AddHeaderOption("Add Item - Bondage Devices")
             AddHeaderOption("* Used when random bondage is DISABLED")
@@ -865,7 +869,7 @@ function DisplayBondageOutfits()
                 endif
             endif
 
-        ;endif
+        endif
 
         AddHeaderOption("Fixed Items - Clothing & Armor")
         AddHeaderOption("")
@@ -883,14 +887,14 @@ function DisplayBondageOutfits()
             endif
         endif
 
-        AddHeaderOption("Block Equiping")
-        AddHeaderOption("")
-        i = 0
-        while i < bondageOutfitBlocks.Length
-            bondageOutfitBlockToggle[i] = AddToggleOption(bondageOutfitBlocks[i], JsonUtil.IntListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i]))
-            i += 1
-        endwhile
-        AddTextOption("", "")
+        ; AddHeaderOption("Block Equiping")
+        ; AddHeaderOption("")
+        ; i = 0
+        ; while i < bondageOutfitBlocks.Length
+        ;     bondageOutfitBlockToggle[i] = AddToggleOption(bondageOutfitBlocks[i], JsonUtil.IntListHas(main.BindingGameOutfitFile, selectedBondageOutfitId + "_block_slots", bondageOutfitBlocksSlots[i]))
+        ;     i += 1
+        ; endwhile
+        ; AddTextOption("", "")
 
         AddHeaderOption("Set Used For")
         AddHeaderOption("")
@@ -2908,7 +2912,7 @@ Event OnOptionSelect(int option)
             JsonUtil.Save(main.BindingGameOutfitFile)
             SetToggleOptionValue(toggleBondageOutfitUseRandomBondage, useRandomBondage)
             ;bind_Utility.DoSleep(1.0)
-            ;ForcePageReset()
+            ForcePageReset()
             ;DisplayBondageOutfits()
         endif
 
@@ -4082,6 +4086,7 @@ Event OnConfigClose()
         if bondageUpdatedFlag == true            
             bondageUpdatedFlag = false
             bind_Utility.WriteNotification("Updating bondage rule changes...", bind_Utility.TextColorBlue())
+            main.TargetBondageSetId = main.ActiveBondageSetId
             main.NeedsBondageSetChange = 1
             fs.AdvanceGameLoop()
             ; Quest uq = Quest.GetQuest("bind_BoundForLocations")

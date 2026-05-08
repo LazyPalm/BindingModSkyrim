@@ -682,7 +682,7 @@ state NoBondageOutfitState
 
 			EventCleanUpSub(theSubRef, theDomRef, true) ;should we do this?
 
-			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
+			main.TargetBondageSetId = 0
 
 			BlueGlow.Stop(theSubRef)
 
@@ -714,65 +714,17 @@ state ArrivalCheckState
 			bind_ArrivalCheckQuest.Start()
 		endif
 
-		int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
+		; if main.TargetBondageSetId == main.ActiveBondageSetId || main.TargetBondageSetId == -1 ;|| main.TargetBondageSetId == 0
 
-		; if !ModInRunningState()
+		; 	main.NeedsBondageSetChange = 0
+		; 	bind_Utility.WriteNotification("ArrivalCheckState - already in this set...", bind_Utility.TextColorRed())
+		; 	bind_Utility.WriteToConsole("ArrivalCheckState - already in this set...")
 
-		; 	bind_Utility.WriteNotification("ArrivalCheckState - Quest is running... terminate", bind_Utility.TextColorRed())
-		; 	bind_Utility.WriteToConsole("ArrivalCheckState - Quest is running... terminate")
+		if main.TargetBondageSetId != main.ActiveBondageSetId
 
-		if targetSetId == main.ActiveBondageSetId
-
-			bind_Utility.WriteNotification("ArrivalCheckState - already in this set...", bind_Utility.TextColorRed())
-			bind_Utility.WriteToConsole("ArrivalCheckState - already in this set...")
-
-		else
-
-			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", main.ActiveBondageSetId) ;store this
-
-			; if main.PreferenceSpellChangeBondage == 1
-
-			; 	BlueGlow.Play(theSubRef, 10.0)
-
-			; 	int outfitId = main.ActiveBondageSetId
-			; 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
-			; 	;if outfitId > 0
-			; 	bms.EquipBondageOutfit(theSubRef, outfitId)
-			; 	if TheSecondSub.GetReference() != none
-			; 		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-			; 	endif
-			; 	if TheThirdSub.GetReference() != none
-			; 		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-			; 	endif
-			; 	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId)
-
-			; 	BlueGlow.Stop(theSubRef)
-
-			; else
-				main.NeedsBondageSetChange = 1
-				bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
-				bcs.AdvanceGameLoop()
-
-				; if !bind_BoundForLocations.IsRunning() && ModInRunningState()
-				; 	bind_BoundForLocations.Start()
-				; endif
-
-			;endif
-
-			; if main.AdventuringAutomatic == 1
-
-			; 	bind_Utility.WriteToConsole("ArrivalCheckState - update bondage")
-			; 	bind_Utility.WriteNotification("updating bondage...", bind_Utility.TextColorRed())
-			; 	bms.EquipBondageOutfit(theSubRef, main.ActiveBondageSetId)
-
-			; else
-
-			; 	main.NeedsBondageSetChange = 1
-			; 	bind_Utility.WriteNotification("start conversation?", bind_Utility.TextColorRed())
-			; 	bind_Utility.WriteToConsole("ArrivalCheckState - start conversation")
-			; 	debug.MessageBox("This is not coded yet... use auto")
-
-			; endif
+			main.NeedsBondageSetChange = 1
+			bind_Utility.WriteNotification("Marked update bondage needed...", bind_Utility.TextColorRed())
+			bcs.AdvanceGameLoop()
 
 		endif
 
@@ -865,19 +817,10 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 		bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
 	endif
 
-	;TODO - test with this off 9/29/25 - it is causing issues leaving areas without dom
-	; if main.NeedsBondageSetChange == 1
-	; 	;entered and left area before a change
-	; 	main.NeedsBondageSetChange = 0 ;reset this
-	; 	int targetSetId = StorageUtil.GetIntValue(theSubRef, "bind_target_outfit_id")
-	; 	main.ActiveBondageSetId = targetSetId
-	; 	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", 0)
-	; endif
+	;int currentBondageSetId = main.ActiveBondageSetId
+	main.TargetBondageSetId = bms.GetBondageSetForLocation(newlocation, main.ActiveBondageSetId)
 
-	int currentBondageSetId = main.ActiveBondageSetId
-	main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
-
-	if main.ActiveBondageSetId == 0
+	if main.TargetBondageSetId == 0
 		bind_Utility.WriteToConsole("DEBUG - No bondage outfit could be found")
 		if StorageUtil.GetIntValue(theSubRef, "bind_display_no_outfit", 0) == 1
 			bind_Utility.WriteNotification("No bondage outfit could be found", bind_Utility.TextColorGreen())
@@ -890,11 +833,11 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 			RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
 		endif
 	else
-		if main.ActiveBondageSetId != currentBondageSetId
+		if main.ActiveBondageSetId != main.TargetBondageSetId
 			;update bondage??
-			bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.ActiveBondageSetId)
+			bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.TargetBondageSetId)
 			if main.DisplayLocationChange == 1
-				bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
+				bind_Utility.WriteNotification("Change bondage outfit to: " + main.TargetBondageSetId, bind_Utility.TextColorGreen())
 			endif
 			UnregisterForUpdate()
 			if isIndoors
@@ -905,10 +848,10 @@ function ProcessLocationChangeAnyState(Location oldLocation, Location newLocatio
 			GotoState("ArrivalCheckState")
 		else
 			if main.DisplayLocationChange == 1
-				bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
+				bind_Utility.WriteNotification("Keep bondage outfit: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
 			endif
-			bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + currentBondageSetId)
-
+			bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + main.ActiveBondageSetId)
+			main.NeedsBondageSetChange = 0
 		endif
 	endif
 
@@ -931,48 +874,6 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 	if main.DisplayLocationChange == 1
 		bind_Utility.WriteNotification("DEBUG - Process location change", bind_Utility.TextColorGreen())
 	endif
-
-	; main.NeedsBondageSetChange = 0 ;reset this
-
-	; ; if newlocation.HasKeywordString("LocTypeCity")
-	; ; 	main.BondageSetLocation = "City"
-	; ; elseif newLocation.HasKeywordString("LocTypeTown")
-	; ; 	main.BondageSetLocation = "Town"
-	; ; endif
-
-	; ; bind_Utility.WriteNotification("BondageSetLocation: " + main.BondageSetLocation, bind_Utility.TextColorRed())
-
-	; int currentBondageSetId = main.ActiveBondageSetId
-	; main.ActiveBondageSetId = bms.GetBondageSetForLocation(newlocation, currentBondageSetId)
-
-	; if main.ActiveBondageSetId == 0
-	; 	bind_Utility.WriteToConsole("DEBUG - No bondage set could be found")
-	; 	bind_Utility.WriteNotification("No bondage set could be found", bind_Utility.TextColorGreen())
-	; else
-	; 	if main.ActiveBondageSetId != currentBondageSetId
-	; 		;update bondage??
-	; 		bind_Utility.WriteToConsole("DEBUG - Change bondage outfit to: " + main.ActiveBondageSetId)
-	; 		bind_Utility.WriteNotification("Change bondage outfit to: " + main.ActiveBondageSetId, bind_Utility.TextColorGreen())
-	; 		UnregisterForUpdate()
-	; 		RegisterForSingleUpdate(main.AdventuringCheckAfterSeconds)
-	; 		GotoState("ArrivalCheckState")
-	; 	else
-	; 		bind_Utility.WriteNotification("Keep bondage outfit: " + currentBondageSetId, bind_Utility.TextColorGreen())
-	; 		bind_Utility.WriteToConsole("DEBUG - Keep bondage outfit: " + currentBondageSetId)
-
-	; 	endif
-	; endif
-
-	; int count = newlocation.GetNumKeywords()
-	; bind_Utility.WriteToConsole("DEBUG - keywords: " + count)
-	; int index
-	; while (index < count)
-	; 	Keyword kw = newlocation.GetNthKeyword(index)
-	; 	bind_Utility.WriteToConsole("keyword: " + kw.GetString())
-	; 	index += 1
-	; endwhile
-
-	;clear stuff
 
 	rman.ClearLocationPermissions(theSubRef) ;TODO - should the entry/exit quest do this???
 
@@ -1008,184 +909,6 @@ function ProcessLocationChange(Location oldLocation, Location newLocation)
 
 ; events
 ; - maybe add flags for forced nudity / gagging (opt in vs. current defaulting to it)
-
-
-	; UnregisterForUpdate()
-	; GoToState("ProcessLocationChangeState")
-	; newLoc = newLocation
-	; RegisterForSingleUpdate(3.0)
-
-	;KEEP THIS - 3/8/25
-
-	; bool safeLocation = SafeLocationTest(newLocation)
-	; bind_Utility.WriteToConsole(newLocation.GetName() + " is safe: " + safeLocation)
-	; if safeLocation
-	; 	bind_GlobalSafeZone.SetValue(2)
-	; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 1)
-	; 	if lastLocationSafetyFlag == 2 || lastLocationSafetyFlag == 0
-	; 		;debug.MessageBox("entering a safe area")
-	; 		bind_Utility.WriteToConsole("Entering a safe area")
-	; 		bind_Utility.SendSimpleModEvent("bind_EnteringSafeAreaEvent")
-	; 		;bms.SetActiveBondageSet(true, newLocation)
-	; 	endif
-	; 	lastLocationSafetyFlag = 1
-	; else
-	; 	bind_GlobalSafeZone.SetValue(1)
-	; 	StorageUtil.SetIntValue(theSubRef, "bind_safe_area", 0)
-	; 	if lastLocationSafetyFlag == 1 || lastLocationSafetyFlag == 0
-	; 		;debug.MessageBox("entering a dangerous area")
-	; 		bind_Utility.WriteToConsole("Enter a dangerous area")
-	; 		bind_Utility.SendSimpleModEvent("bind_LeavingSafeAreaEvent")
-	; 		;bms.SetActiveBondageSet(false, newLocation)
-	; 	endif
-	; 	lastLocationSafetyFlag = 2
-	; endif
-
-	; bind_GlobalTimeEnteredLocation.SetValue(bind_Utility.GetTime())
-	; lastLocation = oldLocation
-	; currentLocation = newLocation
-
-	; if !theSubRef.GetParentCell().IsInterior()
-	; 	bind_GlobalTimeEnteredOutdoorLocation.SetValue(bind_Utility.GetTime())
-	; 	currentOutdoorLocation = newLocation
-	; 	TheSubCurrentOutdoorLocation.ForceLocationTo(newLocation)
-	; endif
-
-	;TheSubCurrentLocation.ForceLocationTo(newLocation)
-
-	; bind_Utility.WriteToConsole("city or town: " + InCityOrTownCheck())
-
-	; int checkValue = bind_GlobalLocationEnteredCheck.GetValue() as int
-	; if InCityOrTownCheck()
-	; 	if checkValue < 1
-	; 		bind_GlobalRulesInEffect.SetValue(1) ;rules always on in cities and towns
-	; 		bind_GlobalLocationEnteredCheck.SetValue(1) ;adventure quest will set to -1 after check
-	; 	endif
-	; else
-	; 	if checkValue > -1
-	; 		;if conditions for rules in mcm
-	; 		bind_GlobalRulesInEffect.SetValue(0) ;suspend rules if mcm settings allow outside of towns and cities
-	; 		;endif
-	; 		bind_GlobalLocationEnteredCheck.SetValue(-1) ;adventure quest will set to -2 after check
-	; 	endif
-	; endif
-
-	; bool isIndoors = theSubRef.IsInInterior()
-
-	; if isIndoors
-	; 	main.SubIndoors = 1
-	; else
-	; 	main.SubIndoors = 0
-	; endif
-
-	; bool enteringSafeArea = false
-	; bool leavingSafeArea = false
-
-	; int safeArea = bind_GlobalSafeZone.GetValue() as int
-	; int newSafeArea = safeArea
-
-	; if newLocation.HasKeyWord(LocTypeCity) || newLocation.HasKeyWord(LocTypeTown)
-
-	; 	;bind_Utility.WriteToConsole("in city town")
-
-	; 	if safeArea < 2 ;coming from unsafe area (or default)
-	; 		newSafeArea = 2
-	; 		enteringSafeArea = true
-	; 	elseif safeArea == 3 ;leaving a building in the town or city
-	; 		newSafeArea = 2
-	; 		enteringSafeArea = false
-	; 	endif
-
-	; elseif isIndoors
-
-	; 	;bind_Utility.WriteToConsole("in indoors")
-
-	; 	if safeArea == 2 ;only set this to 3 if already in a city or town
-	; 		newSafeArea = 3
-	; 	endif
-
-	; 	;don't set a default here, can't tell if interior is in a safe space without history
-	
-	; else
-
-	; 	;bind_Utility.WriteToConsole("in other")
-
-	; 	if safeArea == 2
-	; 		newSafeArea = 1
-	; 		leavingSafeArea = true
-	; 	endif
-
-	; 	if safeArea == 0
-	; 		safeArea = 1 ;default
-	; 	endif
-
-	; endif
-
-	; if enteringSafeArea
-
-	; 	;TODO - modify the location change detection quest to be a normal quest
-	; 	;start it here, and set a 30-60s update after the init
-	; 	;have it check the nudity and bondage rules, status and suspended flags
-	; 	;do a is running check to make sure it does not try to start again until it is completed (OK if this even fires many times while one quest run is happening)
-	; 	;will not matter if the player leaves the safe area because it will check the state of whatever area they are in when the update happens
-	; 	;newlocation - can match location alias on main quest vs. event data
-	; 	;have quest auto strip and tie player if breaking rules
-	; 	;UPDATE - the story manager location change event does not fire as often as needed when changing areas. this code might be stuck here.
-
-	; 	;IDEA - could this just fire everytime an location change happens - then can use it to auto tie / untie
-	; 	;and the 30-60 seconds should help deal with walking on the edge of zones??
-
-	; 	if bind_GlobalSuspendHeavyBondage.GetValue() == 1.0
-	; 		bind_GlobalSuspendHeavyBondage.SetValue(0)
-	; 	endif
-
-	; 	if bind_GlobalSuspendNudity.GetValue() == 1.0
-	; 		bind_GlobalSuspendNudity.SetValue(0)
-	; 	endif
-
-	;     ; int handle = ModEvent.Create("bind_EnteringSafeAreaEvent")
-	; 	; if handle
-	;     ;     ModEvent.Send(handle)
-	;     ; endif
-	
-	; elseif leavingSafeArea
-		
-	; 	if bind_GlobalSuspendHeavyBondage.GetValue() == 0.0
-	; 		bind_GlobalSuspendHeavyBondage.SetValue(1)
-	; 	endif
-
-	; 	if bind_GlobalSuspendNudity.GetValue() == 0.0
-	; 		bind_GlobalSuspendNudity.SetValue(1)
-	; 	endif
-	    
-	; 	; int handle = ModEvent.Create("bind_LeavingSafeAreaEvent")
-	;     ; if handle
-	;     ;     ModEvent.Send(handle)
-	;     ; endif
-
-	; 	bind_Utility.WriteToConsole("clearning rules location permissions")
-	; 	rman.ClearLocationPermissions() ;note - should be valid until you leave the city or town (should it be on entering also?)
-
-	; endif
-
-	; bind_GlobalSafeZone.SetValue(newSafeArea)
-	; ;TODO - the safe area global flag could be a gate for all of the script events
-	; ;so put on events can be gated to safe areas
-
-
-	; bind_Utility.WriteToConsole("safe area: " + newSafeArea + " entering safe: " + enteringSafeArea + " leaving safe: " + leavingSafeArea + " indoors: " + isIndoors)
-
-	; ;NOTE - run the rules check and rules suspend quest
-	; if !bind_GoAdventuringQuest.IsRunning()
-	; 	bind_GoAdventuringQuest.Start()
-	; endif
-
-	; ;clear stuff
-
-	; rman.ClearLocationPermissions(theSubRef)
-
-	; bind_GlobalLocationHasFurniture.SetValue(0)
-	; main.bind_GlobalLocationHasBed.SetValue(0)
 
 endfunction
 
@@ -2165,29 +1888,23 @@ Function SafeWord()
 		if main.IsSub == 1
 
 			WindowOutput("Safeword: re-applying bondage...")
-			;bms.UpdateBondage(theSubRef, true)
 
 			main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 			int outfitId = main.ActiveBondageSetId
-			;debug.MessageBox("outfit id: " + outfitId)
-			;if outfitId > 0
-				bms.EquipBondageOutfit(theSubRef, outfitId)
-				if TheSecondSub.GetReference() != none
-					bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-					;debug.MessageBox("this happen?")
-				endif
-				if TheThirdSub.GetReference() != none
-					bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-				endif
-				StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
-			;endif
+
+            int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+            if handle
+                ModEvent.PushForm(handle, GetSubRef())
+                ModEvent.PushInt(handle, outfitId)
+                ModEvent.Send(handle)
+            endif
 
 		endif
 
 	else
-		StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", -1) ;store this (no outfits)
-		StorageUtil.SetIntValue(theSubRef, "bind_wearing_outfit_id", -1)
-		StorageUtil.SetStringValue(theSubRef, "bind_wearing_outfit_name", "")
+		main.TargetBondageSetId = -1
+		main.ActiveBondageSetId = -1
+		main.ActiveBondageSetName = ""
 		main.ActiveBondageSetId = -1
 	endif
 
@@ -2294,26 +2011,22 @@ event LeavingSafeAreaEvent()
 endevent
 
 event OnPauseStart()
+
 	int restoredGear = 0
 	int removedBondage = 0
+	
 	if bms.IsInBondage(theSubRef)
-		;bms.SnapshotCurrentBondage(theSubRef)
-		;bms.RemoveAllDetectedBondageItems(theSubRef)
 		bms.RemoveAllBondageItems(theSubRef, true)
 		removedBondage = 1
 	endif
-	;gmanage.WearOutfit(theSubRef, "unsafe")
-	; if gmanage.IsNude(theSubRef)
-		
-	; 	;gmanage.RestoreWornGear(theSubRef)
-	; 	restoredGear = 1
-	; endif
-	StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", -1) ;store this (no outfits)
-	StorageUtil.SetIntValue(theSubRef, "bind_wearing_outfit_id", -1)
-	StorageUtil.SetStringValue(theSubRef, "bind_wearing_outfit_name", "")
+
+	main.ActiveBondageSetId = -1
+	main.TargetBondageSetId = -1
+	main.ActiveBondageSetName = ""
 
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_restored_gear", restoredGear)
 	StorageUtil.SetIntValue(theSubRef, "binding_pause_removed_bondage", removedBondage)
+
 endevent
 
 event OnPauseEnd()
@@ -2325,17 +2038,12 @@ event OnPauseEnd()
 
 		main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 		int outfitId = main.ActiveBondageSetId
-		;debug.MessageBox("outfit id: " + outfitId)
-		;if outfitId > 0
-			bms.EquipBondageOutfit(theSubRef, outfitId)
-			if TheSecondSub.GetReference() != none
-				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-			endif
-			if TheThirdSub.GetReference() != none
-				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-			endif
-			StorageUtil.SetIntValue(theSubRef, "bind_target_outfit_id", outfitId) ;store this
-		;endif
+		int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+		if handle
+			ModEvent.PushForm(handle, GetSubRef())
+			ModEvent.PushInt(handle, outfitId)
+			ModEvent.Send(handle)
+		endif
 
 	endif
 endevent
@@ -2670,12 +2378,11 @@ function EventGetPartyReady(string eventName = "")
 	endif
 
 	if eventOutfitId > 0 
-		bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-		if TheSecondSub.GetReference() != none
-			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
-		endif
-		if TheThirdSub.GetReference() != none
-			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
+		int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+		if handle
+			ModEvent.PushForm(handle, GetSubRef())
+			ModEvent.PushInt(handle, eventOutfitId)
+			ModEvent.Send(handle)
 		endif
 
 		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + eventOutfitId + ".json"
@@ -2725,58 +2432,26 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 		eventOutfitId = bms.GetBondageOutfitForEvent(eventName)
 
-        ; i = 0
-        ; while i < fList.Length
-        ;     if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", eventName)
-        ;         if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
-        ;             ;debug.MessageBox(fList[i])
-        ;             int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
-        ;             StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
-        ;         endif
-        ;     endif
-        ;     i += 1
-        ; endwhile
-
-		; outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
 		bind_Utility.WriteToConsole("EventGetSubReady - eventName: " + eventName + " - outfit: " + eventOutfitId)
 
 	endif
 
-	;bind_Utility.WriteToConsole("EventGetSubReady - outfitIds: " + outfitIds)
 	if eventOutfitId == 0 ; outfitIds.Length == 0 || outfitIds == none
 
 		eventOutfitId = bms.GetBondageOutfitForEvent("event_any_event")
 
-        ; i = 0
-        ; while i < fList.Length
-        ;     if JsonUtil.StringListHas(main.GameSaveFolderJson + fList[I], "used_for", "event_any_event")
-        ;         if JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_enabled", 0) == 1
-        ;             debug.MessageBox(fList[i])
-        ;             int outfitId = JsonUtil.GetIntValue(main.GameSaveFolderJson + fList[i], "outfit_id", -1)
-        ;             StorageUtil.IntListAdd(sub, "binding_found_outfit_id_list", outfitId)
-        ;         endif
-        ;     endif
-        ;     i += 1
-        ; endwhile
-
-		; outfitIds = StorageUtil.IntListToArray(sub, "binding_found_outfit_id_list")
 		bind_Utility.WriteToConsole("EventGetSubReady - eventName: any event - outfit: " + eventOutfitId)
 
 	endif
 
-	;debug.MessageBox("outfit: " + eventOutfitId)
-
 	if eventOutfitId > 0 ; outfitIds.Length > 0
-		; int outfitId = outfitIds[Utility.RandomInt(0, outfitIds.Length - 1)]
-		; bind_Utility.WriteToConsole("EventGetSubReady - outfit id: " + outfitId)
-		;if outfitId > 0
-			bms.EquipBondageOutfit(theSubRef, eventOutfitId)
-			if TheSecondSub.GetReference() != none
-				bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), eventOutfitId)
-			endif
-			if TheThirdSub.GetReference() != none
-				bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), eventOutfitId)
-			endif
+
+		int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+		if handle
+			ModEvent.PushForm(handle, GetSubRef())
+			ModEvent.PushInt(handle, eventOutfitId)
+			ModEvent.Send(handle)
+		endif
 
 		string f = main.GameSaveFolderJson + "bind_bondage_outfit_" + eventOutfitId + ".json"
 		if JsonUtil.GetIntValue(f, "remove_existing_gear", 0) == 1
@@ -2784,40 +2459,7 @@ function EventGetSubReady(Actor sub, Actor dom, string eventName = "")
 
 		endif
 
-		;endif
 	endif
-
-	; if playAnimations
-    ; 	bind_MovementQuestScript.PlayDoWork(dom)
-	; endif
-
-    ; if bms.SnapshotCurrentBondage(sub)
-    ;     bind_Utility.DoSleep()
-    ; endif
-
-	; if removeAll
-	; 	if bms.RemoveAllDetectedBondageItems(sub) ; bms.RemoveAllBondageItems(sub)
-	; 		bind_Utility.DoSleep(1.0)
-	; 	endif
-	; else
-	; 	if sub.IsInFaction(bms.WearingHeavyBondageFaction()) && freeWrists
-	; 		bms.RemoveItem(sub, bms.BONDAGE_TYPE_HEAVYBONDAGE())
-	; 		bind_Utility.DoSleep()
-	; 	endif
-	; endif
-
-    ; if !sub.IsInFaction(bms.WearingGagFaction()) && addGag
-    ;     bms.AddItem(sub, bms.BONDAGE_TYPE_GAG())
-    ;     bind_Utility.DoSleep()
-    ; endif
-
-	; if stripClothing ;!gmanage.IsNude(sub) && stripClothing
-	; 	;if gmanage.RemoveWornGear(sub)
-	; 	gmanage.WearOutfit(sub, "nude")
-	; 	eventRemovedClothing = true
-	; 	bind_Utility.DoSleep(1.0)
-	; 	;endif
-	; endif
 
 endfunction
 
@@ -2845,16 +2487,12 @@ function EventClearUpParty()
 	main.ActiveBondageSetId = bms.GetBondageSetForLocation(currentLocation, main.ActiveBondageSetId) ;update set for location
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
-	bms.EquipBondageOutfit(sub, outfitId)
-	if TheSecondSub.GetReference() != none
-		bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
+	int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+	if handle
+		ModEvent.PushForm(handle, GetSubRef())
+		ModEvent.PushInt(handle, outfitId)
+		ModEvent.Send(handle)
 	endif
-	if TheThirdSub.GetReference() != none
-		bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-	endif
-	StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId)
-
-	main.NeedsBondageSetChange = 0
 
 endfunction
 
@@ -2873,10 +2511,6 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 			bind_MovementQuestScript.PlayDoWork(dom)
 		endif
 	endif
-
-    ; if bms.RemoveAllDetectedBondageItems(sub)
-    ;     bind_Utility.DoSleep(1.0)
-    ; endif
 
 	;TODO - put back on clothing? not sure if outfit manager is going to be a thing in here. need to store?
 	;TODO - put back on correct bondage outfit
@@ -2899,33 +2533,14 @@ function EventCleanUpSub(Actor sub, Actor dom, bool playAnimations = true)
 		endif
 	endif
 
-	;int outfitId = StorageUtil.GetIntValue(sub, "bind_target_outfit_id") ;NOTE - this should set it back to the target outfit (set by changing areas) vs. wearing outfit (set by whatever equipped the outfit, which can also be events)
-
-	;debug.MessageBox(currentLocation.GetName())
 	int outfitId = main.ActiveBondageSetId
 	bind_Utility.WriteToConsole("EventCleanUpSub - outfit id: " + outfitId)
-	;if outfitId > 0
-		bms.EquipBondageOutfit(sub, outfitId)
-		if TheSecondSub.GetReference() != none
-			bms.EquipBondageOutfit(TheSecondSub.GetActorReference(), outfitId)
-		endif
-		if TheThirdSub.GetReference() != none
-			bms.EquipBondageOutfit(TheThirdSub.GetActorReference(), outfitId)
-		endif
-		StorageUtil.SetIntValue(sub, "bind_target_outfit_id", outfitId) ;store this
-		;debug.MessageBox(outfitId)
-	;endif
-
-	main.NeedsBondageSetChange = 0
-
-	; if eventRemovedClothing
-	; 	GetSubDressed()
-	; 	bind_Utility.DoSleep(1.0)
-	; endif
-
-    ; if bms.UpdateBondage(sub) ;RestoreFromSnapshot(sub)
-    ;     bind_Utility.DoSleep(1.0)
-    ; endif
+	int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+	if handle
+		ModEvent.PushForm(handle, GetSubRef())
+		ModEvent.PushInt(handle, outfitId)
+		ModEvent.Send(handle)
+	endif
 
 endfunction
 

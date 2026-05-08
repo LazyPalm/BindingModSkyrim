@@ -1,8 +1,5 @@
 Scriptname binda_Input extends Quest  
 
-; int actionKey = 0
-; int modifierKey = 0
-
 event OnInit()
     RegisterKeys()
 endevent
@@ -33,7 +30,7 @@ Event OnKeyDown(Int keyCode)
         if keyCode == binda_KeyActionGlobal.GetValue() && (modifierPressed || binda_KeyModGlobal.GetValue() == 0); Double check it's our key
             if !processingKey
                 processingKey = true
-                debug.Notification("Pressed the action key!!!!")
+                ;debug.Notification("Pressed the action key!!!!")
             endif
         endif
 

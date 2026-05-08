@@ -19,6 +19,7 @@ int property PreferenceGuardsEquipBondage auto conditional
 ;string property BondageSetLocation auto conditional
 int property ActiveBondageSetId auto conditional
 string property ActiveBondageSetName auto conditional
+int property TargetBondageSetId auto conditional
 int property NeedsBondageSetChange auto conditional
 int property PlayerTiedInAnimation auto conditional
 

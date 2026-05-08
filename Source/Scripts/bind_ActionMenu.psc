@@ -435,6 +435,7 @@ function ShowSettingsMenu()
     listMenu.AddEntryItem("Run Dressing Room Quest")
     listMenu.AddEntryItem("Whitelist Proper Female Armor")
     listMenu.AddEntryItem("Flag test")
+    listMenu.AddEntryItem("Make Follower Your Dom")
     ;listMenu.AddEntryItem("Bikini Test")
     ;listMenu.AddEntryItem("Manage Outfits")
     ; listMenu.AddEntryItem("Test Dom Tie 15s")
@@ -446,6 +447,8 @@ function ShowSettingsMenu()
 
     listMenu.OpenMenu()
     int listReturn = listMenu.GetResultInt()
+
+    string stringResult = listMenu.GetResultString()
 
     if listReturn == 0
         ShowActionMenu()
@@ -537,6 +540,32 @@ function ShowSettingsMenu()
     ;     bondage_manager.RemoveAllBondageItems(mqs.GetSubRef())
     ; elseif listReturn == 8
     ;     bondage_manager.RestoreFromSnapshot(mqs.GetSubRef())
+    endif
+
+    if stringResult == "Make Follower Your Dom"
+        bind_Functions f = bind_Functions.GetBindingFunctions()
+        if f.PlayerIsSub() == 1
+            debug.MessageBox("Already have a dominant")
+        else
+            if f.GetConversationTarget() != none
+                Actor act = f.GetConversationTarget() as Actor
+                if act
+                    string actName = act.GetDisplayName()
+                    ;debug.MessageBox(f.GetConversationTarget().GetDisplayName())
+                    Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
+                    if act.IsInFaction(pf)
+                        if bind_Utility.ConfirmBox("Make " + actName + " your dominant?")
+                            f.SetDom(act)
+                        endif
+                    else 
+                        debug.MessageBox(actName + " is not a current follower")
+                    endif
+                    ;DynamicScene.Start()
+                endif
+            else
+                debug.Notification("No actor targeted")
+            endif
+        endif
     endif
 
 endfunction

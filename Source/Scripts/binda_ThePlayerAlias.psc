@@ -1,7 +1,7 @@
 Scriptname binda_ThePlayerAlias extends ReferenceAlias  
 
 bool lookedAtFurniture
-bool processingCrosshair
+;bool processingCrosshair
 
 Actor me
 
@@ -58,43 +58,46 @@ event OnUpdate()
     endif
 endevent
 
-event OnCrosshairRefChange(ObjectReference ref)
+; event OnCrosshairRefChange(ObjectReference ref)
 
-	if !processingCrosshair && ref != none
+; 	if !processingCrosshair && ref != none
 
-		processingCrosshair = true
+; 		processingCrosshair = true
 
-        bind_Utility.WriteToConsole("crosshair - ref: " + ref)
+;         bind_Utility.WriteToConsole("crosshair - ref: " + ref)
 
-        if TheActivator.GetReference() != ref
+;         if TheActivator.GetReference() != ref
 
-            if ref.HasKeywordString("zadc_FurnitureDevice") || ref.HasKeywordString("dse_dm_KeywordFurniture")
-                
-                TheActivator.ForceRefTo(ref)
-                bind_Utility.WriteToConsole("filled theactivator ref: " + ref.GetName())
+;             int foundType = ref.GetType()
+;             if foundType == 61
 
-            ; elseif ref.HasKeywordString("zbfFurniture")
+;                 if ref.HasKeywordString("zadc_FurnitureDevice") || ref.HasKeywordString("dse_dm_KeywordFurniture")
+                    
+;                     TheActivator.ForceRefTo(ref)
+;                     bind_Utility.WriteToConsole("filled theactivator ref: " + ref.GetName())
 
-            ;     ;nothing needed here - onsit works for furniture
+;                 elseif ref as TempleBlessingScript
 
-            else
+;                 endif
 
-                ;clear furniture faction
-                if me.IsInFaction(InFurnitureFaction)
-                    if me.GetFactionRank(InFurnitureFaction) > 1 ;only do this for ddc/dse furnitures
-                        me.RemoveFromFaction(InFurnitureFaction) ;this is added by the activator 
-                    endif
-                endif
+;             else
 
-            endif
+;                 ;clear furniture faction
+;                 if me.IsInFaction(InFurnitureFaction)
+;                     if me.GetFactionRank(InFurnitureFaction) > 1 ;only do this for ddc/dse furnitures
+;                         me.RemoveFromFaction(InFurnitureFaction) ;this is added by the activator 
+;                     endif
+;                 endif
 
-        endif
+;             endif
 
-		processingCrosshair = false
+;         endif
 
-	endif
+; 		processingCrosshair = false
 
-endevent
+; 	endif
+
+; endevent
 
 Event OnSit(ObjectReference akFurniture)
 	
@@ -153,8 +156,19 @@ Event OnLocationChange(Location akOldLoc, Location akNewLoc)
         ModEvent.Send(handle)
     endif
 
+    ;THIS IS JUST TESTING CODE - can be removed
+    ; if akNewLoc.HasKeyWord(LocTypeInn)
+    ;     ;bondage test
+    ;     Form[] list = new Form[3]
+    ;     list[0] = Game.GetFormFromFile(0x000800, "Devious Devices - Expansion.esm")
+    ;     list[1] = Game.GetFormFromFile(0x0012CE, "Devious Devices - Expansion.esm")
+    ;     list[2] = Game.GetFormFromFile(0x0237BE, "Devious Devices - Expansion.esm")
+    ;     (ThePlayer as binda_GearManagerAlias).AddBondage(list)
+    ; endif
+
 EndEvent
 
+ReferenceAlias property ThePlayer auto
 ReferenceAlias property TheActivator auto
 
 Faction property InFurnitureFaction auto

@@ -6,9 +6,25 @@ event OnInit()
 
     if IsRunning()
 
+        RegisterForModEvent("bind_ChangeOutfitCompletedModEvent", "ChangeOutfitCompletedModEvent")
+
         GuardIsBusy = 0
 
         ;debug.MessageBox("guard should do their thing...")
+
+    endif
+
+endevent
+
+event ChangeOutfitCompletedModEvent(Form akActor)
+
+    if akActor == Game.GetPlayer()
+
+        bind_Utility.PriApiEventEnd(false, false)
+
+        debug.MessageBox("ending quest...")
+
+        self.Stop()
 
     endif
 
@@ -18,14 +34,29 @@ function EquipBondage(Actor theGuard)
 
     GuardIsBusy = 1
 
+    int setId = 0
+
+    bind_MainQuestScript mq = Quest.GetQuest("bind_MainQuest") as bind_MainQuestScript
+    if mq
+        setId = mq.ActiveBondageSetId
+        mq.NeedsBondageSetChange = 0
+    endif
+
     bind_Utility.PriApiEventStart("Guard Equips Bondage", false)
 
-    bind_Utility.PriApiUpdatePlayerBondage(theGuard)
+    int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+    if handle
+        ModEvent.PushForm(handle, Game.GetPlayer())
+        ModEvent.PushInt(handle, setId)
+        ModEvent.Send(handle)
+    endif
 
-    bind_Utility.PriApiEventEnd(false, false)
+    ; bind_Utility.PriApiUpdatePlayerBondage(theGuard)
 
-    ;debug.MessageBox("ending quest...")
+    ; bind_Utility.PriApiEventEnd(false, false)
 
-    self.Stop()
+    ; ;debug.MessageBox("ending quest...")
+
+    ; self.Stop()
 
 endfunction
