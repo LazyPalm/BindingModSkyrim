@@ -187,7 +187,8 @@ function StartPlayed()
     if outfitId > 0
         bind_MovementQuestScript.FaceTarget(theDom, theSub)
         bind_MovementQuestScript.PlayDoWork(theDom)
-        bind_utility.PriApiEquipBondageOutfit(theSub, outfitId)
+        ;bind_utility.PriApiEquipBondageOutfit(theSub, outfitId)
+        binda_GearManagerAlias.SendAddOutfit(theSub, outfitId)
     endif
 
     SetObjectiveCompleted(10, true)

@@ -476,7 +476,8 @@ function ChangeSubPosition()
     int eventOutfitId = bms.GetBondageOutfitForEvent("event_hogtied")
     ;debug.MessageBox("eventOutfitId: " + eventOutfitId)
 	if eventOutfitId > 0 
-		bms.EquipBondageOutfit(theSub, eventOutfitId)
+		;bms.EquipBondageOutfit(theSub, eventOutfitId)
+        binda_GearManagerAlias.SendAddOutfit(theSub, eventOutfitId)
 	endif
 
     debug.SendAnimationEvent(theSub, "ZazAPCAO052")

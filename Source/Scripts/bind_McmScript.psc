@@ -290,6 +290,7 @@ int selectedBondageOutfitId
 ;int selectedBondageOutfitIndex
 int toggleBondageOutfitUseRandomBondage
 int toggleBondageOutfitRulesBased
+int toggleBondageOutfitLeaveItems
 string[] bondageOutfitUsageKey
 string[] bondageOutfitUsageList
 int[] bondageSetUsedForToggle
@@ -782,9 +783,11 @@ function DisplayBondageOutfits()
 
         int useRandomBondage = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_use_random_bondage", 0)
         int useRulesBased = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", 0)
+        int leaveItems = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_leave_items", 0)
 
         toggleBondageOutfitUseRandomBondage = AddToggleOption("Use Random Bondage", useRandomBondage)
         toggleBondageOutfitRulesBased = AddToggleOption("Use Bondage Rules", useRulesBased)
+        toggleBondageOutfitLeaveItems = AddToggleOption("Leave Existing Bondage Items", leaveItems)
 
         Form[] setItems
 
@@ -2884,6 +2887,15 @@ Event OnOptionSelect(int option)
             JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_rules_based", useRulesBased)
             JsonUtil.Save(main.BindingGameOutfitFile)
             SetToggleOptionValue(toggleBondageOutfitRulesBased, useRulesBased)
+        endif
+
+        if option == toggleBondageOutfitLeaveItems
+            bondageUpdatedFlag = true
+            int leaveItems = JsonUtil.GetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_leave_items", 0)
+            leaveItems = ToggleValue(leaveItems)
+            JsonUtil.SetIntValue(main.BindingGameOutfitFile, selectedBondageOutfitId + "_leave_items", leaveItems)
+            JsonUtil.Save(main.BindingGameOutfitFile)
+            SetToggleOptionValue(toggleBondageOutfitLeaveItems, leaveItems)
         endif
 
         if option == toggleBondageOutfitUseRandomBondage

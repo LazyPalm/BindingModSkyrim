@@ -1898,7 +1898,8 @@ function HogtieActor(Actor a) global
     int eventOutfitId = bmanager.GetBondageOutfitForEvent("event_hogtied")
     ;debug.MessageBox("eventOutfitId: " + eventOutfitId)
 	if eventOutfitId > 0 
-		bmanager.EquipBondageOutfit(a, eventOutfitId)
+		;bmanager.EquipBondageOutfit(a, eventOutfitId)
+        binda_GearManagerAlias.SendAddOutfit(a, eventOutfitId)
 	endif
 
 endfunction

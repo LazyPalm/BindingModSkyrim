@@ -16,10 +16,15 @@ event OnInit()
         RegisterForModEvent("bind_EventPressedActionEvent", "PressedAction")
         RegisterForModEvent("bind_SafewordEvent", "SafewordEvent")
         RegisterForModEvent("bind_EventCombatStartedInEvent", "CombatStartedInEvent")
+        RegisterForModEvent("bind_ChangeOutfitCompletedModEvent", "ChangeOutfitCompletedModEvent")
 
         EventStart()
 
     endif
+
+endevent
+
+event ChangeOutfitCompletedModEvent(Form akActor)
 
 endevent
 

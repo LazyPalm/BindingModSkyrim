@@ -29,16 +29,23 @@ function StartUp()
 
 endfunction
 
-event UpdateBondageModEvent(Form akActor, int setId)
+function SendAddOutfit(Actor akActor, int setId) global
+    int handle = ModEvent.Create("bind_BondageUpdateModEvent")
+    if handle
+        ModEvent.PushForm(handle, akActor)
+        ModEvent.PushInt(handle, setId)
+        ModEvent.Send(handle)
+    endif
+endfunction
 
-    ;debug.MessageBox("akActor: " + akActor + " setId: " + setId)
+event UpdateBondageModEvent(Form akActor, int setId)
 
     if (akActor as Actor) == me && setid > 0
 
-        Form[] items = bind_BondageManager.GetBondageItems(setid)
+        Form[] items = binda_Bondage.GetBondageItems(setid)
         bind_Utility.WriteToConsole("UpdateBondageModEvent items: " + items)
 
-        Form[] clothing = bind_BondageManager.GetClothing(setId)
+        Form[] clothing = binda_Bondage.GetClothing(setId)
 
         Form[] addItems
         addItems = Utility.CreateFormArray((items.Length + clothing.Length))
@@ -50,9 +57,6 @@ event UpdateBondageModEvent(Form akActor, int setId)
         endwhile
 
         int offset = items.Length
-        ; if offset < 0
-        ;     offset = 0
-        ; endif
         i = 0
         while i < clothing.Length
             addItems[(offset + i)] = clothing[i]
@@ -61,9 +65,8 @@ event UpdateBondageModEvent(Form akActor, int setId)
 
         ;re-order array items??
 
-        ;debug.MessageBox(addItems)
-
-        bool removeGear = bind_BondageManager.RemoveGearSetting(setId)
+        bool removeGear = binda_Bondage.RemoveGearSetting(setId)
+        bool leaveBondageItems = binda_Bondage.LeaveBondageItemsEquipped(setId)
 
         StorageUtil.SetIntValue(me, "bind_wearing_outfit_id", setId)
         ;update set name??
@@ -74,7 +77,7 @@ event UpdateBondageModEvent(Form akActor, int setId)
             mqs.ActiveBondageSetId = setId
         endif
 
-        AddOutfit(addItems, removeGear)
+        AddOutfit(addItems, removeGear, leaveBondageItems)
 
     endif
 
@@ -97,17 +100,6 @@ endfunction
 
 function InternalEquipItem()
 endfunction
-
-; function AddToRemoveList(Form f)
-;     int i = 0
-;     while i < arraySize
-;         if removeList[i] == none
-;             removeList[i] = f
-;             return
-;         endif
-;         i += 1
-;     endwhile
-; endfunction
 
 function StripClothing()
 
@@ -156,55 +148,15 @@ function StripClothing()
         thisSlot *= 2 ;double the number to move on to the next slot
     endWhile
 
-    ; ;head
-    ; Form equippedItem = me.GetWornForm(0x00000001)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
-    ; ;body
-    ; equippedItem = me.GetWornForm(0x00000004)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
-    ; ;hands
-    ; equippedItem = me.GetWornForm(0x00000008)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
-    ; ;forearms
-    ; equippedItem = me.GetWornForm(0x00000010)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
-    ; ;feet
-    ; equippedItem = me.GetWornForm(0x00000080)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
-    ; ;shield
-    ; equippedItem = me.GetWornForm(0x00000200)
-    ; if equippedItem && equippedItem.IsPlayable()
-    ;     me.RemoveItem(equippedItem, 1, true)
-    ; endif
-
 endfunction
 
-function AddOutfit(Form[] items, bool removeGear)
+function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
 
     GoToState("BuildingListsState")
 
     if deviceList.Length != arraySize
         deviceList = Utility.ResizeFormArray(deviceList, arraySize, none)
     endif
-
-    ; if removeList.Length != arraySize
-    ;     removeList = Utility.ResizeFormArray(removeList, arraySize, none)
-    ; endif
 
     protect = new int[15]
     removeList = Utility.CreateFormArray(arraySize)
@@ -221,23 +173,9 @@ function AddOutfit(Form[] items, bool removeGear)
     ;equip new items
     int i = 0
     while i < items.Length
-        ;if !me.IsEquipped(items[i])
-            deviceList[i] = items[i]
-        ; else 
-        ;     int ip = 0
-        ;     while ip < arraySize
-        ;         if removeList[ip] == items[i]
-        ;             protect[ip] = 1
-        ;             bind_Utility.WriteToConsole("protect: " + items[i].GetName() + " at: " + ip)
-        ;             ip = arraySize ;break
-        ;         endif
-        ;         ip += 1
-        ;     endwhile
-        ;endif
+        deviceList[i] = items[i]
         i += 1
     endwhile
-
-    ;debug.MessageBox("items: " + deviceList + " total: " + totalDevices + " remove: " + removeList + " remove total: " + totalRemoveDevices)
 
     if removeGear
         StripClothing()
@@ -258,26 +196,13 @@ function AddOutfit(Form[] items, bool removeGear)
                     removeList[ri] = kForm
                     ri += 1	
                 endif
-                ; if idevice.IsPlayable() && (idevice.HasKeywordString("ArmorCuirass") || idevice.HasKeywordString("ClothingBody")) && removeGear
-                ;     removeList[ri] = kForm
-                ;     ri += 1	
-                ; endif
-                ; if idevice.HasKeyword(z.zad_InventoryDevice) && StorageUtil.GetIntValue(idevice, "binding_item") == 1	
-                ;     removeList[ri] = kForm
-                ;     ri += 1			
-                ;     debug.MessageBox("possible zad remove: " + idevice.GetName() + " stored: " + StorageUtil.GetIntValue(idevice, "binding_item"))
-                ; elseif idevice.IsPlayable() && (!idevice.IsJewelry()) && (!idevice.HasKeyword(z.zad_Lockable)) && removeGear
-                ;     removeList[ri] = kForm
-                ;     ri += 1                    
-                ;     debug.MessageBox("possible clothing/armor remove: " + idevice.GetName())
-                ; endif
             endif
 		endif
 	endwhile
 
     bind_Utility.WriteToConsole("remove list: " + removeList + " ri: " + ri)
 
-    if ri == 0
+    if ri == 0 || leaveBondageItems
         InternalEquipItem()
     else
         InternalUnequipItem()
@@ -285,22 +210,16 @@ function AddOutfit(Form[] items, bool removeGear)
 
 endfunction
 
-function AddOutfitItems()
-
-
-
-endfunction
-
 state BuildingListsState
 
-    function AddOutfit(Form[] items, bool removeGear)
+    function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
     endfunction
 
 endstate
 
 state RemovingItemsState
 
-    function AddOutfit(Form[] items, bool removeGear)
+    function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
     endfunction
 
 endstate
@@ -314,7 +233,6 @@ state BusyState
             int i = 0
             while i < arraySize
                 if akBaseObject == removeList[i]
-                    ;Debug.MessageBox(akBaseObject + " stored: " + StorageUtil.GetIntValue(akBaseObject, "binding_item"))
                     removeList[i] = none
                     i = arraySize
                 endif
@@ -339,7 +257,6 @@ state BusyState
                         if StorageUtil.GetIntValue(akBaseObject, "binding_item") == 0
                             StorageUtil.SetIntValue(akBaseObject, "binding_item", 10)
                         endif
-                        ;AddToRemoveList(akBaseObject)
                     endif
                     i = arraySize
                 endif
@@ -354,15 +271,11 @@ state BusyState
 
     function InternalEquipItem()
 
-        ;debug.MessageBox("***** InternalEquipItem")
-        ;debug.MessageBox(deviceList)
-
         int i = 0
         while i < arraySize
             if deviceList[i] != none
                 Form f = deviceList[i]
                 if f as Armor
-                    ;debug.MessageBox(f)
                     currentDevice = f
                     if !me.IsEquipped(f)
                         if f.HasKeywordString("zad_InventoryDevice")
@@ -380,7 +293,6 @@ state BusyState
         endwhile
 
         ;nothing left to equip
-        ;debug.MessageBox(removeList)
 
         int handle = ModEvent.Create("bind_ChangeOutfitCompletedModEvent")
         if handle
@@ -394,17 +306,13 @@ state BusyState
 
     function InternalUnequipItem()
 
-        ;debug.MessageBox("***** InternalEquipItem")
-
-        ;debug.MessageBox("currentRemoveIndex: " + currentRemoveIndex + " totalRemoveDevices: " + totalRemoveDevices)
-
         int i = 0
         while i < arraySize
             if removeList[i] != none && protect[i] == 0
                 Form f = removeList[i]
                 if f as Armor
                     currentDevice = f
-                    if StorageUtil.GetIntValue(f, "binding_item") == 1 ; f.HasKeywordString("zad_InventoryDevice")
+                    if StorageUtil.GetIntValue(f, "binding_item") == 1
                         z.UnlockDevice(me, f as Armor, none, none, true, true)
                     else
                         me.UnequipItem(f, 1, true)
@@ -420,7 +328,7 @@ state BusyState
 
     endfunction
 
-    function AddOutfit(Form[] items, bool removeGear)
+    function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
     endfunction
 
 endstate

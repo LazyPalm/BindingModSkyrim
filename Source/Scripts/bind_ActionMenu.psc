@@ -550,21 +550,13 @@ function ShowSettingsMenu()
             Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
             if pf 
                 Actor[] nearbyActors = MiscUtil.ScanCellNPCsByFaction(pf, Game.GetPlayer())
-                if nearbyActors.Length > 0                
-                ;if f.GetConversationTarget() != none
+                if nearbyActors.Length > 0
                     Actor act = nearbyActors[0] as Actor
                     if act
                         string actName = act.GetDisplayName()
-                        ;debug.MessageBox(f.GetConversationTarget().GetDisplayName())
-                        ; Faction pf = Game.GetFormFromFile(0x084D1B, "Skyrim.esm") as Faction
-                        ; if act.IsInFaction(pf)
-                            if bind_Utility.ConfirmBox("Make " + actName + " your dominant?")
-                                f.SetDom(act)
-                            endif
-                        ; else 
-                        ;     debug.MessageBox(actName + " is not a current follower")
-                        ; endif
-                        ;DynamicScene.Start()
+                        if bind_Utility.ConfirmBox("Make " + actName + " your dominant?")
+                            f.SetDom(act)
+                        endif
                     endif
                 else
                     debug.Notification("No follower nearby")

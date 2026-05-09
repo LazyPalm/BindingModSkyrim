@@ -185,7 +185,8 @@ function DomRuleSceneGiveThanksEndedFunction()
     if add == 1 && choice == 2
         bind_Utility.WriteToConsole("add type number: " + rule)
         if setId > 0
-            bms.EquipBondageOutfit(theSub, setId)
+            ;bms.EquipBondageOutfit(theSub, setId)
+            binda_GearManagerAlias.SendAddOutfit(theSub, setId)
         endif
         ; if !theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
         ;     bind_Utility.WriteToConsole("not in faction: " + bms.WearingBondageItemFaction(rule))
@@ -197,7 +198,8 @@ function DomRuleSceneGiveThanksEndedFunction()
     elseif add == 2 && choice == 2
         bind_Utility.WriteToConsole("remove type number: " + rule)
         if setId > 0
-            bms.EquipBondageOutfit(theSub, setId)
+            ;bms.EquipBondageOutfit(theSub, setId)
+            binda_GearManagerAlias.SendAddOutfit(theSub, setId)
         endif
         ; if theSub.IsInFaction(bms.WearingBondageItemFaction(rule))       
         ;     bind_Utility.WriteToConsole("in faction: " + bms.WearingBondageItemFaction(rule))
