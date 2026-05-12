@@ -667,6 +667,11 @@ function SelectFollowersList(float scanDistance = 2000.0, string storageKey, Fac
     Actor selectedActor
     Actor[] theActors = MiscUtil.ScanCellNPCsByFaction(u.PotentialFollowerFaction, act, scanDistance)
 
+    if theActors.Length == 0
+        debug.MessageBox("No potential followers found")
+        return
+    endif
+
     UIListMenu listMenu = UIExtensions.GetMenu("UIListMenu") as UIListMenu
     
     int i = 0

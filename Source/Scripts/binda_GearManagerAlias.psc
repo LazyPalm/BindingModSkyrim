@@ -5,7 +5,6 @@ Actor me
 Form currentDevice
 
 Form[] deviceList
-int[] protect
 Form[] removeList
 
 zadLibs z
@@ -20,9 +19,14 @@ event OnPlayerLoadGame()
     StartUp()
 endevent
 
+event OnUpdate()
+    bind_Utility.WriteToConsole("binda_GearManagerAlias hit the failsafe due to timing out")
+    GoToState("")
+endevent
+
 function StartUp()
 
-    arraySize = 15
+    ;arraySize = 15
     me = self.GetActorReference()
 
     RegisterForModEvent("bind_BondageUpdateModEvent", "UpdateBondageModEvent")
@@ -126,20 +130,16 @@ function StripClothing()
         if (Math.LogicalAnd(slotsChecked, thisSlot) != thisSlot) ;only check slots we haven't found anything equipped on already
             Armor thisArmor = me.GetWornForm(thisSlot) as Armor
             if (thisArmor)
-                if thisArmor.IsPlayable() && !thisArmor.IsJewelry() && (!thisArmor.HasKeywordString("zad_Lockable"))
-                    ;debug.MessageBox(thisArmor.GetName() + " val: " + thisArmor + " zad: " + thisArmor.HasKeywordString("zad_Lockable"))
-                    me.UnEquipItem(thisArmor, 1, true)
+                if StorageUtil.FormListHas(me, "bind_safe_to_remove", thisArmor)
+                    
+                    me.UnequipItem(thisArmor, 1, true)
+                else 
+                    if thisArmor.IsPlayable() && !thisArmor.IsJewelry() && (!thisArmor.HasKeywordString("zad_Lockable"))
+                        ;debug.MessageBox(thisArmor.GetName() + " val: " + thisArmor + " zad: " + thisArmor.HasKeywordString("zad_Lockable"))
+                        StorageUtil.FormListAdd(me, "bind_safe_to_remove", thisArmor)
+                        me.UnequipItem(thisArmor, 1, true)
+                    endif
                 endif
-                ; if (thisArmor.GetEnchantment()) ;check for basic enchantments
-                ;     wornEnchantedForms[index] = thisArmor.getName()
-                ;     index += 1
-                ; elseif (WornObject.GetEnchantment(target, 0, thisSlot)) ;check for player-added enchantments
-                ;     wornEnchantedForms[index] = WornObject.GetDisplayName(target, 0, thisSlot)
-                ;     if (!wornEnchantedForms[index]) ;if it wasn't given a custom name, take the item's original name:
-                ;         wornEnchantedForms[index] = thisArmor.getName()
-                ;     endif
-                ;     index += 1
-                ; endif
                 slotsChecked += thisArmor.GetSlotMask() ;add all slots this item covers to our slotsChecked variable
             else ;no armor was found on this slot
                 slotsChecked += thisSlot
@@ -148,17 +148,32 @@ function StripClothing()
         thisSlot *= 2 ;double the number to move on to the next slot
     endWhile
 
+    ;will move this after I figure out Enchantment logic
+    ; if (thisArmor.GetEnchantment()) ;check for basic enchantments
+    ;     wornEnchantedForms[index] = thisArmor.getName()
+    ;     index += 1
+    ; elseif (WornObject.GetEnchantment(target, 0, thisSlot)) ;check for player-added enchantments
+    ;     wornEnchantedForms[index] = WornObject.GetDisplayName(target, 0, thisSlot)
+    ;     if (!wornEnchantedForms[index]) ;if it wasn't given a custom name, take the item's original name:
+    ;         wornEnchantedForms[index] = thisArmor.getName()
+    ;     endif
+    ;     index += 1
+    ; endif    
+
 endfunction
 
 function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
 
     GoToState("BuildingListsState")
+    RegisterForSingleUpdate(30.0)
 
-    if deviceList.Length != arraySize
-        deviceList = Utility.ResizeFormArray(deviceList, arraySize, none)
-    endif
+    arraySize = items.Length
 
-    protect = new int[15]
+    ; if deviceList.Length != arraySize
+    ;     deviceList = Utility.ResizeFormArray(deviceList, arraySize, none)
+    ; endif
+
+    deviceList = Utility.CreateFormArray(arraySize)
     removeList = Utility.CreateFormArray(arraySize)
 
     z = Quest.GetQuest("zadQuest") as zadLibs
@@ -184,6 +199,7 @@ function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
     GoToState("BusyState")
 
     int ri = 0
+    int bindingItem = 0
 
 	i = me.GetNumItems()
 	while i > 0			
@@ -192,7 +208,8 @@ function AddOutfit(Form[] items, bool removeGear, bool leaveBondageItems)
 		if (kForm As Armor)
             Armor idevice = kForm As Armor
             if idevice && me.IsEquipped(idevice)
-                if StorageUtil.GetIntValue(idevice, "binding_item") == 1 || StorageUtil.GetIntValue(idevice, "binding_item") == 2
+                bindingItem = StorageUtil.GetIntValue(idevice, "binding_item", 0)
+                if bindingItem == 1 || bindingItem == 2
                     removeList[ri] = kForm
                     ri += 1	
                 endif
@@ -300,6 +317,7 @@ state BusyState
             ModEvent.Send(handle)
         endif
 
+        UnregisterForUpdate()
         GoToState("")
 
     endfunction
@@ -308,7 +326,7 @@ state BusyState
 
         int i = 0
         while i < arraySize
-            if removeList[i] != none && protect[i] == 0
+            if removeList[i] != none
                 Form f = removeList[i]
                 if f as Armor
                     currentDevice = f
